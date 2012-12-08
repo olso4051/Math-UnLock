@@ -59,10 +59,8 @@ public class MainActivity extends Activity {
 
 			if (action.equals(Intent.ACTION_TIME_CHANGED) || action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
 				Date curDateTime = new Date(System.currentTimeMillis());
-				SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMMM d"); // hh:mm
-																					// a
-																					// yyyy
-																					// G);
+				// hour:minute am/pm newline Day, Month DayOfMonth
+				SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
 				clock.setText(formatter.format(curDateTime));
 			}
 		}
@@ -116,10 +114,8 @@ public class MainActivity extends Activity {
 			break;
 		}
 		Date curDateTime = new Date(System.currentTimeMillis());
-		SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMMM d"); // hh:mm
-																			// a
-																			// yyyy
-																			// G);
+		// hour:minute am/pm newline Day, Month DayOfMonth
+		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
 		clock.setText(formatter.format(curDateTime));
 
 		registerReceiver(m_timeChangedReceiver, s_intentFilter);
