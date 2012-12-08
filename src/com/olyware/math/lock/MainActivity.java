@@ -203,7 +203,14 @@ public class MainActivity extends Activity {
 			buttonUnlock.setEnabled(false);
 			buttonSure.setEnabled(false);
 			radioGroup2.clearCheck();
+			launchHomeScreen();
 		}
 	}
 
+	private void launchHomeScreen() {
+		Intent startMain = new Intent(Intent.ACTION_MAIN);
+		startMain.addCategory(Intent.CATEGORY_HOME);
+		startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(startMain);
+	}
 }
