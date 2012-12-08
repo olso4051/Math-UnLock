@@ -103,4 +103,4 @@
 		    android:textSize="30dp"
 		    android:textStyle="bold" />
 	
-</LinearLayout>
+</RelativeLayout>
