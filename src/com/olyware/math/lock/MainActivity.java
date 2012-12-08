@@ -36,50 +36,50 @@ public class MainActivity extends Activity {
 	private Button buttonUnlock;
 	private Button buttonSure;
 	private AudioManager am;
-	
-	private double pi=Math.PI;
-	
-	private SharedPreferences sharedPrefs;
-	
-	private Handler mHandler;
-	
-	static {
-        IntentFilter s_intentFilter = new IntentFilter();
-        s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
-        s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-    }
-    
-    private final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
 
-            if (action.equals(Intent.ACTION_TIME_CHANGED) ||
-                action.equals(Intent.ACTION_TIMEZONE_CHANGED))
-            {
-            	Date curDateTime = new Date(System.currentTimeMillis());
-        		SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMMM d"); //hh:mm a yyyy G);  
-        		clock.setText(formatter.format(curDateTime));
-            }
-        }
-    };
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        IntentFilter s_intentFilter = new IntentFilter();
-        s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
-        s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-        
-        
-        mHandler = new Handler();
-        setContentView(R.layout.activity_main);
-        
-        clock = (TextView) findViewById(R.id.clock);
-        problem = (TextView) findViewById(R.id.problem);
+	private double pi = Math.PI;
+
+	private SharedPreferences sharedPrefs;
+
+	private Handler mHandler;
+
+	static {
+		IntentFilter s_intentFilter = new IntentFilter();
+		s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
+		s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+		s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
+	}
+
+	private final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			final String action = intent.getAction();
+
+			if (action.equals(Intent.ACTION_TIME_CHANGED) || action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
+				Date curDateTime = new Date(System.currentTimeMillis());
+				SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMMM d"); // hh:mm
+																					// a
+																					// yyyy
+																					// G);
+				clock.setText(formatter.format(curDateTime));
+			}
+		}
+	};
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		IntentFilter s_intentFilter = new IntentFilter();
+		s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
+		s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+		s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
+
+		mHandler = new Handler();
+		setContentView(R.layout.activity_main);
+
+		clock = (TextView) findViewById(R.id.clock);
+		problem = (TextView) findViewById(R.id.problem);
 		radioGroup1 = (RadioGroup) findViewById(R.id.radioGroup1);
 		radioGroup2 = (RadioGroup) findViewById(R.id.radioGroup2);
 		radioPhone = (RadioButton) findViewById(R.id.radioPhone);
@@ -101,121 +101,109 @@ public class MainActivity extends Activity {
 				buttonSureClick();
 			}
 		});
-		am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-		switch (am.getRingerMode())
-		{
-		    case AudioManager.RINGER_MODE_SILENT:
-		        radioSilent.setText(getString(R.string.sound));
-		        break;
-		    case AudioManager.RINGER_MODE_VIBRATE:
-		    	radioSilent.setText(getString(R.string.sound));
-		        break;
-		    case AudioManager.RINGER_MODE_NORMAL:
-		    	radioSilent.setText(getString(R.string.silent));
-		        break;
+		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		switch (am.getRingerMode()) {
+		case AudioManager.RINGER_MODE_SILENT:
+			radioSilent.setText(getString(R.string.sound));
+			break;
+		case AudioManager.RINGER_MODE_VIBRATE:
+			radioSilent.setText(getString(R.string.sound));
+			break;
+		case AudioManager.RINGER_MODE_NORMAL:
+			radioSilent.setText(getString(R.string.silent));
+			break;
 		}
 		Date curDateTime = new Date(System.currentTimeMillis());
-		SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMMM d"); //hh:mm a yyyy G);  
+		SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMMM d"); // hh:mm
+																			// a
+																			// yyyy
+																			// G);
 		clock.setText(formatter.format(curDateTime));
-		
-		registerReceiver(m_timeChangedReceiver, s_intentFilter);  
-		
+
+		registerReceiver(m_timeChangedReceiver, s_intentFilter);
+
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-    }
-    
-    @Override
-	protected void onResume()
-    {
+	}
+
+	@Override
+	protected void onResume() {
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
-    }
-    
-    public void onRadioButtonClicked2(View view)
-    {
-        if (!buttonUnlock.isEnabled())
-        {
-        	buttonUnlock.setEnabled(true);
-        	mHandler.removeCallbacksAndMessages(null);
-        	mHandler.postDelayed(new Runnable() {
-        		@Override
-        		public void run() {
-        		    buttonUnlock.setEnabled(false);
-        		    buttonSure.setEnabled(false);
-        		    radioGroup2.clearCheck();
-        			}
-        		}, 3000);	//disable unlock button after 3s
-        }
-        buttonSure.setEnabled(false);
-    	radioGroup1.clearCheck();
-    }
-    
-    public void onRadioButtonClicked1(View view)
-    {
-        if (!buttonSure.isEnabled() || buttonUnlock.isEnabled())
-        {
-        	buttonSure.setEnabled(true);
-        	mHandler.removeCallbacksAndMessages(null);
-        	mHandler.postDelayed(new Runnable() {
-        		@Override
-        		public void run() {
-        		    buttonSure.setEnabled(false);
-        		    radioGroup1.clearCheck();
-        			}
-        		}, 3000);	//disable sure button after 3s
-        }
-        buttonUnlock.setEnabled(false);
-    	radioGroup2.clearCheck();
-    }
-    
-    private void buttonUnlockClick()
-    {
-    	buttonSure.setEnabled(true);
-    }
-    
-    private void buttonSureClick()
-    {
-    	if (!buttonUnlock.isEnabled())
-    	{
-    		switch(radioGroup1.getCheckedRadioButtonId())
-    		{
-	    		case R.id.radioPhone:
-	    			Intent i = new Intent(Intent.ACTION_DIAL, null);
-	    			startActivity(i);
-	    			break;
-	    		case R.id.radioSilent:
-	    			if (radioSilent.getText().toString().equals(getString(R.string.silent)))
-	    			{
-	    				am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-	    				radioSilent.setText(getString(R.string.sound));
-	    			}
-	    			else
-	    			{
-	    				am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-	    				radioSilent.setText(getString(R.string.silent));
-	    			}
-	    			break;
-	    		case R.id.radioSettings:
-	    			startActivity(new Intent(this, ShowSettingsActivity.class));
-	    			break;
-	    		default:
-	    			break;
-    		}
-    		buttonSure.setEnabled(false);
-    		radioGroup1.clearCheck();
-    	}
-    	else
-    	{
-    		//TODO check if answer is correct
-    		buttonUnlock.setEnabled(false);
-    		buttonSure.setEnabled(false);
-    		radioGroup2.clearCheck();
-    	}
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+
+	public void onRadioButtonClicked2(View view) {
+		if (!buttonUnlock.isEnabled()) {
+			buttonUnlock.setEnabled(true);
+			mHandler.removeCallbacksAndMessages(null);
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					buttonUnlock.setEnabled(false);
+					buttonSure.setEnabled(false);
+					radioGroup2.clearCheck();
+				}
+			}, 3000); // disable unlock button after 3s
+		}
+		buttonSure.setEnabled(false);
+		radioGroup1.clearCheck();
+	}
+
+	public void onRadioButtonClicked1(View view) {
+		if (!buttonSure.isEnabled() || buttonUnlock.isEnabled()) {
+			buttonSure.setEnabled(true);
+			mHandler.removeCallbacksAndMessages(null);
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					buttonSure.setEnabled(false);
+					radioGroup1.clearCheck();
+				}
+			}, 3000); // disable sure button after 3s
+		}
+		buttonUnlock.setEnabled(false);
+		radioGroup2.clearCheck();
+	}
+
+	private void buttonUnlockClick() {
+		buttonSure.setEnabled(true);
+	}
+
+	private void buttonSureClick() {
+		if (!buttonUnlock.isEnabled()) {
+			switch (radioGroup1.getCheckedRadioButtonId()) {
+			case R.id.radioPhone:
+				Intent i = new Intent(Intent.ACTION_DIAL, null);
+				startActivity(i);
+				break;
+			case R.id.radioSilent:
+				if (radioSilent.getText().toString().equals(getString(R.string.silent))) {
+					am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+					radioSilent.setText(getString(R.string.sound));
+				} else {
+					am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+					radioSilent.setText(getString(R.string.silent));
+				}
+				break;
+			case R.id.radioSettings:
+				startActivity(new Intent(this, ShowSettingsActivity.class));
+				break;
+			default:
+				break;
+			}
+			buttonSure.setEnabled(false);
+			radioGroup1.clearCheck();
+		} else {
+			// TODO check if answer is correct
+			buttonUnlock.setEnabled(false);
+			buttonSure.setEnabled(false);
+			radioGroup2.clearCheck();
+		}
+	}
 
 }
