@@ -1,4 +1,6 @@
-package com.olyware.math.lock;
+package com.olyware.mathlock;
+
+import com.olyware.math.lock.R;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;

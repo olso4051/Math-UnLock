@@ -31,7 +31,7 @@
         </activity>
         
         <activity 
-            android:name=".ShowSettingsActivity"
+            android:name="com.olyware.mathlock.ShowSettingsActivity"
             android:label="@string/menu_settings" >
         </activity>
     </application>
