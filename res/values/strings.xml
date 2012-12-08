@@ -1,0 +1,24 @@
+<resources>
+
+    <string name="answer1">1</string>
+    <string name="answer2">2</string>
+    <string name="answer3">3</string>
+    <string name="answer4">4</string>
+    <string name="app_name">Math Lock</string>
+    <string name="date">Monday, January 1</string>
+    <string name="difficulty_default">easy</string>
+    <string name="difficulty_summary">Difficulty of math questions</string>
+    <string name="difficulty_title">Difficulty</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="phone">Phone</string>
+    <string name="problem">1 + 1 = ?</string>
+    <string name="settings">Settings</string>
+    <string name="silent">Sound Off</string>
+    <string name="sound">Sound On</string>
+    <string name="sure">Are You Sure?</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="unlock">Unlock</string>
+    
+
+</resources>

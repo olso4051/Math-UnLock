@@ -1,0 +1,106 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+	<TextView
+	    android:id="@+id/clock"
+	    android:gravity="center"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginTop="10dp"
+	    android:textSize="25dp"
+	    android:text="@string/date"/>
+	<RadioGroup
+	    android:id="@+id/radioGroup1"
+	    android:gravity="center"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginTop="10dp"
+	    android:orientation="horizontal" >    
+        <RadioButton
+            android:id="@+id/radioPhone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:text="@string/phone"
+            android:onClick="onRadioButtonClicked1" />
+        <RadioButton
+            android:id="@+id/radioSilent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:text="@string/silent"
+            android:onClick="onRadioButtonClicked1" />
+        <RadioButton
+            android:id="@+id/radioSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings"
+            android:onClick="onRadioButtonClicked1" />
+ 	</RadioGroup>
+ 	<Button
+		    android:id="@+id/buttonSure"
+		    android:enabled="false"
+		    android:layout_centerInParent="true"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:textSize="30dp"
+		    android:textStyle="bold"
+		    android:text="@string/sure" />
+    <TextView
+        android:id="@+id/problem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="@string/problem"
+        android:textSize="30dp"
+        tools:context=".MainActivity" />
+	<RadioGroup
+	    android:id="@+id/radioGroup2"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginTop="40dp"
+	    android:orientation="horizontal" >
+        <RadioButton
+            android:id="@+id/radioAnswer1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/answer1"
+            android:onClick="onRadioButtonClicked2" />
+        <RadioButton
+            android:id="@+id/radioAnswer2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/answer2"
+            android:onClick="onRadioButtonClicked2" />
+        <RadioButton
+            android:id="@+id/radioAnswer3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/answer3"
+            android:onClick="onRadioButtonClicked2" />
+        <RadioButton
+            android:id="@+id/radioAnswer4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/answer4"
+            android:onClick="onRadioButtonClicked2" />
+ 	</RadioGroup>
+ 	
+	<Button
+		    android:id="@+id/buttonUnlock"
+		    android:enabled="false"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="10dp"
+		    android:layout_marginBottom="5dp"
+		    android:text="@string/unlock"
+		    android:textSize="30dp"
+		    android:textStyle="bold" />
+	
+</LinearLayout>
