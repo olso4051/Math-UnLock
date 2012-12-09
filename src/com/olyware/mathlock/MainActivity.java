@@ -1,6 +1,5 @@
 package com.olyware.mathlock;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,11 +20,6 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-
-import com.olyware.mathlock.database.DatabaseManager;
-import com.olyware.mathlock.model.Difficulty;
-import com.olyware.mathlock.model.Question;
-import com.olyware.mathlock.utils.EZ;
 
 public class MainActivity extends Activity {
 	private TextView clock;
@@ -73,12 +67,6 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		DatabaseManager manager = new DatabaseManager(this);
-
-		Question question = new Question("asdf", new File("asdfasdf"), "wgew", EZ.list("1", "2"), Difficulty.MEDIUM);
-		manager.addQuestion(question);
-		manager.getAllQuestions();
 
 		IntentFilter s_intentFilter = new IntentFilter();
 		s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
