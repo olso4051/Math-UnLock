@@ -6,8 +6,8 @@
 	        android:summary="@string/enable_summary"
 	        android:defaultValue="true"/>
     <PreferenceCategory
-        android:title="@string/math_settings_title"
-        android:key="math_settings">
+        android:title="@string/settings_math_title"
+        android:key="settings_math">
         <CheckBoxPreference
 	        android:key="enable_math"
 	        android:title="@string/enable_math_title"
@@ -18,8 +18,42 @@
 	        android:title="@string/difficulty_math_title"
 	        android:summary="@string/difficulty_math_summary"
 	        android:dialogTitle="@string/difficulty_math_title"
-	        android:entries="@array/difficulty_math_entries"
-	        android:entryValues="@array/difficulty_math_values"
+	        android:entries="@array/difficulty_entries"
+	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_math_default" />
+	</PreferenceCategory>
+	<PreferenceCategory
+        android:title="@string/settings_vocab_title"
+        android:key="settings_vocab">
+        <CheckBoxPreference
+	        android:key="enable_vocab"
+	        android:title="@string/enable_vocab_title"
+	        android:summary="@string/enable_vocab_summary"
+	        android:defaultValue="true"/>
+	    <ListPreference
+	        android:key="difficulty_vocab"
+	        android:title="@string/difficulty_vocab_title"
+	        android:summary="@string/difficulty_vocab_summary"
+	        android:dialogTitle="@string/difficulty_vocab_title"
+	        android:entries="@array/difficulty_entries"
+	        android:entryValues="@array/difficulty_values"
+	        android:defaultValue="@string/difficulty_vocab_default" />
+	</PreferenceCategory>
+	<PreferenceCategory
+        android:title="@string/settings_translate_title"
+        android:key="settings_translate">
+        <CheckBoxPreference
+	        android:key="enable_translate"
+	        android:title="@string/enable_translate_title"
+	        android:summary="@string/enable_translate_summary"
+	        android:defaultValue="true"/>
+	    <ListPreference
+	        android:key="difficulty_translate"
+	        android:title="@string/difficulty_translate_title"
+	        android:summary="@string/difficulty_translate_summary"
+	        android:dialogTitle="@string/difficulty_translate_title"
+	        android:entries="@array/difficulty_entries"
+	        android:entryValues="@array/difficulty_values"
+	        android:defaultValue="@string/difficulty_translate_default" />
 	</PreferenceCategory>
 </PreferenceScreen>
