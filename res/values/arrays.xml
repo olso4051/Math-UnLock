@@ -2,15 +2,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     
     <string-array name="difficulty_entries">
-        <item name="easy">Easy (+&#8211;, 0&#8211;10)</item>
-        <item name="medium">Medium (+&#8211;*/, 0&#8211;20)</item>
-        <item name="hard">Hard (+&#8211;*/, 0&#8211;100)</item>
+        <item name="easy">Easy</item>
+        <item name="medium">Medium</item>
+        <item name="hard">Hard</item>
     </string-array>
-    
     <string-array name="difficulty_values">
-        <item name="easy">easy</item>
-        <item name="medium">medium</item>
-        <item name="hard">hard</item>
+        <item name="easy">1</item>
+        <item name="medium">2</item>
+        <item name="hard">3</item>
     </string-array>
+
     
 </resources>

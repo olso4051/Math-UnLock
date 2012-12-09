@@ -6,19 +6,36 @@
     <string name="answer4">4</string>
     <string name="app_name">Math Lock</string>
     <string name="date">Monday, January 1</string>
-    <string name="difficulty_default">easy</string>
-    <string name="difficulty_summary">Difficulty of math questions</string>
-    <string name="difficulty_title">Difficulty</string>
+    <string name="difficulty_math_default">1</string>
+    <string name="difficulty_math_summary">Difficulty of math questions</string>
+    <string name="difficulty_math_title">Difficulty</string>
+    <string name="difficulty_vocab_default">1</string>
+    <string name="difficulty_vocab_summary">Difficulty of vocab questions</string>
+    <string name="difficulty_vocab_title">Difficulty</string>
+    <string name="difficulty_translate_default">1</string>
+    <string name="difficulty_translate_summary">Difficulty of EN->ES translation</string>
+    <string name="difficulty_translate_title">Difficulty</string>
+    <string name="enable_title">Enable</string>
+    <string name="enable_summary">Use custom unlock screen</string>
+    <string name="enable_math_title">Enable</string>
+    <string name="enable_math_summary">Answer math questions</string>
+    <string name="enable_vocab_title">Enable</string>
+    <string name="enable_vocab_summary">Answer vocab questions</string>
+    <string name="enable_translate_title">Enable</string>
+    <string name="enable_translate_summary">Answer EN->ES questions</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="phone">Phone</string>
     <string name="problem">1 + 1 = ?</string>
     <string name="settings">Settings</string>
+    <string name="settings_math_title">Math Questions</string>
+    <string name="settings_translate_title">Translation Questions</string>
+    <string name="settings_vocab_title">Vocabulary Questions</string>
     <string name="silent">Sound Off</string>
     <string name="sound">Sound On</string>
     <string name="sure">Are You Sure?</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="unlock">Unlock</string>
     
-
+    
 </resources>

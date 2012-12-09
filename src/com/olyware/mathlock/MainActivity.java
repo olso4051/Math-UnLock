@@ -3,8 +3,6 @@ package com.olyware.mathlock;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.olyware.math.lock.R;
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
