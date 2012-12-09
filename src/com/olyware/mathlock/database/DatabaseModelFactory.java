@@ -16,9 +16,9 @@ public class DatabaseModelFactory {
 
 	public static List<Question> buildQuestions(Cursor cursor) {
 		List<Question> questions = EZ.list();
-		CursorHelper cursorHelper = new CursorHelper(cursor);
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
 			String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 			String wrongAnswerStr = cursorHelper.getString(QuestionContract.ANSWER_WRONG);
 			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -29,6 +29,8 @@ public class DatabaseModelFactory {
 
 			Question question = new Question(questionText, new File(questionImage), correctAnswer, wrongAnswers, difficulty);
 			questions.add(question);
+
+			cursor.moveToNext();
 		}
 		return questions;
 	}

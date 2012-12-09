@@ -15,7 +15,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	private final Loggy log = new Loggy(this.getClass());
 
-	private static final String DATABASE_NAME = "unlockhelper.db";
+	private static final String DATABASE_NAME = "mathunlock.db";
 	private static final int DATABASE_VERSION = 1;
 
 	private Context context;
