@@ -43,19 +43,13 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler;
 
-	static {
-		IntentFilter s_intentFilter = new IntentFilter();
-		s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
-		s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-		s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-	}
-
 	private final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			final String action = intent.getAction();
-
-			if (action.equals(Intent.ACTION_TIME_CHANGED) || action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
+			boolean timeChange = (action.equals(Intent.ACTION_TIME_TICK) || action.equals(Intent.ACTION_TIME_CHANGED) || action
+					.equals(Intent.ACTION_TIMEZONE_CHANGED));
+			if (timeChange) {
 				Date curDateTime = new Date(System.currentTimeMillis());
 				// hour:minute am/pm newline Day, Month DayOfMonth
 				SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
@@ -126,6 +120,18 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		/*IntentFilter s_intentFilter = new IntentFilter();
+		s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
+		s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+		s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
+		registerReceiver(m_timeChangedReceiver, s_intentFilter);*/
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// this.unregisterReceiver(m_timeChangedReceiver);
 	}
 
 	@Override

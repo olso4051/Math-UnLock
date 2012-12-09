@@ -6,14 +6,12 @@
     <string name="answer4">4</string>
     <string name="app_name">Math Lock</string>
     <string name="date">Monday, January 1</string>
+    <string name="difficulty_summary">Easy</string>
     <string name="difficulty_math_default">1</string>
-    <string name="difficulty_math_summary">Difficulty of math questions</string>
     <string name="difficulty_math_title">Difficulty</string>
     <string name="difficulty_vocab_default">1</string>
-    <string name="difficulty_vocab_summary">Difficulty of vocab questions</string>
     <string name="difficulty_vocab_title">Difficulty</string>
     <string name="difficulty_translate_default">1</string>
-    <string name="difficulty_translate_summary">Difficulty of EN->ES translation</string>
     <string name="difficulty_translate_title">Difficulty</string>
     <string name="enable_title">Enable</string>
     <string name="enable_summary">Use custom unlock screen</string>
