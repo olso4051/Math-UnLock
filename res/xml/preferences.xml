@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <ListPreference
-        android:key="difficulty"
-        android:title="@string/difficulty_title"
-        android:summary="@string/difficulty_summary"
-        android:dialogTitle="@string/difficulty_title"
-        android:entries="@array/difficulty_entries"
-        android:entryValues="@array/difficulty_values"
-        android:defaultValue="@string/difficulty_default" />
+    <CheckBoxPreference
+	        android:key="enable"
+	        android:title="@string/enable_title"
+	        android:summary="@string/enable_summary"
+	        android:defaultValue="true"/>
+    <PreferenceCategory
+        android:title="@string/math_settings_title"
+        android:key="math_settings">
+        <CheckBoxPreference
+	        android:key="enable_math"
+	        android:title="@string/enable_math_title"
+	        android:summary="@string/enable_math_summary"
+	        android:defaultValue="true"/>
+	    <ListPreference
+	        android:key="difficulty_math"
+	        android:title="@string/difficulty_math_title"
+	        android:summary="@string/difficulty_math_summary"
+	        android:dialogTitle="@string/difficulty_math_title"
+	        android:entries="@array/difficulty_math_entries"
+	        android:entryValues="@array/difficulty_math_values"
+	        android:defaultValue="@string/difficulty_math_default" />
+	</PreferenceCategory>
 </PreferenceScreen>
