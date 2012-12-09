@@ -10,11 +10,13 @@
         android:key="settings_math">
         <CheckBoxPreference
 	        android:key="enable_math"
+	        android:dependency="enable"
 	        android:title="@string/enable_math_title"
 	        android:summary="@string/enable_math_summary"
 	        android:defaultValue="true"/>
 	    <ListPreference
 	        android:key="difficulty_math"
+	        android:dependency="enable"
 	        android:title="@string/difficulty_math_title"
 	        android:summary="@string/difficulty_math_summary"
 	        android:dialogTitle="@string/difficulty_math_title"
@@ -27,11 +29,13 @@
         android:key="settings_vocab">
         <CheckBoxPreference
 	        android:key="enable_vocab"
+	        android:dependency="enable"
 	        android:title="@string/enable_vocab_title"
 	        android:summary="@string/enable_vocab_summary"
 	        android:defaultValue="true"/>
 	    <ListPreference
 	        android:key="difficulty_vocab"
+	        android:dependency="enable"
 	        android:title="@string/difficulty_vocab_title"
 	        android:summary="@string/difficulty_vocab_summary"
 	        android:dialogTitle="@string/difficulty_vocab_title"
@@ -44,11 +48,13 @@
         android:key="settings_translate">
         <CheckBoxPreference
 	        android:key="enable_translate"
+	        android:dependency="enable"
 	        android:title="@string/enable_translate_title"
 	        android:summary="@string/enable_translate_summary"
 	        android:defaultValue="true"/>
 	    <ListPreference
 	        android:key="difficulty_translate"
+	        android:dependency="enable"
 	        android:title="@string/difficulty_translate_title"
 	        android:summary="@string/difficulty_translate_summary"
 	        android:dialogTitle="@string/difficulty_translate_title"

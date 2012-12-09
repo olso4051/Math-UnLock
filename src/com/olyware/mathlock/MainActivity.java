@@ -119,6 +119,7 @@ public class MainActivity extends Activity {
 		registerReceiver(m_timeChangedReceiver, s_intentFilter);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
 	}
 
 	@Override
