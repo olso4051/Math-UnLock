@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         
-        <activity 
+        <activity
             android:name="com.olyware.mathlock.ShowSettingsActivity"
             android:label="@string/menu_settings" >
         </activity>

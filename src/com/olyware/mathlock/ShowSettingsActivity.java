@@ -7,7 +7,6 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-	// private SharedPreferences sharedPrefs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +21,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Pref_diff_math.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_math", "1")));
 		Pref_diff_vocab.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_vocab", "1")));
 		Pref_diff_trans.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_translate", "1")));
-
-		/*sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPrefs.registerOnSharedPreferenceChangeListener(this);*/
 	}
 
 	@Override

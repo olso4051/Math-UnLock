@@ -13,8 +13,6 @@
     <string name="difficulty_vocab_title">Difficulty</string>
     <string name="difficulty_translate_default">1</string>
     <string name="difficulty_translate_title">Difficulty</string>
-    <string name="enable_title">Enable</string>
-    <string name="enable_summary">Use custom unlock screen</string>
     <string name="enable_math_title">Enable</string>
     <string name="enable_math_summary">Answer math questions</string>
     <string name="enable_vocab_title">Enable</string>

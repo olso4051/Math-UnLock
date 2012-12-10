@@ -1,5 +1,6 @@
 <resources>
 
     <style name="AppTheme" parent="android:Theme.Black.NoTitleBar" />
+    <style name="SettingsTheme" parent="android:Theme.Black" />
 
 </resources>
