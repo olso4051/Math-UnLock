@@ -5,6 +5,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.view.WindowManager;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
@@ -43,6 +44,11 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	protected void onPause() {
 		super.onPause();
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	public void onAttachedToWindow() {
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 	}
 
 	private String difficultyIntToString(String key) {

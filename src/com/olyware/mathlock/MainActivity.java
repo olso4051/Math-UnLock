@@ -52,6 +52,8 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler;
 
+	// private Window window;
+	private BroadcastReceiver mReceiver = new ScreenReceiver();
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -117,19 +119,40 @@ public class MainActivity extends Activity {
 
 		IntentFilter s_intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		s_intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-		BroadcastReceiver mReceiver = new ScreenReceiver();
-		registerReceiver(mReceiver, s_intentFilter);
+		this.registerReceiver(mReceiver, s_intentFilter);
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-		registerReceiver(m_timeChangedReceiver, c_intentFilter);
+		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
-		// KeyguardManager mKeyGuardManager = (KeyguardManager)getSystemService(KEYGUARD_SERVICE);
-		// KeyguardLock mLock = mKeyGuardManager.newKeyguardLock("name of my app");
+		// window=this.getWindow();
+		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+		// KeyguardManager mKeyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+		// KeyguardLock mLock = mKeyGuardManager.newKeyguardLock("Math UnLock");
 		// mLock.disableKeyguard();
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+	}
+
+	@Override
+	public void onAttachedToWindow() {
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mReceiver != null)
+			this.unregisterReceiver(mReceiver);
+		if (m_timeChangedReceiver != null)
+			this.unregisterReceiver(m_timeChangedReceiver);
 	}
 
 	@Override
@@ -140,8 +163,7 @@ public class MainActivity extends Activity {
 		} else {
 			problem.setTextColor(Color.RED);
 		}
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+		buttonUnlock.setText(String.valueOf(ScreenReceiver.count));
 
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
