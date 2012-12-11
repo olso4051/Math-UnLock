@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,7 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -38,11 +40,11 @@ public class MainActivity extends Activity {
 
 	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
 	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_translate" };
+	private int answerLoc = 1;		// {correct radiobutton location}
+	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
+
 	private AudioManager am;
 	private Random rand = new Random(); // Ideally just create one instance globally
-
-	private int answerLoc = 1;		// {correct radiobutton location}
-	private String answers[] = { "3", "1", "2", "4" };	// { answers}
 
 	private double pi = Math.PI;
 
@@ -50,7 +52,8 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler;
 
-	private final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
+	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
+
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			final String action = intent.getAction();
@@ -68,11 +71,6 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		IntentFilter s_intentFilter = new IntentFilter();
-		s_intentFilter.addAction(Intent.ACTION_TIME_TICK);
-		s_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-		s_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
 
 		mHandler = new Handler();
 		setContentView(R.layout.activity_main);
@@ -117,13 +115,34 @@ public class MainActivity extends Activity {
 		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
 		clock.setText(formatter.format(curDateTime));
 
-		registerReceiver(m_timeChangedReceiver, s_intentFilter);
+		IntentFilter s_intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+		s_intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		BroadcastReceiver mReceiver = new ScreenReceiver();
+		registerReceiver(mReceiver, s_intentFilter);
+
+		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
+		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
+		registerReceiver(m_timeChangedReceiver, c_intentFilter);
+
+		// KeyguardManager mKeyGuardManager = (KeyguardManager)getSystemService(KEYGUARD_SERVICE);
+		// KeyguardLock mLock = mKeyGuardManager.newKeyguardLock("name of my app");
+		// mLock.disableKeyguard();
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 
 	@Override
 	protected void onResume() {
+		// ONLY WHEN SCREEN TURNS ON
+		if (!ScreenReceiver.wasScreenOn) {
+			problem.setTextColor(Color.BLUE);
+		} else {
+			problem.setTextColor(Color.RED);
+		}
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -133,6 +152,11 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		if (ScreenReceiver.wasScreenOn) {
+			// THIS IS THE CASE WHEN ONPAUSE() IS CALLED BY THE SYSTEM DUE TO A SCREEN STATE CHANGE
+		} else {
+			// THIS IS WHEN ONPAUSE() IS CALLED WHEN THE SCREEN STATE HAS NOT CHANGED
+		}
 		super.onPause();
 	}
 
@@ -265,7 +289,7 @@ public class MainActivity extends Activity {
 				break;
 			}
 
-			answerLoc = rand.nextInt(3);			// set a random location for the correct answer
+			answerLoc = rand.nextInt(4);			// set a random location for the correct answer
 			int offset = 1;
 			for (int i = 0; i < 4; i++) {
 				if (i == answerLoc) {
@@ -286,26 +310,26 @@ public class MainActivity extends Activity {
 		switch (diffNum) {
 		case 1:				// Easy question
 			// add and subtract options
-			operator = rand.nextInt(1);
-			first = rand.nextInt(10);					// 0 through 10
-			second = rand.nextInt(10);					// 0 through 10
+			operator = rand.nextInt(2);
+			first = rand.nextInt(11);					// 0 through 10
+			second = rand.nextInt(11);					// 0 through 10
 			break;
 		case 2:				// Medium question
 			// add, subtract, multiply options
-			operator = rand.nextInt(2);
-			first = rand.nextInt(40) - 20;				// -20 through 20
-			second = rand.nextInt(40) - 20;				// -20 through 20
+			operator = rand.nextInt(3);
+			first = rand.nextInt(41) - 20;				// -20 through 20
+			second = rand.nextInt(41) - 20;				// -20 through 20
 			break;
 		case 3:				// Hard question
 			// add, subtract, multiply, and divide options
-			operator = rand.nextInt(3);
-			first = rand.nextInt(200) - 100;			// -100 through 100
-			second = rand.nextInt(200) - 100;			// -100 through 100
+			operator = rand.nextInt(4);
+			first = rand.nextInt(201) - 100;			// -100 through 100
+			second = rand.nextInt(201) - 100;			// -100 through 100
 			if (operator == 3) {
 				// check that answer will be an integer
 				while (first % second != 0) {
-					first = rand.nextInt(200) - 100;	// new numbers
-					second = rand.nextInt(200) - 100;
+					first = rand.nextInt(201) - 100;	// new numbers
+					second = rand.nextInt(201) - 100;
 				}
 			}
 			break;
@@ -334,7 +358,7 @@ public class MainActivity extends Activity {
 		List<Integer> generated = new ArrayList<Integer>();
 		for (int i = 0; i < 3; i++) {
 			while (true) {
-				int offset = rand.nextInt(20) - 10;
+				int offset = rand.nextInt(21) - 10;
 				if (!generated.contains(offset) && offset != 0) {
 					// Done for this iteration
 					generated.add(offset);
