@@ -49,6 +49,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	@Override
 	public void onAttachedToWindow() {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 	}
 
 	private String difficultyIntToString(String key) {

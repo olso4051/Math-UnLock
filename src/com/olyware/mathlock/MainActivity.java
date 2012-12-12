@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -139,6 +138,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onAttachedToWindow() {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 	}
 
 	@Override
@@ -159,11 +159,10 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		// ONLY WHEN SCREEN TURNS ON
 		if (!ScreenReceiver.wasScreenOn) {
-			problem.setTextColor(Color.BLUE);
+			// problem.setTextColor(Color.BLUE);
 		} else {
-			problem.setTextColor(Color.RED);
+			// problem.setTextColor(Color.RED);
 		}
-		buttonUnlock.setText(String.valueOf(ScreenReceiver.count));
 
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
