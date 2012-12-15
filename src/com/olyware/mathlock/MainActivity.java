@@ -16,6 +16,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,7 +52,6 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler;
 
-	// private Window window;
 	private BroadcastReceiver mReceiver = new ScreenReceiver();
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 
@@ -118,6 +118,7 @@ public class MainActivity extends Activity {
 
 		IntentFilter s_intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		s_intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		s_intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 		this.registerReceiver(mReceiver, s_intentFilter);
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
@@ -125,9 +126,6 @@ public class MainActivity extends Activity {
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
-		// window=this.getWindow();
-		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 		// KeyguardManager mKeyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 		// KeyguardLock mLock = mKeyGuardManager.newKeyguardLock("Math UnLock");
 		// mLock.disableKeyguard();
@@ -163,6 +161,7 @@ public class MainActivity extends Activity {
 		} else {
 			// problem.setTextColor(Color.RED);
 		}
+		buttonUnlock.setText(String.valueOf(ScreenReceiver.PhoneOn));
 
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);

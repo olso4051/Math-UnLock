@@ -51,4 +51,13 @@
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_translate_default" />
 	</PreferenceCategory>
+	<PreferenceCategory
+        android:title="@string/security_title"
+        android:key="settings_security">
+        <CheckBoxPreference
+	        android:key="enable_security"
+	        android:title="@string/enable_security_title"
+	        android:summary="@string/enable_security_summary"
+	        android:defaultValue="false"/>
+	</PreferenceCategory>
 </PreferenceScreen>

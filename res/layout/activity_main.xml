@@ -44,7 +44,7 @@
         android:id="@+id/problem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="@string/problem"
         android:textSize="30dp"
@@ -53,7 +53,7 @@
 	    android:id="@+id/radioGroup2"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
-	    android:layout_marginTop="40dp"
+	    android:layout_marginTop="20dp"
 	    android:orientation="horizontal" >
         <RadioButton
             android:id="@+id/radioAnswer1"
