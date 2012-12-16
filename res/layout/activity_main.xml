@@ -98,10 +98,22 @@
 	<RelativeLayout 
 	    android:layout_width="match_parent"
     	android:layout_height="match_parent">
+        <ToggleButton
+	        android:id="@+id/quizMode"
+	        android:layout_alignParentBottom="true"
+	        android:layout_centerHorizontal="true"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="30dp"
+		    android:textStyle="bold"
+		    android:textOn="@string/quiz_mode"
+		    android:textOff="@string/quiz_mode"
+		    android:checked="false" />
 	    <Button
 		    android:id="@+id/buttonSure"
 		    android:enabled="false"
-		    android:layout_centerInParent="true"
+		    android:layout_centerHorizontal="true"
+		    android:layout_above="@id/quizMode"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:textSize="30dp"

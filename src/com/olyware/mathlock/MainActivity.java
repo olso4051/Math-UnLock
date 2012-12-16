@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
 	private TextView clock;
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
 	private RadioButton radioAnswer[] = new RadioButton[4];
 	private Button buttonUnlock;
 	private Button buttonSure;
+	private ToggleButton quizMode;
 
 	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
 	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_translate" };
@@ -43,8 +45,6 @@ public class MainActivity extends Activity {
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
 
 	private AudioManager am;
-	/*private KeyguardManager mKeyGuardManager;
-	private KeyguardLock mLock;*/
 	private Random rand = new Random(); // Ideally just create one instance globally
 
 	// private double pi = Math.PI;
@@ -53,7 +53,6 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler;
 
-	// private BroadcastReceiver mReceiver = new ScreenReceiver();
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -100,6 +99,8 @@ public class MainActivity extends Activity {
 				buttonSureClick();
 			}
 		});
+		quizMode = (ToggleButton) findViewById(R.id.quizMode);
+
 		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		switch (am.getRingerMode()) {
 		case AudioManager.RINGER_MODE_SILENT:
@@ -117,18 +118,10 @@ public class MainActivity extends Activity {
 		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
 		clock.setText(formatter.format(curDateTime));
 
-		/*IntentFilter s_intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-		s_intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-		s_intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-		this.registerReceiver(mReceiver, s_intentFilter);*/
-
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
-
-		/*mKeyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-		mLock = mKeyGuardManager.newKeyguardLock("Math UnLock");*/
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 	}
@@ -137,9 +130,6 @@ public class MainActivity extends Activity {
 	public void onAttachedToWindow() {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-		/*if (!sharedPrefs.getBoolean("enable_security", true)) {
-			mLock.disableKeyguard();
-		}*/
 	}
 
 	@Override
@@ -150,9 +140,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		// mLock.reenableKeyguard();
-		/*if (mReceiver != null)
-			this.unregisterReceiver(mReceiver);*/
 		if (m_timeChangedReceiver != null)
 			this.unregisterReceiver(m_timeChangedReceiver);
 	}
@@ -165,11 +152,10 @@ public class MainActivity extends Activity {
 		} else {
 			// problem.setTextColor(Color.RED);
 		}
-		// buttonUnlock.setText(String.valueOf(ScreenReceiver.PhoneOn));
-
 		super.onResume();
+		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
+		// start background service to wait for screen to turn off
 		Intent sIntent = new Intent(this, ScreenService.class);
 		int count = getEnabledPackages();
 		if (count > 0) {
@@ -177,8 +163,9 @@ public class MainActivity extends Activity {
 		} else {
 			this.stopService(sIntent);
 		}
+		// turn quiz mode off
+		quizMode.setChecked(false);
 
-		// TODO set problem, answer, and wrong answers
 		setProblemAndAnswer();
 	}
 
@@ -261,7 +248,7 @@ public class MainActivity extends Activity {
 			radioGroup1.clearCheck();
 		} else {
 			// TODO check if answer is correct
-			if (radioAnswer[answerLoc].isChecked()) {
+			if (radioAnswer[answerLoc].isChecked() && !quizMode.isChecked()) {
 				buttonUnlock.setEnabled(false);
 				buttonSure.setEnabled(false);
 				radioGroup2.clearCheck();

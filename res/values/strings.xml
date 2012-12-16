@@ -15,17 +15,18 @@
     <string name="difficulty_translate_title">Difficulty</string>
     <string name="enable_math_title">Enable</string>
     <string name="enable_math_summary">Answer math questions</string>
-    <string name="enable_vocab_title">Enable</string>
-    <string name="enable_vocab_summary">Answer vocab questions</string>
     <string name="enable_security_title">Enable</string>
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
     <string name="enable_translate_title">Enable</string>
     <string name="enable_translate_summary">Answer EN->ES questions</string>
+    <string name="enable_vocab_title">Enable</string>
+    <string name="enable_vocab_summary">Answer vocab questions</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="none_enabled">Go to Settings and enable a question pack</string>
     <string name="phone">Phone</string>
     <string name="problem">1 + 1 = ?</string>
+    <string name="quiz_mode">Quiz Mode?</string>
     <string name="security_title">Security</string>
     <string name="settings">Settings</string>
     <string name="settings_math_title">Math Questions</string>
