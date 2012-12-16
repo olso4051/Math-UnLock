@@ -16,7 +16,6 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,9 +28,9 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	private TextView clock;
 	private RadioGroup radioGroup1;
-	private RadioButton radioPhone;
+	// private RadioButton radioPhone;
 	private RadioButton radioSilent;
-	private RadioButton radioSettings;
+	// private RadioButton radioSettings;
 	private TextView problem;
 	private RadioGroup radioGroup2;
 	private RadioButton radioAnswer[] = new RadioButton[4];
@@ -44,15 +43,17 @@ public class MainActivity extends Activity {
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
 
 	private AudioManager am;
+	/*private KeyguardManager mKeyGuardManager;
+	private KeyguardLock mLock;*/
 	private Random rand = new Random(); // Ideally just create one instance globally
 
-	private double pi = Math.PI;
+	// private double pi = Math.PI;
 
 	private SharedPreferences sharedPrefs;
 
 	private Handler mHandler;
 
-	private BroadcastReceiver mReceiver = new ScreenReceiver();
+	// private BroadcastReceiver mReceiver = new ScreenReceiver();
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -80,9 +81,9 @@ public class MainActivity extends Activity {
 		problem = (TextView) findViewById(R.id.problem);
 		radioGroup1 = (RadioGroup) findViewById(R.id.radioGroup1);
 		radioGroup2 = (RadioGroup) findViewById(R.id.radioGroup2);
-		radioPhone = (RadioButton) findViewById(R.id.radioPhone);
+		// radioPhone = (RadioButton) findViewById(R.id.radioPhone);
 		radioSilent = (RadioButton) findViewById(R.id.radioSilent);
-		radioSettings = (RadioButton) findViewById(R.id.radioSettings);
+		// radioSettings = (RadioButton) findViewById(R.id.radioSettings);
 		radioAnswer[0] = (RadioButton) findViewById(R.id.radioAnswer1);
 		radioAnswer[1] = (RadioButton) findViewById(R.id.radioAnswer2);
 		radioAnswer[2] = (RadioButton) findViewById(R.id.radioAnswer3);
@@ -116,19 +117,18 @@ public class MainActivity extends Activity {
 		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
 		clock.setText(formatter.format(curDateTime));
 
-		IntentFilter s_intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+		/*IntentFilter s_intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		s_intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
 		s_intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-		this.registerReceiver(mReceiver, s_intentFilter);
+		this.registerReceiver(mReceiver, s_intentFilter);*/
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
-		// KeyguardManager mKeyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-		// KeyguardLock mLock = mKeyGuardManager.newKeyguardLock("Math UnLock");
-		// mLock.disableKeyguard();
+		/*mKeyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+		mLock = mKeyGuardManager.newKeyguardLock("Math UnLock");*/
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 	}
@@ -137,6 +137,9 @@ public class MainActivity extends Activity {
 	public void onAttachedToWindow() {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+		/*if (!sharedPrefs.getBoolean("enable_security", true)) {
+			mLock.disableKeyguard();
+		}*/
 	}
 
 	@Override
@@ -147,8 +150,9 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (mReceiver != null)
-			this.unregisterReceiver(mReceiver);
+		// mLock.reenableKeyguard();
+		/*if (mReceiver != null)
+			this.unregisterReceiver(mReceiver);*/
 		if (m_timeChangedReceiver != null)
 			this.unregisterReceiver(m_timeChangedReceiver);
 	}
@@ -161,10 +165,18 @@ public class MainActivity extends Activity {
 		} else {
 			// problem.setTextColor(Color.RED);
 		}
-		buttonUnlock.setText(String.valueOf(ScreenReceiver.PhoneOn));
+		// buttonUnlock.setText(String.valueOf(ScreenReceiver.PhoneOn));
 
 		super.onResume();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		Intent sIntent = new Intent(this, ScreenService.class);
+		int count = getEnabledPackages();
+		if (count > 0) {
+			this.startService(sIntent);
+		} else {
+			this.stopService(sIntent);
+		}
 
 		// TODO set problem, answer, and wrong answers
 		setProblemAndAnswer();
@@ -264,21 +276,15 @@ public class MainActivity extends Activity {
 	}
 
 	private void launchHomeScreen() {
-		Intent startMain = new Intent(Intent.ACTION_MAIN);
+		/*Intent startMain = new Intent(Intent.ACTION_MAIN);
 		startMain.addCategory(Intent.CATEGORY_HOME);
 		startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivity(startMain);
+		startActivity(startMain);*/
+		this.finish();
 	}
 
 	private void setProblemAndAnswer() {
-		int count = 0;
-
-		// count enabled packages
-		for (int i = 0; i < PackageKeys.length; i++) {
-			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
-				count++;
-			}
-		}
+		int count = getEnabledPackages();
 		// only create a question if more than 1 package is enabled
 		if (count > 0) {
 			String EnabledPackageKeys[] = new String[count];
@@ -319,6 +325,8 @@ public class MainActivity extends Activity {
 					radioAnswer[i].setText(answers[i + offset]);
 				}
 			}
+		} else {
+			problem.setText(R.string.none_enabled);
 		}
 	}
 
@@ -413,5 +421,15 @@ public class MainActivity extends Activity {
 		default:
 			break;
 		}
+	}
+
+	private int getEnabledPackages() {
+		int count = 0;
+		for (int i = 0; i < PackageKeys.length; i++) {
+			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
+				count++;
+			}
+		}
+		return count;
 	}
 }
