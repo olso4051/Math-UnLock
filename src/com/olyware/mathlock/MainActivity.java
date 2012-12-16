@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,7 +24,6 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
 	private Button buttonUnlock;
 	private Button buttonSure;
 	private ToggleButton quizMode;
+	private int defaultTextColor;
 
 	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
 	private int EnabledPackages = 0;
@@ -82,6 +83,7 @@ public class MainActivity extends Activity {
 
 		clock = (TextView) findViewById(R.id.clock);
 		problem = (TextView) findViewById(R.id.problem);
+		defaultTextColor = problem.getTextColors().getDefaultColor();
 		radioGroup1 = (RadioGroup) findViewById(R.id.radioGroup1);
 		radioGroup2 = (RadioGroup) findViewById(R.id.radioGroup2);
 		// radioPhone = (RadioButton) findViewById(R.id.radioPhone);
@@ -182,7 +184,7 @@ public class MainActivity extends Activity {
 		// reset attempts to first attempt
 		attempts = 1;
 		// setup the question and answer and display it
-		setProblemAndAnswer();
+		setProblemAndAnswer(0);
 	}
 
 	@Override
@@ -264,41 +266,45 @@ public class MainActivity extends Activity {
 			buttonSure.setEnabled(false);
 			if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !radioAnswer[answerLoc].isChecked()
 					&& !quizMode.isChecked()) {
-				radioGroup2.clearCheck();
-				Toast.makeText(this, "Wrong, Too many wrong answers", Toast.LENGTH_SHORT).show();
-				launchHomeScreen();
+				displayCorrectOrNot("Wrong, Too many wrong answers", false);
+				launchHomeScreen(2000);
 			} else if (radioAnswer[answerLoc].isChecked() && quizMode.isChecked()) {
-				radioGroup2.clearCheck();
-				Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
-				setProblemAndAnswer();
+				displayCorrectOrNot("Correct!", true);
+				setProblemAndAnswer(1000);
 			} else if (radioAnswer[answerLoc].isChecked() && !quizMode.isChecked()) {
-				radioGroup2.clearCheck();
-				Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
-				launchHomeScreen();
+				launchHomeScreen(0);
 			} else {
-				radioGroup2.clearCheck();
-				Toast.makeText(this, "Wrong", Toast.LENGTH_SHORT).show();
-				attempts++;
-				setProblemAndAnswer();
+				displayCorrectOrNot("Wrong", false);
+				if (!quizMode.isChecked())
+					attempts++;
+				setProblemAndAnswer(2000);
 			}
+			radioGroup2.clearCheck();
 		}
 	}
 
-	private void launchHomeScreen() {
+	private void launchHomeScreen(int delay) {
 		/*Intent startMain = new Intent(Intent.ACTION_MAIN);
 		startMain.addCategory(Intent.CATEGORY_HOME);
 		startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(startMain);*/
+		mHandler.removeCallbacksAndMessages(null);
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				finish();
+			}
+		}, delay); // launch home screen after time [ms]
+		// this.finish();
 
-		this.finish();
 	}
 
-	private void setProblemAndAnswer() {
+	private void setProblemAndAnswer(int delay) {
 		// int count = getEnabledPackages();
 		// only create a question if more than 1 package is enabled
 		if (EnabledPackages > 0) {
-			String EnabledPackageKeys[] = new String[EnabledPackages];
-			int location[] = new int[EnabledPackages];
+			final String EnabledPackageKeys[] = new String[EnabledPackages];
+			final int location[] = new int[EnabledPackages];
 			int count = 0;
 
 			for (int i = 0; i < PackageKeys.length; i++) {
@@ -308,33 +314,40 @@ public class MainActivity extends Activity {
 					count++;
 				}
 			}
+			mHandler.removeCallbacksAndMessages(null);
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// pick a random enabled package
+					int randPack = rand.nextInt(EnabledPackageKeys.length);
+					switch (location[randPack]) {
+					case 0:			// math question
+						setMathProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[0], "1")));
+						break;
+					case 1:			// vocabulary question
+						setVocabProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[1], "1")));
+						break;
+					case 2:			// translate question
+						setTranslateProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[2], "1")));
+						break;
+					default:
+						break;
+					}
 
-			// pick a random enabled package
-			int randPack = rand.nextInt(EnabledPackageKeys.length);
-			switch (location[randPack]) {
-			case 0:			// math question
-				setMathProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[0], "1")));
-				break;
-			case 1:			// vocabulary question
-				setVocabProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[1], "1")));
-				break;
-			case 2:			// translate question
-				setTranslateProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[2], "1")));
-				break;
-			default:
-				break;
-			}
-
-			answerLoc = rand.nextInt(4);			// set a random location for the correct answer
-			int offset = 1;
-			for (int i = 0; i < 4; i++) {
-				if (i == answerLoc) {
-					radioAnswer[i].setText(answers[0]);
-					offset = 0;
-				} else {
-					radioAnswer[i].setText(answers[i + offset]);
+					answerLoc = rand.nextInt(4);			// set a random location for the correct answer
+					int offset = 1;
+					for (int i = 0; i < 4; i++) {
+						if (i == answerLoc) {
+							radioAnswer[i].setText(answers[0]);
+							offset = 0;
+						} else {
+							radioAnswer[i].setText(answers[i + offset]);
+						}
+					}
+					problem.setTextColor(defaultTextColor);
 				}
-			}
+			}, delay); // set new problem after delay time [ms]
+
 		} else {
 			problem.setText(R.string.none_enabled);
 			for (int i = 0; i < 4; i++) {
@@ -444,5 +457,14 @@ public class MainActivity extends Activity {
 			}
 		}
 		return count;
+	}
+
+	private void displayCorrectOrNot(String discription, boolean correct) {
+		if (correct)
+			problem.setTextColor(Color.GREEN);
+		else
+			problem.setTextColor(Color.RED);
+		String s = discription + "\n" + problem.getText();
+		problem.setText(s.substring(0, s.length() - 1) + radioAnswer[answerLoc].getText());
 	}
 }
