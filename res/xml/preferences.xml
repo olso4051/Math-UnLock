@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:picker="http://schemas.android.com/apk/res/com.olyware." >
+    <PreferenceCategory
+        android:title="@string/settings"
+        android:key="settings">
+        <ListPreference
+      		android:key="max_tries"
+      		android:title="@string/max_tries_title"
+      		android:summary="@string/max_tries_summary"
+      		android:dialogTitle="@string/max_tries_title"
+	        android:entries="@array/max_tries_entries"
+	        android:entryValues="@array/max_tries_values"
+	        android:defaultValue="@string/max_tries_default" />
+	</PreferenceCategory>
     <PreferenceCategory
         android:title="@string/settings_math_title"
         android:key="settings_math">

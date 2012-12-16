@@ -16,7 +16,6 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -24,6 +23,7 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
@@ -40,9 +40,13 @@ public class MainActivity extends Activity {
 	private ToggleButton quizMode;
 
 	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
+	private int EnabledPackages = 0;
 	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_translate" };
 	private int answerLoc = 1;		// {correct radiobutton location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
+	private int attempts = 1;
+	private int dayCorrects = 0;
+	private int dayWrongs = 0;
 
 	private AudioManager am;
 	private Random rand = new Random(); // Ideally just create one instance globally
@@ -124,6 +128,16 @@ public class MainActivity extends Activity {
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		// sharedPrefs.edit().putBoolean(arg0, arg1)
+		if (savedInstanceState != null) {
+			quizMode.setChecked(savedInstanceState.getBoolean("Quiz"));
+		}
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		savedInstanceState.putBoolean("Quiz", quizMode.isChecked());
 	}
 
 	@Override
@@ -148,24 +162,26 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		// ONLY WHEN SCREEN TURNS ON
 		if (!ScreenReceiver.wasScreenOn) {
-			// problem.setTextColor(Color.BLUE);
+			// started as a lockscreen
 		} else {
-			// problem.setTextColor(Color.RED);
+			// started by user
 		}
 		super.onResume();
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		// start background service to wait for screen to turn off
+		EnabledPackages = getEnabledPackages();
 		Intent sIntent = new Intent(this, ScreenService.class);
-		int count = getEnabledPackages();
-		if (count > 0) {
+		if (EnabledPackages > 0) {
+			buttonUnlock.setEnabled(false);
 			this.startService(sIntent);
 		} else {
+			buttonUnlock.setEnabled(true);
 			this.stopService(sIntent);
 		}
-		// turn quiz mode off
-		quizMode.setChecked(false);
-
+		// reset attempts to first attempt
+		attempts = 1;
+		// setup the question and answer and display it
 		setProblemAndAnswer();
 	}
 
@@ -179,12 +195,6 @@ public class MainActivity extends Activity {
 		super.onPause();
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
-	}
-
 	public void onRadioButtonClicked2(View view) {
 		if (!buttonUnlock.isEnabled()) {
 			buttonUnlock.setEnabled(true);
@@ -196,7 +206,7 @@ public class MainActivity extends Activity {
 					buttonSure.setEnabled(false);
 					radioGroup2.clearCheck();
 				}
-			}, 3000); // disable unlock button after 3s
+			}, 3000); // disable unlock and sure button after 3s
 		}
 		buttonSure.setEnabled(false);
 		radioGroup1.clearCheck();
@@ -219,7 +229,10 @@ public class MainActivity extends Activity {
 	}
 
 	private void buttonUnlockClick() {
-		buttonSure.setEnabled(true);
+		if (EnabledPackages > 0)
+			buttonSure.setEnabled(true);
+		else
+			this.finish();
 	}
 
 	private void buttonSureClick() {
@@ -247,16 +260,25 @@ public class MainActivity extends Activity {
 			buttonSure.setEnabled(false);
 			radioGroup1.clearCheck();
 		} else {
-			// TODO check if answer is correct
-			if (radioAnswer[answerLoc].isChecked() && !quizMode.isChecked()) {
-				buttonUnlock.setEnabled(false);
-				buttonSure.setEnabled(false);
+			buttonUnlock.setEnabled(false);
+			buttonSure.setEnabled(false);
+			if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !radioAnswer[answerLoc].isChecked()
+					&& !quizMode.isChecked()) {
 				radioGroup2.clearCheck();
+				Toast.makeText(this, "Wrong, Too many wrong answers", Toast.LENGTH_SHORT).show();
+				launchHomeScreen();
+			} else if (radioAnswer[answerLoc].isChecked() && quizMode.isChecked()) {
+				radioGroup2.clearCheck();
+				Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
+				setProblemAndAnswer();
+			} else if (radioAnswer[answerLoc].isChecked() && !quizMode.isChecked()) {
+				radioGroup2.clearCheck();
+				Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
 				launchHomeScreen();
 			} else {
-				buttonUnlock.setEnabled(false);
-				buttonSure.setEnabled(false);
 				radioGroup2.clearCheck();
+				Toast.makeText(this, "Wrong", Toast.LENGTH_SHORT).show();
+				attempts++;
 				setProblemAndAnswer();
 			}
 		}
@@ -267,16 +289,17 @@ public class MainActivity extends Activity {
 		startMain.addCategory(Intent.CATEGORY_HOME);
 		startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(startMain);*/
+
 		this.finish();
 	}
 
 	private void setProblemAndAnswer() {
-		int count = getEnabledPackages();
+		// int count = getEnabledPackages();
 		// only create a question if more than 1 package is enabled
-		if (count > 0) {
-			String EnabledPackageKeys[] = new String[count];
-			int location[] = new int[count];
-			count = 0;
+		if (EnabledPackages > 0) {
+			String EnabledPackageKeys[] = new String[EnabledPackages];
+			int location[] = new int[EnabledPackages];
+			int count = 0;
 
 			for (int i = 0; i < PackageKeys.length; i++) {
 				if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
@@ -314,6 +337,9 @@ public class MainActivity extends Activity {
 			}
 		} else {
 			problem.setText(R.string.none_enabled);
+			for (int i = 0; i < 4; i++) {
+				radioAnswer[i].setText("N/A");
+			}
 		}
 	}
 

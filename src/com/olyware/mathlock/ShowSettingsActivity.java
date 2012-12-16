@@ -18,18 +18,23 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Preference Pref_diff_math = findPreference("difficulty_math");
 		Preference Pref_diff_vocab = findPreference("difficulty_vocab");
 		Preference Pref_diff_trans = findPreference("difficulty_translate");
+		Preference Pref_max_tries = findPreference("max_tries");
 		// Set summary to be the user-description for the selected value
 		Pref_diff_math.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_math", "1")));
 		Pref_diff_vocab.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_vocab", "1")));
 		Pref_diff_trans.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_translate", "1")));
+		Pref_max_tries.setSummary(sharedPrefs.getString("max_tries", "1"));
+		// Toast.makeText(this, sharedPrefs.getString("max_tries", "1"), Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPrefs, String key) {
+		Preference connectionPref = findPreference(key);
 		if (key.equals("difficulty_math") || key.equals("difficulty_vocab") || key.equals("difficulty_translate")) {
-			Preference connectionPref = findPreference(key);
 			// Set summary to be the user-description for the selected value
 			connectionPref.setSummary(difficultyIntToString(sharedPrefs.getString(key, "")));
+		} else if (key.equals("max_tries")) {
+			connectionPref.setSummary(sharedPrefs.getString(key, "1"));
 		}
 		/* Toast.makeText(this, String.valueOf(!key.equals("enable")),Toast.LENGTH_SHORT).show();*/
 	}
