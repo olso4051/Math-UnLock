@@ -155,22 +155,22 @@ public class JoystickView extends View {
 		if (actionType == MotionEvent.ACTION_MOVE) {
 			int px = getMeasuredWidth() / 2;
 			int py = getMeasuredHeight() / 2;
-			int radius = Math.min(px, py) - handleInnerBoundaries;
+			int radius = (int) (Math.min(px, py) * 0.8 - handleInnerBoundaries);
 
 			touchX = (event.getX() - px);
-			touchX = Math.max(Math.min(touchX, radius), -radius);
+			// touchX = Math.max(Math.min(touchX, radius), -radius);
 
 			touchY = (event.getY() - py);
-			touchY = Math.max(Math.min(touchY, radius), -radius);
+			// touchY = Math.max(Math.min(touchY, radius), -radius);
 
 			// set to radius if on edge
-			// Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|radius:" + radius);
+			Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|radius:" + radius);
 			if ((Math.abs(touchX * 1.5) > radius) || (Math.abs(touchY * 1.5) > radius)) {
 				if (Math.sqrt(touchX * touchX + touchY * touchY) > radius) {
 					Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|angle:" + angle);
 					angle = Math.atan2(-touchY, touchX);
-					touchX = radius * Math.acos(angle);
-					touchY = -radius * Math.asin(angle);
+					touchX = radius * Math.cos(angle);
+					touchY = -radius * Math.sin(angle);
 					Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|angle:" + angle);
 				}
 			}
