@@ -122,7 +122,6 @@
 	    <com.olyware.mathlock.JoystickView
 	        android:id="@+id/joystick"
 	        android:layout_centerHorizontal="true"
-	        android:layout_above="@id/quizMode"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content" />"
 

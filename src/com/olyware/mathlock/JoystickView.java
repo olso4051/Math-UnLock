@@ -25,12 +25,17 @@ public class JoystickView extends View {
 	private Rect srcRectForRender;
 	private Paint circlePaint;
 	private Paint handlePaint;
-	private double touchX, touchY;
+	private double touchX, touchY, angle = 2 * Math.PI;	// angle is in radians
 	private int innerPadding;
 	private int handleRadius;
 	private int handleInnerBoundaries;
 	private JoystickMovedListener listener;
 	private int sensitivity;
+
+	private double pi = Math.PI;
+	private double pi4 = pi / 4;
+	private double pi2 = pi / 2;
+	private double pi34 = pi * 3 / 4;
 
 	// =========================================
 	// Constructors
@@ -68,7 +73,7 @@ public class JoystickView extends View {
 		handlePaint.setStrokeWidth(1);
 		handlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-		innerPadding = 10;
+		innerPadding = 0;
 		sensitivity = 10;
 
 		bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background);
@@ -158,8 +163,20 @@ public class JoystickView extends View {
 			touchY = (event.getY() - py);
 			touchY = Math.max(Math.min(touchY, radius), -radius);
 
+			// set to radius if on edge
+			// Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|radius:" + radius);
+			if ((Math.abs(touchX * 1.5) > radius) || (Math.abs(touchY * 1.5) > radius)) {
+				if (Math.sqrt(touchX * touchX + touchY * touchY) > radius) {
+					Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|angle:" + angle);
+					angle = Math.atan2(-touchY, touchX);
+					touchX = radius * Math.acos(angle);
+					touchY = -radius * Math.asin(angle);
+					Log.d(TAG, "X:" + touchX + "|Y:" + touchY + "|angle:" + angle);
+				}
+			}
+
 			// Coordinates
-			Log.d(TAG, "X:" + touchX + "|Y:" + touchY);
+			// Log.d(TAG, "X:" + touchX + "|Y:" + touchY);
 
 			// Pressure
 			if (listener != null) {
@@ -168,6 +185,34 @@ public class JoystickView extends View {
 
 			invalidate();
 		} else if (actionType == MotionEvent.ACTION_UP) {
+			if ((angle >= 0) && (angle < pi4)) {
+				// D selected
+				Log.d(TAG, "D selected");
+			} else if ((angle >= pi4) && (angle < pi2)) {
+				// C selected
+				Log.d(TAG, "C selected");
+			} else if ((angle >= pi2) && (angle < pi34)) {
+				// B selected
+				Log.d(TAG, "B selected");
+			} else if ((angle >= pi34) && (angle <= pi)) {
+				// A selected
+				Log.d(TAG, "A selected");
+			} else if ((angle < 0) && (angle >= -pi4)) {
+				// sound/silent selected
+				Log.d(TAG, "sound or silent");
+			} else if ((angle < -pi4) && (angle >= -pi2)) {
+				// emergency call selected
+				Log.d(TAG, "emergency");
+			} else if ((angle < -pi2) && (angle >= -pi34)) {
+				// quiz mode selected
+				Log.d(TAG, "quiz mode");
+			} else if ((angle < -pi34) && (angle >= -pi)) {
+				// settings selected
+				Log.d(TAG, "settings");
+			} else {
+				// nothing selected
+				Log.d(TAG, "nothing");
+			}
 			returnHandleToCenter();
 			Log.d(TAG, "X:" + touchX + "|Y:" + touchY);
 		}
@@ -177,7 +222,7 @@ public class JoystickView extends View {
 	private void returnHandleToCenter() {
 
 		Handler handler = new Handler();
-		int numberOfFrames = 5;
+		int numberOfFrames = 10;
 		final double intervalsX = (0 - touchX) / numberOfFrames;
 		final double intervalsY = (0 - touchY) / numberOfFrames;
 
@@ -189,8 +234,9 @@ public class JoystickView extends View {
 					touchY += intervalsY;
 					invalidate();
 				}
-			}, i * 40);
+			}, i * 20);
 		}
+		angle = 2 * Math.PI;		// atan2(y,x) gives results in [-pi,pi] 2pi is outside this but equal to zero
 
 		if (listener != null) {
 			listener.OnReleased();
