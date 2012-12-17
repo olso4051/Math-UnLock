@@ -101,7 +101,6 @@
         <ToggleButton
 	        android:id="@+id/quizMode"
 	        android:layout_alignParentBottom="true"
-	        android:layout_centerHorizontal="true"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:textSize="30dp"
@@ -112,12 +111,20 @@
 	    <Button
 		    android:id="@+id/buttonSure"
 		    android:enabled="false"
-		    android:layout_centerHorizontal="true"
-		    android:layout_above="@id/quizMode"
+		    android:layout_alignParentBottom="true"
+		    android:layout_alignParentRight="true"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:textSize="30dp"
 		    android:textStyle="bold"
 		    android:text="@string/sure" />
+
+	    <com.olyware.mathlock.JoystickView
+	        android:id="@+id/joystick"
+	        android:layout_centerHorizontal="true"
+	        android:layout_above="@id/quizMode"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />"
+
 	</RelativeLayout>
 </LinearLayout>

@@ -381,9 +381,15 @@ public class MainActivity extends Activity {
 			second = rand.nextInt(201) - 100;			// -100 through 100
 			if (operator == 3) {
 				// check that answer will be an integer
+				while (second == 0) {
+					second = rand.nextInt(201) - 100;
+				}
 				while (first % second != 0) {
 					first = rand.nextInt(201) - 100;	// new numbers
 					second = rand.nextInt(201) - 100;
+					while (second == 0) {
+						second = rand.nextInt(201) - 100;
+					}
 				}
 			}
 			break;
