@@ -23,6 +23,8 @@ import android.text.Spanned;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.olyware.mathlock.database.DatabaseManager;
+
 public class MainActivity extends Activity {
 	private TextView clock;
 	private TextView problem;
@@ -70,6 +72,9 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// Create database
+		DatabaseManager databaseManager = new DatabaseManager(this);
 
 		mHandler = new Handler();
 		setContentView(R.layout.activity_main);
