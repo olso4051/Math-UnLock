@@ -16,28 +16,22 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.view.View;
-import android.view.View.OnClickListener;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
 	private TextView clock;
-	private RadioGroup radioGroup1;
-	// private RadioButton radioPhone;
-	private RadioButton radioSilent;
-	// private RadioButton radioSettings;
 	private TextView problem;
-	private RadioGroup radioGroup2;
-	private RadioButton radioAnswer[] = new RadioButton[4];
-	private Button buttonUnlock;
-	private Button buttonSure;
-	private ToggleButton quizMode;
+	private TextView probAnswers;
+	// private RadioGroup radioGroup2;
+	// private RadioButton radioAnswer[] = new RadioButton[4];
+	private boolean quizMode = false;
+	private boolean silentMode;
+	private JoystickView joystick;
 	private int defaultTextColor;
 
 	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
@@ -50,9 +44,8 @@ public class MainActivity extends Activity {
 	private int dayWrongs = 0;
 
 	private AudioManager am;
+	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
-
-	// private double pi = Math.PI;
 
 	private SharedPreferences sharedPrefs;
 
@@ -83,42 +76,33 @@ public class MainActivity extends Activity {
 
 		clock = (TextView) findViewById(R.id.clock);
 		problem = (TextView) findViewById(R.id.problem);
+		probAnswers = (TextView) findViewById(R.id.answers);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
-		radioGroup1 = (RadioGroup) findViewById(R.id.radioGroup1);
-		radioGroup2 = (RadioGroup) findViewById(R.id.radioGroup2);
-		// radioPhone = (RadioButton) findViewById(R.id.radioPhone);
-		radioSilent = (RadioButton) findViewById(R.id.radioSilent);
-		// radioSettings = (RadioButton) findViewById(R.id.radioSettings);
+		/*radioGroup2 = (RadioGroup) findViewById(R.id.radioGroup2);
 		radioAnswer[0] = (RadioButton) findViewById(R.id.radioAnswer1);
 		radioAnswer[1] = (RadioButton) findViewById(R.id.radioAnswer2);
 		radioAnswer[2] = (RadioButton) findViewById(R.id.radioAnswer3);
-		radioAnswer[3] = (RadioButton) findViewById(R.id.radioAnswer4);
-		buttonUnlock = (Button) findViewById(R.id.buttonUnlock);
-		buttonUnlock.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buttonUnlockClick();
+		radioAnswer[3] = (RadioButton) findViewById(R.id.radioAnswer4);*/
+		joystick = (JoystickView) findViewById(R.id.joystick);
+		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
+			@Override
+			public void OnSelect(int s) {
+				JoystickSelected(s);
 			}
 		});
-		buttonSure = (Button) findViewById(R.id.buttonSure);
-		buttonSure.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buttonSureClick();
-			}
-		});
-		quizMode = (ToggleButton) findViewById(R.id.quizMode);
 
 		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		switch (am.getRingerMode()) {
 		case AudioManager.RINGER_MODE_SILENT:
-			radioSilent.setText(getString(R.string.sound));
-			break;
 		case AudioManager.RINGER_MODE_VIBRATE:
-			radioSilent.setText(getString(R.string.sound));
+			silentMode = joystick.setSilentMode(true);
 			break;
 		case AudioManager.RINGER_MODE_NORMAL:
-			radioSilent.setText(getString(R.string.silent));
+			silentMode = joystick.setSilentMode(false);
 			break;
 		}
+		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
 		Date curDateTime = new Date(System.currentTimeMillis());
 		// hour:minute am/pm newline Day, Month DayOfMonth
 		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
@@ -130,16 +114,17 @@ public class MainActivity extends Activity {
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		// sharedPrefs.edit().putBoolean(arg0, arg1)
+
 		if (savedInstanceState != null) {
-			quizMode.setChecked(savedInstanceState.getBoolean("Quiz"));
+			quizMode = joystick.setQuizMode(savedInstanceState.getBoolean("Quiz"));
 		}
+
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
-		savedInstanceState.putBoolean("Quiz", quizMode.isChecked());
+		savedInstanceState.putBoolean("Quiz", quizMode);
 	}
 
 	@Override
@@ -175,10 +160,8 @@ public class MainActivity extends Activity {
 		EnabledPackages = getEnabledPackages();
 		Intent sIntent = new Intent(this, ScreenService.class);
 		if (EnabledPackages > 0) {
-			buttonUnlock.setEnabled(false);
 			this.startService(sIntent);
 		} else {
-			buttonUnlock.setEnabled(true);
 			this.stopService(sIntent);
 		}
 		// reset attempts to first attempt
@@ -197,111 +180,17 @@ public class MainActivity extends Activity {
 		super.onPause();
 	}
 
-	public void onRadioButtonClicked2(View view) {
-		if (!buttonUnlock.isEnabled()) {
-			buttonUnlock.setEnabled(true);
-			mHandler.removeCallbacksAndMessages(null);
-			mHandler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					buttonUnlock.setEnabled(false);
-					buttonSure.setEnabled(false);
-					radioGroup2.clearCheck();
-				}
-			}, 3000); // disable unlock and sure button after 3s
-		}
-		buttonSure.setEnabled(false);
-		radioGroup1.clearCheck();
-	}
-
-	public void onRadioButtonClicked1(View view) {
-		if (!buttonSure.isEnabled() || buttonUnlock.isEnabled()) {
-			buttonSure.setEnabled(true);
-			mHandler.removeCallbacksAndMessages(null);
-			mHandler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					buttonSure.setEnabled(false);
-					radioGroup1.clearCheck();
-				}
-			}, 3000); // disable sure button after 3s
-		}
-		buttonUnlock.setEnabled(false);
-		radioGroup2.clearCheck();
-	}
-
-	private void buttonUnlockClick() {
-		if (EnabledPackages > 0)
-			buttonSure.setEnabled(true);
-		else
-			this.finish();
-	}
-
-	private void buttonSureClick() {
-		if (!buttonUnlock.isEnabled()) {
-			switch (radioGroup1.getCheckedRadioButtonId()) {
-			case R.id.radioPhone:
-				Intent i = new Intent(Intent.ACTION_DIAL, null);
-				startActivity(i);
-				break;
-			case R.id.radioSilent:
-				if (radioSilent.getText().toString().equals(getString(R.string.silent))) {
-					am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-					radioSilent.setText(getString(R.string.sound));
-				} else {
-					am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-					radioSilent.setText(getString(R.string.silent));
-				}
-				break;
-			case R.id.radioSettings:
-				startActivity(new Intent(this, ShowSettingsActivity.class));
-				break;
-			default:
-				break;
-			}
-			buttonSure.setEnabled(false);
-			radioGroup1.clearCheck();
-		} else {
-			buttonUnlock.setEnabled(false);
-			buttonSure.setEnabled(false);
-			if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !radioAnswer[answerLoc].isChecked()
-					&& !quizMode.isChecked()) {
-				displayCorrectOrNot("Wrong, Too many wrong answers", false);
-				launchHomeScreen(2000);
-			} else if (radioAnswer[answerLoc].isChecked() && quizMode.isChecked()) {
-				displayCorrectOrNot("Correct!", true);
-				setProblemAndAnswer(1000);
-			} else if (radioAnswer[answerLoc].isChecked() && !quizMode.isChecked()) {
-				launchHomeScreen(0);
-			} else {
-				displayCorrectOrNot("Wrong", false);
-				if (!quizMode.isChecked())
-					attempts++;
-				setProblemAndAnswer(2000);
-			}
-			radioGroup2.clearCheck();
-		}
-	}
-
 	private void launchHomeScreen(int delay) {
-		/*Intent startMain = new Intent(Intent.ACTION_MAIN);
-		startMain.addCategory(Intent.CATEGORY_HOME);
-		startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivity(startMain);*/
 		mHandler.removeCallbacksAndMessages(null);
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				finish();
 			}
-		}, delay); // launch home screen after time [ms]
-		// this.finish();
-
+		}, delay); // launch home screen after delay time [ms]
 	}
 
 	private void setProblemAndAnswer(int delay) {
-		// int count = getEnabledPackages();
-		// only create a question if more than 1 package is enabled
 		if (EnabledPackages > 0) {
 			final String EnabledPackageKeys[] = new String[EnabledPackages];
 			final int location[] = new int[EnabledPackages];
@@ -336,24 +225,83 @@ public class MainActivity extends Activity {
 
 					answerLoc = rand.nextInt(4);			// set a random location for the correct answer
 					int offset = 1;
+					String temp[] = new String[4];
 					for (int i = 0; i < 4; i++) {
 						if (i == answerLoc) {
-							radioAnswer[i].setText(answers[0]);
+							temp[i] = answers[0];
+							// probAnswers.setText(setAnswerText(i, 0));
+							// radioAnswer[i].setText(answers[0]);
 							offset = 0;
 						} else {
-							radioAnswer[i].setText(answers[i + offset]);
+							temp[i] = answers[i + offset];
+							// probAnswers.setText(setAnswerText(i, i + offset));
+							// radioAnswer[i].setText(answers[i + offset]);
 						}
 					}
+					probAnswers.setText(setAnswerText(temp));
 					problem.setTextColor(defaultTextColor);
 				}
 			}, delay); // set new problem after delay time [ms]
 
 		} else {
 			problem.setText(R.string.none_enabled);
+			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
 			for (int i = 0; i < 4; i++) {
-				radioAnswer[i].setText("N/A");
+				probAnswers.setText(setAnswerText(temp));
+				// radioAnswer[i].setText("N/A");
 			}
 		}
+	}
+
+	private Spanned setAnswerText(String ans[]) {
+		int abcd = 4;
+		int maxLength = 0;
+		for (int i = 0; i < ans.length; i++) {
+			if (ans[i].length() > maxLength)
+				maxLength = ans[i].length();
+		}
+		if (maxLength < 4)
+			abcd = 4;
+		else if (maxLength < 10)
+			abcd = 2;
+		else
+			abcd = 1;
+
+		String sTemp = "<b>A</b>: <small>" + ans[0] + "</small>   ";
+		if (abcd == 1)
+			sTemp = sTemp + "<br/>";
+		sTemp = sTemp + "<b>B</b>: <small>" + ans[1] + "</small> ";
+		if (abcd <= 2)
+			sTemp = sTemp + "<br/>";
+		sTemp = sTemp + "<b>C</b>: <small>" + ans[2] + "</small> ";
+		if (abcd == 1)
+			sTemp = sTemp + "<br/>";
+		sTemp = sTemp + "<b>D</b>: <small>" + ans[3] + "</small> ";
+
+		return Html.fromHtml(sTemp);
+		/*String s;
+		switch (let) {
+		case 0:
+			s = "A: ";
+			break;
+		case 1:
+			s = probAnswers.getText() + "B: ";
+			break;
+		case 2:
+			s = probAnswers.getText() + "C: ";
+			break;
+		case 3:
+			s = probAnswers.getText() + "D: ";
+			break;
+		default:
+			s = "N/A:";
+		}
+		if (ans < 0)
+			return s + "N/A  ";
+		s = s + answers[ans] + "  ";
+		if (answers[ans].length() > 5)
+			s = s + "\n";
+		return s;*/
 	}
 
 	private void setMathProblem(int diffNum) {
@@ -471,6 +419,53 @@ public class MainActivity extends Activity {
 		else
 			problem.setTextColor(Color.RED);
 		String s = discription + "\n" + problem.getText();
-		problem.setText(s.substring(0, s.length() - 1) + radioAnswer[answerLoc].getText());
+		// problem.setText(s.substring(0, s.length() - 1) + radioAnswer[answerLoc].getText());
+		problem.setText(s.substring(0, s.length() - 1) + answers[0]);
+	}
+
+	private void JoystickSelected(int s) {
+		vib.vibrate(50);	// vibrate for 50ms
+		switch (s) {
+		case 0:		// A was selected
+		case 1:		// B was selected
+		case 2:		// C was selected
+		case 3:		// D was selected
+			if (EnabledPackages == 0) {
+				this.finish();
+			} else if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !(answerLoc == s) && !quizMode) {
+				displayCorrectOrNot("Wrong, Too many wrong answers", false);
+				launchHomeScreen(2000);
+			} else if ((answerLoc == s) && quizMode) {
+				displayCorrectOrNot("Correct!", true);
+				setProblemAndAnswer(1000);
+			} else if ((answerLoc == s) && !quizMode) {
+				launchHomeScreen(0);
+			} else {
+				displayCorrectOrNot("Wrong", false);
+				if (!quizMode)
+					attempts++;
+				setProblemAndAnswer(2000);
+			}
+			break;
+		case 4:		// sound/silent was selected
+			if (silentMode) {
+				am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+			} else {
+				am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+			}
+			silentMode = joystick.setSilentMode(!silentMode);
+
+			break;
+		case 5:		// Emergency was selected
+			Intent i = new Intent(Intent.ACTION_DIAL, null);
+			startActivity(i);
+			break;
+		case 6:		// quiz Mode was selected
+			quizMode = joystick.setQuizMode(!quizMode);
+			break;
+		case 7:		// settings was selected
+			startActivity(new Intent(this, ShowSettingsActivity.class));
+			break;
+		}
 	}
 }

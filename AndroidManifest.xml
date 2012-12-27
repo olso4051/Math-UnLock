@@ -5,11 +5,12 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="15" />
+        android:targetSdkVersion="17" />
 
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
     
     <supports-screens android:resizeable="true"
                   android:smallScreens="true"
