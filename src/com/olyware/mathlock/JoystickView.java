@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -19,18 +18,28 @@ public class JoystickView extends View {
 	// =========================================
 
 	private final String TAG = "JoystickView";
-	private Bitmap bmp, bmp_handle;
-	private Bitmap bmp_silent, bmp_sound, bmp_quizMode, bmp_set, bmp_em, bmp_sil, bmp_A, bmp_B, bmp_C, bmp_D;
-	private Bitmap bmp_select;
+	// private Bitmap bmp, bmp_handle;
+	// private Bitmap bmp_silent, bmp_sound, bmp_quizMode, bmp_set, bmp_em, bmp_sil, bmp_A, bmp_B, bmp_C, bmp_D;
+	// private Bitmap bmp_select;
+	private Bitmap bmpA, bmpB, bmpC, bmpD, bmpS, bmpQ, bmpE, bmpSil, bmpSnd;
 	// private Path p[] = new Path[4];
-	private Rect dstRectForRender, dstRectForHandle;
-	private Rect srcRectForRender, srcRectForHandle;
-	private Paint circlePaint;
+	// private Rect dstRectForRender, dstRectForHandle;
+	// private Rect srcRectForRender, srcRectForHandle;
+	private Rect dstRectForA, dstRectForB, dstRectForC, dstRectForD;
+	private Rect dstRectForS, dstRectForQ, dstRectForE, dstRectForSnd;
+	private Rect srcRectForBig, srcRectForSmall;
+	private Paint circlePaint[] = new Paint[4];
 	private Paint handlePaint;
-	private double touchX, touchY, angle;	// angle is in radians
-	private int handleRadius;
-	private double thetaMax, rMax, fX, fY;	// for maximum area of a rectangle in an ellipse
-	private double rX, rY, rCurrent;
+	private double touchX, touchY;// , angle; // angle is in radians
+	private double startX, startY;// , aX, aY, bX, bY, cX, cY, dX, dY;
+	private double X[] = new double[4];		// a=0,b=1,c=2,d=3
+	private double Y[] = new double[4];
+	private int diffX1, diffY1, diffX, diffY;
+	private int state = 0;					// direction answers are going (up-left, up-right, ect..)
+	// private int handleRadius;
+	// private double thetaMax, rMax, fX, fY; // for maximum area of a rectangle in an ellipse
+	// private double rX, rY, rCurrent;
+	private int rBig, rSmall;
 	private JoystickSelectListener listener;
 
 	private boolean settingsMode;
@@ -68,9 +77,13 @@ public class JoystickView extends View {
 
 	private void initJoystickView() {
 		setFocusable(true);
+		int W = getMeasuredWidth();
+		int H = getMeasuredHeight();
 
-		circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		circlePaint.setAlpha(0);
+		for (int ans = 0; ans < 4; ans++) {
+			circlePaint[ans] = new Paint(Paint.ANTI_ALIAS_FLAG);
+			circlePaint[ans].setAlpha(0);
+		}
 		// circlePaint.setColor(Color.GRAY);
 		// circlePaint.setStrokeWidth(2);
 		// circlePaint.setStyle(Paint.Style.STROKE);
@@ -81,7 +94,16 @@ public class JoystickView extends View {
 		// handlePaint.setStrokeWidth(1);
 		// handlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-		bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background2);
+		bmpA = BitmapFactory.decodeResource(getResources(), R.drawable.select_a2);
+		bmpB = BitmapFactory.decodeResource(getResources(), R.drawable.select_b2);
+		bmpC = BitmapFactory.decodeResource(getResources(), R.drawable.select_c2);
+		bmpD = BitmapFactory.decodeResource(getResources(), R.drawable.select_d2);
+		bmpS = BitmapFactory.decodeResource(getResources(), R.drawable.select_s2);
+		bmpQ = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2);
+		bmpE = BitmapFactory.decodeResource(getResources(), R.drawable.select_e2);
+		bmpSil = BitmapFactory.decodeResource(getResources(), R.drawable.select_sil2);
+		bmpSnd = BitmapFactory.decodeResource(getResources(), R.drawable.select_sound2);
+		/*bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background2);
 		bmp_handle = BitmapFactory.decodeResource(getResources(), R.drawable.unlock);
 		bmp_set = BitmapFactory.decodeResource(getResources(), R.drawable.select_s);
 		bmp_quizMode = BitmapFactory.decodeResource(getResources(), R.drawable.select_q);
@@ -94,17 +116,29 @@ public class JoystickView extends View {
 		bmp_silent = BitmapFactory.decodeResource(getResources(), R.drawable.silent_background);
 		bmp_sound = BitmapFactory.decodeResource(getResources(), R.drawable.sound_background);
 		if (select)
-			bmp_select = BitmapFactory.decodeResource(getResources(), R.drawable.select_a);
-
-		srcRectForRender = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
-		dstRectForRender = new Rect();
-		srcRectForHandle = new Rect(0, 0, bmp_handle.getWidth(), bmp_handle.getHeight());
-		dstRectForHandle = new Rect();
+			bmp_select = BitmapFactory.decodeResource(getResources(), R.drawable.select_a);*/
 
 		touchX = 0;
 		touchY = 0;
-		angle = 0;
-		rCurrent = 0;
+		// angle = 0;
+		rBig = Math.max(bmpA.getWidth(), bmpA.getHeight()) / 2;
+		rSmall = Math.max(bmpS.getWidth(), bmpS.getHeight()) / 2;
+		setDiffXY();
+
+		/*srcRectForRender = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
+		dstRectForRender = new Rect();
+		srcRectForHandle = new Rect(0, 0, bmp_handle.getWidth(), bmp_handle.getHeight());
+		dstRectForHandle = new Rect();*/
+		srcRectForBig = new Rect(0, 0, bmpA.getWidth(), bmpA.getHeight());
+		srcRectForSmall = new Rect(0, 0, bmpS.getWidth(), bmpS.getHeight());
+		dstRectForA = new Rect();
+		dstRectForB = new Rect();
+		dstRectForC = new Rect();
+		dstRectForD = new Rect();
+		dstRectForS = new Rect();
+		dstRectForQ = new Rect();
+		dstRectForE = new Rect();
+		dstRectForSnd = new Rect();
 
 		for (int i = 0; i < angles.length; i++)
 			angles[i] = new AngleSelect();
@@ -160,6 +194,14 @@ public class JoystickView extends View {
 		return this.emergencyMode;
 	}
 
+	public void setLeftRightHanded(boolean LtrueRfalse) {
+		if (LtrueRfalse)
+			state = 1;
+		else
+			state = 0;
+		setDiffXY();
+	}
+
 	// =========================================
 	// Drawing Functionality
 	// =========================================
@@ -169,10 +211,14 @@ public class JoystickView extends View {
 		// Here we make sure that we have a perfect circle
 		int W = measure(widthMeasureSpec);
 		int H = measure(heightMeasureSpec);
-		W = Math.min(W, bmp.getWidth()); // use the size of the bmp so we don't have to scale
-		Log.d(TAG, H + "|" + W);
+		dstRectForS.set(W / 2 - rBig * 2 - rSmall * 2, H - rBig - rSmall, W / 2 - rBig * 2, H - rBig + rSmall);
+		dstRectForQ.set(W / 2 - rBig * 2, H - rBig * 2, W / 2, H);
+		dstRectForE.set(W / 2, H - rBig * 2, W / 2 + rBig * 2, H);
+		dstRectForSnd.set(W / 2 + rBig * 2, H - rBig - rSmall, W / 2 + rBig * 2 + rSmall * 2, H - rBig + rSmall);
 
-		if (H > W) {
+		// W = Math.min(W, bmp.getWidth()); // use the size of the bmp so we don't have to scale
+
+		/*if (H > W) {
 			H = W; // use a circle if there is room
 			// int tempH = bmp.getHeight() * W / bmp.getWidth(); // use ellipse the size of the bmp
 			// H = Math.min(tempH, H); // use the space available
@@ -188,7 +234,7 @@ public class JoystickView extends View {
 		fX = 1 / Math.cos(thetaMax);
 		fY = 1 / Math.sin(thetaMax);
 
-		handleRadius = (int) (W * 0.1);
+		handleRadius = (int) (W * 0.1);*/
 
 		setMeasuredDimension(W, H);
 	}
@@ -211,9 +257,25 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		int px = getMeasuredWidth();
-		int py = getMeasuredHeight();
-		int hx = (int) touchX + px / 2 - handleRadius;
+		// int px = getMeasuredWidth();
+		// int py = getMeasuredHeight();
+
+		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, handlePaint);
+		canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, handlePaint);
+		canvas.drawBitmap(bmpE, srcRectForBig, dstRectForE, handlePaint);
+		canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, handlePaint);
+
+		if (select) {
+			dstRectForA.set((int) X[0] - rBig, (int) Y[0] - rBig, (int) X[0] + rBig, (int) Y[0] + rBig);
+			dstRectForB.set((int) X[1] - rBig, (int) Y[1] - rBig, (int) X[1] + rBig, (int) Y[1] + rBig);
+			dstRectForC.set((int) X[2] - rBig, (int) Y[2] - rBig, (int) X[2] + rBig, (int) Y[2] + rBig);
+			dstRectForD.set((int) X[3] - rBig, (int) Y[3] - rBig, (int) X[3] + rBig, (int) Y[3] + rBig);
+			canvas.drawBitmap(bmpA, srcRectForBig, dstRectForA, circlePaint[0]);
+			canvas.drawBitmap(bmpB, srcRectForBig, dstRectForB, circlePaint[1]);
+			canvas.drawBitmap(bmpC, srcRectForBig, dstRectForC, circlePaint[2]);
+			canvas.drawBitmap(bmpD, srcRectForBig, dstRectForD, circlePaint[3]);
+		}
+		/*int hx = (int) touchX + px / 2 - handleRadius;
 		int hy = py / 2 - (int) touchY - handleRadius;
 
 		// Draw the background
@@ -236,18 +298,29 @@ public class JoystickView extends View {
 		// Draw the handle
 		canvas.drawBitmap(bmp_handle, srcRectForHandle, dstRectForHandle, handlePaint);
 		// canvas.drawCircle((int) touchX + px, py - (int) touchY, handleRadius, handlePaint);
-
+		*/
 		canvas.save();
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		int actionType = event.getAction();
-		if (actionType == MotionEvent.ACTION_MOVE) {
-			int px = getMeasuredWidth() / 2;
-			int py = getMeasuredHeight() / 2;
+		// int px = getMeasuredWidth();
+		// int py = getMeasuredHeight();
 
-			double tempX = (event.getX() - px);
+		if (actionType == MotionEvent.ACTION_DOWN) {
+			startX = event.getX();
+			startY = event.getY();
+			setAnswerLocations();
+			if (listener != null)
+				listener.OnSelect(-1);		// send a vibrate signal
+			select = true;
+			revealAnswers();
+		}
+		if (actionType == MotionEvent.ACTION_MOVE) {
+			touchX = event.getX();
+			touchY = event.getY();
+			/*double tempX = (event.getX() - px);
 			double tempY = (py - event.getY());
 
 			if ((touchX == 0) && (touchY == 0) && (Math.abs(tempX) < handleRadius * 1.25) && (Math.abs(tempY) < handleRadius * 1.25)) {
@@ -276,21 +349,284 @@ public class JoystickView extends View {
 				} else {
 					select = false;
 				}
-				// } else {
-				// select = false;
-				// }
 				invalidate();
-			}
+			}*/
 		} else if (actionType == MotionEvent.ACTION_UP) {
-			if ((Math.sqrt(touchX * touchX + touchY * touchY) > rCurrent * .6) && (rCurrent > 0))
+
+			returnToDefault();
+			/*if ((Math.sqrt(touchX * touchX + touchY * touchY) > rCurrent * .6) && (rCurrent > 0))
 				checkSelection(angle, true);
 			revealDisappearBackground(false);
-			returnHandleToCenter();
+			returnHandleToCenter();*/
 		}
 		return true;
 	}
 
-	private void checkSelection(double ang, boolean send) {
+	private void setAnswerLocations() {
+		int maxDiff = 2;
+		int diff = 0;
+		int attempts = 0;
+		int startingState = state;
+
+		while ((maxDiff >= 2) && (attempts < 4)) {
+			maxDiff = 0;
+			state = (startingState + attempts) % 4;
+			attempts += 1;
+			setDiffXY();
+
+			X[0] = startX + diffX1;
+			Y[0] = startY + diffY1;
+			checkDiff(0);
+
+			X[1] = X[0] + diffX;
+			Y[1] = Y[0] + diffY;
+			diff = checkDiff(1);
+			if (diff > maxDiff)
+				maxDiff = diff;
+
+			X[2] = X[1] + diffX;
+			Y[2] = Y[1] + diffY;
+			diff = checkDiff(2);
+			if (diff > maxDiff)
+				maxDiff = diff;
+
+			X[3] = X[2] + diffX;
+			Y[3] = Y[2] + diffY;
+			diff = checkDiff(3);
+			if (diff > maxDiff)
+				maxDiff = diff;
+		}
+		state = startingState;
+	}
+
+	private void setDiffXY() {
+		switch (state) {
+		case 0:		// up-right
+			diffX = (int) (rBig * Math.sqrt(3));
+			diffY = -rBig;
+			break;
+		case 1:		// up-left
+			diffX = (int) (-rBig * Math.sqrt(3));
+			diffY = -rBig;
+			break;
+		case 2:		// down-left
+			diffX = (int) (-rBig * Math.sqrt(3));
+			diffY = rBig;
+			break;
+		case 3:		// down-right
+			diffX = (int) (rBig * Math.sqrt(3));
+			diffY = rBig;
+			break;
+		}
+		diffX1 = diffX * 2;
+		diffY1 = diffY * 2;
+	}
+
+	private int checkDiff(int loc) {
+		int W = getMeasuredWidth();
+		int H = getMeasuredHeight();
+		int checks = 0;
+		boolean first = (loc == 0);
+		switch (state) {
+		case 0:		// up-right
+			if (Y[loc] - rBig < 0) {		// above top boundary
+				checks += 1;
+				state = ((state - 1) % 4 + 4) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			if (X[loc] + rBig > W) {		// right of right boundary
+				checks += 1;
+				state = (state + 1) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			break;
+		case 1:		// up-left
+			if (Y[loc] - rBig < 0) {		// above top boundary
+				checks += 1;
+				state = (state + 1) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			if (X[loc] - rBig < 0) {		// left of left boundary
+				checks += 1;
+				state = ((state - 1) % 4 + 4) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			break;
+		case 2:		// down-left
+			if (Y[loc] + rBig > H) {		// below bottom boundary
+				checks += 1;
+				state = ((state - 1) % 4 + 4) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			if (X[loc] - rBig < 0) {		// left of left boundary
+				checks += 1;
+				state = (state + 1) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			break;
+		case 3:		// down-right
+			if (Y[loc] + rBig > H) {		// below bottom boundary
+				checks += 1;
+				state = (state + 1) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			if (X[loc] + rBig > W) {		// right of right boundary
+				checks += 1;
+				state = ((state - 1) % 4 + 4) % 4;
+				setDiffXY();
+				if (first) {
+					X[loc] = startX + diffX1;
+					Y[loc] = startY + diffY1;
+				} else {
+					X[loc] = X[loc - 1] + diffX;
+					Y[loc] = Y[loc - 1] + diffY;
+				}
+			}
+			break;
+		}
+		return checks;
+	}
+
+	private void revealAnswers() {
+		Handler handler = new Handler();
+		int numFrames = 5;
+		int frameTime = 20;
+		final int interval = 255 / numFrames;
+		for (int ans = 0; ans < 4; ans++)
+			circlePaint[ans].setAlpha(0);
+
+		for (int i = 0; i < numFrames; i++) {
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					circlePaint[0].setAlpha(circlePaint[0].getAlpha() + interval);
+					invalidate();
+				}
+			}, i * frameTime);
+		}
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				circlePaint[0].setAlpha(255);
+				invalidate();
+			}
+		}, numFrames * frameTime);
+
+		for (int i = 0; i < numFrames; i++) {
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					circlePaint[1].setAlpha(circlePaint[1].getAlpha() + interval);
+					invalidate();
+				}
+			}, i * frameTime + 1 * numFrames * frameTime);
+		}
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				circlePaint[1].setAlpha(255);
+				invalidate();
+			}
+		}, numFrames * frameTime * 2);
+
+		for (int i = 0; i < numFrames; i++) {
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					circlePaint[2].setAlpha(circlePaint[2].getAlpha() + interval);
+					invalidate();
+				}
+			}, i * frameTime + 2 * numFrames * frameTime);
+		}
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				circlePaint[2].setAlpha(255);
+				invalidate();
+			}
+		}, numFrames * frameTime * 3);
+
+		for (int i = 0; i < numFrames; i++) {
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					circlePaint[3].setAlpha(circlePaint[3].getAlpha() + interval);
+					invalidate();
+				}
+			}, i * frameTime + 3 * numFrames * frameTime);
+		}
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				circlePaint[3].setAlpha(255);
+				invalidate();
+			}
+		}, numFrames * frameTime * 4);
+	}
+
+	private void returnToDefault() {
+
+		touchX = 0;
+		touchY = 0;
+		startX = 0;
+		startY = 0;
+		select = false;
+		for (int ans = 0; ans < 4; ans++) {
+			X[ans] = 0;
+			Y[ans] = 0;
+			circlePaint[ans].setAlpha(0);
+		}
+	}
+	/*private void checkSelection(double ang, boolean send) {
 		select = false;
 
 		if ((listener != null) || (!send)) {
@@ -365,9 +701,9 @@ public class JoystickView extends View {
 
 			}
 		}
-	}
+	}*/
 
-	private void returnHandleToCenter() {
+	/*private void returnHandleToCenter() {
 
 		Handler handler = new Handler();
 		int numFrames = 5;
@@ -395,10 +731,9 @@ public class JoystickView extends View {
 				invalidate();
 			}
 		}, numFrames * frameTime);
+	}*/
 
-	}
-
-	private void revealDisappearBackground(final boolean RorD) {
+	/*private void revealDisappearBackground(final boolean RorD) {
 		Handler handler = new Handler();
 		int numFrames = 10;
 		int frameTime = 40;
@@ -430,74 +765,5 @@ public class JoystickView extends View {
 				invalidate();
 			}
 		}, numFrames * frameTime);
-	}
-
-	/*private void revealAnswer(final int a) {
-
-		Handler handler = new Handler();
-		final int numFrames = 5;
-		int frameTime = 20;
-		final int px = getMeasuredWidth();
-		final int py = getMeasuredHeight();
-		int IntervalX = px / (2 * (numFrames - 1));
-		int IntervalY = py / (2 * (numFrames - 1));
-
-		switch (a) {
-		case 0:
-			p[a].moveTo(0, 0);
-			break;
-		case 1:
-			p[a].moveTo(px, 0);
-			IntervalX = -IntervalX;
-			break;
-		case 2:
-			p[a].moveTo(0, py);
-			IntervalY = -IntervalY;
-			break;
-		case 3:
-			p[a].moveTo(px, py);
-			IntervalX = -IntervalX;
-			IntervalY = -IntervalY;
-			break;
-		}
-
-		for (int i = 0; i < numFrames; i++) {
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					switch (a) {
-					case 0:
-						p[a].lineTo(0, (int) (py * Frac));
-						p[a].lineTo((int) (px * Frac / 2), (int) (py * Frac));
-						p[a].lineTo((int) (px * Frac), (int) (py * Frac / 2));
-						p[a].lineTo((int) (px * Frac), 0);
-						p[a].close();
-						break;
-					case 1:
-						p[a].lineTo(px, (int) (py * Frac));
-						p[a].lineTo((int) (px * (1 - Frac / 2)), (int) (py * Frac));
-						p[a].lineTo((int) (px * (1 - Frac)), (int) (py * Frac / 2));
-						p[a].lineTo((int) (px * (1 - Frac)), 0);
-						p[a].lineTo(px, 0);
-						break;
-					case 2:
-						p[a].lineTo(0, (int) (py * (1 - Frac)));
-						p[a].lineTo((int) (px * Frac / 2), (int) (py * (1 - Frac)));
-						p[a].lineTo((int) (px * Frac), (int) (py * (1 - Frac / 2)));
-						p[a].lineTo((int) (px * Frac), py);
-						p[a].lineTo(0, py);
-						break;
-					case 3:
-						p[a].lineTo(px, (int) (py * (1 - Frac)));
-						p[a].lineTo((int) (px * (1 - Frac / 2)), (int) (py * (1 - Frac)));
-						p[a].lineTo((int) (px * (1 - Frac)), (int) (py * (1 - Frac / 2)));
-						p[a].lineTo((int) (px * (1 - Frac)), py);
-						p[a].lineTo(px, py);
-						break;
-					}
-					invalidate();
-				}
-			}, i * frameTime);
-		}
 	}*/
 }

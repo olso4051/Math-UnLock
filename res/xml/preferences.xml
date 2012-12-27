@@ -37,7 +37,7 @@
 	        android:key="enable_vocab"
 	        android:title="@string/enable_vocab_title"
 	        android:summary="@string/enable_vocab_summary"
-	        android:defaultValue="true"/>
+	        android:defaultValue="false"/>
 	    <ListPreference
 	        android:key="difficulty_vocab"
 	        android:title="@string/difficulty_vocab_title"
@@ -54,7 +54,7 @@
 	        android:key="enable_translate"
 	        android:title="@string/enable_translate_title"
 	        android:summary="@string/enable_translate_summary"
-	        android:defaultValue="true"/>
+	        android:defaultValue="false"/>
 	    <ListPreference
 	        android:key="difficulty_translate"
 	        android:title="@string/difficulty_translate_title"
