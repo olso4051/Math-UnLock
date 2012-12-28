@@ -38,6 +38,8 @@
     <string name="silent">Sound Off</string>
     <string name="sound">Sound On</string>
     <string name="sure">Sure?</string>
+    <string name="swipe_screen">Press then Swipe to Unlock</string>
+    <string name="swipe_option">Swipe Option to Select</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="unlock">Unlock</string>
     

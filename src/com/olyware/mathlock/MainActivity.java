@@ -20,7 +20,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
-import android.view.Menu;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -179,12 +178,6 @@ public class MainActivity extends Activity {
 			// THIS IS WHEN ONPAUSE() IS CALLED WHEN THE SCREEN STATE HAS NOT CHANGED
 		}
 		super.onPause();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		startActivity(new Intent(this, ShowSettingsActivity.class));
-		return true;
 	}
 
 	private void launchHomeScreen(int delay) {
