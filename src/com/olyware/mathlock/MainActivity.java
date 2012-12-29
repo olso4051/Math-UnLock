@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
 	// private RadioButton radioAnswer[] = new RadioButton[4];
 	private boolean quizMode = false;
 	private boolean silentMode;
+	private boolean LtrueRfalse;
 	private JoystickView joystick;
 	private int defaultTextColor;
 
@@ -58,11 +59,22 @@ public class MainActivity extends Activity {
 			final String action = intent.getAction();
 			boolean timeChange = (action.equals(Intent.ACTION_TIME_TICK) || action.equals(Intent.ACTION_TIME_CHANGED) || action
 					.equals(Intent.ACTION_TIMEZONE_CHANGED));
+			boolean audioChange = action.equals(Intent.ACTION_MEDIA_BUTTON);
 			if (timeChange) {
 				Date curDateTime = new Date(System.currentTimeMillis());
 				// hour:minute am/pm newline Day, Month DayOfMonth
 				SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
 				clock.setText(formatter.format(curDateTime));
+			} else if (audioChange) {
+				switch (am.getRingerMode()) {
+				case AudioManager.RINGER_MODE_SILENT:
+				case AudioManager.RINGER_MODE_VIBRATE:
+					silentMode = joystick.setSilentMode(true);
+					break;
+				case AudioManager.RINGER_MODE_NORMAL:
+					silentMode = joystick.setSilentMode(false);
+					break;
+				}
 			}
 		}
 	};
@@ -111,9 +123,16 @@ public class MainActivity extends Activity {
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
+		c_intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (sharedPrefs.getString("handed", "Right").equals("Right"))
+			LtrueRfalse = joystick.setLeftRightHanded(false);
+		else
+			LtrueRfalse = joystick.setLeftRightHanded(true);
+
+		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 
 		if (savedInstanceState != null) {
 			quizMode = joystick.setQuizMode(savedInstanceState.getBoolean("Quiz"));
@@ -156,6 +175,13 @@ public class MainActivity extends Activity {
 		super.onResume();
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		// set the current handedness
+		if (sharedPrefs.getString("handed", "Right").equals("Right"))
+			LtrueRfalse = joystick.setLeftRightHanded(false);
+		else
+			LtrueRfalse = joystick.setLeftRightHanded(true);
+		// set the unlocktype
+		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 		// start background service to wait for screen to turn off
 		EnabledPackages = getEnabledPackages();
 		Intent sIntent = new Intent(this, ScreenService.class);

@@ -21,6 +21,8 @@
     <string name="enable_translate_summary">Answer EN->ES questions</string>
     <string name="enable_vocab_title">Enable</string>
     <string name="enable_vocab_summary">Answer vocab questions</string>
+    <string name="handed_default">Right</string>
+    <string name="handed_title">Handedness</string>
     <string name="hello_world">Hello world!</string>
     <string name="max_tries_default">1</string>
     <string name="max_tries_title">Maximum Attempts</string>
@@ -38,9 +40,12 @@
     <string name="silent">Sound Off</string>
     <string name="sound">Sound On</string>
     <string name="sure">Sure?</string>
-    <string name="swipe_screen">Press then Swipe to Unlock</string>
+    <string name="swipe_screen">Swipe Screen to Answer</string>
     <string name="swipe_option">Swipe Option to Select</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="type_default">2</string>
+    <string name="type_summary">Dynamic Slide</string>
+    <string name="type_title">Unlocking Mechanism</string>
     <string name="unlock">Unlock</string>
     
 </resources>

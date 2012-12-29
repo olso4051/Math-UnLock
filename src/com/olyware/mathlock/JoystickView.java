@@ -51,6 +51,7 @@ public class JoystickView extends View {
 	private boolean quizMode;
 	private boolean emergencyMode;
 	private boolean silentMode;
+	private boolean LtrueRfalse;
 	private boolean selectAnswers[] = new boolean[4];
 	private boolean selectOptions[] = new boolean[4];
 	private int selectLeft[] = new int[4];
@@ -65,7 +66,7 @@ public class JoystickView extends View {
 	private Runnable revealAnswer[] = new Runnable[4];
 	private Runnable finishAnswer[] = new Runnable[4];
 	private Handler answerHandler, textHandler;
-	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 20;
+	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10;
 
 	// =========================================
 	// Constructors
@@ -225,12 +226,14 @@ public class JoystickView extends View {
 		return this.emergencyMode;
 	}
 
-	public void setLeftRightHanded(boolean LtrueRfalse) {
+	public boolean setLeftRightHanded(boolean LtrueRfalse) {
 		if (LtrueRfalse)
 			state = 1;
 		else
 			state = 0;
+		this.LtrueRfalse = LtrueRfalse;
 		setDiffXY();
+		return this.LtrueRfalse;
 	}
 
 	public void setUnlockType(int type) {
@@ -453,33 +456,49 @@ public class JoystickView extends View {
 		int attempts = 0;
 		int startingState = state;
 
-		while ((maxDiff >= 2) && (attempts < 4)) {
+		while ((maxDiff >= 2) && (attempts < 3)) {
 			maxDiff = 0;
-			state = (startingState + attempts) % 4;
+			if (LtrueRfalse)
+				state = ((startingState - attempts) % 4 + 4) % 4;
+			else
+				state = (startingState + attempts) % 4;
+			// Log.d(TAG, "state - " + state + "");
 			attempts += 1;
 			setDiffXY();
 
 			X[0] = startX + diffX1;
 			Y[0] = startY + diffY1;
-			checkDiff(0);
+			diff = checkDiff(0);
 
-			X[1] = X[0] + diffX;
-			Y[1] = Y[0] + diffY;
-			diff = checkDiff(1);
-			if (diff > maxDiff)
-				maxDiff = diff;
+			if (diff == 0)
+				for (int i = 1; i < 4; i++) {
+					X[i] = X[i - 1] + diffX;
+					Y[i] = Y[i - 1] + diffY;
+					diff = checkDiff(i);
+					if (diff > maxDiff)
+						maxDiff = diff;
+				}
+			else
+				maxDiff = 2;
+			// Log.d(TAG, maxDiff + "|" + attempts);
+		}
+		if ((maxDiff >= 2) && (attempts == 3)) {
+			int W = getMeasuredWidth();
+			int centerX;
+			int centerY = rBig * 2;
+			if (startX <= W / 2)
+				centerX = W - (int) (2 * rBig * Math.sqrt(3));
+			else
+				centerX = (int) (2 * rBig * Math.sqrt(3));
 
-			X[2] = X[1] + diffX;
-			Y[2] = Y[1] + diffY;
-			diff = checkDiff(2);
-			if (diff > maxDiff)
-				maxDiff = diff;
-
-			X[3] = X[2] + diffX;
-			Y[3] = Y[2] + diffY;
-			diff = checkDiff(3);
-			if (diff > maxDiff)
-				maxDiff = diff;
+			X[0] = centerX - (int) (rBig * Math.sqrt(3));
+			Y[0] = centerY;
+			X[1] = centerX;
+			Y[1] = centerY - rBig;
+			X[2] = centerX + (int) (rBig * Math.sqrt(3));
+			Y[2] = centerY;
+			X[3] = centerX;
+			Y[3] = centerY + rBig;
 		}
 		state = startingState;
 	}
@@ -509,7 +528,7 @@ public class JoystickView extends View {
 
 	private int checkDiff(int loc) {
 		int W = getMeasuredWidth();
-		int H = getMeasuredHeight();
+		int H = getMeasuredHeight() - rBig * 2;
 		int checks = 0;
 		boolean first = (loc == 0);
 		switch (state) {
@@ -517,106 +536,50 @@ public class JoystickView extends View {
 			if (Y[loc] - rBig < 0) {		// above top boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
 			}
 			if (X[loc] + rBig > W) {		// right of right boundary
 				checks += 1;
-				state = (state + 1) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
+				state = (state + checks) % 4;
 			}
 			break;
 		case 1:		// up-left
 			if (Y[loc] - rBig < 0) {		// above top boundary
 				checks += 1;
 				state = (state + 1) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
 			}
 			if (X[loc] - rBig < 0) {		// left of left boundary
 				checks += 1;
-				state = ((state - 1) % 4 + 4) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
+				state = ((state - checks) % 4 + 4) % 4;
 			}
 			break;
 		case 2:		// down-left
 			if (Y[loc] + rBig > H) {		// below bottom boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
 			}
 			if (X[loc] - rBig < 0) {		// left of left boundary
 				checks += 1;
-				state = (state + 1) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
+				state = (state + checks) % 4;
 			}
 			break;
 		case 3:		// down-right
 			if (Y[loc] + rBig > H) {		// below bottom boundary
 				checks += 1;
 				state = (state + 1) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
 			}
 			if (X[loc] + rBig > W) {		// right of right boundary
 				checks += 1;
-				state = ((state - 1) % 4 + 4) % 4;
-				setDiffXY();
-				if (first) {
-					X[loc] = startX + diffX1;
-					Y[loc] = startY + diffY1;
-				} else {
-					X[loc] = X[loc - 1] + diffX;
-					Y[loc] = Y[loc - 1] + diffY;
-				}
+				state = ((state - checks) % 4 + 4) % 4;
 			}
 			break;
+		}
+		setDiffXY();
+		if (first) {
+			X[loc] = startX + diffX1;
+			Y[loc] = startY + diffY1;
+		} else {
+			X[loc] = X[loc - 1] + diffX;
+			Y[loc] = Y[loc - 1] + diffY;
 		}
 		return checks;
 	}

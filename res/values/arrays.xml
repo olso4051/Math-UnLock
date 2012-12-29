@@ -23,5 +23,20 @@
         <item name="3">3</item>
     </string-array>
 
+    <string-array name="handed_entries">
+        <item name="left">Left</item>
+        <item name="right">Right</item>
+    </string-array>
+    
+    <string-array name="type_entries">
+        <item name="sSlide">Static Slide</item>
+        <item name="sCircle">Static Circle</item>
+        <item name="dSlide">Dynamic Slide</item>
+    </string-array>
+    <string-array name="type_values">
+        <item name="sSlide">0</item>
+        <item name="sCircle">1</item>
+        <item name="dSlide">2</item>
+    </string-array>
     
 </resources>
