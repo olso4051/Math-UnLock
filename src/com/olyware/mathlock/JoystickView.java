@@ -226,14 +226,14 @@ public class JoystickView extends View {
 		return this.emergencyMode;
 	}
 
-	public boolean setLeftRightHanded(boolean LtrueRfalse) {
+	public void setLeftRightHanded(boolean LtrueRfalse) {
 		if (LtrueRfalse)
 			state = 1;
 		else
 			state = 0;
 		this.LtrueRfalse = LtrueRfalse;
 		setDiffXY();
-		return this.LtrueRfalse;
+		// return this.LtrueRfalse;
 	}
 
 	public void setUnlockType(int type) {
@@ -249,7 +249,7 @@ public class JoystickView extends View {
 		// Here we make sure that we have a perfect circle
 		int W = measure(widthMeasureSpec);
 		int H = measure(heightMeasureSpec);
-		if (H < W / 2)
+		if (H - rBig * 3 < W / 2)
 			H = W;
 		spacing = (W - rBig * 4 - rSmall * 4) / 5;
 		selectLeft[3] = W / 2 - rBig * 2 - rSmall * 2 - spacing * 3 / 2;
@@ -449,6 +449,10 @@ public class JoystickView extends View {
 		}
 		return true;
 	}
+
+	// =========================================
+	// Setup and Initialization Algorithms
+	// =========================================
 
 	private void setAnswerLocations() {
 		int maxDiff = 2;

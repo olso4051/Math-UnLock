@@ -5,7 +5,8 @@
     <string name="answer3">3</string>
     <string name="answer4">4</string>
     <string name="app_name">Math Lock</string>
-    <string name="date">Monday, January 1</string>
+    <string name="clock">10:15 pm</string>
+    <string name="date">Monday,\nJanuary 1</string>
     <string name="difficulty_summary">Easy</string>
     <string name="difficulty_math_default">1</string>
     <string name="difficulty_math_title">Difficulty</string>

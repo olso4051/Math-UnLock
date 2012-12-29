@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,29 +21,27 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
+import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	private TextView clock;
+	private TextView date;
 	private TextView problem;
 	private TextView probAnswers;
-	// private RadioGroup radioGroup2;
-	// private RadioButton radioAnswer[] = new RadioButton[4];
 	private boolean quizMode = false;
 	private boolean silentMode;
-	private boolean LtrueRfalse;
 	private JoystickView joystick;
 	private int defaultTextColor;
 
 	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
+	private boolean PackageDefaults[] = { true, false, false };
 	private int EnabledPackages = 0;
 	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_translate" };
 	private int answerLoc = 1;		// {correct radiobutton location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
 	private int attempts = 1;
-	private int dayCorrects = 0;
-	private int dayWrongs = 0;
 
 	private AudioManager am;
 	private Vibrator vib;
@@ -53,28 +52,13 @@ public class MainActivity extends Activity {
 	private Handler mHandler;
 
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
-
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			final String action = intent.getAction();
 			boolean timeChange = (action.equals(Intent.ACTION_TIME_TICK) || action.equals(Intent.ACTION_TIME_CHANGED) || action
 					.equals(Intent.ACTION_TIMEZONE_CHANGED));
-			boolean audioChange = action.equals(Intent.ACTION_MEDIA_BUTTON);
 			if (timeChange) {
-				Date curDateTime = new Date(System.currentTimeMillis());
-				// hour:minute am/pm newline Day, Month DayOfMonth
-				SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
-				clock.setText(formatter.format(curDateTime));
-			} else if (audioChange) {
-				switch (am.getRingerMode()) {
-				case AudioManager.RINGER_MODE_SILENT:
-				case AudioManager.RINGER_MODE_VIBRATE:
-					silentMode = joystick.setSilentMode(true);
-					break;
-				case AudioManager.RINGER_MODE_NORMAL:
-					silentMode = joystick.setSilentMode(false);
-					break;
-				}
+				setTime();
 			}
 		}
 	};
@@ -87,14 +71,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		clock = (TextView) findViewById(R.id.clock);
+		date = (TextView) findViewById(R.id.date);
+		date.setGravity(Gravity.CENTER);
 		problem = (TextView) findViewById(R.id.problem);
 		probAnswers = (TextView) findViewById(R.id.answers);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
-		/*radioGroup2 = (RadioGroup) findViewById(R.id.radioGroup2);
-		radioAnswer[0] = (RadioButton) findViewById(R.id.radioAnswer1);
-		radioAnswer[1] = (RadioButton) findViewById(R.id.radioAnswer2);
-		radioAnswer[2] = (RadioButton) findViewById(R.id.radioAnswer3);
-		radioAnswer[3] = (RadioButton) findViewById(R.id.radioAnswer4);*/
 		joystick = (JoystickView) findViewById(R.id.joystick);
 		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 			@Override
@@ -115,23 +96,18 @@ public class MainActivity extends Activity {
 		}
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-		Date curDateTime = new Date(System.currentTimeMillis());
-		// hour:minute am/pm newline Day, Month DayOfMonth
-		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a\n EEEE, MMMM d");
-		clock.setText(formatter.format(curDateTime));
+		setTime();
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-		c_intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (sharedPrefs.getString("handed", "Right").equals("Right"))
-			LtrueRfalse = joystick.setLeftRightHanded(false);
+		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
+			joystick.setLeftRightHanded(false);
 		else
-			LtrueRfalse = joystick.setLeftRightHanded(true);
-
+			joystick.setLeftRightHanded(true);
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 
 		if (savedInstanceState != null) {
@@ -176,10 +152,10 @@ public class MainActivity extends Activity {
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		// set the current handedness
-		if (sharedPrefs.getString("handed", "Right").equals("Right"))
-			LtrueRfalse = joystick.setLeftRightHanded(false);
+		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
+			joystick.setLeftRightHanded(false);
 		else
-			LtrueRfalse = joystick.setLeftRightHanded(true);
+			joystick.setLeftRightHanded(true);
 		// set the unlocktype
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 		// start background service to wait for screen to turn off
@@ -223,7 +199,7 @@ public class MainActivity extends Activity {
 			int count = 0;
 
 			for (int i = 0; i < PackageKeys.length; i++) {
-				if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
+				if (sharedPrefs.getBoolean(PackageKeys[i], PackageDefaults[i])) {
 					EnabledPackageKeys[count] = PackageKeys[i];
 					location[count] = i;
 					count++;
@@ -255,13 +231,9 @@ public class MainActivity extends Activity {
 					for (int i = 0; i < 4; i++) {
 						if (i == answerLoc) {
 							temp[i] = answers[0];
-							// probAnswers.setText(setAnswerText(i, 0));
-							// radioAnswer[i].setText(answers[0]);
 							offset = 0;
 						} else {
 							temp[i] = answers[i + offset];
-							// probAnswers.setText(setAnswerText(i, i + offset));
-							// radioAnswer[i].setText(answers[i + offset]);
 						}
 					}
 					probAnswers.setText(setAnswerText(temp));
@@ -274,7 +246,6 @@ public class MainActivity extends Activity {
 			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
 			for (int i = 0; i < 4; i++) {
 				probAnswers.setText(setAnswerText(temp));
-				// radioAnswer[i].setText("N/A");
 			}
 		}
 	}
@@ -305,29 +276,6 @@ public class MainActivity extends Activity {
 		sTemp = sTemp + "<b>D</b>: <small>" + ans[3] + "</small> ";
 
 		return Html.fromHtml(sTemp);
-		/*String s;
-		switch (let) {
-		case 0:
-			s = "A: ";
-			break;
-		case 1:
-			s = probAnswers.getText() + "B: ";
-			break;
-		case 2:
-			s = probAnswers.getText() + "C: ";
-			break;
-		case 3:
-			s = probAnswers.getText() + "D: ";
-			break;
-		default:
-			s = "N/A:";
-		}
-		if (ans < 0)
-			return s + "N/A  ";
-		s = s + answers[ans] + "  ";
-		if (answers[ans].length() > 5)
-			s = s + "\n";
-		return s;*/
 	}
 
 	private void setMathProblem(int diffNum) {
@@ -354,7 +302,7 @@ public class MainActivity extends Activity {
 			first = rand.nextInt(201) - 100;			// -100 through 100
 			second = rand.nextInt(201) - 100;			// -100 through 100
 			if (operator == 3) {
-				// check that answer will be an integer
+				// check that answer will be an integer and not divide by zero
 				while (second == 0) {
 					second = rand.nextInt(201) - 100;
 				}
@@ -432,7 +380,7 @@ public class MainActivity extends Activity {
 	private int getEnabledPackages() {
 		int count = 0;
 		for (int i = 0; i < PackageKeys.length; i++) {
-			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
+			if (sharedPrefs.getBoolean(PackageKeys[i], PackageDefaults[i])) {
 				count++;
 			}
 		}
@@ -445,8 +393,25 @@ public class MainActivity extends Activity {
 		else
 			problem.setTextColor(Color.RED);
 		String s = discription + "\n" + problem.getText();
-		// problem.setText(s.substring(0, s.length() - 1) + radioAnswer[answerLoc].getText());
 		problem.setText(s.substring(0, s.length() - 1) + answers[0]);
+	}
+
+	@SuppressLint("SimpleDateFormat")
+	private void setTime() {
+		Date curDateTime = new Date(System.currentTimeMillis());
+		// hour:minute am/pm newline Day, Month DayOfMonth
+		SimpleDateFormat hourFormatter = new SimpleDateFormat("hh");
+		int hour = Integer.parseInt(hourFormatter.format(curDateTime));
+		int start = 0;
+		if (hour < 10)
+			start = 1;
+		SimpleDateFormat clockFormatter = new SimpleDateFormat("hh:mm");
+		String time = clockFormatter.format(curDateTime);
+		time = time.substring(start);
+		SimpleDateFormat AMPMFormatter = new SimpleDateFormat("a");
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE,\nMMMM d");
+		clock.setText(Html.fromHtml(time + " <small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
+		date.setText(dateFormatter.format(curDateTime));
 	}
 
 	private void JoystickSelected(int s) {
