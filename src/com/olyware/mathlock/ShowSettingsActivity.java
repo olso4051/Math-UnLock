@@ -42,6 +42,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			connectionPref.setSummary(sharedPrefs.getString(key, "1"));
 		} else if (key.equals("handed")) {
 			connectionPref.setSummary(sharedPrefs.getString(key, "Right"));
+		} else if (key.equals("type")) {
+			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "2")));
 		}
 		/* Toast.makeText(this, String.valueOf(!key.equals("enable")),Toast.LENGTH_SHORT).show();*/
 	}

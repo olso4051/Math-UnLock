@@ -5,7 +5,7 @@
     <string name="answer3">3</string>
     <string name="answer4">4</string>
     <string name="app_name">Math Lock</string>
-    <string name="clock">10:15 pm</string>
+    <string name="clock">10:15pm</string>
     <string name="date">Monday,\nJanuary 1</string>
     <string name="difficulty_summary">Easy</string>
     <string name="difficulty_math_default">1</string>
@@ -38,10 +38,11 @@
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_translate_title">Translation Questions</string>
     <string name="settings_vocab_title">Vocabulary Questions</string>
+    <string name="side_bar">Track Progress</string>
     <string name="silent">Sound Off</string>
     <string name="sound">Sound On</string>
     <string name="sure">Sure?</string>
-    <string name="swipe_screen">Swipe Screen to Answer</string>
+    <string name="swipe_screen">Swipe Here to Answer</string>
     <string name="swipe_option">Swipe Option to Select</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="type_default">2</string>

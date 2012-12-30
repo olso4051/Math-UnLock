@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 
 		clock = (TextView) findViewById(R.id.clock);
 		date = (TextView) findViewById(R.id.date);
-		date.setGravity(Gravity.CENTER);
+		date.setGravity(Gravity.CENTER_VERTICAL);
 		problem = (TextView) findViewById(R.id.problem);
 		probAnswers = (TextView) findViewById(R.id.answers);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
@@ -170,6 +170,7 @@ public class MainActivity extends Activity {
 		attempts = 1;
 		// setup the question and answer and display it
 		setProblemAndAnswer(0);
+		joystick.showStartAnimation();
 	}
 
 	@Override
@@ -410,7 +411,7 @@ public class MainActivity extends Activity {
 		time = time.substring(start);
 		SimpleDateFormat AMPMFormatter = new SimpleDateFormat("a");
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE,\nMMMM d");
-		clock.setText(Html.fromHtml(time + " <small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
+		clock.setText(Html.fromHtml(time + "<small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
 		date.setText(dateFormatter.format(curDateTime));
 	}
 
@@ -429,6 +430,7 @@ public class MainActivity extends Activity {
 			} else if ((answerLoc == s) && quizMode) {
 				displayCorrectOrNot("Correct!", true);
 				setProblemAndAnswer(1000);
+				// joystick.showStartAnimation();
 			} else if ((answerLoc == s) && !quizMode) {
 				launchHomeScreen(0);
 			} else {
@@ -456,6 +458,9 @@ public class MainActivity extends Activity {
 			break;
 		case 7:		// settings was selected
 			startActivity(new Intent(this, ShowSettingsActivity.class));
+			break;
+		case 8:		// sidebar was selected
+			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		}
 	}

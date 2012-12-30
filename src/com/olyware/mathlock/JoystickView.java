@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -30,12 +31,15 @@ public class JoystickView extends View {
 	// private Rect srcRectForRender, srcRectForHandle;
 	private Rect dstRectForA, dstRectForB, dstRectForC, dstRectForD;
 	private Rect dstRectForS, dstRectForQ, dstRectForE, dstRectForSnd;
-	private Rect srcRectForBig, srcRectForSmall;
+	private Rect srcRectForAns, srcRectForBig, srcRectForSmall;
+	private Rect textBounds;
+	private Path sidePath, sideTextPath;
 	private Paint circlePaint[] = new Paint[4];
-	private Paint handlePaint, textPaint;
+	private Paint handlePaint, textPaint, sidePaint;
 	private int textSizeDP, textSizePix;
-	private double touchX, touchY;// , angle; // angle is in radians
-	private double startX, startY;// , aX, aY, bX, bY, cX, cY, dX, dY;
+	private double touchX, touchY;
+	private double startX, startY;
+	private int Width, Height;
 	private double X[] = new double[4];		// a=0,b=1,c=2,d=3
 	private double Y[] = new double[4];
 	private int type = 0;
@@ -44,7 +48,7 @@ public class JoystickView extends View {
 	// private int handleRadius;
 	// private double thetaMax, rMax, fX, fY; // for maximum area of a rectangle in an ellipse
 	// private double rX, rY, rCurrent;
-	private int spacing, rBig, rSmall;
+	private int spacing, rAns, rBig, rSmall;
 	private JoystickSelectListener listener;
 
 	private boolean settingsMode;
@@ -54,6 +58,7 @@ public class JoystickView extends View {
 	private boolean LtrueRfalse;
 	private boolean selectAnswers[] = new boolean[4];
 	private boolean selectOptions[] = new boolean[4];
+	private boolean selectSideBar = false;
 	private int selectLeft[] = new int[4];
 	private int selectRight[] = new int[4];
 
@@ -62,11 +67,12 @@ public class JoystickView extends View {
 	private AngleSelect angles[] = new AngleSelect[8];
 
 	private Resources res;
-	private Runnable revealText, finishText;
+	private Runnable revealText, finishText, startAnimate, finishAnimate;
 	private Runnable revealAnswer[] = new Runnable[4];
 	private Runnable finishAnswer[] = new Runnable[4];
-	private Handler answerHandler, textHandler;
+	private Handler answerHandler, textHandler, animateHandler;
 	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10;
+	private final int startFrames = 30, startFrameTime = 50;
 
 	// =========================================
 	// Constructors
@@ -93,8 +99,9 @@ public class JoystickView extends View {
 
 	private void initJoystickView() {
 		setFocusable(true);
-		// int W = getMeasuredWidth();
-		// int H = getMeasuredHeight();
+		Width = getMeasuredWidth();
+		Height = getMeasuredHeight();
+
 		res = getResources();
 
 		textSizeDP = 20; // 5dp
@@ -102,6 +109,7 @@ public class JoystickView extends View {
 
 		textHandler = new Handler();
 		answerHandler = new Handler();
+		animateHandler = new Handler();
 		initRunnables();
 
 		for (int ans = 0; ans < 4; ans++) {
@@ -124,6 +132,16 @@ public class JoystickView extends View {
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setColor(Color.WHITE);
 		textPaint.setTextSize(textSizePix);
+
+		sidePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		sidePaint.setStrokeJoin(Paint.Join.ROUND);
+		sidePaint.setStyle(Paint.Style.STROKE);
+		sidePaint.setColor(Color.CYAN);
+		sidePaint.setAlpha(255);
+		// sideTextPaint = sidePaint;
+		sidePaint.setTextSize(textSizePix);
+
+		textBounds = new Rect();
 
 		bmpA = BitmapFactory.decodeResource(getResources(), R.drawable.select_a2);
 		bmpB = BitmapFactory.decodeResource(getResources(), R.drawable.select_b2);
@@ -157,7 +175,8 @@ public class JoystickView extends View {
 		touchX = 0;
 		touchY = 0;
 		// angle = 0;
-		rBig = Math.max(bmpA.getWidth(), bmpA.getHeight()) / 2;
+		rAns = Math.max(bmpA.getWidth(), bmpA.getHeight()) / 2;
+		rBig = Math.max(bmpQ.getWidth(), bmpQ.getHeight()) / 2;
 		rSmall = Math.max(bmpS.getWidth(), bmpS.getHeight()) / 2;
 
 		setDiffXY();
@@ -166,7 +185,8 @@ public class JoystickView extends View {
 		dstRectForRender = new Rect();
 		srcRectForHandle = new Rect(0, 0, bmp_handle.getWidth(), bmp_handle.getHeight());
 		dstRectForHandle = new Rect();*/
-		srcRectForBig = new Rect(0, 0, bmpA.getWidth(), bmpA.getHeight());
+		srcRectForAns = new Rect(0, 0, bmpA.getWidth(), bmpA.getHeight());
+		srcRectForBig = new Rect(0, 0, bmpQ.getWidth(), bmpQ.getHeight());
 		srcRectForSmall = new Rect(0, 0, bmpS.getWidth(), bmpS.getHeight());
 		dstRectForA = new Rect();
 		dstRectForB = new Rect();
@@ -176,6 +196,9 @@ public class JoystickView extends View {
 		dstRectForQ = new Rect();
 		dstRectForE = new Rect();
 		dstRectForSnd = new Rect();
+
+		sidePath = new Path();
+		sideTextPath = new Path();
 
 		for (int i = 0; i < angles.length; i++)
 			angles[i] = new AngleSelect();
@@ -233,11 +256,24 @@ public class JoystickView extends View {
 			state = 0;
 		this.LtrueRfalse = LtrueRfalse;
 		setDiffXY();
-		// return this.LtrueRfalse;
 	}
 
 	public void setUnlockType(int type) {
 		this.type = type;
+	}
+
+	public void showStartAnimation() {
+		setSidePaths(Width);
+		sidePaint.setAlpha(255);
+
+		invalidate();
+		animateHandler.removeCallbacks(startAnimate);
+		animateHandler.removeCallbacks(finishAnimate);
+
+		for (int i = 0; i < startFrames; i++) {
+			animateHandler.postDelayed(startAnimate, i * startFrameTime + 1000);
+		}
+		animateHandler.postDelayed(finishAnimate, startFrames * startFrameTime + 1000);
 	}
 
 	// =========================================
@@ -247,24 +283,26 @@ public class JoystickView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		// Here we make sure that we have a perfect circle
-		int W = measure(widthMeasureSpec);
-		int H = measure(heightMeasureSpec);
-		if (H - rBig * 3 < W / 2)
-			H = W;
-		spacing = (W - rBig * 4 - rSmall * 4) / 5;
-		selectLeft[3] = W / 2 - rBig * 2 - rSmall * 2 - spacing * 3 / 2;
-		selectRight[3] = W / 2 - rBig * 2 - spacing * 3 / 2;
-		selectLeft[2] = W / 2 - rBig * 2 - spacing / 2;
-		selectRight[2] = W / 2 - spacing / 2;
-		selectLeft[1] = W / 2 + spacing / 2;
-		selectRight[1] = W / 2 + rBig * 2 + spacing / 2;
-		selectLeft[0] = W / 2 + rBig * 2 + spacing * 3 / 2;
-		selectRight[0] = W / 2 + rBig * 2 + rSmall * 2 + spacing * 3 / 2;
+		Width = measure(widthMeasureSpec);
+		Height = measure(heightMeasureSpec);
 
-		dstRectForS.set(selectLeft[3], H - rBig - rSmall, selectRight[3], H - rBig + rSmall);
-		dstRectForQ.set(selectLeft[2], H - rBig * 2, selectRight[2], H);
-		dstRectForE.set(selectLeft[1], H - rBig * 2, selectRight[1], H);
-		dstRectForSnd.set(selectLeft[0], H - rBig - rSmall, selectRight[0], H - rBig + rSmall);
+		if (Height - rBig * 2 < Width / 2)
+			Height = Width;
+
+		spacing = (Width - rBig * 4 - rSmall * 4) / 5;
+		selectLeft[3] = Width / 2 - rBig * 2 - rSmall * 2 - spacing * 3 / 2;
+		selectRight[3] = Width / 2 - rBig * 2 - spacing * 3 / 2;
+		selectLeft[2] = Width / 2 - rBig * 2 - spacing / 2;
+		selectRight[2] = Width / 2 - spacing / 2;
+		selectLeft[1] = Width / 2 + spacing / 2;
+		selectRight[1] = Width / 2 + rBig * 2 + spacing / 2;
+		selectLeft[0] = Width / 2 + rBig * 2 + spacing * 3 / 2;
+		selectRight[0] = Width / 2 + rBig * 2 + rSmall * 2 + spacing * 3 / 2;
+
+		dstRectForS.set(selectLeft[3], Height - rBig - rSmall, selectRight[3], Height - rBig + rSmall);
+		dstRectForQ.set(selectLeft[2], Height - rBig * 2, selectRight[2], Height);
+		dstRectForE.set(selectLeft[1], Height - rBig * 2, selectRight[1], Height);
+		dstRectForSnd.set(selectLeft[0], Height - rBig - rSmall, selectRight[0], Height - rBig + rSmall);
 
 		// W = Math.min(W, bmp.getWidth()); // use the size of the bmp so we don't have to scale
 
@@ -286,7 +324,7 @@ public class JoystickView extends View {
 
 		handleRadius = (int) (W * 0.1);*/
 
-		setMeasuredDimension(W, H);
+		setMeasuredDimension(Width, Height);
 	}
 
 	private int measure(int measureSpec) {
@@ -307,8 +345,16 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		int W = getMeasuredWidth();
-		int H = getMeasuredHeight();
+		Width = getMeasuredWidth();
+		Height = getMeasuredHeight();
+
+		int offset = (Height - rBig * 2) / 2;
+
+		String s = res.getString(R.string.side_bar);
+		sidePaint.getTextBounds(s, 0, s.length(), textBounds);
+		offset = offset - textBounds.width() / 2;
+		canvas.drawPath(sidePath, sidePaint);
+		canvas.drawTextOnPath(res.getString(R.string.side_bar), sideTextPath, offset, 0, sidePaint);
 
 		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, handlePaint);
 		if (quizMode)
@@ -316,28 +362,33 @@ public class JoystickView extends View {
 		else
 			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, handlePaint);
 		canvas.drawBitmap(bmpE, srcRectForBig, dstRectForE, handlePaint);
+		if (silentMode) {
+			canvas.drawBitmap(bmpSil, srcRectForSmall, dstRectForSnd, handlePaint);
+		} else {
+			canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, handlePaint);
+		}
 		// canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, handlePaint);
 
-		dstRectForA.set((int) X[0] - rBig, (int) Y[0] - rBig, (int) X[0] + rBig, (int) Y[0] + rBig);
-		dstRectForB.set((int) X[1] - rBig, (int) Y[1] - rBig, (int) X[1] + rBig, (int) Y[1] + rBig);
-		dstRectForC.set((int) X[2] - rBig, (int) Y[2] - rBig, (int) X[2] + rBig, (int) Y[2] + rBig);
-		dstRectForD.set((int) X[3] - rBig, (int) Y[3] - rBig, (int) X[3] + rBig, (int) Y[3] + rBig);
+		dstRectForA.set((int) X[0] - rAns, (int) Y[0] - rAns, (int) X[0] + rAns, (int) Y[0] + rAns);
+		dstRectForB.set((int) X[1] - rAns, (int) Y[1] - rAns, (int) X[1] + rAns, (int) Y[1] + rAns);
+		dstRectForC.set((int) X[2] - rAns, (int) Y[2] - rAns, (int) X[2] + rAns, (int) Y[2] + rAns);
+		dstRectForD.set((int) X[3] - rAns, (int) Y[3] - rAns, (int) X[3] + rAns, (int) Y[3] + rAns);
 		if (selectAnswers[0])
-			canvas.drawBitmap(bmpAs, srcRectForBig, dstRectForA, circlePaint[0]);
+			canvas.drawBitmap(bmpAs, srcRectForAns, dstRectForA, circlePaint[0]);
 		else
-			canvas.drawBitmap(bmpA, srcRectForBig, dstRectForA, circlePaint[0]);
+			canvas.drawBitmap(bmpA, srcRectForAns, dstRectForA, circlePaint[0]);
 		if (selectAnswers[1])
-			canvas.drawBitmap(bmpBs, srcRectForBig, dstRectForB, circlePaint[1]);
+			canvas.drawBitmap(bmpBs, srcRectForAns, dstRectForB, circlePaint[1]);
 		else
-			canvas.drawBitmap(bmpB, srcRectForBig, dstRectForB, circlePaint[1]);
+			canvas.drawBitmap(bmpB, srcRectForAns, dstRectForB, circlePaint[1]);
 		if (selectAnswers[2])
-			canvas.drawBitmap(bmpCs, srcRectForBig, dstRectForC, circlePaint[2]);
+			canvas.drawBitmap(bmpCs, srcRectForAns, dstRectForC, circlePaint[2]);
 		else
-			canvas.drawBitmap(bmpC, srcRectForBig, dstRectForC, circlePaint[2]);
+			canvas.drawBitmap(bmpC, srcRectForAns, dstRectForC, circlePaint[2]);
 		if (selectAnswers[3])
-			canvas.drawBitmap(bmpDs, srcRectForBig, dstRectForD, circlePaint[3]);
+			canvas.drawBitmap(bmpDs, srcRectForAns, dstRectForD, circlePaint[3]);
 		else
-			canvas.drawBitmap(bmpD, srcRectForBig, dstRectForD, circlePaint[3]);
+			canvas.drawBitmap(bmpD, srcRectForAns, dstRectForD, circlePaint[3]);
 
 		/*int hx = (int) touchX + px / 2 - handleRadius;
 		int hy = py / 2 - (int) touchY - handleRadius;
@@ -349,13 +400,9 @@ public class JoystickView extends View {
 		canvas.drawBitmap(bmp, srcRectForRender, dstRectForRender, circlePaint);
 		if (select) {
 			canvas.drawBitmap(bmp_select, srcRectForRender, dstRectForRender, circlePaint);
-		}*/
-		if (silentMode) {
-			canvas.drawBitmap(bmpSil, srcRectForSmall, dstRectForSnd, handlePaint);
-		} else {
-			canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, handlePaint);
 		}
-		/*if (quizMode) {
+		
+		if (quizMode) {
 			canvas.drawBitmap(bmp_quizMode, srcRectForRender, dstRectForRender, circlePaint);
 		}
 
@@ -364,9 +411,9 @@ public class JoystickView extends View {
 		// canvas.drawCircle((int) touchX + px, py - (int) touchY, handleRadius, handlePaint);
 		*/
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]))
-			canvas.drawText(res.getString(R.string.swipe_option), W / 2, H - rBig * 2 - 20, textPaint);
+			canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaint);
 		else
-			canvas.drawText(res.getString(R.string.swipe_screen), W / 2, H - rBig * 2 - 20, textPaint);
+			canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
 		canvas.save();
 	}
 
@@ -374,17 +421,17 @@ public class JoystickView extends View {
 	public boolean onTouchEvent(MotionEvent event) {
 		int actionType = event.getAction();
 		// int W = getMeasuredWidth();
-		int H = getMeasuredHeight();
+		// int H = getMeasuredHeight();
 
 		if (actionType == MotionEvent.ACTION_DOWN) {
+			animateHandler.removeCallbacks(startAnimate);
+			animateHandler.removeCallbacks(finishAnimate);
+			textPaint.setAlpha(0);
+			sidePaint.setAlpha(0);
+			invalidate();
 			startX = event.getX();
 			startY = event.getY();
-			if (startY < (H - rBig * 3)) {			// select answers
-				setAnswerLocations();
-				if (listener != null)
-					listener.OnSelect(-1);		// send a vibrate signal
-				revealAnswers();
-			} else {							// select options
+			if (startY >= Height - rBig * 2) {	// Options selected
 				touchX = startX;
 				touchY = startY;
 				if ((startX >= selectLeft[0]) && (startX <= selectRight[0])) {
@@ -400,6 +447,25 @@ public class JoystickView extends View {
 					selectOptions[3] = true;
 					flashText();
 				}
+				if (listener != null)
+					listener.OnSelect(-1);		// send a vibrate signal
+			} else if (startX > Width - textSizePix) {	// SideBar selected
+				sidePaint.setAlpha(255);
+				selectSideBar = true;
+				invalidate();
+			} else {			// select answers
+				switch (type) {
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					setAnswerLocations();
+					revealAnswers();
+					break;
+				}
+				if (listener != null)
+					listener.OnSelect(-1);		// send a vibrate signal
 			}
 		}
 		if (actionType == MotionEvent.ACTION_MOVE) {
@@ -455,75 +521,82 @@ public class JoystickView extends View {
 	// =========================================
 
 	private void setAnswerLocations() {
-		int maxDiff = 2;
-		int diff = 0;
-		int attempts = 0;
-		int startingState = state;
+		switch (type) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			int maxDiff = 2;
+			int diff = 0;
+			int attempts = 0;
+			int startingState = state;
+			while ((maxDiff >= 2) && (attempts < 3)) {
+				maxDiff = 0;
+				if (LtrueRfalse)
+					state = ((startingState - attempts) % 4 + 4) % 4;
+				else
+					state = (startingState + attempts) % 4;
+				// Log.d(TAG, "state - " + state + "");
+				attempts += 1;
+				setDiffXY();
 
-		while ((maxDiff >= 2) && (attempts < 3)) {
-			maxDiff = 0;
-			if (LtrueRfalse)
-				state = ((startingState - attempts) % 4 + 4) % 4;
-			else
-				state = (startingState + attempts) % 4;
-			// Log.d(TAG, "state - " + state + "");
-			attempts += 1;
-			setDiffXY();
+				X[0] = startX + diffX1;
+				Y[0] = startY + diffY1;
+				diff = checkDiff(0);
 
-			X[0] = startX + diffX1;
-			Y[0] = startY + diffY1;
-			diff = checkDiff(0);
+				if (diff == 0)
+					for (int i = 1; i < 4; i++) {
+						X[i] = X[i - 1] + diffX;
+						Y[i] = Y[i - 1] + diffY;
+						diff = checkDiff(i);
+						if (diff > maxDiff)
+							maxDiff = diff;
+					}
+				else
+					maxDiff = 2;
+				// Log.d(TAG, maxDiff + "|" + attempts);
+			}
+			if ((maxDiff >= 2) && (attempts == 3)) {
+				Width = getMeasuredWidth();
+				int centerX;
+				int centerY = rAns * 2;
+				if (startX <= Width / 2)
+					centerX = Width - (int) (rAns * (Math.sqrt(3) + 1));
+				else
+					centerX = (int) (rAns * (Math.sqrt(3) + 1));
 
-			if (diff == 0)
-				for (int i = 1; i < 4; i++) {
-					X[i] = X[i - 1] + diffX;
-					Y[i] = Y[i - 1] + diffY;
-					diff = checkDiff(i);
-					if (diff > maxDiff)
-						maxDiff = diff;
-				}
-			else
-				maxDiff = 2;
-			// Log.d(TAG, maxDiff + "|" + attempts);
+				X[0] = centerX - (int) (rAns * Math.sqrt(3));
+				Y[0] = centerY;
+				X[1] = centerX;
+				Y[1] = centerY - rAns;
+				X[2] = centerX + (int) (rAns * Math.sqrt(3));
+				Y[2] = centerY;
+				X[3] = centerX;
+				Y[3] = centerY + rAns;
+			}
+			state = startingState;
+			break;
 		}
-		if ((maxDiff >= 2) && (attempts == 3)) {
-			int W = getMeasuredWidth();
-			int centerX;
-			int centerY = rBig * 2;
-			if (startX <= W / 2)
-				centerX = W - (int) (2 * rBig * Math.sqrt(3));
-			else
-				centerX = (int) (2 * rBig * Math.sqrt(3));
-
-			X[0] = centerX - (int) (rBig * Math.sqrt(3));
-			Y[0] = centerY;
-			X[1] = centerX;
-			Y[1] = centerY - rBig;
-			X[2] = centerX + (int) (rBig * Math.sqrt(3));
-			Y[2] = centerY;
-			X[3] = centerX;
-			Y[3] = centerY + rBig;
-		}
-		state = startingState;
 	}
 
 	private void setDiffXY() {
 		switch (state) {
 		case 0:		// up-right
-			diffX = (int) (rBig * Math.sqrt(3));
-			diffY = -rBig;
+			diffX = (int) (rAns * Math.sqrt(3));
+			diffY = -rAns;
 			break;
 		case 1:		// up-left
-			diffX = (int) (-rBig * Math.sqrt(3));
-			diffY = -rBig;
+			diffX = (int) (-rAns * Math.sqrt(3));
+			diffY = -rAns;
 			break;
 		case 2:		// down-left
-			diffX = (int) (-rBig * Math.sqrt(3));
-			diffY = rBig;
+			diffX = (int) (-rAns * Math.sqrt(3));
+			diffY = rAns;
 			break;
 		case 3:		// down-right
-			diffX = (int) (rBig * Math.sqrt(3));
-			diffY = rBig;
+			diffX = (int) (rAns * Math.sqrt(3));
+			diffY = rAns;
 			break;
 		}
 		diffX1 = diffX * 2;
@@ -531,47 +604,47 @@ public class JoystickView extends View {
 	}
 
 	private int checkDiff(int loc) {
-		int W = getMeasuredWidth();
-		int H = getMeasuredHeight() - rBig * 2;
+		Width = getMeasuredWidth();
+		Height = getMeasuredHeight() - rBig * 2;
 		int checks = 0;
 		boolean first = (loc == 0);
 		switch (state) {
 		case 0:		// up-right
-			if (Y[loc] - rBig < 0) {		// above top boundary
+			if (Y[loc] - rAns < 0) {		// above top boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;
 			}
-			if (X[loc] + rBig > W) {		// right of right boundary
+			if (X[loc] + rAns > Width) {		// right of right boundary
 				checks += 1;
 				state = (state + checks) % 4;
 			}
 			break;
 		case 1:		// up-left
-			if (Y[loc] - rBig < 0) {		// above top boundary
+			if (Y[loc] - rAns < 0) {		// above top boundary
 				checks += 1;
 				state = (state + 1) % 4;
 			}
-			if (X[loc] - rBig < 0) {		// left of left boundary
+			if (X[loc] - rAns < 0) {		// left of left boundary
 				checks += 1;
 				state = ((state - checks) % 4 + 4) % 4;
 			}
 			break;
 		case 2:		// down-left
-			if (Y[loc] + rBig > H) {		// below bottom boundary
+			if (Y[loc] + rAns > Height) {		// below bottom boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;
 			}
-			if (X[loc] - rBig < 0) {		// left of left boundary
+			if (X[loc] - rAns < 0) {		// left of left boundary
 				checks += 1;
 				state = (state + checks) % 4;
 			}
 			break;
 		case 3:		// down-right
-			if (Y[loc] + rBig > H) {		// below bottom boundary
+			if (Y[loc] + rAns > Height) {		// below bottom boundary
 				checks += 1;
 				state = (state + 1) % 4;
 			}
-			if (X[loc] + rBig > W) {		// right of right boundary
+			if (X[loc] + rAns > Width) {		// right of right boundary
 				checks += 1;
 				state = ((state - checks) % 4 + 4) % 4;
 			}
@@ -606,29 +679,49 @@ public class JoystickView extends View {
 	}
 
 	private void returnToDefault() {
-		int H = getMeasuredHeight();
+		Height = getMeasuredHeight();
 		touchX = 0;
 		touchY = 0;
-		startX = -rBig;
-		startY = -rBig;
+		startX = -rAns;
+		startY = -rAns;
 		for (int ans = 0; ans < 4; ans++) {
-			X[ans] = -rBig;
-			Y[ans] = -rBig;
 			selectAnswers[ans] = false;
 			selectOptions[ans] = false;
-			circlePaint[ans].setAlpha(0);
 		}
-		dstRectForS.set(selectLeft[3], H - rBig - rSmall, selectRight[3], H - rBig + rSmall);
-		dstRectForQ.set(selectLeft[2], H - rBig * 2, selectRight[2], H);
-		dstRectForE.set(selectLeft[1], H - rBig * 2, selectRight[1], H);
-		dstRectForSnd.set(selectLeft[0], H - rBig - rSmall, selectRight[0], H - rBig + rSmall);
+		selectSideBar = false;
+		dstRectForS.set(selectLeft[3], Height - rBig - rSmall, selectRight[3], Height - rBig + rSmall);
+		dstRectForQ.set(selectLeft[2], Height - rBig * 2, selectRight[2], Height);
+		dstRectForE.set(selectLeft[1], Height - rBig * 2, selectRight[1], Height);
+		dstRectForSnd.set(selectLeft[0], Height - rBig - rSmall, selectRight[0], Height - rBig + rSmall);
+		animateHandler.removeCallbacks(startAnimate);
+		animateHandler.removeCallbacks(finishAnimate);
+		sidePaint.setAlpha(0);
+		switch (type) {
+		case 0:
+			for (int ans = 0; ans < 4; ans++) {
+				X[ans] = rAns;
+				circlePaint[ans].setAlpha(255);
+			}
+			break;
+		case 1:
+			break;
+		case 2:
+			for (int ans = 0; ans < 4; ans++) {
+				answerHandler.removeCallbacks(revealAnswer[ans]);
+				answerHandler.removeCallbacks(finishAnswer[ans]);
+				X[ans] = -rAns;
+				Y[ans] = -rAns;
+				circlePaint[ans].setAlpha(0);
+			}
+			break;
+		}
 		invalidate();
 	}
 
 	private void checkSelection(boolean send) {
 		double diffx, diffy;
 		int s = -1, swipeLength = rBig * 4;
-		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3])) {
+		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectSideBar)) {
 			if (selectOptions[0]) {
 				s = 4;
 				dstRectForSnd.set((int) touchX - rSmall, (int) touchY - rSmall, (int) touchX + rSmall, (int) touchY + rSmall);
@@ -641,10 +734,18 @@ public class JoystickView extends View {
 			} else if (selectOptions[3]) {
 				s = 7;
 				dstRectForS.set((int) touchX - rSmall, (int) touchY - rSmall, (int) touchX + rSmall, (int) touchY + rSmall);
+			} else if (selectSideBar) {
+				s = 8;
+				setSidePaths((int) touchX);
 			}
 			diffx = touchX - startX;
 			diffy = touchY - startY;
-			if (Math.sqrt(diffx * diffx + diffy * diffy) > swipeLength) {
+			if (s == 8) {
+				if (-diffx > swipeLength) {
+					selectSideBar = false;
+					listener.OnSelect(s);
+				}
+			} else if (Math.sqrt(diffx * diffx + diffy * diffy) > swipeLength) {
 				selectOptions[s - 4] = false;
 				listener.OnSelect(s);
 			}
@@ -652,7 +753,7 @@ public class JoystickView extends View {
 			for (int i = 0; i < 4; i++) {
 				diffx = touchX - X[i];
 				diffy = touchY - Y[i];
-				if (Math.sqrt(diffx * diffx + diffy * diffy) < rBig)
+				if (Math.sqrt(diffx * diffx + diffy * diffy) < rAns)
 					if (send) {
 						selectAnswers[i] = false;
 						listener.OnSelect(i);
@@ -678,6 +779,22 @@ public class JoystickView extends View {
 	private void initRunnables() {
 		final int answerInterval = 255 / answerFrames;
 		final int textInterval = 255 / textFrames;
+		final int startInterval = -255 / startFrames;
+
+		startAnimate = new Runnable() {
+			@Override
+			public void run() {
+				sidePaint.setAlpha(sidePaint.getAlpha() + startInterval);
+				invalidate();
+			}
+		};
+		finishAnimate = new Runnable() {
+			@Override
+			public void run() {
+				sidePaint.setAlpha(0);
+				invalidate();
+			}
+		};
 
 		for (int i = 0; i < 4; i++) {
 			final int a = i;
@@ -710,6 +827,17 @@ public class JoystickView extends View {
 				invalidate();
 			}
 		};
+	}
+
+	private void setSidePaths(int side) {
+		sidePath.rewind();
+		sideTextPath.rewind();
+		sideTextPath.moveTo(side, Height - rBig * 2 - 10);
+		sideTextPath.lineTo(side, 10);
+		sidePath.moveTo(side, 0);
+		sidePath.lineTo(side - textSizePix, 10);
+		sidePath.lineTo(side - textSizePix, Height - rBig * 2 - 10);
+		sidePath.lineTo(side, Height - rBig * 2);
 	}
 	/*private void checkSelection(double ang, boolean send) {
 		select = false;
