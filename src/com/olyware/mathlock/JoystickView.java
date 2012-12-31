@@ -374,7 +374,6 @@ public class JoystickView extends View {
 		} else {
 			canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, handlePaint);
 		}
-		// canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, handlePaint);
 
 		dstRectForA.set((int) X[0] - rAns, (int) Y[0] - rAns, (int) X[0] + rAns, (int) Y[0] + rAns);
 		dstRectForB.set((int) X[1] - rAns, (int) Y[1] - rAns, (int) X[1] + rAns, (int) Y[1] + rAns);
@@ -692,6 +691,7 @@ public class JoystickView extends View {
 
 	private void returnToDefault() {
 		Height = getMeasuredHeight();
+		Width = getMeasuredWidth();
 		touchX = 0;
 		touchY = 0;
 		startX = -rAns;
@@ -710,6 +710,7 @@ public class JoystickView extends View {
 		animateHandler.removeCallbacks(startAnimate);
 		animateHandler.removeCallbacks(finishAnimate);
 		sidePaint.setAlpha(0);
+		setSidePaths(Width);
 		switch (type) {
 		case 0:
 			for (int ans = 0; ans < 4; ans++) {
