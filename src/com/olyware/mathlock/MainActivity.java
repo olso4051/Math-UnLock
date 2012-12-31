@@ -170,7 +170,7 @@ public class MainActivity extends Activity {
 		attempts = 1;
 		// setup the question and answer and display it
 		setProblemAndAnswer(0);
-		joystick.showStartAnimation();
+		joystick.showStartAnimation(0, 3000);
 	}
 
 	@Override
