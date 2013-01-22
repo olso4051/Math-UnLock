@@ -9,33 +9,62 @@ import android.preference.PreferenceActivity;
 import android.view.WindowManager;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+	private String unlockPackageKeys[] = { "unlock_all", "unlock_math", "unlock_vocab", "unlock_language", "unlock_act", "unlock_sat",
+			"unlock_gre", "unlock_toddler", "unlock_engineer" };
+	private String settingsPackageKeys[] = { "settings_math", "settings_vocab", "settings_language", "settings_act", "settings_sat",
+			"settings_gre", "settings_toddler", "settings_engineer" };
+	private String difficultyPackageKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_language", "difficulty_act",
+			"difficulty_sat", "difficulty_gre", "difficulty_toddler", "difficulty_engineer" };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
 		SharedPreferences sharedPrefs = getPreferenceScreen().getSharedPreferences();
+		SharedPreferences sharedPrefsMoney = this.getSharedPreferences("Packages", 0);
 
-		Preference Pref_diff_math = findPreference("difficulty_math");
-		Preference Pref_diff_vocab = findPreference("difficulty_vocab");
-		Preference Pref_diff_trans = findPreference("difficulty_translate");
+		for (int i = 0; i < difficultyPackageKeys.length; i++) {
+			Preference Pref_diff = findPreference(difficultyPackageKeys[i]);
+			Pref_diff.setSummary(difficultyIntToString(sharedPrefs.getString(difficultyPackageKeys[i], "1")));
+		}
+		// Preference Pref_diff_math = findPreference("difficulty_math");
+		// Preference Pref_diff_vocab = findPreference("difficulty_vocab");
+		// Preference Pref_diff_trans = findPreference("difficulty_language");
 		Preference Pref_max_tries = findPreference("max_tries");
 		Preference Pref_handed = findPreference("handed");
 		Preference Pref_type = findPreference("type");
 		// Set summary to be the user-description for the selected value
-		Pref_diff_math.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_math", "1")));
-		Pref_diff_vocab.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_vocab", "1")));
-		Pref_diff_trans.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_translate", "1")));
+		// Pref_diff_math.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_math", "1")));
+		// Pref_diff_vocab.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_vocab", "1")));
+		// Pref_diff_trans.setSummary(difficultyIntToString(sharedPrefs.getString("difficulty_language", "1")));
 		Pref_max_tries.setSummary(sharedPrefs.getString("max_tries", "1"));
 		Pref_handed.setSummary(sharedPrefs.getString("handed", "Right"));
 		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "2")));
-		// Toast.makeText(this, sharedPrefs.getString("max_tries", "1"), Toast.LENGTH_SHORT).show();
+
+		if (sharedPrefsMoney.getBoolean("unlock_all", false))
+			for (int i = 0; i < settingsPackageKeys.length; i++) {
+				Preference Pref_Packages = findPreference(settingsPackageKeys[i]);
+				Pref_Packages.setEnabled(true);
+			}
+		else
+			for (int i = 1; i < unlockPackageKeys.length; i++) {
+				Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
+				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
+					Pref_Packages.setEnabled(true);
+				else
+					Pref_Packages.setEnabled(false);
+			}
 	}
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPrefs, String key) {
 		Preference connectionPref = findPreference(key);
-		if (key.equals("difficulty_math") || key.equals("difficulty_vocab") || key.equals("difficulty_translate")) {
+		boolean difficultyChanged = false;
+		for (int i = 0; i < difficultyPackageKeys.length; i++) {
+			if (key.equals(difficultyPackageKeys[i]))
+				difficultyChanged = true;
+		}
+		if (difficultyChanged) {
 			// Set summary to be the user-description for the selected value
 			connectionPref.setSummary(difficultyIntToString(sharedPrefs.getString(key, "")));
 		} else if (key.equals("max_tries")) {

@@ -31,7 +31,7 @@ public class JoystickView extends View {
 	// private Bitmap bmp, bmp_handle;
 	// private Bitmap bmp_silent, bmp_sound, bmp_quizMode, bmp_set, bmp_em, bmp_sil, bmp_A, bmp_B, bmp_C, bmp_D;
 	// private Bitmap bmp_select;
-	private Bitmap bmpA, bmpB, bmpC, bmpD, bmpSet, bmpS, bmpQ, bmpP, bmpE, bmpSil, bmpSnd;
+	private Bitmap bmpA, bmpB, bmpC, bmpD, bmpSet, bmpS, bmpQ, bmpP, bmpStore, bmpSil, bmpSnd;
 	private Bitmap bmpAs, bmpBs, bmpCs, bmpDs, bmpQs;
 	// private Rect dstRectForRender, dstRectForHandle;
 	// private Rect srcRectForRender, srcRectForHandle;
@@ -66,6 +66,7 @@ public class JoystickView extends View {
 	private boolean selectOptions[] = new boolean[5];
 	private boolean selectSideBar = false;
 	private boolean options = false;
+	private boolean problem = true;
 	private int selectLeft[] = new int[5];
 	private int selectRight[] = new int[5];
 
@@ -148,7 +149,7 @@ public class JoystickView extends View {
 		sidePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		sidePaint.setStrokeJoin(Paint.Join.ROUND);
 		sidePaint.setStyle(Paint.Style.STROKE);
-		sidePaint.setColor(Color.WHITE);
+		sidePaint.setColor(Color.BLACK);
 		sidePaint.setAlpha(255);
 		// sideTextPaint = sidePaint;
 		sidePaint.setTextSize(textSizePix);
@@ -168,7 +169,7 @@ public class JoystickView extends View {
 		bmpQ = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2);
 		bmpQs = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2s);
 		bmpP = BitmapFactory.decodeResource(getResources(), R.drawable.select_p2);
-		bmpE = BitmapFactory.decodeResource(getResources(), R.drawable.select_e2);
+		bmpStore = BitmapFactory.decodeResource(getResources(), R.drawable.select_store2);
 		bmpSil = BitmapFactory.decodeResource(getResources(), R.drawable.select_sil2);
 		bmpSnd = BitmapFactory.decodeResource(getResources(), R.drawable.select_sound2);
 		/*bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background2);
@@ -298,6 +299,10 @@ public class JoystickView extends View {
 		animateHandler.postDelayed(finishAnimate, startFrames * startFrameTime + delay);
 	}
 
+	public void setProblem(boolean problem) {
+		this.problem = problem;
+	}
+
 	// =========================================
 	// Drawing Functionality
 	// =========================================
@@ -390,7 +395,7 @@ public class JoystickView extends View {
 		else
 			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, sidePaint);
 		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, sidePaint);
-		canvas.drawBitmap(bmpE, srcRectForBig, dstRectForE, sidePaint);
+		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, sidePaint);
 		if (silentMode) {
 			canvas.drawBitmap(bmpSil, srcRectForSmall, dstRectForSnd, sidePaint);
 		} else {
@@ -418,30 +423,12 @@ public class JoystickView extends View {
 		else
 			canvas.drawBitmap(bmpD, srcRectForAns, dstRectForD, circlePaint[3]);
 
-		/*int hx = (int) touchX + px / 2 - handleRadius;
-		int hy = py / 2 - (int) touchY - handleRadius;
-
-		// Draw the background
-		dstRectForRender.set(0, 0, px, py);
-		dstRectForHandle.set(hx, hy, hx + 2 * handleRadius, hy + 2 * handleRadius);
-
-		canvas.drawBitmap(bmp, srcRectForRender, dstRectForRender, circlePaint);
-		if (select) {
-			canvas.drawBitmap(bmp_select, srcRectForRender, dstRectForRender, circlePaint);
-		}
-		
-		if (quizMode) {
-			canvas.drawBitmap(bmp_quizMode, srcRectForRender, dstRectForRender, circlePaint);
-		}
-
-		// Draw the handle
-		canvas.drawBitmap(bmp_handle, srcRectForHandle, dstRectForHandle, handlePaint);
-		// canvas.drawCircle((int) touchX + px, py - (int) touchY, handleRadius, handlePaint);
-		*/
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]))
 			canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaint);
-		else
+		else if (problem)
 			canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
+		else
+			canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
 		canvas.save();
 	}
 
@@ -488,6 +475,9 @@ public class JoystickView extends View {
 				sidePaint.setAlpha(255);
 				selectSideBar = true;
 				invalidate();
+			} else if (!problem) {
+				if (listener != null)
+					listener.OnSelect(0);		// select a on any touch event
 			} else {			// select answers
 				switch (type) {
 				case 0:

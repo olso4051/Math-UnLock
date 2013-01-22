@@ -14,14 +14,16 @@
 		    android:layout_weight="1"
 		    android:layout_height="wrap_content"
 		    android:textSize="45sp"
+		    android:maxLines="2"
 		    android:text="@string/clock"/>
 		<TextView
-		    android:id="@+id/date"
-		    android:layout_width="0dp"
-		    android:layout_weight="1"
-		    android:layout_height="match_parent"
-		    android:textSize="15sp"
-		    android:text="@string/date"/>
+	    	android:id="@+id/money"
+	    	android:gravity="center_vertical"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="fill_parent"
+	    	android:textSize="25sp"
+	    	android:drawableLeft="@drawable/coins"
+	    	android:text="@string/default_money"/>
 	</LinearLayout>
 
     <TextView

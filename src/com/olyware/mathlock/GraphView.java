@@ -1,5 +1,7 @@
 package com.olyware.mathlock;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
@@ -9,6 +11,9 @@ import android.view.View;
 public class GraphView extends View {
 	private final String TAG = "GraphView";
 	private GraphViewListener listener;
+	private ArrayList<Integer> percent = new ArrayList<Integer>();
+	private int Width, Height;
+	private int movingAverage;
 
 	// =========================================
 	// Constructors
@@ -45,6 +50,27 @@ public class GraphView extends View {
 		this.listener = listener;
 	}
 
+	public void setMovingAverage(int movingAverage) {
+		this.movingAverage = movingAverage;
+		setMovingAveragePercent();
+	}
+
+	public void setArray(int arrayInPercent[]) {
+		// clear all emlements in percentage array
+		percent.clear();
+
+		// set all elements in percentage array
+		for (int i = 0; i < arrayInPercent.length; i++)
+			percent.add(arrayInPercent[i]);
+
+		// check to see if the graph will fit all the data nicely on the screen
+		// if not increase moving average size
+		while (Width / percent.size() < 10) {
+			movingAverage = movingAverage * 2;
+			setMovingAveragePercent();
+		}
+	}
+
 	// =========================================
 	// Drawing Functionality
 	// =========================================
@@ -52,10 +78,10 @@ public class GraphView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		// Here we make sure that we have a perfect circle
-		int W = measure(widthMeasureSpec);
-		int H = measure(heightMeasureSpec);
+		Width = measure(widthMeasureSpec);
+		Height = measure(heightMeasureSpec);
 
-		setMeasuredDimension(W, H);
+		setMeasuredDimension(Width, Height);
 	}
 
 	private int measure(int measureSpec) {
@@ -85,4 +111,11 @@ public class GraphView extends View {
 		return true;
 	}
 
+	// =========================================
+	// Private Methods
+	// =========================================
+
+	private void setMovingAveragePercent() {
+
+	}
 }

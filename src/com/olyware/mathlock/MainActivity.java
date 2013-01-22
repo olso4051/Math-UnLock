@@ -21,13 +21,21 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
-import android.view.Gravity;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+	private int money;
+	private int Pmoney = 1000;
+	private int difficulty = 0;
+
 	private TextView clock;
-	private TextView date;
+	final private float clockSize = 45, dateSize = 15;
+	private float currentClockSize;
+	private TextView coins;
 	private TextView problem;
 	private TextView probAnswers;
 	private boolean quizMode = false;
@@ -35,11 +43,16 @@ public class MainActivity extends Activity {
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_translate" };
-	private boolean PackageDefaults[] = { true, false, false };
+	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_language", "enable_act", "enable_sat", "enable_gre",
+			"enable_toddler", "enable_engineer" };
+	private String unlockPackageKeys[] = { "unlock_all", "unlock_math", "unlock_vocab", "unlock_language", "unlock_act", "unlock_sat",
+			"unlock_gre", "unlock_toddler", "unlock_engineer" };
+	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_language", "difficulty_act", "difficulty_sat",
+			"difficulty_gre", "difficulty_toddler", "difficulty_engineer" };
 	private int EnabledPackages = 0;
-	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_translate" };
-	private int answerLoc = 1;		// {correct radiobutton location}
+	private boolean UnlockedPackages = false;
+
+	private int answerLoc = 1;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
 	private int attempts = 1;
 
@@ -48,6 +61,7 @@ public class MainActivity extends Activity {
 	private Random rand = new Random(); // Ideally just create one instance globally
 
 	private SharedPreferences sharedPrefs;
+	private SharedPreferences sharedPrefsMoney;
 
 	private Handler mHandler;
 
@@ -71,8 +85,14 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		clock = (TextView) findViewById(R.id.clock);
-		date = (TextView) findViewById(R.id.date);
-		date.setGravity(Gravity.CENTER_VERTICAL);
+		clock.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				toggleClockDate();
+			}
+		});
+		currentClockSize = clockSize;
+
+		coins = (TextView) findViewById(R.id.money);
 		problem = (TextView) findViewById(R.id.problem);
 		probAnswers = (TextView) findViewById(R.id.answers);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
@@ -96,30 +116,41 @@ public class MainActivity extends Activity {
 		}
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-		setTime();
-
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
 			joystick.setLeftRightHanded(false);
 		else
 			joystick.setLeftRightHanded(true);
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 
+		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		if (sharedPrefsMoney.getBoolean("first", true)) {
+			Pmoney = sharedPrefsMoney.getInt("paid_money", 1000);
+			editor.putBoolean("first", false).commit();
+		} else
+			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		money = sharedPrefsMoney.getInt("money", 0);
+
+		setMoney();
+
 		if (savedInstanceState != null) {
 			quizMode = joystick.setQuizMode(savedInstanceState.getBoolean("Quiz"));
+			currentClockSize = savedInstanceState.getFloat("ClockSize");
 		}
-
+		setTime();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		savedInstanceState.putBoolean("Quiz", quizMode);
+		savedInstanceState.putFloat("ClockSize", currentClockSize);
 	}
 
 	@Override
@@ -142,24 +173,23 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		// ONLY WHEN SCREEN TURNS ON
-		if (!ScreenReceiver.wasScreenOn) {
-			// started as a lockscreen
-		} else {
-			// started by user
-		}
 		super.onResume();
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		money = sharedPrefsMoney.getInt("money", 0);
+		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		setMoney();
+
 		// set the current handedness
 		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
 			joystick.setLeftRightHanded(false);
 		else
 			joystick.setLeftRightHanded(true);
-		// set the unlocktype
+		// set the unlock type
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 		// start background service to wait for screen to turn off
-		EnabledPackages = getEnabledPackages();
+		getEnabledPackages();
 		Intent sIntent = new Intent(this, ScreenService.class);
 		if (EnabledPackages > 0) {
 			this.startService(sIntent);
@@ -175,11 +205,10 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		if (ScreenReceiver.wasScreenOn) {
-			// THIS IS THE CASE WHEN ONPAUSE() IS CALLED BY THE SYSTEM DUE TO A SCREEN STATE CHANGE
-		} else {
-			// THIS IS WHEN ONPAUSE() IS CALLED WHEN THE SCREEN STATE HAS NOT CHANGED
-		}
+		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		editor.putInt("money", money);
+		editor.putInt("paid_money", Pmoney);
+		editor.commit();
 		super.onPause();
 	}
 
@@ -195,12 +224,13 @@ public class MainActivity extends Activity {
 
 	private void setProblemAndAnswer(int delay) {
 		if (EnabledPackages > 0) {
+			joystick.setProblem(true);
 			final String EnabledPackageKeys[] = new String[EnabledPackages];
 			final int location[] = new int[EnabledPackages];
 			int count = 0;
 
 			for (int i = 0; i < PackageKeys.length; i++) {
-				if (sharedPrefs.getBoolean(PackageKeys[i], PackageDefaults[i])) {
+				if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
 					EnabledPackageKeys[count] = PackageKeys[i];
 					location[count] = i;
 					count++;
@@ -214,13 +244,36 @@ public class MainActivity extends Activity {
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
 					switch (location[randPack]) {
 					case 0:			// math question
-						setMathProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[0], "1")));
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[0], "1"));
+						setMathProblem(difficulty);
 						break;
 					case 1:			// vocabulary question
-						setVocabProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[1], "1")));
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[1], "1"));
+						setVocabProblem(difficulty);
 						break;
-					case 2:			// translate question
-						setTranslateProblem(Integer.parseInt(sharedPrefs.getString(DifficultyKeys[2], "1")));
+					case 2:			// language question
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[2], "1"));
+						setLanguageProblem(difficulty);
+						break;
+					case 3:			// language question
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[3], "1"));
+						setACTProblem(difficulty);
+						break;
+					case 4:			// language question
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[4], "1"));
+						setSATProblem(difficulty);
+						break;
+					case 5:			// language question
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[5], "1"));
+						setGREProblem(difficulty);
+						break;
+					case 6:			// language question
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[6], "1"));
+						setToddlerProblem(difficulty);
+						break;
+					case 7:			// language question
+						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[7], "1"));
+						setEngineerProblem(difficulty);
 						break;
 					default:
 						break;
@@ -243,7 +296,11 @@ public class MainActivity extends Activity {
 			}, delay); // set new problem after delay time [ms]
 
 		} else {
-			problem.setText(R.string.none_enabled);
+			joystick.setProblem(false);
+			if (!UnlockedPackages)
+				problem.setText(R.string.none_unlocked);
+			else
+				problem.setText(R.string.none_enabled);
 			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
 			for (int i = 0; i < 4; i++) {
 				probAnswers.setText(setAnswerText(temp));
@@ -318,6 +375,13 @@ public class MainActivity extends Activity {
 			break;
 		}
 
+		if ((first <= 10) && (first >= 0) && (second <= 10) && (second >= 0))
+			difficulty = 1;
+		else if ((first <= 20) && (first >= -20) && (second <= 20) && (second >= -20))
+			difficulty = 2;
+		else
+			difficulty = 3;
+
 		switch (operator) {
 		case 0:			// add
 			answers[0] = String.valueOf(first + second);
@@ -365,7 +429,7 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void setTranslateProblem(int diffNum) {
+	private void setLanguageProblem(int diffNum) {
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -378,21 +442,98 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private int getEnabledPackages() {
+	private void setACTProblem(int diffNum) {
+		switch (diffNum) {
+		case 1:				// Easy question
+			break;
+		case 2:				// Medium question
+			break;
+		case 3:				// Hard question
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void setSATProblem(int diffNum) {
+		switch (diffNum) {
+		case 1:				// Easy question
+			break;
+		case 2:				// Medium question
+			break;
+		case 3:				// Hard question
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void setGREProblem(int diffNum) {
+		switch (diffNum) {
+		case 1:				// Easy question
+			break;
+		case 2:				// Medium question
+			break;
+		case 3:				// Hard question
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void setToddlerProblem(int diffNum) {
+		switch (diffNum) {
+		case 1:				// Easy question
+			break;
+		case 2:				// Medium question
+			break;
+		case 3:				// Hard question
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void setEngineerProblem(int diffNum) {
+		switch (diffNum) {
+		case 1:				// Easy question
+			break;
+		case 2:				// Medium question
+			break;
+		case 3:				// Hard question
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void getEnabledPackages() {
 		int count = 0;
+		if (sharedPrefsMoney.getBoolean(unlockPackageKeys[0], false)) {
+			UnlockedPackages = true;
+		}
 		for (int i = 0; i < PackageKeys.length; i++) {
-			if (sharedPrefs.getBoolean(PackageKeys[i], PackageDefaults[i])) {
+			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
 				count++;
 			}
+			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i + 1], false)) {
+				UnlockedPackages = true;
+			}
 		}
-		return count;
+		EnabledPackages = count;
 	}
 
 	private void displayCorrectOrNot(String discription, boolean correct) {
-		if (correct)
+		if (correct) {
 			problem.setTextColor(Color.GREEN);
-		else
+			money += difficulty * difficulty;
+		} else {
 			problem.setTextColor(Color.RED);
+			money -= difficulty * difficulty;
+		}
+		if (money < 0)
+			money = 0;
+		setMoney();
 		String s = discription + "\n" + problem.getText();
 		problem.setText(s.substring(0, s.length() - 1) + answers[0]);
 	}
@@ -400,19 +541,24 @@ public class MainActivity extends Activity {
 	@SuppressLint("SimpleDateFormat")
 	private void setTime() {
 		Date curDateTime = new Date(System.currentTimeMillis());
-		// hour:minute am/pm newline Day, Month DayOfMonth
-		SimpleDateFormat hourFormatter = new SimpleDateFormat("hh");
-		int hour = Integer.parseInt(hourFormatter.format(curDateTime));
-		int start = 0;
-		if (hour < 10)
-			start = 1;
-		SimpleDateFormat clockFormatter = new SimpleDateFormat("hh:mm");
-		String time = clockFormatter.format(curDateTime);
-		time = time.substring(start);
-		SimpleDateFormat AMPMFormatter = new SimpleDateFormat("a");
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE,\nMMMM d");
-		clock.setText(Html.fromHtml(time + "<small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
-		date.setText(dateFormatter.format(curDateTime));
+
+		if (currentClockSize == dateSize) {
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE,\nMMMM d");
+			clock.setText(dateFormatter.format(curDateTime));
+		} else {
+			// hour:minute am/pm newline Day, Month DayOfMonth
+			SimpleDateFormat hourFormatter = new SimpleDateFormat("hh");
+			int hour = Integer.parseInt(hourFormatter.format(curDateTime));
+			int start = 0;
+			if (hour < 10)
+				start = 1;
+			SimpleDateFormat clockFormatter = new SimpleDateFormat("hh:mm");
+			String time = clockFormatter.format(curDateTime);
+			time = time.substring(start);
+			SimpleDateFormat AMPMFormatter = new SimpleDateFormat("a");
+
+			clock.setText(Html.fromHtml(time + "<small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
+		}
 	}
 
 	private void JoystickSelected(int s) {
@@ -432,6 +578,7 @@ public class MainActivity extends Activity {
 				setProblemAndAnswer(1000);
 				// joystick.showStartAnimation();
 			} else if ((answerLoc == s) && !quizMode) {
+				displayCorrectOrNot("Correct!", true);
 				launchHomeScreen(0);
 			} else {
 				displayCorrectOrNot("Wrong", false);
@@ -449,9 +596,8 @@ public class MainActivity extends Activity {
 			silentMode = joystick.setSilentMode(!silentMode);
 
 			break;
-		case 5:		// Emergency was selected
-			Intent i = new Intent(Intent.ACTION_DIAL, null);
-			startActivity(i);
+		case 5:		// Store was selected
+			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case 6:		// quiz Mode was selected
 			quizMode = joystick.setQuizMode(!quizMode);
@@ -459,9 +605,30 @@ public class MainActivity extends Activity {
 		case 7:		// settings was selected
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
-		case 8:		// sidebar was selected
+		case 8:		// progress was selected
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
+		}
+	}
+
+	private void setMoney() {
+		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		editor.putInt("money", money);
+		editor.putInt("paid_money", Pmoney);
+		editor.commit();
+		coins.setText("" + (money + Pmoney));
+	}
+
+	private void toggleClockDate() {
+		if (currentClockSize == dateSize) {
+			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
+			currentClockSize = clockSize;
+			setTime();
+		} else {
+			clock.setHeight(clock.getHeight());
+			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, dateSize);	// date
+			currentClockSize = dateSize;
+			setTime();
 		}
 	}
 }
