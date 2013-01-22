@@ -28,8 +28,9 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+	final private int startingPmoney = 1000;
 	private int money;
-	private int Pmoney = 1000;
+	private int Pmoney;
 	private int difficulty = 0;
 
 	private TextView clock;
@@ -131,7 +132,7 @@ public class MainActivity extends Activity {
 
 		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
 		if (sharedPrefsMoney.getBoolean("first", true)) {
-			Pmoney = sharedPrefsMoney.getInt("paid_money", 1000);
+			Pmoney = sharedPrefsMoney.getInt("paid_money", startingPmoney);
 			editor.putBoolean("first", false).commit();
 		} else
 			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);

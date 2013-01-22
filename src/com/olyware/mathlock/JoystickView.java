@@ -41,10 +41,11 @@ public class JoystickView extends View {
 	private Rect textBounds;
 	private Path sideTextPath;// sidePath;
 	private Paint circlePaint[] = new Paint[4];
-	private Paint handlePaint, textPaint, sidePaint;
+	private Paint handlePaint, textPaint, sidePaint, optionPaint;
 	private int textSizeDP, textSizePix;
 	private double touchX, touchY;
 	private double startX, startY;
+	private float optionX, optionY, optionR;
 	private int Width, Height, dstHeight, pad = 10;
 	private double X[] = new double[4];		// a=0,b=1,c=2,d=3
 	private double Y[] = new double[4];
@@ -54,7 +55,7 @@ public class JoystickView extends View {
 	// private int handleRadius;
 	// private double thetaMax, rMax, fX, fY; // for maximum area of a rectangle in an ellipse
 	// private double rX, rY, rCurrent;
-	private int spacing, rAns, rBig, rSmall;
+	private int spacing, rAns, rBig, rSmall, swipeLength;
 	private JoystickSelectListener listener;
 
 	private boolean settingsMode;
@@ -75,12 +76,13 @@ public class JoystickView extends View {
 	private AngleSelect angles[] = new AngleSelect[8];
 
 	private Resources res;
-	private Runnable revealText, finishText, startAnimate, finishAnimate;
+	private Runnable revealText, finishText, startAnimate, finishAnimate, revealCircle, finishCircle;
 	private Runnable revealAnswer[] = new Runnable[4];
 	private Runnable finishAnswer[] = new Runnable[4];
 	private Handler answerHandler, textHandler, animateHandler;
 	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10;
 	private final int startFrames = 30, startFrameTime = 50;
+	private final int circleFrames = 30, circleFrameTime = 20;
 
 	private final Context ctx;
 
@@ -154,6 +156,13 @@ public class JoystickView extends View {
 		// sideTextPaint = sidePaint;
 		sidePaint.setTextSize(textSizePix);
 
+		optionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		optionPaint.setColor(Color.RED);
+		optionPaint.setAlpha(0);
+		optionPaint.setStyle(Paint.Style.STROKE);
+		optionPaint.setStrokeWidth(3);
+		optionR = 0;
+
 		textBounds = new Rect();
 
 		bmpA = BitmapFactory.decodeResource(getResources(), R.drawable.select_a2);
@@ -192,6 +201,7 @@ public class JoystickView extends View {
 		// angle = 0;
 		rAns = Math.max(bmpA.getWidth(), bmpA.getHeight()) / 2;
 		rBig = Math.max(bmpQ.getWidth(), bmpQ.getHeight()) / 2;
+		swipeLength = rBig * 4;
 		rSmall = Math.max(bmpS.getWidth(), bmpS.getHeight()) / 2;
 
 		setDiffXY();
@@ -315,6 +325,7 @@ public class JoystickView extends View {
 
 		if (Height - rBig * 2 < Width / 2)
 			Height = Width;
+		optionY = Height - rBig;
 
 		spacing = (Width - rBig * 6 - rSmall * 4) / 6;
 		selectLeft[4] = Width / 2 - rBig * 3 - rSmall * 2 - spacing * 2;
@@ -387,8 +398,8 @@ public class JoystickView extends View {
 		offset = offset - textBounds.width() / 2;
 		// canvas.drawPath(sidePath, sidePaint);
 		canvas.drawBitmap(bmpSet, srcRectForSet, dstRectForSet, sidePaint);
+		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
 		canvas.drawTextOnPath(res.getString(R.string.side_bar), sideTextPath, offset, 0, sidePaint);
-
 		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, sidePaint);
 		if (quizMode)
 			canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, sidePaint);
@@ -429,6 +440,7 @@ public class JoystickView extends View {
 			canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
 		else
 			canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
+
 		canvas.save();
 	}
 
@@ -443,6 +455,8 @@ public class JoystickView extends View {
 			// animateHandler.removeCallbacks(finishAnimate);
 			textHandler.removeCallbacks(revealText);
 			textHandler.removeCallbacks(finishText);
+			textHandler.removeCallbacks(revealCircle);
+			textHandler.removeCallbacks(finishCircle);
 			textPaint.setAlpha(0);
 			// sidePaint.setAlpha(0);
 			invalidate();
@@ -455,19 +469,24 @@ public class JoystickView extends View {
 				touchY = startY;
 				if ((startX >= selectLeft[0]) && (startX <= selectRight[0])) {
 					selectOptions[0] = true;
-					flashText();
+					optionX = selectLeft[0] + rSmall;
+					flashText(true);
 				} else if ((startX >= selectLeft[1]) && (startX <= selectRight[1])) {
 					selectOptions[1] = true;
-					flashText();
+					optionX = selectLeft[1] + rBig;
+					flashText(true);
 				} else if ((startX >= selectLeft[2]) && (startX <= selectRight[2])) {
 					selectOptions[2] = true;
-					flashText();
+					optionX = selectLeft[2] + rBig;
+					flashText(true);
 				} else if ((startX >= selectLeft[3]) && (startX <= selectRight[3])) {
 					selectOptions[3] = true;
-					flashText();
+					optionX = selectLeft[3] + rBig;
+					flashText(true);
 				} else if ((startX >= selectLeft[4]) && (startX <= selectRight[4])) {
 					selectOptions[4] = true;
-					flashText();
+					optionX = selectLeft[4] + rSmall;
+					flashText(true);
 				}
 				if (listener != null)
 					listener.OnSelect(-1);		// send a vibrate signal
@@ -532,7 +551,7 @@ public class JoystickView extends View {
 		} else if (actionType == MotionEvent.ACTION_UP) {
 			checkSelection(true);
 			returnToDefault();
-			flashText();
+			flashText(false);
 			/*if ((Math.sqrt(touchX * touchX + touchY * touchY) > rCurrent * .6) && (rCurrent > 0))
 				checkSelection(angle, true);
 			revealDisappearBackground(false);
@@ -747,7 +766,7 @@ public class JoystickView extends View {
 
 	private void checkSelection(boolean send) {
 		double diffx, diffy;
-		int s = -1, swipeLength = rBig * 4;
+		int s = -1;// swipeLength = rBig * 4;
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]) || (selectSideBar)) {
 			diffx = touchX - startX;
 			diffy = touchY - startY;
@@ -795,9 +814,11 @@ public class JoystickView extends View {
 			}
 	}
 
-	private void flashText() {
+	private void flashText(boolean circle) {
 		textHandler.removeCallbacks(revealText);
 		textHandler.removeCallbacks(finishText);
+		textHandler.removeCallbacks(revealCircle);
+		textHandler.removeCallbacks(finishCircle);
 
 		textPaint.setAlpha(0);
 
@@ -805,13 +826,26 @@ public class JoystickView extends View {
 			textHandler.postDelayed(revealText, i * textFrameTime);
 		}
 		textHandler.postDelayed(finishText, textFrames * textFrameTime);
+
+		if (circle) {
+			optionR = rSmall;
+			for (int i = 0; i < circleFrames; i++) {
+				textHandler.postDelayed(revealCircle, i * circleFrameTime);
+			}
+			textHandler.postDelayed(finishCircle, circleFrames * circleFrameTime);
+		} else {
+			optionR = 0;
+			optionPaint.setAlpha(0);
+		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	private void initRunnables() {
 		final int answerInterval = 255 / answerFrames;
 		final int textInterval = 255 / textFrames;
-		final int startInterval = -255 / startFrames;
+		// final int startInterval = -255 / startFrames;
+		final int radiusInterval = (swipeLength - rSmall) / circleFrames;
 		WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		Point size = new Point();
@@ -819,31 +853,36 @@ public class JoystickView extends View {
 		if (android.os.Build.VERSION.SDK_INT >= 13) {
 			display.getSize(size);
 			w = size.x;
-		} else
+		} else {
 			w = display.getWidth();
+		}
 		dstHeight = w * bmpSet.getHeight() / bmpSet.getWidth();
-		Log.d(TAG, dstHeight + "|");
-		final int slideInterval = dstHeight / startFrames;
+		Log.d(TAG, dstHeight + "|" + Width + "|" + Height);
+		final int slideInterval = (dstHeight - pad) / startFrames;
 
 		startAnimate = new Runnable() {
 			@Override
 			public void run() {
-				sidePaint.setAlpha(sidePaint.getAlpha() + startInterval);
+				options = false;
+				// sidePaint.setAlpha(sidePaint.getAlpha() + startInterval);
 				PathMeasure pm = new PathMeasure(sideTextPath, false);
 				// coordinates will be here
 				float aCoordinates[] = { 0f, 0f };
 
 				// get point from the middle
 				pm.getPosTan(pm.getLength() * 0.5f, aCoordinates, null);
-				setSidePaths((int) aCoordinates[1] + slideInterval);
+				if ((int) aCoordinates[1] + slideInterval > Height - pad)
+					setSidePaths(Height - pad);
+				else
+					setSidePaths((int) aCoordinates[1] + slideInterval);
 				invalidate();
 			}
 		};
 		finishAnimate = new Runnable() {
 			@Override
 			public void run() {
-				sidePaint.setAlpha(0);
-				setSidePaths(Height);
+				// sidePaint.setAlpha(0);
+				setSidePaths(Height - pad);
 				options = false;
 				invalidate();
 			}
@@ -877,6 +916,22 @@ public class JoystickView extends View {
 			@Override
 			public void run() {
 				textPaint.setAlpha(255);
+				invalidate();
+			}
+		};
+		revealCircle = new Runnable() {
+			@Override
+			public void run() {
+				optionPaint.setAlpha(255);
+				optionR += radiusInterval;
+				invalidate();
+			}
+		};
+		finishCircle = new Runnable() {
+			@Override
+			public void run() {
+				optionPaint.setAlpha(0);
+				optionR = 0;
 				invalidate();
 			}
 		};
