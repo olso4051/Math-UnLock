@@ -42,7 +42,7 @@ public class JoystickView extends View {
 	private Path sideTextPath;// sidePath;
 	private Paint circlePaint[] = new Paint[4];
 	private Paint handlePaint, textPaint, sidePaint, optionPaint;
-	private int textSizeDP, textSizePix;
+	private int textSizeSP, textSizePix;
 	private double touchX, touchY;
 	private double startX, startY;
 	private float optionX, optionY, optionR;
@@ -119,8 +119,8 @@ public class JoystickView extends View {
 
 		res = getResources();
 
-		textSizeDP = 20; // 5dp
-		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, textSizeDP, getResources().getDisplayMetrics());
+		textSizeSP = 20; // 5dp
+		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
 		Log.d(TAG, textSizePix + "text size");
 		textHandler = new Handler();
 		answerHandler = new Handler();

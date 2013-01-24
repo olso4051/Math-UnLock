@@ -76,15 +76,20 @@
 	        android:layout_height="wrap_content"
 	        android:prompt="@string/prompt_difficulty" />
 	</LinearLayout>
-	<RelativeLayout
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" >
-
-	    <com.olyware.mathlock.GraphView
-	        android:id="@+id/graph"
-	        android:layout_centerHorizontal="true"
-	        android:layout_alignParentBottom="true"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-	</RelativeLayout>
+	<ScrollView
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10dp" >
+		<RelativeLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" >
+	
+		    <com.olyware.mathlock.GraphView
+		        android:id="@+id/graph"
+		        android:layout_below="@id/spinner_package"
+		        android:layout_centerHorizontal="true"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+		</RelativeLayout>
+	</ScrollView>
 </LinearLayout>
