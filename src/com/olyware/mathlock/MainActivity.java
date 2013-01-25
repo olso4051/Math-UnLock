@@ -39,6 +39,7 @@ public class MainActivity extends Activity {
 	private TextView coins;
 	private TextView problem;
 	private TextView probAnswers;
+	private AnswerView answerView;
 	private boolean quizMode = false;
 	private boolean silentMode;
 	private JoystickView joystick;
@@ -55,6 +56,7 @@ public class MainActivity extends Activity {
 
 	private int answerLoc = 1;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
+	private String answersRandom[] = { "4", "2", "3", "1" };	// {random answers}
 	private int attempts = 1;
 
 	private AudioManager am;
@@ -96,6 +98,13 @@ public class MainActivity extends Activity {
 		coins = (TextView) findViewById(R.id.money);
 		problem = (TextView) findViewById(R.id.problem);
 		probAnswers = (TextView) findViewById(R.id.answers);
+		answerView = (AnswerView) findViewById(R.id.answers2);
+		answerView.setReadyListener(new AnswerReadyListener() {
+			@Override
+			public void Ready() {
+				answerView.setAnswers(answersRandom);
+			}
+		});
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 		joystick = (JoystickView) findViewById(R.id.joystick);
 		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
@@ -282,16 +291,17 @@ public class MainActivity extends Activity {
 
 					answerLoc = rand.nextInt(4);			// set a random location for the correct answer
 					int offset = 1;
-					String temp[] = new String[4];
+					// String temp[] = new String[4];
 					for (int i = 0; i < 4; i++) {
 						if (i == answerLoc) {
-							temp[i] = answers[0];
+							answersRandom[i] = answers[0];
 							offset = 0;
 						} else {
-							temp[i] = answers[i + offset];
+							answersRandom[i] = answers[i + offset];
 						}
 					}
-					probAnswers.setText(setAnswerText(temp));
+					probAnswers.setText(setAnswerText(answersRandom));
+					answerView.setAnswers(answersRandom);
 					problem.setTextColor(defaultTextColor);
 				}
 			}, delay); // set new problem after delay time [ms]
@@ -303,8 +313,10 @@ public class MainActivity extends Activity {
 			else
 				problem.setText(R.string.none_enabled);
 			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
+			answersRandom = temp;
 			for (int i = 0; i < 4; i++) {
-				probAnswers.setText(setAnswerText(temp));
+				probAnswers.setText(setAnswerText(answersRandom));
+				answerView.setAnswers(answersRandom);
 			}
 		}
 	}

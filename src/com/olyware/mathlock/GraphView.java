@@ -2,7 +2,6 @@ package com.olyware.mathlock;
 
 import java.util.ArrayList;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,8 +14,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class GraphView extends View {
-	private final String TAG = "GraphView";
-	private GraphViewListener listener;
 	private ArrayList<Integer> percent = new ArrayList<Integer>();
 	private ArrayList<Integer> percentAve = new ArrayList<Integer>();
 	private int Width, Height;
@@ -103,10 +100,6 @@ public class GraphView extends View {
 	// Public Methods
 	// =========================================
 
-	public void setGraphViewListener(GraphViewListener listener) {
-		this.listener = listener;
-	}
-
 	public void setMovingAverage(int movingAverage) {
 		this.movingAverage = movingAverage;
 		if (!percent.isEmpty())
@@ -131,7 +124,6 @@ public class GraphView extends View {
 		// }
 	}
 
-	@SuppressLint("NewApi")
 	public void setStats(long correct, long wrong, long coins, long totalTime, long streakBest, long streakCurrent, long answerTimeFast,
 			long answerTimeAve) {
 		StatsValues[0] = correct;
@@ -256,5 +248,6 @@ public class GraphView extends View {
 					percentPath.lineTo((right - left) * i / (size - 1) + left, (1 - percentAve.get(i) / 100f) * (bottom - top) + top);
 			}
 		}
+		invalidate();
 	}
 }

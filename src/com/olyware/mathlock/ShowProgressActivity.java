@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,9 +34,13 @@ public class ShowProgressActivity extends Activity {
 	private float currentClockSize;
 	private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
+	private GraphView graphView;
 	private String unlockPackageKeys[] = { "unlock_all", "unlock_math", "unlock_vocab", "unlock_language", "unlock_act", "unlock_sat",
 			"unlock_gre", "unlock_toddler", "unlock_engineer" };
 	private String displayPackageKeys[] = { "All", "Math", "Vocab", "Language", "ACT", "SAT", "GRE", "Toddler", "Engineer" };
+	private String[] times = { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
+	private List<String> packages;
+	private String[] difficulties = { "All", "Hard", "Medium", "Easy" };
 
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
@@ -67,6 +72,8 @@ public class ShowProgressActivity extends Activity {
 		spinPackage = (Spinner) findViewById(R.id.spinner_package);
 		spinDifficulty = (Spinner) findViewById(R.id.spinner_difficulty);
 
+		graphView = (GraphView) findViewById(R.id.graph);
+
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
@@ -77,6 +84,7 @@ public class ShowProgressActivity extends Activity {
 		initSpinners();
 		setTime();
 		setMoney();
+		// setGraph();
 	}
 
 	@Override
@@ -110,9 +118,9 @@ public class ShowProgressActivity extends Activity {
 	}
 
 	private void initSpinners() {
-		String[] times = new String[] { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
-		List<String> packages = getUnlockedPackages();
-		String[] difficulties = new String[] { "All", "Hard", "Medium", "Easy" };
+		// String[] times = new String[] { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
+		packages = getUnlockedPackages();
+		// String[] difficulties = new String[] { "All", "Hard", "Medium", "Easy" };
 		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times);
 		ArrayAdapter<String> adapterPackages = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, packages);
 		ArrayAdapter<String> adapterDifficulties = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficulties);
@@ -125,6 +133,7 @@ public class ShowProgressActivity extends Activity {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 				// parent.getItemAtPosition(pos).toString();
+				setGraph();
 			}
 
 			@Override
@@ -135,7 +144,7 @@ public class ShowProgressActivity extends Activity {
 		spinPackage.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-
+				setGraph();
 			}
 
 			@Override
@@ -146,7 +155,7 @@ public class ShowProgressActivity extends Activity {
 		spinDifficulty.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-
+				setGraph();
 			}
 
 			@Override
@@ -211,5 +220,20 @@ public class ShowProgressActivity extends Activity {
 			currentClockSize = dateSize;
 			setTime();
 		}
+	}
+
+	private void setGraph() {
+		// String time = spinTime.getSelectedItem().toString();
+		// String pack = spinPackage.getSelectedItem().toString();
+		// String diff = spinDifficulty.getSelectedItem().toString();
+		// TODO use these selections to do a sql query and get the array to graph
+
+		// random 1000 integers and moving average to test the graph view
+		int test[] = new int[500];
+		Random rnd = new Random();
+		for (int i = 0; i < test.length; i++)
+			test[i] = rnd.nextInt(101);
+		graphView.setMovingAverage(rnd.nextInt(50) + 1);
+		graphView.setArray(test);
 	}
 }

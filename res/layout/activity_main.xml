@@ -41,6 +41,10 @@
 	    android:layout_height="wrap_content"
 	    android:textSize="25sp"
 	    android:text="@string/date"/>
+    <com.olyware.mathlock.AnswerView
+        android:id="@+id/answers2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 	<RelativeLayout
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content" >
