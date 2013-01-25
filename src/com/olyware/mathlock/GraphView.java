@@ -21,14 +21,18 @@ public class GraphView extends View {
 	private ArrayList<Integer> percentAve = new ArrayList<Integer>();
 	private int Width, Height;
 	private int movingAverage;
+	private int textLabelSizeSP, textStatsSizeSP;
+	private float padVert, padHorz;
+	private float textLabelSizePix, textStatsSizePix;
+	private float left, top, right, bottom;
 	private long StatsValues[] = new long[8];
 	private String Stats[] = { "Total Correct Answers", "Total Incorrect Answers", "(+/-) Coins", "Best Correct Streak", "Current Streak",
 			"Total Time Spent Studying", "Fastest Time to Answer", "Average Time to Answer" };
-	private int pad;
-	private int textLabelSizeSP, textLabelSizePix, textStatsSizeSP, textStatsSizePix;
+
 	private Paint TextLabelPaint, TextStatsPaintL, TextStatsPaintR, TextStatsPaintC, GraphPaint, LinePaint;
 	private Rect textBounds;
 	private Path Xlabel;
+	private Path percentPath;
 
 	// =========================================
 	// Constructors
@@ -55,14 +59,14 @@ public class GraphView extends View {
 
 	private void initGraphView() {
 		textLabelSizeSP = 40; // text size in scaled pixels
-		textLabelSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
+		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
 		TextLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextLabelPaint.setColor(Color.WHITE);
 		TextLabelPaint.setTextAlign(Paint.Align.CENTER);
 		TextLabelPaint.setTextSize(textLabelSizePix);
 
 		textStatsSizeSP = 20;
-		textStatsSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textStatsSizeSP, getResources().getDisplayMetrics());
+		textStatsSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textStatsSizeSP, getResources().getDisplayMetrics());
 		TextStatsPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextStatsPaintL.setColor(Color.WHITE);
 		TextStatsPaintL.setTextAlign(Paint.Align.LEFT);
@@ -76,21 +80,23 @@ public class GraphView extends View {
 		TextStatsPaintC.setTextAlign(Paint.Align.CENTER);
 		TextStatsPaintC.setTextSize(textStatsSizePix);
 
-		movingAverage = 1;
+		movingAverage = 20;
 		setStats(0, 0, 0, 0, 0, 0, 0, 0);
-		pad = 4;
+		padVert = textStatsSizePix / 2;
+		padHorz = 5;
 		textBounds = new Rect();
 		Xlabel = new Path();
+		percentPath = new Path();
 
 		GraphPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		GraphPaint.setColor(Color.WHITE);
 		GraphPaint.setStyle(Paint.Style.STROKE);
-		GraphPaint.setStrokeWidth(pad);
+		GraphPaint.setStrokeWidth(3);
 
 		LinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		LinePaint.setColor(Color.CYAN);
 		LinePaint.setStyle(Paint.Style.STROKE);
-		LinePaint.setStrokeWidth(pad);
+		LinePaint.setStrokeWidth(5);
 	}
 
 	// =========================================
@@ -147,12 +153,20 @@ public class GraphView extends View {
 		// Here we make sure that we have a perfect circle
 		Width = measure(widthMeasureSpec);
 		Height = measure(heightMeasureSpec);
-		setStats(StatsValues[0], StatsValues[1], StatsValues[2], StatsValues[3], StatsValues[4], StatsValues[5], StatsValues[6],
-				StatsValues[7]);
+
+		// setStats(StatsValues[0], StatsValues[1], StatsValues[2], StatsValues[3], StatsValues[4], StatsValues[5], StatsValues[6],
+		// StatsValues[7]);
 		Xlabel.rewind();
 		Xlabel.moveTo(textStatsSizePix, Width / 2);
 		Xlabel.lineTo(textStatsSizePix, 0);
-		Height = Width / 2 + textLabelSizePix + textStatsSizePix * (Stats.length + 2) + pad * (Stats.length + 2);
+		String s = "100";
+		TextStatsPaintR.getTextBounds(s, 0, s.length(), textBounds);
+		left = textStatsSizePix + padHorz * 2 + textBounds.width();
+		top = padVert;
+		right = Width - left + textStatsSizePix;
+		bottom = Width / 2;
+
+		Height = (int) (Width / 2 + textLabelSizePix + textStatsSizePix * (Stats.length + 1) + padVert * (Stats.length + 2));
 		setMeasuredDimension(Width, Height);
 	}
 
@@ -176,27 +190,27 @@ public class GraphView extends View {
 	protected void onDraw(Canvas canvas) {
 		int padNum = Stats.length + 1;
 		int StatsNum = Stats.length;
-		String s = "100";
-		TextStatsPaintR.getTextBounds(s, 0, s.length(), textBounds);
-		int left = textStatsSizePix + pad + textBounds.width();
-		int bottom = Width / 2;
 
-		canvas.drawText("100", left, textStatsSizePix, TextStatsPaintR);
-		canvas.drawText("50", left, (bottom + textStatsSizePix) / 2, TextStatsPaintR);
-		canvas.drawText("0", left, bottom, TextStatsPaintR);
+		canvas.drawText("100", left - padHorz, padVert + textStatsSizePix / 2, TextStatsPaintR);
+		canvas.drawText("75", left - padHorz, (bottom - padVert) / 4 + padVert + textStatsSizePix / 2, TextStatsPaintR);
+		canvas.drawText("50", left - padHorz, (bottom - padVert) / 2 + padVert + textStatsSizePix / 2, TextStatsPaintR);
+		canvas.drawText("25", left - padHorz, (bottom - padVert) * 3 / 4 + padVert + textStatsSizePix / 2, TextStatsPaintR);
+		canvas.drawText("0", left - padHorz, bottom + textStatsSizePix / 2, TextStatsPaintR);
 		canvas.drawTextOnPath("Percent", Xlabel, 0, 0, TextStatsPaintC);
-		canvas.drawText("Time", (Width + left) / 2, bottom + textStatsSizePix * 2 + pad, TextStatsPaintC);
-		canvas.drawText("Today", Width - pad, bottom + textStatsSizePix, TextStatsPaintR);
-		canvas.drawLine(left + pad, 0, left + pad, bottom - pad / 2, GraphPaint);
-		canvas.drawLine(Width - pad, 0, Width - pad, bottom - pad / 2, GraphPaint);
-		// TODO draw percentage path
-		canvas.drawLine(left + pad, bottom - pad, Width - pad, bottom - pad, GraphPaint);
-		canvas.drawLine(left + pad, pad / 2, Width - pad, pad / 2, GraphPaint);
+		canvas.drawText("Time", Width / 2, bottom + textStatsSizePix + padVert, TextStatsPaintC);
 
-		canvas.drawText("All Time Stats", Width / 2, Height - textStatsSizePix * StatsNum - pad * padNum, TextLabelPaint);
+		canvas.drawRect(left, top, right, bottom, GraphPaint);
+		// canvas.drawLine(left + padVert, 0, left + padVert, bottom - padVert / 2, GraphPaint);
+		// canvas.drawLine(Width - padVert, 0, Width - padVert, bottom - padVert / 2, GraphPaint);
+		if (!percentPath.isEmpty())
+			canvas.drawPath(percentPath, LinePaint);
+		// canvas.drawLine(left + padVert, bottom - padVert, Width - padVert, bottom - padVert, GraphPaint);
+		// canvas.drawLine(left + padVert, padVert / 2, Width - padVert, padVert / 2, GraphPaint);
+
+		canvas.drawText("All Time Stats", Width / 2, Height - textStatsSizePix * StatsNum - padVert * padNum, TextLabelPaint);
 		for (int i = 0; i < StatsNum; i++) {
-			canvas.drawText(Stats[i], 0, Height - textStatsSizePix * (StatsNum - i - 1) - pad * (padNum - i), TextStatsPaintL);
-			canvas.drawText(StatsValues[i] + " ", Width, Height - textStatsSizePix * (StatsNum - i - 1) - pad * (padNum - i),
+			canvas.drawText(Stats[i], 0, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1), TextStatsPaintL);
+			canvas.drawText(StatsValues[i] + " ", Width, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1),
 					TextStatsPaintR);
 		}
 		canvas.save();
@@ -214,19 +228,33 @@ public class GraphView extends View {
 	private void setMovingAveragePercent() {
 		Object temp[] = percent.toArray();
 		int tempPercent[] = new int[temp.length];
+		int size = tempPercent.length - movingAverage + 1;
 		percentAve.clear();
-		percentAve.ensureCapacity(tempPercent.length - movingAverage + 1);
+		percentAve.ensureCapacity(size);
+		percentPath.rewind();
 
 		for (int i = 0; i < temp.length; i++)
 			tempPercent[i] = ((Integer) temp[i]).intValue();
 
-		for (int i = 0; i < tempPercent.length - movingAverage + 1; i++) {
+		if (movingAverage >= tempPercent.length) {
 			int sum = 0;
-			for (int a = 0; a < movingAverage; a++) {
-				sum += tempPercent[i + a];
+			for (int i = 0; i < tempPercent.length; i++)
+				sum += tempPercent[i];
+			percentAve.add(sum / tempPercent.length);
+			percentPath.moveTo(left, (1 - percentAve.get(0) / 100f) * (bottom - top) + top);
+			percentPath.lineTo(right, (1 - percentAve.get(0) / 100f) * (bottom - top) + top);
+		} else {
+			for (int i = 0; i < size; i++) {
+				int sum = 0;
+				for (int a = 0; a < movingAverage; a++) {
+					sum += tempPercent[i + a];
+				}
+				percentAve.add(sum / movingAverage);
+				if (i == 0)
+					percentPath.moveTo(left, (1 - percentAve.get(0) / 100f) * (bottom - top) + top);
+				else
+					percentPath.lineTo((right - left) * i / (size - 1) + left, (1 - percentAve.get(i) / 100f) * (bottom - top) + top);
 			}
-			percentAve.add(sum / movingAverage);
 		}
-		// TODO set percentage path
 	}
 }
