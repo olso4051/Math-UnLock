@@ -5,6 +5,7 @@ import java.util.List;
 import android.provider.BaseColumns;
 
 import com.olyware.mathlock.database.contracts.QuestionContract;
+import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.utils.EZ;
 
 public class SchemaBuilder {
@@ -17,13 +18,12 @@ public class SchemaBuilder {
 
 		// t_user
 		StringBuilder sqlBuilder = new StringBuilder();
-		sqlBuilder.append("CREATE TABLE " + QuestionContract.TABLE_NAME + " (");
+		sqlBuilder.append("CREATE TABLE " + VocabQuestionContract.TABLE_NAME + " (");
 		sqlBuilder.append(BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, ");
 		sqlBuilder.append(QuestionContract.QUESTION_TEXT + " STRING, ");
-		sqlBuilder.append(QuestionContract.QUESTION_IMAGE + " STRING,");
 		sqlBuilder.append(QuestionContract.ANSWER_CORRECT + " STRING,");
-		sqlBuilder.append(QuestionContract.ANSWER_WRONG + " STRING,");
-		sqlBuilder.append(QuestionContract.DIFFICULTY + " INTEGER");
+		sqlBuilder.append(QuestionContract.DIFFICULTY + " INTEGER,");
+		// sqlBuilder.append(VocabQuestionContract.PART_OF_SPEECH + " STRING");
 		sqlBuilder.append(");\n");
 		statements.add(sqlBuilder.toString());
 

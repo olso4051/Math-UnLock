@@ -26,6 +26,11 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.utils.EZ;
+
 public class MainActivity extends Activity {
 	final private int startingPmoney = 1000;
 	private int money;
@@ -67,6 +72,8 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler;
 
+	private DatabaseManager dbManager;
+
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -84,6 +91,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		mHandler = new Handler();
+		dbManager = new DatabaseManager(getApplicationContext());
 		setContentView(R.layout.activity_main);
 
 		clock = (TextView) findViewById(R.id.clock);
@@ -397,17 +405,32 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	// TODO: Pass in a Difficulty enum instead of an integer
 	private void setVocabProblem(int diffNum) {
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
+		// TODO: don't query the DB every time we display a question. Needs a cache.
+		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum));
+		// Get random question
+		Random random = new Random();
+		List<Integer> questionIndexes = EZ.list();
+		int rand = random.nextInt(questions.size() - 1);
+		questionIndexes.add(rand);
+		VocabQuestion question = questions.get(rand);
+
+		// Get 3 wrong answers and avoid duplicates
+		List<String> answersList = EZ.list();
+		for (int i = 0; i < 3; i++) {
+			while (!questionIndexes.contains(rand)) {
+				rand = random.nextInt(questions.size() - 1);
+			}
+			questionIndexes.add(rand);
+			answersList.add(questions.get(rand).getCorrectAnswer());
 		}
+		// Add the correct answer to the answers list
+		answersList.add(question.getCorrectAnswer());
+
+		// Display the vocab question and answers
+		answers = answersList.toArray(new String[answersList.size()]);
+		problem.setText(question.getText());
 	}
 
 	private void setLanguageProblem(int diffNum) {
