@@ -1,9 +1,14 @@
 package com.olyware.mathlock.database;
 
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.io.FileUtils;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.olyware.mathlock.utils.Loggy;
@@ -15,7 +20,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	private final Loggy log = new Loggy(this.getClass());
 
+	private static final String DATABASE_PATH = "/data/data/com.olyware.mathlock/databases/";
 	private static final String DATABASE_NAME = "mathunlock.db";
+	private static final String DATABASE_FULL_PATH = DATABASE_PATH + DATABASE_NAME;
 	private static final int DATABASE_VERSION = 1;
 
 	private Context context;
@@ -24,15 +31,38 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private DatabaseOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.context = context;
+		copyDatabase();
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		List<String> statements = SchemaBuilder.buildCreateTableSql();
+		// Do nothing
+	}
 
-		log.d("Creating tables in database " + DATABASE_NAME);
-		for (String statement : statements) {
-			db.execSQL(statement);
+	private void copyDatabase() {
+		if (!dbExists()) {
+			InputStream is;
+			try {
+				is = context.getAssets().open(DATABASE_NAME);
+				File dest = new File(DATABASE_FULL_PATH);
+				FileUtils.copyInputStreamToFile(is, dest);
+			} catch (IOException e) {
+				log.e("Unable to populate database", e);
+				return;
+			}
+		}
+	}
+
+	private boolean dbExists() {
+		// This doesn't work because the database is there before we even hit onCreate somehow. WTF.
+		try {
+			SQLiteDatabase database = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READONLY);
+			if (database != null) {
+				database.close();
+			}
+			return database != null;
+		} catch (SQLiteException e) {
+			return false;
 		}
 	}
 
