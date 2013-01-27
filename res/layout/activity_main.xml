@@ -34,13 +34,6 @@
         android:text="@string/problem"
         android:textSize="30sp"
         tools:context=".MainActivity" />
-    <TextView
-	    android:id="@+id/answers"
-	    android:gravity="center"
-	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:textSize="25sp"
-	    android:text="@string/date"/>
     <com.olyware.mathlock.AnswerView
         android:id="@+id/answers2"
         android:layout_width="match_parent"

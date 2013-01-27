@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.text.Spanned;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,7 +37,7 @@ public class MainActivity extends Activity {
 	private float currentClockSize;
 	private TextView coins;
 	private TextView problem;
-	private TextView probAnswers;
+	// private TextView probAnswers;
 	private AnswerView answerView;
 	private boolean quizMode = false;
 	private boolean silentMode;
@@ -97,7 +96,7 @@ public class MainActivity extends Activity {
 
 		coins = (TextView) findViewById(R.id.money);
 		problem = (TextView) findViewById(R.id.problem);
-		probAnswers = (TextView) findViewById(R.id.answers);
+		// probAnswers = (TextView) findViewById(R.id.answers);
 		answerView = (AnswerView) findViewById(R.id.answers2);
 		answerView.setReadyListener(new AnswerReadyListener() {
 			@Override
@@ -291,7 +290,6 @@ public class MainActivity extends Activity {
 
 					answerLoc = rand.nextInt(4);			// set a random location for the correct answer
 					int offset = 1;
-					// String temp[] = new String[4];
 					for (int i = 0; i < 4; i++) {
 						if (i == answerLoc) {
 							answersRandom[i] = answers[0];
@@ -300,7 +298,6 @@ public class MainActivity extends Activity {
 							answersRandom[i] = answers[i + offset];
 						}
 					}
-					probAnswers.setText(setAnswerText(answersRandom));
 					answerView.setAnswers(answersRandom);
 					problem.setTextColor(defaultTextColor);
 				}
@@ -315,38 +312,9 @@ public class MainActivity extends Activity {
 			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
 			answersRandom = temp;
 			for (int i = 0; i < 4; i++) {
-				probAnswers.setText(setAnswerText(answersRandom));
 				answerView.setAnswers(answersRandom);
 			}
 		}
-	}
-
-	private Spanned setAnswerText(String ans[]) {
-		int abcd = 4;
-		int maxLength = 0;
-		for (int i = 0; i < ans.length; i++) {
-			if (ans[i].length() > maxLength)
-				maxLength = ans[i].length();
-		}
-		if (maxLength < 4)
-			abcd = 4;
-		else if (maxLength < 10)
-			abcd = 2;
-		else
-			abcd = 1;
-
-		String sTemp = "<b>A</b>: <small>" + ans[0] + "</small>   ";
-		if (abcd == 1)
-			sTemp = sTemp + "<br/>";
-		sTemp = sTemp + "<b>B</b>: <small>" + ans[1] + "</small> ";
-		if (abcd <= 2)
-			sTemp = sTemp + "<br/>";
-		sTemp = sTemp + "<b>C</b>: <small>" + ans[2] + "</small> ";
-		if (abcd == 1)
-			sTemp = sTemp + "<br/>";
-		sTemp = sTemp + "<b>D</b>: <small>" + ans[3] + "</small> ";
-
-		return Html.fromHtml(sTemp);
 	}
 
 	private void setMathProblem(int diffNum) {

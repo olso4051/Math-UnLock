@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 
 public class AnswerView extends View {
 
@@ -19,19 +20,22 @@ public class AnswerView extends View {
 	private int Width, Height;
 	private int layout;
 	private int textLabelSizeSP, textAnswerSizeSP;
+	final private int maxAnswers = 5;
 	private float padVert, padHorz;
 	private float textLabelSizePix, textAnswerSizePix;
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A" };
-	final private String labels[] = { "A:", "B:", "C:", "D:" };
+	final private String labels[] = { "A) ", "B) ", "C) ", "D) ", "E) " };
 
 	private Paint TextLabelPaintL, TextLabelPaintR, TextAnswerPaintL, TextAnswerPaintR, TextAnswerPaintC;
+	private Paint graphPaint;
 	private TextPaint test;
-	private float answerBoundsWidth[] = new float[4];
-	private float labelBoundsWidth[] = new float[4];
+	private float answerBoundsWidth[] = new float[maxAnswers];
+	private float labelBoundsWidth[] = new float[maxAnswers];
 	private float totalWidth;
-	private float centersX[] = new float[4], centersY[] = new float[4];
-	private Rect answerBounds[] = new Rect[4], labelBounds[] = new Rect[4];
-	private StaticLayout layouts[] = new StaticLayout[4];
+	private float Widths[] = new float[maxAnswers];
+	private float centersX[] = new float[maxAnswers], centersY[] = new float[maxAnswers];
+	private Rect answerBounds[] = new Rect[maxAnswers], labelBounds[] = new Rect[maxAnswers];
+	private StaticLayout layouts[] = new StaticLayout[maxAnswers];
 	private boolean measured = false;
 
 	// =========================================
@@ -83,10 +87,15 @@ public class AnswerView extends View {
 		TextAnswerPaintC.setColor(Color.WHITE);
 		TextAnswerPaintC.setTextAlign(Paint.Align.CENTER);
 		TextAnswerPaintC.setTextSize(textAnswerSizePix);
+
 		test = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
 		test.setColor(Color.WHITE);
 		test.setTextAlign(Paint.Align.LEFT);
 		test.setTextSize(textAnswerSizePix);
+		graphPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		graphPaint.setStyle(Paint.Style.STROKE);
+		graphPaint.setColor(Color.WHITE);
+		graphPaint.setStrokeWidth(5);
 
 		padVert = 5;
 		padHorz = 0;
@@ -95,6 +104,13 @@ public class AnswerView extends View {
 			labelBounds[i] = new Rect();
 		}
 		layout = 1;
+		listener = new AnswerReadyListener() {
+			@Override
+			public void Ready() {
+			}
+		};
+		String temp[] = { "0000000", "0909090", "0000000", "0000000" };
+		setAnswers(temp);
 	}
 
 	// =========================================
@@ -122,7 +138,6 @@ public class AnswerView extends View {
 		Height = measure(heightMeasureSpec);
 
 		setDimensions();
-		// setMeasuredDimension(Width, h);
 		measured = true;
 		listener.Ready();
 	}
@@ -147,24 +162,20 @@ public class AnswerView extends View {
 	protected void onDraw(Canvas canvas) {
 
 		if (layout == 4) {
-			canvas.save();
-			canvas.translate(labelBoundsWidth[0], centersY[0] - textAnswerSizePix); // position the text
 			for (int i = 0; i < answers.length; i++) {
+				canvas.save();
+				canvas.translate(centersX[i], centersY[i] - textAnswerSizePix); // position the text
 				layouts[i].draw(canvas);
-				if (i < answers.length - 1)
-					canvas.translate(labelBoundsWidth[i + 1] - labelBoundsWidth[i], layouts[i].getHeight() + padVert);
+				canvas.restore();
 			}
-			canvas.restore();
 		} else {
-			canvas.drawText(answers[0], centersX[0], centersY[0], TextAnswerPaintL);
-			canvas.drawText(answers[1], centersX[1], centersY[1], TextAnswerPaintL);
-			canvas.drawText(answers[2], centersX[2], centersY[2], TextAnswerPaintL);
-			canvas.drawText(answers[3], centersX[3], centersY[3], TextAnswerPaintL);
+			for (int i = 0; i < answers.length; i++) {
+				canvas.drawText(answers[i], centersX[i], centersY[i], TextAnswerPaintL);
+			}
 		}
-		canvas.drawText(labels[0], centersX[0], centersY[0], TextLabelPaintR);
-		canvas.drawText(labels[1], centersX[1], centersY[1], TextLabelPaintR);
-		canvas.drawText(labels[2], centersX[2], centersY[2], TextLabelPaintR);
-		canvas.drawText(labels[3], centersX[3], centersY[3], TextLabelPaintR);
+		for (int i = 0; i < answers.length; i++) {
+			canvas.drawText(labels[i], centersX[i], centersY[i], TextLabelPaintR);
+		}
 		canvas.save();
 	}
 
@@ -179,50 +190,94 @@ public class AnswerView extends View {
 
 	private void setDimensions() {
 		float maxW = getMaxWidth();
+		float maxH = textLabelSizePix;
+		for (int i = 0; i < answers.length; i++)
+			maxH = Math.max(labelBounds[i].height(), maxH);
 
-		if (maxW < Width / 4) {
-			Height = (int) textLabelSizePix;
-			setMeasuredDimension(Width, Height);// labelBounds[0].height());
+		float minH = Math.min(maxH, textLabelSizePix);
+		for (int i = 0; i < answers.length; i++)
+			minH = Math.min(labelBounds[i].height(), minH);
+
+		if (maxW < Width / answers.length) {
+			Height = (int) maxH;
+			padHorz = (Width - totalWidth) / (answers.length + 1);
 			layout = 1;
-			centersX[0] = labelBoundsWidth[0];
+			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			setMeasuredDimension(Width, Height);
+			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+			centersX[0] = labelBoundsWidth[0] + padHorz;
 			centersX[1] = centersX[0] + answerBoundsWidth[0] + padHorz + labelBoundsWidth[0];
 			centersX[2] = centersX[1] + answerBoundsWidth[1] + padHorz + labelBoundsWidth[1];
 			centersX[3] = centersX[2] + answerBoundsWidth[2] + padHorz + labelBoundsWidth[2];
-			centersY[0] = textLabelSizePix;
-			centersY[1] = textLabelSizePix;
-			centersY[2] = textLabelSizePix;
-			centersY[3] = textLabelSizePix;
-		} else if (maxW < Width / 2) {
-			Height = (int) (textLabelSizePix * 2 + padVert);
-			setMeasuredDimension(Width, Height);
-			centersX[0] = labelBounds[0].width();
-			centersX[1] = Width / 2 + labelBoundsWidth[1];
-			centersX[2] = labelBounds[2].width();
-			centersX[3] = Width / 2 + labelBoundsWidth[3];
-			centersY[0] = textLabelSizePix;
-			centersY[1] = textLabelSizePix;
-			centersY[2] = textLabelSizePix * 2 + padVert;
-			centersY[3] = textLabelSizePix * 2 + padVert;
+			centersX[4] = centersX[3] + answerBoundsWidth[3] + padHorz + labelBoundsWidth[3];
+			centersY[0] = minH;
+			centersY[1] = minH;
+			centersY[2] = minH;
+			centersY[3] = minH;
+			centersY[4] = minH;
+		} else if ((answers.length == 5) && (maxW < Width / 3)) {
+			Height = (int) (maxH * 2 + padVert);
+			totalWidth = 3 * maxW;
+			padHorz = (Width - totalWidth) / 4;
 			layout = 2;
-		} else {
-			int totalHeight = 0;
-			centersY[0] = textLabelSizePix;
-			for (int i = 0; i < layouts.length; i++) {
-				totalHeight += layouts[i].getHeight();
-				centersX[i] = labelBoundsWidth[i];
-				if (i > 0)
-					centersY[i] = layouts[i - 1].getHeight() + centersY[i - 1] + padVert;
-			}
-			Height = totalHeight + (int) (padVert * 3);
+			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
 			setMeasuredDimension(Width, Height);
+			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+			centersX[0] = labelBounds[0].width() + padHorz;
+			centersX[1] = centersX[0] + maxW + padHorz;
+			centersX[2] = centersX[1] + maxW + padHorz;
+			centersX[3] = centersX[0];
+			centersX[4] = centersX[1];
+			centersY[0] = minH;
+			centersY[1] = minH;
+			centersY[2] = minH;
+			centersY[3] = minH * 2 + padVert;
+			centersY[4] = minH * 2 + padVert;
+		} else if (maxW < Width / 2) {
+			int lines = Math.round((float) answers.length / 2);
+			Height = (int) (maxH * lines + padVert * (lines - 1));
+			totalWidth = 2 * maxW;
+			padHorz = (Width - totalWidth) / 3;
+			layout = 2;
+			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			setMeasuredDimension(Width, Height);
+			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+			centersX[0] = labelBounds[0].width() + padHorz;
+			centersX[1] = centersX[0] + maxW + padHorz;
+			centersX[2] = centersX[0];
+			centersX[3] = centersX[1];
+			centersX[4] = centersX[0];
+			centersY[0] = minH;
+			centersY[1] = minH;
+			centersY[2] = minH * 2 + padVert;
+			centersY[3] = minH * 2 + padVert;
+			centersY[4] = minH * 3 + padVert;
+
+		} else {
+			float maxWlabel = 0;
+			centersY[0] = minH;
+			for (int i = 0; i < answers.length; i++) {
+				if (labelBoundsWidth[i] > maxWlabel)
+					maxWlabel = labelBoundsWidth[i];
+				if (i > 0) {
+					centersY[i] = centersY[i - 1] - answerBounds[i - 1].height() + layouts[i - 1].getHeight() + padVert + minH;
+				}
+			}
+			for (int i = 0; i < answers.length; i++) {
+				centersX[i] = maxWlabel;
+			}
+			Height = (int) (centersY[answers.length - 1] - textAnswerSizePix + padVert * (answers.length - 1))
+					+ layouts[answers.length - 1].getHeight();
 			layout = 4;
+			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			setMeasuredDimension(Width, Height);
+			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
 		}
 		invalidate();
 	}
 
 	private float getMaxWidth() {
 		float max = 0;
-		float temp = 0;
 		totalWidth = 0;
 
 		for (int i = 0; i < answers.length; i++) {
@@ -231,13 +286,13 @@ public class AnswerView extends View {
 			TextAnswerPaintL.getTextBounds(answers[i], 0, answers[i].length(), answerBounds[i]);
 			TextLabelPaintL.getTextBounds(labels[i], 0, labels[i].length(), labelBounds[i]);
 			layouts[i] = new StaticLayout(answers[i], test, Width - (int) Math.abs(labelBoundsWidth[i]), Layout.Alignment.ALIGN_NORMAL,
-					1.3f, 0, false);
-			temp = Math.abs(answerBoundsWidth[i]) + Math.abs(labelBoundsWidth[i]);
-			totalWidth += temp;
-			if (temp > max)
-				max = temp;
+					1.0f, 0, false);
+			Widths[i] = Math.abs(answerBoundsWidth[i]) + Math.abs(labelBoundsWidth[i]);
+			totalWidth += Widths[i];
+			if (Widths[i] > max)
+				max = Widths[i];
 		}
-		padHorz = (Width - totalWidth) / 3;
+
 		return max;
 	}
 }
