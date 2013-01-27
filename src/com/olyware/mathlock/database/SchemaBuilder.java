@@ -23,7 +23,7 @@ public class SchemaBuilder {
 		sqlBuilder.append(QuestionContract.QUESTION_TEXT + " STRING, ");
 		sqlBuilder.append(QuestionContract.ANSWER_CORRECT + " STRING,");
 		sqlBuilder.append(QuestionContract.DIFFICULTY + " INTEGER,");
-		sqlBuilder.append(VocabQuestionContract.PART_OF_SPEECH + " STRING");
+		// sqlBuilder.append(VocabQuestionContract.PART_OF_SPEECH + " STRING");
 		sqlBuilder.append(");\n");
 		statements.add(sqlBuilder.toString());
 

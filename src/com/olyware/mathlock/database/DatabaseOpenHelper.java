@@ -54,7 +54,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	}
 
 	private boolean dbExists() {
-		// This doesn't work because the database is there before we even hit onCreate somehow. WTF.
 		try {
 			SQLiteDatabase database = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READONLY);
 			if (database != null) {
