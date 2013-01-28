@@ -441,6 +441,7 @@ public class MainActivity extends Activity {
 	private void setVocabProblem(int diffNum) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum));
+
 		// Get random question
 		Random random = new Random();
 		List<Integer> questionIndexes = EZ.list();
@@ -448,17 +449,21 @@ public class MainActivity extends Activity {
 		questionIndexes.add(rand);
 		VocabQuestion question = questions.get(rand);
 
-		// Get 3 wrong answers and avoid duplicates
+		// Add the correct answer to the answers list
 		List<String> answersList = EZ.list();
+		answersList.add(question.getCorrectAnswer());
+
+		// Get 3 wrong answers and avoid duplicates
 		for (int i = 0; i < 3; i++) {
-			while (!questionIndexes.contains(rand)) {
-				rand = random.nextInt(questions.size() - 1);
+			while (true) {
+				rand = random.nextInt(questions.size());
+				if (!questionIndexes.contains(rand)) {
+					questionIndexes.add(rand);
+					break;
+				}
 			}
-			questionIndexes.add(rand);
 			answersList.add(questions.get(rand).getCorrectAnswer());
 		}
-		// Add the correct answer to the answers list
-		answersList.add(question.getCorrectAnswer());
 
 		// Display the vocab question and answers
 		answers = answersList.toArray(new String[answersList.size()]);
