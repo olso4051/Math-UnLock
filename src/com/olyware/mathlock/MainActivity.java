@@ -428,7 +428,7 @@ public class MainActivity extends Activity {
 
 		// Display the vocab question and answers
 		answers = answersList.toArray(new String[answersList.size()]);
-		problem.setText(question.getText());
+		problem.setText("Define: " + question.getText());
 	}
 
 	private void setLanguageProblem(int diffNum) {

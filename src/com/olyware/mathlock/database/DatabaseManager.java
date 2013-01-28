@@ -37,7 +37,7 @@ public class DatabaseManager {
 	}
 
 	public List<VocabQuestion> getVocabQuestions(Difficulty difficulty) {
-		String where = "difficulty = ?";
+		String where = "difficulty <= ?";
 		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
 		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, whereArgs, null, null, null);
 		return DatabaseModelFactory.buildVocabQuestions(cursor);
