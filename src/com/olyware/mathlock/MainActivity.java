@@ -240,6 +240,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setProblemAndAnswer(int delay) {
+
 		if (EnabledPackages > 0) {
 			joystick.setProblem(true);
 			final String EnabledPackageKeys[] = new String[EnabledPackages];
@@ -257,6 +258,8 @@ public class MainActivity extends Activity {
 			mHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
+					answerView.resetGuess();
+					joystick.unPauseSelection();
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
 					difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[location[randPack]], "1"));
@@ -305,6 +308,7 @@ public class MainActivity extends Activity {
 			}, delay); // set new problem after delay time [ms]
 
 		} else {
+			answerView.resetGuess();
 			joystick.setProblem(false);
 			if (!UnlockedPackages)
 				problem.setText(R.string.none_unlocked);
@@ -359,7 +363,7 @@ public class MainActivity extends Activity {
 
 		if ((first <= 10) && (first >= 0) && (second <= 10) && (second >= 0))
 			difficulty = 1;
-		else if ((first <= 20) && (first >= -20) && (second <= 20) && (second >= -20))
+		else if (((first <= 20) && (first >= -20)) || ((second <= 20) && (second >= -20)))
 			difficulty = 2;
 		else
 			difficulty = 3;
@@ -525,19 +529,23 @@ public class MainActivity extends Activity {
 		EnabledPackages = count;
 	}
 
-	private void displayCorrectOrNot(String discription, boolean correct) {
+	private void displayCorrectOrNot(int correctLoc, int guessLoc, String discription, boolean correct) {
 		if (correct) {
+			answerView.setCorrectAnswer(correctLoc);
 			problem.setTextColor(Color.GREEN);
-			money += difficulty * difficulty;
+			money += difficulty;
 		} else {
+			answerView.setCorrectAnswer(correctLoc);
+			answerView.setIncorrectGuess(guessLoc);
 			problem.setTextColor(Color.RED);
-			money -= difficulty * difficulty;
+			money -= difficulty;
 		}
 		if (money < 0)
 			money = 0;
 		setMoney();
-		String s = discription + "\n" + problem.getText();
-		problem.setText(s.substring(0, s.length() - 1) + answers[0]);
+		// String s = discription + "\n" + problem.getText();
+		problem.setText(discription + "\n" + problem.getText());
+		// problem.setText(s.substring(0, s.length() - 1) + answers[0]);
 	}
 
 	@SuppressLint("SimpleDateFormat")
@@ -573,20 +581,33 @@ public class MainActivity extends Activity {
 			if (EnabledPackages == 0) {
 				this.finish();
 			} else if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !(answerLoc == s) && !quizMode) {
-				displayCorrectOrNot("Wrong, Too many wrong answers", false);
-				launchHomeScreen(2000);
+				displayCorrectOrNot(answerLoc, s, "Too Many Wrong", false);
+				joystick.pauseSelection();
+				launchHomeScreen(3000);
 			} else if ((answerLoc == s) && quizMode) {
-				displayCorrectOrNot("Correct!", true);
+				displayCorrectOrNot(answerLoc, s, "Correct!", true);
+				joystick.pauseSelection();
 				setProblemAndAnswer(1000);
 				// joystick.showStartAnimation();
 			} else if ((answerLoc == s) && !quizMode) {
-				displayCorrectOrNot("Correct!", true);
-				launchHomeScreen(0);
+				displayCorrectOrNot(answerLoc, s, "Correct!", true);
+				joystick.pauseSelection();
+				launchHomeScreen(100);
 			} else {
-				displayCorrectOrNot("Wrong", false);
+				displayCorrectOrNot(answerLoc, s, "Wrong", false);
 				if (!quizMode)
 					attempts++;
-				setProblemAndAnswer(2000);
+				joystick.setWrongGuess();
+				joystick.pauseSelection();
+				joystick.setOnTouchedListener(new JoystickTouchListener() {
+					@Override
+					public void OnTouch() {
+						joystick.removeTouchListener();
+						joystick.resetWrongGuess();
+						setProblemAndAnswer(0);
+					}
+				});
+				// setProblemAndAnswer(3000);
 			}
 			break;
 		case 4:		// sound/silent was selected

@@ -39,9 +39,9 @@ public class JoystickView extends View {
 	private Rect dstRectForSet, dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForSnd;
 	private Rect srcRectForAns, srcRectForBig, srcRectForSmall, srcRectForSet;
 	private Rect textBounds;
-	private Path sideTextPath;// sidePath;
+	private Path sideTextPath;
 	private Paint circlePaint[] = new Paint[4];
-	private Paint handlePaint, textPaint, sidePaint, optionPaint;
+	private Paint textPaint, sidePaint, optionPaint;
 	private int textSizeSP, textSizePix;
 	private double touchX, touchY;
 	private double startX, startY;
@@ -57,6 +57,7 @@ public class JoystickView extends View {
 	// private double rX, rY, rCurrent;
 	private int spacing, rAns, rBig, rSmall, swipeLength;
 	private JoystickSelectListener listener;
+	private JoystickTouchListener listenerTouch;
 
 	private boolean settingsMode;
 	private boolean quizMode;
@@ -65,9 +66,8 @@ public class JoystickView extends View {
 	private boolean LtrueRfalse;
 	private boolean selectAnswers[] = new boolean[4];
 	private boolean selectOptions[] = new boolean[5];
-	private boolean selectSideBar = false;
-	private boolean options = false;
-	private boolean problem = true;
+	private boolean options = true, selectSideBar = false;
+	private boolean problem = true, wrong = false, paused = false;
 	private int selectLeft[] = new int[5];
 	private int selectRight[] = new int[5];
 
@@ -133,15 +133,6 @@ public class JoystickView extends View {
 			circlePaint[ans].setAlpha(0);
 		}
 		selectOptions[4] = false;
-		// circlePaint.setColor(Color.GRAY);
-		// circlePaint.setStrokeWidth(2);
-		// circlePaint.setStyle(Paint.Style.STROKE);
-
-		handlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		handlePaint.setAlpha(255);
-		// handlePaint.setColor(Color.DKGRAY);
-		// handlePaint.setStrokeWidth(1);
-		// handlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
 		textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		textPaint.setTextAlign(Paint.Align.CENTER);
@@ -153,7 +144,6 @@ public class JoystickView extends View {
 		sidePaint.setStyle(Paint.Style.STROKE);
 		sidePaint.setColor(Color.BLACK);
 		sidePaint.setAlpha(255);
-		// sideTextPaint = sidePaint;
 		sidePaint.setTextSize(textSizePix);
 
 		optionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -162,6 +152,7 @@ public class JoystickView extends View {
 		optionPaint.setStyle(Paint.Style.STROKE);
 		optionPaint.setStrokeWidth(3);
 		optionR = 0;
+		options = true;
 
 		textBounds = new Rect();
 
@@ -225,7 +216,6 @@ public class JoystickView extends View {
 		dstRectForE = new Rect();
 		dstRectForSnd = new Rect();
 
-		// sidePath = new Path();
 		sideTextPath = new Path();
 
 		initRunnables();
@@ -257,6 +247,14 @@ public class JoystickView extends View {
 
 	public void setOnJostickSelectedListener(JoystickSelectListener listener) {
 		this.listener = listener;
+	}
+
+	public void setOnTouchedListener(JoystickTouchListener listener) {
+		this.listenerTouch = listener;
+	}
+
+	public void removeTouchListener() {
+		this.listenerTouch = null;
 	}
 
 	public boolean setQuizMode(boolean quizMode) {
@@ -313,6 +311,22 @@ public class JoystickView extends View {
 		this.problem = problem;
 	}
 
+	public void setWrongGuess() {
+		this.wrong = true;
+	}
+
+	public void resetWrongGuess() {
+		this.wrong = false;
+	}
+
+	public void pauseSelection() {
+		this.paused = true;
+	}
+
+	public void unPauseSelection() {
+		this.paused = false;
+	}
+
 	// =========================================
 	// Drawing Functionality
 	// =========================================
@@ -340,7 +354,10 @@ public class JoystickView extends View {
 		selectRight[0] = Width / 2 + rBig * 3 + rSmall * 2 + spacing * 2;
 
 		dstHeight = Width * bmpSet.getHeight() / bmpSet.getWidth();
-		setSidePaths(Height - dstHeight + textSizePix - pad);
+		if (options)
+			setSidePaths(Height - dstHeight + textSizePix - pad);
+		else
+			setSidePaths(Height - pad);
 		// dstRectForSet.set(0, Height - dstHeight + textSizePix, Width, Height - textSizePix + dstHeight);
 		// dstRectForS.set(selectLeft[4], Height - rBig - rSmall, selectRight[4], Height - rBig + rSmall);
 		// dstRectForQ.set(selectLeft[3], Height - rBig * 2, selectRight[3], Height);
@@ -396,7 +413,7 @@ public class JoystickView extends View {
 		String s = res.getString(R.string.side_bar);
 		sidePaint.getTextBounds(s, 0, s.length(), textBounds);
 		offset = offset - textBounds.width() / 2;
-		// canvas.drawPath(sidePath, sidePaint);
+
 		canvas.drawBitmap(bmpSet, srcRectForSet, dstRectForSet, sidePaint);
 		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
 		canvas.drawTextOnPath(res.getString(R.string.side_bar), sideTextPath, offset, 0, sidePaint);
@@ -437,7 +454,10 @@ public class JoystickView extends View {
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]))
 			canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaint);
 		else if (problem)
-			canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
+			if (!wrong)
+				canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
+			else
+				canvas.drawText(res.getString(R.string.swipe_new), Width / 2, (Height - rBig * 2) / 2, textPaint);
 		else
 			canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
 
@@ -447,115 +467,119 @@ public class JoystickView extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		int actionType = event.getAction();
-		// int W = getMeasuredWidth();
-		// int H = getMeasuredHeight();
 
-		if (actionType == MotionEvent.ACTION_DOWN) {
-			// animateHandler.removeCallbacks(startAnimate);
-			// animateHandler.removeCallbacks(finishAnimate);
-			textHandler.removeCallbacks(revealText);
-			textHandler.removeCallbacks(finishText);
-			textHandler.removeCallbacks(revealCircle);
-			textHandler.removeCallbacks(finishCircle);
-			textPaint.setAlpha(0);
-			// sidePaint.setAlpha(0);
-			invalidate();
-			startX = event.getX();
-			startY = event.getY();
-			if ((startY >= Height - rBig * 2) && (options)) {	// Options selected
-				animateHandler.removeCallbacks(startAnimate);
-				animateHandler.removeCallbacks(finishAnimate);
-				touchX = startX;
-				touchY = startY;
-				if ((startX >= selectLeft[0]) && (startX <= selectRight[0])) {
-					selectOptions[0] = true;
-					optionX = selectLeft[0] + rSmall;
-					flashText(true);
-				} else if ((startX >= selectLeft[1]) && (startX <= selectRight[1])) {
-					selectOptions[1] = true;
-					optionX = selectLeft[1] + rBig;
-					flashText(true);
-				} else if ((startX >= selectLeft[2]) && (startX <= selectRight[2])) {
-					selectOptions[2] = true;
-					optionX = selectLeft[2] + rBig;
-					flashText(true);
-				} else if ((startX >= selectLeft[3]) && (startX <= selectRight[3])) {
-					selectOptions[3] = true;
-					optionX = selectLeft[3] + rBig;
-					flashText(true);
-				} else if ((startX >= selectLeft[4]) && (startX <= selectRight[4])) {
-					selectOptions[4] = true;
-					optionX = selectLeft[4] + rSmall;
-					flashText(true);
-				}
-				if (listener != null)
-					listener.OnSelect(-1);		// send a vibrate signal
-			} else if (startY >= Height - textSizePix) {	// SideBar selected
-				sidePaint.setAlpha(255);
-				selectSideBar = true;
+		if (!paused) {
+			if (actionType == MotionEvent.ACTION_DOWN) {
+				textHandler.removeCallbacks(revealText);
+				textHandler.removeCallbacks(finishText);
+				textHandler.removeCallbacks(revealCircle);
+				textHandler.removeCallbacks(finishCircle);
+				textPaint.setAlpha(0);
 				invalidate();
-			} else if (!problem) {
-				if (listener != null)
-					listener.OnSelect(0);		// select a on any touch event
-			} else {			// select answers
-				switch (type) {
-				case 0:
-					break;
-				case 1:
-					break;
-				case 2:
-					setAnswerLocations();
-					revealAnswers();
-					break;
+				startX = event.getX();
+				startY = event.getY();
+				if ((startY >= Height - rBig * 2) && (options)) {	// Options selected
+					animateHandler.removeCallbacks(startAnimate);
+					animateHandler.removeCallbacks(finishAnimate);
+					touchX = startX;
+					touchY = startY;
+					if ((startX >= selectLeft[0]) && (startX <= selectRight[0])) {
+						selectOptions[0] = true;
+						optionX = selectLeft[0] + rSmall;
+						flashText(true);
+					} else if ((startX >= selectLeft[1]) && (startX <= selectRight[1])) {
+						selectOptions[1] = true;
+						optionX = selectLeft[1] + rBig;
+						flashText(true);
+					} else if ((startX >= selectLeft[2]) && (startX <= selectRight[2])) {
+						selectOptions[2] = true;
+						optionX = selectLeft[2] + rBig;
+						flashText(true);
+					} else if ((startX >= selectLeft[3]) && (startX <= selectRight[3])) {
+						selectOptions[3] = true;
+						optionX = selectLeft[3] + rBig;
+						flashText(true);
+					} else if ((startX >= selectLeft[4]) && (startX <= selectRight[4])) {
+						selectOptions[4] = true;
+						optionX = selectLeft[4] + rSmall;
+						flashText(true);
+					}
+					if (listener != null)
+						listener.OnSelect(-1);		// send a vibrate signal
+				} else if (startY >= Height - textSizePix) {	// SideBar selected
+					sidePaint.setAlpha(255);
+					selectSideBar = true;
+					invalidate();
+				} else if (!problem) {
+					if (listener != null)
+						listener.OnSelect(0);		// select A on any touch event
+				} else {			// select answers
+					switch (type) {
+					case 0:
+						break;
+					case 1:
+						break;
+					case 2:
+						setAnswerLocations();
+						revealAnswers();
+						break;
+					}
+					if (listener != null)
+						listener.OnSelect(-1);		// send a vibrate signal
 				}
-				if (listener != null)
-					listener.OnSelect(-1);		// send a vibrate signal
 			}
-		}
-		if (actionType == MotionEvent.ACTION_MOVE) {
-			touchX = event.getX();
-			touchY = event.getY();
-			checkSelection(false);
-			invalidate();
-			/*double tempX = (event.getX() - px);
-			double tempY = (py - event.getY());
+			if (actionType == MotionEvent.ACTION_MOVE) {
+				touchX = event.getX();
+				touchY = event.getY();
+				checkSelection(false);
+				invalidate();
+				/*double tempX = (event.getX() - px);
+				double tempY = (py - event.getY());
 
-			if ((touchX == 0) && (touchY == 0) && (Math.abs(tempX) < handleRadius * 1.25) && (Math.abs(tempY) < handleRadius * 1.25)) {
-				if (listener != null)
-					listener.OnSelect(-1);	// center selected
-				revealDisappearBackground(true);
-				touchX = tempX;
-				touchY = tempY;
-				rCurrent = rX;
-				angle = 0;
-				invalidate();
-			} else if ((touchX != 0) || (touchY != 0)) {
-				touchX = tempX;
-				touchY = tempY;
-				angle = Math.atan2(touchY, touchX);
-				// if ((Math.abs(touchX * fX) > rMax) || (Math.abs(touchY * fY) > rMax)) {
-				rCurrent = rX * rY / Math.sqrt(Math.pow(rY * Math.cos(angle), 2) + Math.pow(rX * Math.sin(angle), 2));
-				// set to radius if on edge
-				double dis = Math.sqrt(touchX * touchX + touchY * touchY);
-				if (dis > rCurrent) {
-					touchX = rCurrent * Math.cos(angle);
-					touchY = rCurrent * Math.sin(angle);
-					checkSelection(angle, false);
-				} else if (dis > rCurrent * .6) {
-					checkSelection(angle, false);
-				} else {
-					select = false;
-				}
-				invalidate();
-			}*/
-		} else if (actionType == MotionEvent.ACTION_UP) {
-			checkSelection(true);
-			returnToDefault();
-			flashText(false);
-			/*if ((Math.sqrt(touchX * touchX + touchY * touchY) > rCurrent * .6) && (rCurrent > 0))
-				checkSelection(angle, true);
-			revealDisappearBackground(false);
-			returnHandleToCenter();*/
+				if ((touchX == 0) && (touchY == 0) && (Math.abs(tempX) < handleRadius * 1.25) && (Math.abs(tempY) < handleRadius * 1.25)) {
+					if (listener != null)
+						listener.OnSelect(-1);	// center selected
+					revealDisappearBackground(true);
+					touchX = tempX;
+					touchY = tempY;
+					rCurrent = rX;
+					angle = 0;
+					invalidate();
+				} else if ((touchX != 0) || (touchY != 0)) {
+					touchX = tempX;
+					touchY = tempY;
+					angle = Math.atan2(touchY, touchX);
+					// if ((Math.abs(touchX * fX) > rMax) || (Math.abs(touchY * fY) > rMax)) {
+					rCurrent = rX * rY / Math.sqrt(Math.pow(rY * Math.cos(angle), 2) + Math.pow(rX * Math.sin(angle), 2));
+					// set to radius if on edge
+					double dis = Math.sqrt(touchX * touchX + touchY * touchY);
+					if (dis > rCurrent) {
+						touchX = rCurrent * Math.cos(angle);
+						touchY = rCurrent * Math.sin(angle);
+						checkSelection(angle, false);
+					} else if (dis > rCurrent * .6) {
+						checkSelection(angle, false);
+					} else {
+						select = false;
+					}
+					invalidate();
+				}*/
+			} else if (actionType == MotionEvent.ACTION_UP) {
+				if (listenerTouch != null)
+					listenerTouch.OnTouch();
+				checkSelection(true);
+				returnToDefault();
+				flashText(false);
+				/*if ((Math.sqrt(touchX * touchX + touchY * touchY) > rCurrent * .6) && (rCurrent > 0))
+					checkSelection(angle, true);
+				revealDisappearBackground(false);
+				returnHandleToCenter();*/
+			}
+			return true;
+		}
+		if (actionType == MotionEvent.ACTION_UP) {
+			if (listenerTouch != null)
+				listenerTouch.OnTouch();
 		}
 		return true;
 	}
@@ -737,11 +761,6 @@ public class JoystickView extends View {
 		else if (selectSideBar)
 			showStartAnimation(1, 0);
 		selectSideBar = false;
-		/*dstRectForS.set(selectLeft[4], Height - rBig - rSmall, selectRight[4], Height - rBig + rSmall);
-		dstRectForQ.set(selectLeft[3], Height - rBig * 2, selectRight[3], Height);
-		dstRectForP.set(selectLeft[2], Height - rBig * 2, selectRight[2], Height);
-		dstRectForE.set(selectLeft[1], Height - rBig * 2, selectRight[1], Height);
-		dstRectForSnd.set(selectLeft[0], Height - rBig - rSmall, selectRight[0], Height - rBig + rSmall);*/
 		switch (type) {
 		case 0:
 			for (int ans = 0; ans < X.length; ans++) {

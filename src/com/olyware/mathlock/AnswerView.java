@@ -20,20 +20,22 @@ public class AnswerView extends View {
 	private int Width, Height;
 	private int layout;
 	private int textLabelSizeSP, textAnswerSizeSP;
+	private int correctAnswer, wrongAnswer;
 	final private int maxAnswers = 5;
 	private float padVert, padHorz;
 	private float textLabelSizePix, textAnswerSizePix;
+	private float answerBoundsWidth[] = new float[maxAnswers];
+	private float labelBoundsWidth[] = new float[maxAnswers];
+	private float totalWidth, maxW;
+	private float Widths[] = new float[maxAnswers];
+	private float centersX[] = new float[maxAnswers], centersY[] = new float[maxAnswers];
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A" };
 	final private String labels[] = { "A) ", "B) ", "C) ", "D) ", "E) " };
 
-	private Paint TextLabelPaintL, TextLabelPaintR, TextAnswerPaintL, TextAnswerPaintR, TextAnswerPaintC;
-	private Paint graphPaint;
+	private Paint /*TextLabelPaintL,*/TextLabelPaintR, TextAnswerPaintL/*, TextAnswerPaintR, TextAnswerPaintC*/;
+	private TextPaint correctAnswerPaint, correctLabelPaint, wrongAnswerPaint, wrongLabelPaint;
 	private TextPaint test;
-	private float answerBoundsWidth[] = new float[maxAnswers];
-	private float labelBoundsWidth[] = new float[maxAnswers];
-	private float totalWidth;
-	private float Widths[] = new float[maxAnswers];
-	private float centersX[] = new float[maxAnswers], centersY[] = new float[maxAnswers];
+
 	private Rect answerBounds[] = new Rect[maxAnswers], labelBounds[] = new Rect[maxAnswers];
 	private StaticLayout layouts[] = new StaticLayout[maxAnswers];
 	private boolean measured = false;
@@ -64,14 +66,22 @@ public class AnswerView extends View {
 	private void initGraphView() {
 		textLabelSizeSP = 30; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
-		TextLabelPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
-		TextLabelPaintL.setColor(Color.WHITE);
-		TextLabelPaintL.setTextAlign(Paint.Align.LEFT);
-		TextLabelPaintL.setTextSize(textLabelSizePix);
+		// TextLabelPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
+		// TextLabelPaintL.setColor(Color.WHITE);
+		// TextLabelPaintL.setTextAlign(Paint.Align.LEFT);
+		// TextLabelPaintL.setTextSize(textLabelSizePix);
 		TextLabelPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextLabelPaintR.setColor(Color.WHITE);
 		TextLabelPaintR.setTextAlign(Paint.Align.RIGHT);
 		TextLabelPaintR.setTextSize(textLabelSizePix);
+		correctLabelPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		correctLabelPaint.setColor(Color.GREEN);
+		correctLabelPaint.setTextAlign(Paint.Align.RIGHT);
+		correctLabelPaint.setTextSize(textLabelSizePix);
+		wrongLabelPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		wrongLabelPaint.setColor(Color.RED);
+		wrongLabelPaint.setTextAlign(Paint.Align.RIGHT);
+		wrongLabelPaint.setTextSize(textLabelSizePix);
 
 		textAnswerSizeSP = 20;
 		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
@@ -79,23 +89,27 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setColor(Color.WHITE);
 		TextAnswerPaintL.setTextAlign(Paint.Align.LEFT);
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
-		TextAnswerPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
+		/*TextAnswerPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextAnswerPaintR.setColor(Color.WHITE);
 		TextAnswerPaintR.setTextAlign(Paint.Align.RIGHT);
 		TextAnswerPaintR.setTextSize(textAnswerSizePix);
 		TextAnswerPaintC = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextAnswerPaintC.setColor(Color.WHITE);
 		TextAnswerPaintC.setTextAlign(Paint.Align.CENTER);
-		TextAnswerPaintC.setTextSize(textAnswerSizePix);
+		TextAnswerPaintC.setTextSize(textAnswerSizePix);*/
+		correctAnswerPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		correctAnswerPaint.setColor(Color.GREEN);
+		correctAnswerPaint.setTextAlign(Paint.Align.LEFT);
+		correctAnswerPaint.setTextSize(textAnswerSizePix);
+		wrongAnswerPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		wrongAnswerPaint.setColor(Color.RED);
+		wrongAnswerPaint.setTextAlign(Paint.Align.LEFT);
+		wrongAnswerPaint.setTextSize(textAnswerSizePix);
 
 		test = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
 		test.setColor(Color.WHITE);
 		test.setTextAlign(Paint.Align.LEFT);
 		test.setTextSize(textAnswerSizePix);
-		graphPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		graphPaint.setStyle(Paint.Style.STROKE);
-		graphPaint.setColor(Color.WHITE);
-		graphPaint.setStrokeWidth(5);
 
 		padVert = 5;
 		padHorz = 0;
@@ -109,7 +123,10 @@ public class AnswerView extends View {
 			public void Ready() {
 			}
 		};
-		String temp[] = { "0000000", "0909090", "0000000", "0000000" };
+
+		correctAnswer = maxAnswers;
+		wrongAnswer = maxAnswers;
+		String temp[] = { "N/A", "test", "test", "test" };
 		setAnswers(temp);
 	}
 
@@ -119,6 +136,21 @@ public class AnswerView extends View {
 
 	public void setReadyListener(AnswerReadyListener listener) {
 		this.listener = listener;
+	}
+
+	public void setCorrectAnswer(int location) {
+		this.correctAnswer = location;
+		setLayouts();
+	}
+
+	public void setIncorrectGuess(int location) {
+		this.wrongAnswer = location;
+		setLayouts();
+	}
+
+	public void resetGuess() {
+		this.correctAnswer = maxAnswers;
+		this.wrongAnswer = maxAnswers;
 	}
 
 	public void setAnswers(String answers[]) {
@@ -170,11 +202,21 @@ public class AnswerView extends View {
 			}
 		} else {
 			for (int i = 0; i < answers.length; i++) {
-				canvas.drawText(answers[i], centersX[i], centersY[i], TextAnswerPaintL);
+				if (i == correctAnswer)
+					canvas.drawText(answers[i], centersX[i], centersY[i], correctAnswerPaint);
+				else if (i == wrongAnswer)
+					canvas.drawText(answers[i], centersX[i], centersY[i], wrongAnswerPaint);
+				else
+					canvas.drawText(answers[i], centersX[i], centersY[i], TextAnswerPaintL);
 			}
 		}
 		for (int i = 0; i < answers.length; i++) {
-			canvas.drawText(labels[i], centersX[i], centersY[i], TextLabelPaintR);
+			if (i == correctAnswer)
+				canvas.drawText(labels[i], centersX[i], centersY[i], correctLabelPaint);
+			else if (i == wrongAnswer)
+				canvas.drawText(labels[i], centersX[i], centersY[i], wrongLabelPaint);
+			else
+				canvas.drawText(labels[i], centersX[i], centersY[i], TextLabelPaintR);
 		}
 		canvas.save();
 	}
@@ -189,7 +231,7 @@ public class AnswerView extends View {
 	// =========================================
 
 	private void setDimensions() {
-		float maxW = getMaxWidth();
+		setLayouts();
 		float maxH = textLabelSizePix;
 		for (int i = 0; i < answers.length; i++)
 			maxH = Math.max(labelBounds[i].height(), maxH);
@@ -276,23 +318,29 @@ public class AnswerView extends View {
 		invalidate();
 	}
 
-	private float getMaxWidth() {
-		float max = 0;
+	private void setLayouts() {
+		maxW = 0;
 		totalWidth = 0;
 
 		for (int i = 0; i < answers.length; i++) {
 			answerBoundsWidth[i] = TextAnswerPaintL.measureText(answers[i]);
-			labelBoundsWidth[i] = TextLabelPaintL.measureText(labels[i]);
+			labelBoundsWidth[i] = TextLabelPaintR.measureText(labels[i]);
 			TextAnswerPaintL.getTextBounds(answers[i], 0, answers[i].length(), answerBounds[i]);
-			TextLabelPaintL.getTextBounds(labels[i], 0, labels[i].length(), labelBounds[i]);
-			layouts[i] = new StaticLayout(answers[i], test, Width - (int) Math.abs(labelBoundsWidth[i]), Layout.Alignment.ALIGN_NORMAL,
-					1.0f, 0, false);
+			TextLabelPaintR.getTextBounds(labels[i], 0, labels[i].length(), labelBounds[i]);
+			if (i == correctAnswer)
+				layouts[i] = new StaticLayout(answers[i], correctAnswerPaint, Width - (int) Math.abs(labelBoundsWidth[i]),
+						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+			else if (i == wrongAnswer)
+				layouts[i] = new StaticLayout(answers[i], wrongAnswerPaint, Width - (int) Math.abs(labelBoundsWidth[i]),
+						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+			else
+				layouts[i] = new StaticLayout(answers[i], test, Width - (int) Math.abs(labelBoundsWidth[i]), Layout.Alignment.ALIGN_NORMAL,
+						1.0f, 0, false);
 			Widths[i] = Math.abs(answerBoundsWidth[i]) + Math.abs(labelBoundsWidth[i]);
 			totalWidth += Widths[i];
-			if (Widths[i] > max)
-				max = Widths[i];
+			if (Widths[i] > maxW)
+				maxW = Widths[i];
 		}
-
-		return max;
+		invalidate();
 	}
 }

@@ -56,8 +56,9 @@
     <string name="store">Store</string>
     <string name="sure">Sure?</string>
     <string name="swipe_exit">Touch Here to Exit</string>
-    <string name="swipe_screen">Swipe Here to Answer</string>
+    <string name="swipe_new">Tap for new Question</string>
     <string name="swipe_option">Swipe Option to Select</string>
+    <string name="swipe_screen">Swipe Here to Answer</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="type_default">2</string>
     <string name="type_summary">Dynamic Slide</string>
