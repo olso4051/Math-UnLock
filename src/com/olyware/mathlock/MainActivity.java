@@ -259,37 +259,30 @@ public class MainActivity extends Activity {
 				public void run() {
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
+					difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[location[randPack]], "1"));
 					switch (location[randPack]) {
 					case 0:			// math question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[0], "1"));
 						setMathProblem(difficulty);
 						break;
 					case 1:			// vocabulary question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[1], "1"));
 						setVocabProblem(difficulty);
 						break;
 					case 2:			// language question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[2], "1"));
 						setLanguageProblem(difficulty);
 						break;
-					case 3:			// language question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[3], "1"));
+					case 3:			// act question
 						setACTProblem(difficulty);
 						break;
-					case 4:			// language question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[4], "1"));
+					case 4:			// sat question
 						setSATProblem(difficulty);
 						break;
-					case 5:			// language question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[5], "1"));
+					case 5:			// gre question
 						setGREProblem(difficulty);
 						break;
-					case 6:			// language question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[6], "1"));
+					case 6:			// toddler question
 						setToddlerProblem(difficulty);
 						break;
-					case 7:			// language question
-						difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[7], "1"));
+					case 7:			// engineer question
 						setEngineerProblem(difficulty);
 						break;
 					default:
