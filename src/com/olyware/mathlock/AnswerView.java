@@ -66,10 +66,6 @@ public class AnswerView extends View {
 	private void initGraphView() {
 		textLabelSizeSP = 30; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
-		// TextLabelPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
-		// TextLabelPaintL.setColor(Color.WHITE);
-		// TextLabelPaintL.setTextAlign(Paint.Align.LEFT);
-		// TextLabelPaintL.setTextSize(textLabelSizePix);
 		TextLabelPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextLabelPaintR.setColor(Color.WHITE);
 		TextLabelPaintR.setTextAlign(Paint.Align.RIGHT);
@@ -89,14 +85,6 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setColor(Color.WHITE);
 		TextAnswerPaintL.setTextAlign(Paint.Align.LEFT);
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
-		/*TextAnswerPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
-		TextAnswerPaintR.setColor(Color.WHITE);
-		TextAnswerPaintR.setTextAlign(Paint.Align.RIGHT);
-		TextAnswerPaintR.setTextSize(textAnswerSizePix);
-		TextAnswerPaintC = new Paint(Paint.ANTI_ALIAS_FLAG);
-		TextAnswerPaintC.setColor(Color.WHITE);
-		TextAnswerPaintC.setTextAlign(Paint.Align.CENTER);
-		TextAnswerPaintC.setTextSize(textAnswerSizePix);*/
 		correctAnswerPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		correctAnswerPaint.setColor(Color.GREEN);
 		correctAnswerPaint.setTextAlign(Paint.Align.LEFT);
@@ -126,7 +114,7 @@ public class AnswerView extends View {
 
 		correctAnswer = maxAnswers;
 		wrongAnswer = maxAnswers;
-		String temp[] = { "N/A", "test", "test", "test" };
+		String temp[] = { "test", "test", "test", "test" };
 		setAnswers(temp);
 	}
 
@@ -284,7 +272,7 @@ public class AnswerView extends View {
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
 			setMeasuredDimension(Width, Height);
 			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-			centersX[0] = labelBounds[0].width() + padHorz;
+			centersX[0] = labelBoundsWidth[0] + padHorz;
 			centersX[1] = centersX[0] + maxW + padHorz;
 			centersX[2] = centersX[0];
 			centersX[3] = centersX[1];
