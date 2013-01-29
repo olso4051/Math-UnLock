@@ -19,9 +19,10 @@ public class AnswerView extends View {
 	private AnswerReadyListener listener;
 	private int Width, Height;
 	private int layout;
+	private final int textConstLabelSizeSP = 30, textConstAnswerSizeSP = 20;
 	private int textLabelSizeSP, textAnswerSizeSP;
 	private int correctAnswer, wrongAnswer;
-	final private int maxAnswers = 5;
+	final private int maxAnswers = 4;
 	private float padVert, padHorz;
 	private float textLabelSizePix, textAnswerSizePix;
 	private float answerBoundsWidth[] = new float[maxAnswers];
@@ -32,7 +33,7 @@ public class AnswerView extends View {
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A" };
 	final private String labels[] = { "A) ", "B) ", "C) ", "D) ", "E) " };
 
-	private Paint /*TextLabelPaintL,*/TextLabelPaintR, TextAnswerPaintL/*, TextAnswerPaintR, TextAnswerPaintC*/;
+	private Paint TextLabelPaintR, TextAnswerPaintL;
 	private TextPaint correctAnswerPaint, correctLabelPaint, wrongAnswerPaint, wrongLabelPaint;
 	private TextPaint test;
 
@@ -64,7 +65,7 @@ public class AnswerView extends View {
 	// =========================================
 
 	private void initGraphView() {
-		textLabelSizeSP = 30; // text size in scaled pixels
+		textLabelSizeSP = textConstLabelSizeSP; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
 		TextLabelPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextLabelPaintR.setColor(Color.WHITE);
@@ -79,7 +80,7 @@ public class AnswerView extends View {
 		wrongLabelPaint.setTextAlign(Paint.Align.RIGHT);
 		wrongLabelPaint.setTextSize(textLabelSizePix);
 
-		textAnswerSizeSP = 20;
+		textAnswerSizeSP = textConstAnswerSizeSP;
 		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
 		TextAnswerPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextAnswerPaintL.setColor(Color.WHITE);
@@ -114,7 +115,7 @@ public class AnswerView extends View {
 
 		correctAnswer = maxAnswers;
 		wrongAnswer = maxAnswers;
-		String temp[] = { "test", "test", "test", "test" };
+		String temp[] = { "test fine I'll try a couple more", "test", "test", "test" };
 		setAnswers(temp);
 	}
 
@@ -146,6 +147,49 @@ public class AnswerView extends View {
 		if (measured)
 			setDimensions();
 	}
+
+	public String[] getAnswers() {
+		return answers;
+	}
+
+	/*public void decreaseTextSize() {
+		textLabelSizeSP = textLabelSizeSP / 2;
+		// textLabelSizeSP -= 5;
+		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
+		TextLabelPaintR.setTextSize(textLabelSizePix);
+		correctLabelPaint.setTextSize(textLabelSizePix);
+		wrongLabelPaint.setTextSize(textLabelSizePix);
+
+		textAnswerSizeSP = textAnswerSizeSP / 2;
+		// textAnswerSizeSP -= 5;
+		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
+		correctAnswerPaint.setTextSize(textAnswerSizePix);
+		wrongAnswerPaint.setTextSize(textAnswerSizePix);
+		test.setTextSize(textAnswerSizePix);
+		if (measured) {
+			setDimensions();
+			listener.Ready();
+		}
+	}
+
+	public void resetTextSize() {
+		textLabelSizeSP = textConstLabelSizeSP;
+		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
+		TextLabelPaintR.setTextSize(textLabelSizePix);
+		correctLabelPaint.setTextSize(textLabelSizePix);
+		wrongLabelPaint.setTextSize(textLabelSizePix);
+
+		textAnswerSizeSP = textConstAnswerSizeSP;
+		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
+		correctAnswerPaint.setTextSize(textAnswerSizePix);
+		wrongAnswerPaint.setTextSize(textAnswerSizePix);
+		test.setTextSize(textAnswerSizePix);
+		if (measured) {
+			setDimensions();
+		}
+	}*/
 
 	// =========================================
 	// Drawing Functionality
@@ -239,12 +283,12 @@ public class AnswerView extends View {
 			centersX[1] = centersX[0] + answerBoundsWidth[0] + padHorz + labelBoundsWidth[0];
 			centersX[2] = centersX[1] + answerBoundsWidth[1] + padHorz + labelBoundsWidth[1];
 			centersX[3] = centersX[2] + answerBoundsWidth[2] + padHorz + labelBoundsWidth[2];
-			centersX[4] = centersX[3] + answerBoundsWidth[3] + padHorz + labelBoundsWidth[3];
+			// centersX[4] = centersX[3] + answerBoundsWidth[3] + padHorz + labelBoundsWidth[3];
 			centersY[0] = minH;
 			centersY[1] = minH;
 			centersY[2] = minH;
 			centersY[3] = minH;
-			centersY[4] = minH;
+			// centersY[4] = minH;
 		} else if ((answers.length == 5) && (maxW < Width / 3)) {
 			Height = (int) (maxH * 2 + padVert);
 			totalWidth = 3 * maxW;
@@ -257,12 +301,12 @@ public class AnswerView extends View {
 			centersX[1] = centersX[0] + maxW + padHorz;
 			centersX[2] = centersX[1] + maxW + padHorz;
 			centersX[3] = centersX[0];
-			centersX[4] = centersX[1];
+			// centersX[4] = centersX[1];
 			centersY[0] = minH;
 			centersY[1] = minH;
 			centersY[2] = minH;
 			centersY[3] = minH * 2 + padVert;
-			centersY[4] = minH * 2 + padVert;
+			// centersY[4] = minH * 2 + padVert;
 		} else if (maxW < Width / 2) {
 			int lines = Math.round((float) answers.length / 2);
 			Height = (int) (maxH * lines + padVert * (lines - 1));
@@ -276,12 +320,12 @@ public class AnswerView extends View {
 			centersX[1] = centersX[0] + maxW + padHorz;
 			centersX[2] = centersX[0];
 			centersX[3] = centersX[1];
-			centersX[4] = centersX[0];
+			// centersX[4] = centersX[0];
 			centersY[0] = minH;
 			centersY[1] = minH;
 			centersY[2] = minH * 2 + padVert;
 			centersY[3] = minH * 2 + padVert;
-			centersY[4] = minH * 3 + padVert;
+			// centersY[4] = minH * 3 + padVert;
 
 		} else {
 			float maxWlabel = 0;

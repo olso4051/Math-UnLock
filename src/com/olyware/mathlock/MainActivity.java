@@ -105,22 +105,30 @@ public class MainActivity extends Activity {
 		coins = (TextView) findViewById(R.id.money);
 		problem = (TextView) findViewById(R.id.problem);
 		// probAnswers = (TextView) findViewById(R.id.answers);
-		answerView = (AnswerView) findViewById(R.id.answers2);
-		answerView.setReadyListener(new AnswerReadyListener() {
-			@Override
-			public void Ready() {
-				answerView.setAnswers(answersRandom);
-			}
-		});
+
 		defaultTextColor = problem.getTextColors().getDefaultColor();
+
 		joystick = (JoystickView) findViewById(R.id.joystick);
+		answerView = (AnswerView) findViewById(R.id.answers2);
+
 		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 			@Override
 			public void OnSelect(int s) {
 				JoystickSelected(s);
 			}
-		});
 
+			@Override
+			public void TooSmall() {
+				setProblemAndAnswer(0);
+			}
+		});
+		answerView.setReadyListener(new AnswerReadyListener() {
+			@Override
+			public void Ready() {
+				if (!answerView.getAnswers().equals(answersRandom))
+					answerView.setAnswers(answersRandom);
+			}
+		});
 		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		switch (am.getRingerMode()) {
 		case AudioManager.RINGER_MODE_SILENT:
@@ -417,6 +425,7 @@ public class MainActivity extends Activity {
 		// Add the correct answer to the answers list
 		List<String> answersList = EZ.list();
 		answersList.add(question.getCorrectAnswer());
+		difficulty = question.getDifficulty().getValue();
 
 		// Get 3 wrong answers and avoid duplicates
 		for (int i = 0; i < 3; i++) {
@@ -529,23 +538,25 @@ public class MainActivity extends Activity {
 		EnabledPackages = count;
 	}
 
-	private void displayCorrectOrNot(int correctLoc, int guessLoc, String discription, boolean correct) {
-		if (correct) {
+	private void displayCorrectOrNot(int correctLoc, int guessLoc, String discription, boolean correct, boolean unknown) {
+		if (unknown) {
 			answerView.setCorrectAnswer(correctLoc);
-			problem.setTextColor(Color.GREEN);
-			money += difficulty;
 		} else {
-			answerView.setCorrectAnswer(correctLoc);
-			answerView.setIncorrectGuess(guessLoc);
-			problem.setTextColor(Color.RED);
-			money -= difficulty;
+			if (correct) {
+				answerView.setCorrectAnswer(correctLoc);
+				problem.setTextColor(Color.GREEN);
+				money += difficulty;
+			} else {
+				answerView.setCorrectAnswer(correctLoc);
+				answerView.setIncorrectGuess(guessLoc);
+				problem.setTextColor(Color.RED);
+				money -= difficulty;
+			}
+			if (money < 0)
+				money = 0;
+			setMoney();
+			problem.setText(discription + problem.getText());
 		}
-		if (money < 0)
-			money = 0;
-		setMoney();
-		// String s = discription + "\n" + problem.getText();
-		problem.setText(discription + "\n" + problem.getText());
-		// problem.setText(s.substring(0, s.length() - 1) + answers[0]);
 	}
 
 	@SuppressLint("SimpleDateFormat")
@@ -581,20 +592,20 @@ public class MainActivity extends Activity {
 			if (EnabledPackages == 0) {
 				this.finish();
 			} else if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !(answerLoc == s) && !quizMode) {
-				displayCorrectOrNot(answerLoc, s, "Too Many Wrong", false);
+				displayCorrectOrNot(answerLoc, s, "Too Many Wrong\n", false, false);
 				joystick.pauseSelection();
 				launchHomeScreen(3000);
 			} else if ((answerLoc == s) && quizMode) {
-				displayCorrectOrNot(answerLoc, s, "Correct!", true);
+				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				joystick.pauseSelection();
 				setProblemAndAnswer(1000);
 				// joystick.showStartAnimation();
 			} else if ((answerLoc == s) && !quizMode) {
-				displayCorrectOrNot(answerLoc, s, "Correct!", true);
+				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				joystick.pauseSelection();
 				launchHomeScreen(100);
 			} else {
-				displayCorrectOrNot(answerLoc, s, "Wrong", false);
+				displayCorrectOrNot(answerLoc, s, "Wrong\n", false, false);
 				if (!quizMode)
 					attempts++;
 				joystick.setWrongGuess();
@@ -607,10 +618,22 @@ public class MainActivity extends Activity {
 						setProblemAndAnswer(0);
 					}
 				});
-				// setProblemAndAnswer(3000);
 			}
 			break;
-		case 4:		// sound/silent was selected
+		case 4:
+			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
+			joystick.setWrongGuess();
+			joystick.pauseSelection();
+			joystick.setOnTouchedListener(new JoystickTouchListener() {
+				@Override
+				public void OnTouch() {
+					joystick.removeTouchListener();
+					joystick.resetWrongGuess();
+					setProblemAndAnswer(0);
+				}
+			});
+			break;
+		case 5:		// sound/silent was selected
 			if (silentMode) {
 				am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 			} else {
@@ -619,17 +642,17 @@ public class MainActivity extends Activity {
 			silentMode = joystick.setSilentMode(!silentMode);
 
 			break;
-		case 5:		// Store was selected
+		case 6:		// Store was selected
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
-		case 6:		// quiz Mode was selected
+		case 7:		// progress was selected
+			startActivity(new Intent(this, ShowProgressActivity.class));
+			break;
+		case 8:		// quiz Mode was selected
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
-		case 7:		// settings was selected
+		case 9:		// settings was selected
 			startActivity(new Intent(this, ShowSettingsActivity.class));
-			break;
-		case 8:		// progress was selected
-			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		}
 	}
