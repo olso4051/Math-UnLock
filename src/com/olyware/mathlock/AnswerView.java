@@ -9,7 +9,6 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -246,7 +245,6 @@ public class AnswerView extends View {
 			padHorz = (Width - totalWidth) / (answers.length + 1);
 			layout = 1;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
 			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
 				decreaseTextSize();
 				setDimensions(false);
@@ -270,7 +268,6 @@ public class AnswerView extends View {
 			padHorz = (Width - totalWidth) / 4;
 			layout = 2;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
 			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
 				decreaseTextSize();
 				setDimensions(false);
@@ -295,7 +292,6 @@ public class AnswerView extends View {
 			padHorz = (Width - totalWidth) / 3;
 			layout = 2;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
 			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
 				decreaseTextSize();
 				setDimensions(false);
@@ -331,7 +327,6 @@ public class AnswerView extends View {
 					+ layouts[answers.length - 1].getHeight();
 			layout = 4;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
 			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
 				decreaseTextSize();
 				setDimensions(false);

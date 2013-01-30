@@ -34,15 +34,18 @@ import com.olyware.mathlock.utils.EZ;
 
 public class MainActivity extends Activity {
 	final private int startingPmoney = 1000;
+	final private int multiplier = 5;
+	final private int decreaseRate = 2000;
 	private int money;
 	private int Pmoney;
 	private int difficulty = 0;
+	private long startTime = 0;
 
 	private LinearLayout layout;
 	private TextView clock;
 	final private float clockSize = 45, dateSize = 15;
 	private float currentClockSize;
-	private TextView coins;
+	private TextView coins, pack, worth;
 	private TextView problem;
 	// private TextView probAnswers;
 	private AnswerView answerView;
@@ -72,7 +75,8 @@ public class MainActivity extends Activity {
 	private SharedPreferences sharedPrefs;
 	private SharedPreferences sharedPrefsMoney;
 
-	private Handler mHandler;
+	private Handler mHandler, timerHandler;
+	private Runnable reduceWorth;
 
 	private DatabaseManager dbManager;
 
@@ -107,20 +111,12 @@ public class MainActivity extends Activity {
 		currentClockSize = clockSize;
 
 		coins = (TextView) findViewById(R.id.money);
+		pack = (TextView) findViewById(R.id.pack);
+		worth = (TextView) findViewById(R.id.difficulty);
 		problem = (TextView) findViewById(R.id.problem);
-		// probAnswers = (TextView) findViewById(R.id.answers);
-
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
-		joystick = (JoystickView) findViewById(R.id.joystick);
 		answerView = (AnswerView) findViewById(R.id.answers2);
-
-		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
-			@Override
-			public void OnSelect(int s) {
-				JoystickSelected(s);
-			}
-		});
 		answerView.setReadyListener(new AnswerReadyListener() {
 			@Override
 			public void Ready() {
@@ -128,6 +124,30 @@ public class MainActivity extends Activity {
 					answerView.setAnswers(answersRandom);
 			}
 		});
+		joystick = (JoystickView) findViewById(R.id.joystick);
+		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
+			@Override
+			public void OnSelect(int s) {
+				JoystickSelected(s);
+			}
+		});
+
+		timerHandler = new Handler();
+		reduceWorth = new Runnable() {
+			@Override
+			public void run() {
+				int d = Integer.parseInt(worth.getText().toString());
+				d -= 1;
+				if (d <= 0) {
+					d = 0;
+					worth.setText(String.valueOf(d));
+				} else {
+					worth.setText(String.valueOf(d));
+					timerHandler.postDelayed(this, decreaseRate);
+				}
+			}
+		};
+
 		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		switch (am.getRingerMode()) {
 		case AudioManager.RINGER_MODE_SILENT:
@@ -185,6 +205,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
+		problem.setHeight(layout.getBottom() / 5);
 		answerView.setParentHeight(layout.getBottom());
 		super.onWindowFocusChanged(hasFocus);
 	}
@@ -271,7 +292,11 @@ public class MainActivity extends Activity {
 			mHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
+					startTime = System.currentTimeMillis();
+					timerHandler.removeCallbacks(reduceWorth);
+					timerHandler.postDelayed(reduceWorth, decreaseRate);
 					answerView.resetGuess();
+					problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 					joystick.unPauseSelection();
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
@@ -336,6 +361,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setMathProblem(int diffNum) {
+		pack.setText(R.string.unlock_math);
 		int operator = 0;
 		int first = 1;
 		int second = 1;
@@ -380,6 +406,7 @@ public class MainActivity extends Activity {
 			difficulty = 2;
 		else
 			difficulty = 3;
+		worth.setText(String.valueOf(difficulty * multiplier));
 
 		switch (operator) {
 		case 0:			// add
@@ -417,6 +444,7 @@ public class MainActivity extends Activity {
 
 	// TODO: Pass in a Difficulty enum instead of an integer
 	private void setVocabProblem(int diffNum) {
+		pack.setText(R.string.unlock_vocab);
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum));
 
@@ -430,7 +458,10 @@ public class MainActivity extends Activity {
 		// Add the correct answer to the answers list
 		List<String> answersList = EZ.list();
 		answersList.add(question.getCorrectAnswer());
+
+		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
+		worth.setText(String.valueOf(difficulty * multiplier));
 
 		// Get 3 wrong answers and avoid duplicates
 		for (int i = 0; i < 3; i++) {
@@ -450,6 +481,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setLanguageProblem(int diffNum) {
+		pack.setText(R.string.unlock_language);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -463,6 +495,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setACTProblem(int diffNum) {
+		pack.setText(R.string.unlock_act);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -476,6 +509,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setSATProblem(int diffNum) {
+		pack.setText(R.string.unlock_sat);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -489,6 +523,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setGREProblem(int diffNum) {
+		pack.setText(R.string.unlock_gre);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -502,6 +537,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setToddlerProblem(int diffNum) {
+		pack.setText(R.string.unlock_toddler);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -515,6 +551,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineerProblem(int diffNum) {
+		pack.setText(R.string.unlock_engineer);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -550,12 +587,13 @@ public class MainActivity extends Activity {
 			if (correct) {
 				answerView.setCorrectAnswer(correctLoc);
 				problem.setTextColor(Color.GREEN);
-				money += difficulty;
+				money += Integer.parseInt(worth.getText().toString());
+				;
 			} else {
 				answerView.setCorrectAnswer(correctLoc);
 				answerView.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
-				money -= difficulty;
+				money -= Integer.parseInt(worth.getText().toString());
 			}
 			if (money < 0)
 				money = 0;
@@ -594,6 +632,9 @@ public class MainActivity extends Activity {
 		case 1:		// B was selected
 		case 2:		// C was selected
 		case 3:		// D was selected
+			long ms = System.currentTimeMillis() - startTime;
+			float sec = ms / 1000f;
+			// TODO store this in a new database table for statistics
 			if (EnabledPackages == 0) {
 				this.finish();
 			} else if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !(answerLoc == s) && !quizMode) {
@@ -604,7 +645,6 @@ public class MainActivity extends Activity {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				joystick.pauseSelection();
 				setProblemAndAnswer(1000);
-				// joystick.showStartAnimation();
 			} else if ((answerLoc == s) && !quizMode) {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				joystick.pauseSelection();

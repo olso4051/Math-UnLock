@@ -26,11 +26,32 @@
 	    	android:drawableLeft="@drawable/coins"
 	    	android:text="@string/default_money"/>
 	</LinearLayout>
-
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+		<TextView
+		    android:id="@+id/pack"
+		    android:gravity="center_vertical|left"
+		    android:layout_width="0dp"
+		    android:layout_weight="1"
+		    android:layout_height="wrap_content"
+		    android:textSize="20sp"
+		    android:maxLines="2"
+		    android:text="@string/unlock_math"/>
+		<TextView
+	    	android:id="@+id/difficulty"
+	    	android:gravity="center_vertical|right"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+	    	android:textSize="20sp"
+	    	android:drawableLeft="@drawable/coin"
+	    	android:text="@string/default_money"/>
+	</LinearLayout>
     <TextView
         android:id="@+id/problem"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/problem"
         android:textSize="30sp"
