@@ -9,6 +9,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,7 @@ public class AnswerView extends View {
 
 	private AnswerReadyListener listener;
 	private int Width, Height;
+	private int maxHeight = 0;
 	private int layout;
 	private final int textConstLabelSizeSP = 30, textConstAnswerSizeSP = 20;
 	private int textLabelSizeSP, textAnswerSizeSP;
@@ -115,6 +117,7 @@ public class AnswerView extends View {
 
 		correctAnswer = maxAnswers;
 		wrongAnswer = maxAnswers;
+		maxHeight = 0;
 		String temp[] = { "test fine I'll try a couple more", "test", "test", "test" };
 		setAnswers(temp);
 	}
@@ -144,52 +147,18 @@ public class AnswerView extends View {
 
 	public void setAnswers(String answers[]) {
 		this.answers = answers;
+		resetTextSize();
 		if (measured)
-			setDimensions();
+			setDimensions(false);
 	}
 
 	public String[] getAnswers() {
 		return answers;
 	}
 
-	/*public void decreaseTextSize() {
-		textLabelSizeSP = textLabelSizeSP / 2;
-		// textLabelSizeSP -= 5;
-		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
-		TextLabelPaintR.setTextSize(textLabelSizePix);
-		correctLabelPaint.setTextSize(textLabelSizePix);
-		wrongLabelPaint.setTextSize(textLabelSizePix);
-
-		textAnswerSizeSP = textAnswerSizeSP / 2;
-		// textAnswerSizeSP -= 5;
-		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
-		TextAnswerPaintL.setTextSize(textAnswerSizePix);
-		correctAnswerPaint.setTextSize(textAnswerSizePix);
-		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		test.setTextSize(textAnswerSizePix);
-		if (measured) {
-			setDimensions();
-			listener.Ready();
-		}
+	public void setParentHeight(int h) {
+		this.maxHeight = h / 4;
 	}
-
-	public void resetTextSize() {
-		textLabelSizeSP = textConstLabelSizeSP;
-		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
-		TextLabelPaintR.setTextSize(textLabelSizePix);
-		correctLabelPaint.setTextSize(textLabelSizePix);
-		wrongLabelPaint.setTextSize(textLabelSizePix);
-
-		textAnswerSizeSP = textConstAnswerSizeSP;
-		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
-		TextAnswerPaintL.setTextSize(textAnswerSizePix);
-		correctAnswerPaint.setTextSize(textAnswerSizePix);
-		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		test.setTextSize(textAnswerSizePix);
-		if (measured) {
-			setDimensions();
-		}
-	}*/
 
 	// =========================================
 	// Drawing Functionality
@@ -201,7 +170,7 @@ public class AnswerView extends View {
 		Width = measure(widthMeasureSpec);
 		Height = measure(heightMeasureSpec);
 
-		setDimensions();
+		setDimensions(true);
 		measured = true;
 		listener.Ready();
 	}
@@ -262,7 +231,7 @@ public class AnswerView extends View {
 	// Private Methods
 	// =========================================
 
-	private void setDimensions() {
+	private void setDimensions(boolean fromOnMeasure) {
 		setLayouts();
 		float maxH = textLabelSizePix;
 		for (int i = 0; i < answers.length; i++)
@@ -277,6 +246,12 @@ public class AnswerView extends View {
 			padHorz = (Width - totalWidth) / (answers.length + 1);
 			layout = 1;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
+			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+				decreaseTextSize();
+				setDimensions(false);
+				return;
+			}
 			setMeasuredDimension(Width, Height);
 			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
 			centersX[0] = labelBoundsWidth[0] + padHorz;
@@ -295,6 +270,12 @@ public class AnswerView extends View {
 			padHorz = (Width - totalWidth) / 4;
 			layout = 2;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
+			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+				decreaseTextSize();
+				setDimensions(false);
+				return;
+			}
 			setMeasuredDimension(Width, Height);
 			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
 			centersX[0] = labelBounds[0].width() + padHorz;
@@ -314,6 +295,12 @@ public class AnswerView extends View {
 			padHorz = (Width - totalWidth) / 3;
 			layout = 2;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
+			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+				decreaseTextSize();
+				setDimensions(false);
+				return;
+			}
 			setMeasuredDimension(Width, Height);
 			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
 			centersX[0] = labelBoundsWidth[0] + padHorz;
@@ -344,6 +331,12 @@ public class AnswerView extends View {
 					+ layouts[answers.length - 1].getHeight();
 			layout = 4;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+			Log.d("max height test", "maxHeight = " + maxHeight + "|Height = " + Height);
+			if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+				decreaseTextSize();
+				setDimensions(false);
+				return;
+			}
 			setMeasuredDimension(Width, Height);
 			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
 		}
@@ -374,5 +367,36 @@ public class AnswerView extends View {
 				maxW = Widths[i];
 		}
 		invalidate();
+	}
+
+	private void decreaseTextSize() {
+		textLabelSizeSP -= 5;
+		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
+		TextLabelPaintR.setTextSize(textLabelSizePix);
+		correctLabelPaint.setTextSize(textLabelSizePix);
+		wrongLabelPaint.setTextSize(textLabelSizePix);
+
+		textAnswerSizeSP -= 5;
+		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
+		correctAnswerPaint.setTextSize(textAnswerSizePix);
+		wrongAnswerPaint.setTextSize(textAnswerSizePix);
+		test.setTextSize(textAnswerSizePix);
+
+	}
+
+	private void resetTextSize() {
+		textLabelSizeSP = textConstLabelSizeSP;
+		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
+		TextLabelPaintR.setTextSize(textLabelSizePix);
+		correctLabelPaint.setTextSize(textLabelSizePix);
+		wrongLabelPaint.setTextSize(textLabelSizePix);
+
+		textAnswerSizeSP = textConstAnswerSizeSP;
+		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
+		correctAnswerPaint.setTextSize(textAnswerSizePix);
+		wrongAnswerPaint.setTextSize(textAnswerSizePix);
+		test.setTextSize(textAnswerSizePix);
 	}
 }

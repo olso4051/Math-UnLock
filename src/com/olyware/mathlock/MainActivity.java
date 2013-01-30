@@ -24,6 +24,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
@@ -37,6 +38,7 @@ public class MainActivity extends Activity {
 	private int Pmoney;
 	private int difficulty = 0;
 
+	private LinearLayout layout;
 	private TextView clock;
 	final private float clockSize = 45, dateSize = 15;
 	private float currentClockSize;
@@ -94,6 +96,8 @@ public class MainActivity extends Activity {
 		dbManager = new DatabaseManager(getApplicationContext());
 		setContentView(R.layout.activity_main);
 
+		layout = (LinearLayout) findViewById(R.id.layout);
+
 		clock = (TextView) findViewById(R.id.clock);
 		clock.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -115,11 +119,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void OnSelect(int s) {
 				JoystickSelected(s);
-			}
-
-			@Override
-			public void TooSmall() {
-				setProblemAndAnswer(0);
 			}
 		});
 		answerView.setReadyListener(new AnswerReadyListener() {
@@ -182,6 +181,12 @@ public class MainActivity extends Activity {
 	public void onAttachedToWindow() {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		answerView.setParentHeight(layout.getBottom());
+		super.onWindowFocusChanged(hasFocus);
 	}
 
 	@Override

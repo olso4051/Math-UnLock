@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.WindowManager;
 
 public class JoystickView extends View {
-	private boolean flag;
 	private final int NumAnswers = 5;
 	// private Bitmap bmp, bmp_handle;
 	// private Bitmap bmp_silent, bmp_sound, bmp_quizMode, bmp_set, bmp_em, bmp_sil, bmp_A, bmp_B, bmp_C, bmp_D;
@@ -213,14 +212,9 @@ public class JoystickView extends View {
 
 		listener = new JoystickSelectListener() {
 			@Override
-			public void TooSmall() {
-			}
-
-			@Override
 			public void OnSelect(int s) {
 			}
 		};
-		flag = true;
 		/*for (int i = 0; i < angles.length; i++)
 			angles[i] = new AngleSelect();
 
@@ -393,11 +387,6 @@ public class JoystickView extends View {
 		handleRadius = (int) (W * 0.1);*/
 
 		setMeasuredDimension(Width, Height);
-		if ((Height < Width / 4) && (flag)) {
-			listener.TooSmall();
-			flag = false;
-		} else
-			flag = true;
 	}
 
 	private int measure(int measureSpec) {
