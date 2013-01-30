@@ -204,6 +204,8 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
+		// at this point the activity has been measured and we can get the height
+		// only allow problem to get 1/5 of screen
 		problem.setHeight(layout.getBottom() / 5);
 		answerView.setParentHeight(layout.getBottom());
 		super.onWindowFocusChanged(hasFocus);

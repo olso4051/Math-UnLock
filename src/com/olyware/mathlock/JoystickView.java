@@ -41,7 +41,8 @@ public class JoystickView extends View {
 	private double Y[] = new double[NumAnswers];
 	private int type = 0;
 	private int diffX1, diffY1, diffX, diffY;
-	private int state = 0;					// direction answers are going (up-left, up-right, ect..)
+	// direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
+	private int state = 0;
 	// private int handleRadius;
 	// private double thetaMax, rMax, fX, fY; // for maximum area of a rectangle in an ellipse
 	// private double rX, rY, rCurrent;
@@ -615,7 +616,7 @@ public class JoystickView extends View {
 				Y[0] = startY + diffY1;
 				diff = checkDiff(0);
 
-				if (diff == 0)
+				if (diff == 0) {
 					for (int i = 1; i < X.length; i++) {
 						X[i] = X[i - 1] + diffX;
 						Y[i] = Y[i - 1] + diffY;
@@ -623,7 +624,9 @@ public class JoystickView extends View {
 						if (diff > maxDiff)
 							maxDiff = diff;
 					}
-				else
+					if (checkOnTop())
+						maxDiff = 2;
+				} else
 					maxDiff = 2;
 			}
 			if ((maxDiff >= 2) && (attempts == 3)) {
@@ -653,7 +656,19 @@ public class JoystickView extends View {
 		}
 	}
 
+	private boolean checkOnTop() {
+		for (int a = 0; a < X.length - 1; a++) {
+			for (int b = a + 1; b < X.length; b++) {
+				if (a != b)
+					if ((X[a] == X[b]) && (Y[a] == Y[b]))
+						return true;
+			}
+		}
+		return false;
+	}
+
 	private void setDiffXY() {
+		// sets the direction to display the answers in
 		switch (state) {
 		case 0:		// up-right
 			diffX = (int) (rAns * Math.sqrt(3));
@@ -683,13 +698,13 @@ public class JoystickView extends View {
 		boolean first = (loc == 0);
 		switch (state) {
 		case 0:		// up-right
-			if (Y[loc] - rAns < 0) {		// above top boundary
+			if (Y[loc] - rAns < 0) {				// above top boundary
 				checks += 1;
-				state = ((state - 1) % 4 + 4) % 4;
+				state = ((state - 1) % 4 + 4) % 4;	// state-> 3=down-right
 			}
-			if (X[loc] + rAns > Width) {		// right of right boundary
+			if (X[loc] + rAns > Width) {			// right of right boundary
 				checks += 1;
-				state = (state + checks) % 4;
+				state = (state + checks) % 4;		// state-> 1=up-left or 2=down-left
 			}
 			break;
 		case 1:		// up-left
@@ -731,7 +746,7 @@ public class JoystickView extends View {
 			X[loc] = X[loc - 1] + diffX;
 			Y[loc] = Y[loc - 1] + diffY;
 		}
-		return checks;
+		return checks;			// # of walls hit
 	}
 
 	private void revealAnswers() {

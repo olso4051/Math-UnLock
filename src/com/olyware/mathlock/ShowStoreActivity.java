@@ -112,6 +112,8 @@ public class ShowStoreActivity extends Activity {
 
 	@Override
 	public void onAttachedToWindow() {
+		// don't show when locked to bring up screen lock mechanism
+		// dismiss keyguard though so if there is no security then the activity is shown
 		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 	}
