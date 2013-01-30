@@ -47,7 +47,6 @@ public class MainActivity extends Activity {
 	private float currentClockSize;
 	private TextView coins, pack, worth;
 	private TextView problem;
-	// private TextView probAnswers;
 	private AnswerView answerView;
 	private boolean quizMode = false;
 	private boolean silentMode;
@@ -65,7 +64,7 @@ public class MainActivity extends Activity {
 
 	private int answerLoc = 1;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
-	private String answersRandom[] = { "4", "2", "3", "1" };	// {random answers}
+	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
 	private int attempts = 1;
 
 	private AudioManager am;
