@@ -73,7 +73,7 @@
     <string name="unlock_sat">SAT Pack</string>
     <string name="unlock_toddler">Toddler Pack</string>
     <string name="unlock_vocab">Vocab Pack</string>
-    <string name="worth">Worth - </string>
+    <string name="worth">Question Worth </string>
     <string name="yes">Yes</string>
     
 </resources>

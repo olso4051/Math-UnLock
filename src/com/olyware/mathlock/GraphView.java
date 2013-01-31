@@ -22,9 +22,10 @@ public class GraphView extends View {
 	private float padVert, padHorz;
 	private float textLabelSizePix, textStatsSizePix;
 	private float left, top, right, bottom;
-	private long StatsValues[] = new long[8];
-	private String Stats[] = { "Total Correct Answers", "Total Incorrect Answers", "(+/-) Coins", "Best Correct Streak", "Current Streak",
-			"Total Time Spent Studying", "Fastest Time to Answer", "Average Time to Answer" };
+
+	private String Stats[] = { "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak", "Current Streak", "Total Study Time",
+			"Fastest Time", "Average Time", "coins/hr (cph)" };
+	private String StatsValues[] = new String[Stats.length];
 
 	private Paint TextLabelPaint, TextStatsPaintL, TextStatsPaintR, TextStatsPaintC, GraphPaint, LinePaint;
 	private Rect textBounds;
@@ -124,16 +125,18 @@ public class GraphView extends View {
 		// }
 	}
 
-	public void setStats(long correct, long wrong, long coins, long totalTime, long streakBest, long streakCurrent, long answerTimeFast,
+	public void setStats(int correct, int wrong, int coins, long totalTime, int streakBest, int streakCurrent, long answerTimeFast,
 			long answerTimeAve) {
-		StatsValues[0] = correct;
-		StatsValues[1] = wrong;
-		StatsValues[2] = coins;
-		StatsValues[3] = streakBest;
-		StatsValues[4] = streakCurrent;
-		StatsValues[5] = totalTime;
-		StatsValues[6] = answerTimeFast;
-		StatsValues[7] = answerTimeAve;
+		StatsValues[0] = correct + "";
+		StatsValues[1] = wrong + "";
+		StatsValues[2] = coins + "";
+		StatsValues[3] = streakBest + "";
+		StatsValues[4] = streakCurrent + "";
+		StatsValues[5] = format(totalTime);
+		StatsValues[6] = format(answerTimeFast);
+		StatsValues[7] = format(answerTimeAve);
+		if (totalTime != 0)
+			StatsValues[8] = coins * 1000 * 60 * 60 / totalTime + "";
 	}
 
 	// =========================================
@@ -202,7 +205,7 @@ public class GraphView extends View {
 		canvas.drawText("All Time Stats", Width / 2, Height - textStatsSizePix * StatsNum - padVert * padNum, TextLabelPaint);
 		for (int i = 0; i < StatsNum; i++) {
 			canvas.drawText(Stats[i], 0, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1), TextStatsPaintL);
-			canvas.drawText(StatsValues[i] + " ", Width, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1),
+			canvas.drawText(StatsValues[i], Width, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1),
 					TextStatsPaintR);
 		}
 		canvas.save();
@@ -216,6 +219,32 @@ public class GraphView extends View {
 	// =========================================
 	// Private Methods
 	// =========================================
+
+	private String format(long time) {
+		long minute = 1000 * 60;	// ms in a minute
+		long hour = minute * 60;	// ms in an hour
+		long day = hour * 24;		// ms in a day
+		long year = day * 365;		// ms in a year
+		long sec = time % (minute);						// # of seconds in ms
+		long min = (time - sec) % (hour);				// # of minutes in ms
+		long hr = (time - min - sec) % (day);			// # of hrs in ms
+		long days = (time - hr - min - sec) % (year);	// # of days in ms
+		long years = (time - days - hr - min - sec);	// # of years in ms
+		min = min / minute;
+		hr = hr / hour;
+		days = days / day;
+		years = years / year;
+		if (time < minute)
+			return String.format("%.2fs", sec / 1000f);
+		else if (time < hour)
+			return String.format("%dm%.2fs", min, sec / 1000f);
+		else if (time < day)
+			return String.format("%dh%dm%.2fs", hr, min, sec / 1000f);
+		else if (time < year)
+			return String.format("%dd%dh%dm%.2fs", days, hr, min, sec / 1000f);
+		else
+			return String.format("%dy%dd%dh%dm%.2fs", years, days, hr, min, sec / 1000f);
+	}
 
 	private void setMovingAveragePercent() {
 		Object temp[] = percent.toArray();

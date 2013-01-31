@@ -35,7 +35,7 @@ import com.olyware.mathlock.utils.EZ;
 public class MainActivity extends Activity {
 	final private int startingPmoney = 1000;
 	final private int multiplier = 5;
-	final private int decreaseRate = 2000;
+	final private int decreaseRate = 1000;
 	private int money;
 	private int Pmoney;
 	private int difficulty = 0;
@@ -43,9 +43,10 @@ public class MainActivity extends Activity {
 
 	private LinearLayout layout;
 	private TextView clock;
-	final private float clockSize = 45, dateSize = 15;
+	final private float clockSize = 45, dateSize = 20;
 	private float currentClockSize;
-	private TextView coins, pack, worth;
+	private TextView coins, worth;
+	private int questionWorth;
 	private TextView problem;
 	private AnswerView answerView;
 	private boolean quizMode = false;
@@ -71,8 +72,8 @@ public class MainActivity extends Activity {
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
-	private SharedPreferences sharedPrefs;
-	private SharedPreferences sharedPrefsMoney;
+	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats;
+	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
 
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
@@ -110,8 +111,7 @@ public class MainActivity extends Activity {
 		currentClockSize = clockSize;
 
 		coins = (TextView) findViewById(R.id.money);
-		pack = (TextView) findViewById(R.id.pack);
-		worth = (TextView) findViewById(R.id.difficulty);
+		worth = (TextView) findViewById(R.id.worth);
 		problem = (TextView) findViewById(R.id.problem);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
@@ -135,13 +135,15 @@ public class MainActivity extends Activity {
 		reduceWorth = new Runnable() {
 			@Override
 			public void run() {
-				int d = Integer.parseInt(worth.getText().toString());
-				d -= 1;
-				if (d <= 0) {
-					d = 0;
-					worth.setText(String.valueOf(d));
+				// int d = Integer.parseInt(worth.getText().toString());
+				// d -= 1;
+				questionWorth -= 1;
+				if (questionWorth <= 0) {
+					// d = 0;
+					questionWorth = 0;
+					worth.setText(String.valueOf(questionWorth));
 				} else {
-					worth.setText(String.valueOf(d));
+					worth.setText(String.valueOf(questionWorth));
 					timerHandler.postDelayed(this, decreaseRate);
 				}
 			}
@@ -166,16 +168,18 @@ public class MainActivity extends Activity {
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
 			joystick.setLeftRightHanded(false);
 		else
 			joystick.setLeftRightHanded(true);
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 
-		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsStats = sharedPrefsStats.edit();
 		if (sharedPrefsMoney.getBoolean("first", true)) {
 			Pmoney = sharedPrefsMoney.getInt("paid_money", startingPmoney);
-			editor.putBoolean("first", false).commit();
+			editorPrefsMoney.putBoolean("first", false);	// will commit in setMoney() call
 		} else
 			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
@@ -229,6 +233,7 @@ public class MainActivity extends Activity {
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		setMoney();
@@ -257,10 +262,10 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
-		editor.putInt("money", money);
-		editor.putInt("paid_money", Pmoney);
-		editor.commit();
+		// SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		editorPrefsMoney.putInt("money", money);
+		editorPrefsMoney.putInt("paid_money", Pmoney);
+		editorPrefsMoney.commit();
 		super.onPause();
 	}
 
@@ -294,6 +299,7 @@ public class MainActivity extends Activity {
 				@Override
 				public void run() {
 					startTime = System.currentTimeMillis();
+					questionWorth = 0;
 					timerHandler.removeCallbacks(reduceWorth);
 					timerHandler.postDelayed(reduceWorth, decreaseRate);
 					answerView.resetGuess();
@@ -362,7 +368,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setMathProblem(int diffNum) {
-		pack.setText(R.string.unlock_math);
 		int operator = 0;
 		int first = 1;
 		int second = 1;
@@ -407,7 +412,8 @@ public class MainActivity extends Activity {
 			difficulty = 2;
 		else
 			difficulty = 3;
-		worth.setText(String.valueOf(difficulty * multiplier));
+		questionWorth = difficulty * multiplier;
+		worth.setText(String.valueOf(questionWorth));
 
 		switch (operator) {
 		case 0:			// add
@@ -445,7 +451,6 @@ public class MainActivity extends Activity {
 
 	// TODO: Pass in a Difficulty enum instead of an integer
 	private void setVocabProblem(int diffNum) {
-		pack.setText(R.string.unlock_vocab);
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum));
 
@@ -462,7 +467,8 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
-		worth.setText(String.valueOf(difficulty * multiplier));
+		questionWorth = difficulty * multiplier;
+		worth.setText(String.valueOf(questionWorth));
 
 		// Get 3 wrong answers and avoid duplicates
 		for (int i = 0; i < 3; i++) {
@@ -482,7 +488,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setLanguageProblem(int diffNum) {
-		pack.setText(R.string.unlock_language);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -496,7 +501,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setACTProblem(int diffNum) {
-		pack.setText(R.string.unlock_act);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -510,7 +514,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setSATProblem(int diffNum) {
-		pack.setText(R.string.unlock_sat);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -524,7 +527,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setGREProblem(int diffNum) {
-		pack.setText(R.string.unlock_gre);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -538,7 +540,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setToddlerProblem(int diffNum) {
-		pack.setText(R.string.unlock_toddler);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -552,7 +553,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineerProblem(int diffNum) {
-		pack.setText(R.string.unlock_engineer);
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -588,13 +588,13 @@ public class MainActivity extends Activity {
 			if (correct) {
 				answerView.setCorrectAnswer(correctLoc);
 				problem.setTextColor(Color.GREEN);
-				money += Integer.parseInt(worth.getText().toString());
+				money += questionWorth;// Integer.parseInt(worth.getText().toString());
 				;
 			} else {
 				answerView.setCorrectAnswer(correctLoc);
 				answerView.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
-				money -= Integer.parseInt(worth.getText().toString());
+				money -= questionWorth;// Integer.parseInt(worth.getText().toString());
 			}
 			if (money < 0)
 				money = 0;
@@ -633,24 +633,26 @@ public class MainActivity extends Activity {
 		case 1:		// B was selected
 		case 2:		// C was selected
 		case 3:		// D was selected
-			long ms = System.currentTimeMillis() - startTime;
-			float sec = ms / 1000f;
-			// TODO store this in a new database table for statistics
+			timerHandler.removeCallbacks(reduceWorth);
 			if (EnabledPackages == 0) {
 				this.finish();
 			} else if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !(answerLoc == s) && !quizMode) {
+				updateStats(false);
 				displayCorrectOrNot(answerLoc, s, "Too Many Wrong\n", false, false);
 				joystick.pauseSelection();
 				launchHomeScreen(3000);
 			} else if ((answerLoc == s) && quizMode) {
+				updateStats(true);
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				joystick.pauseSelection();
 				setProblemAndAnswer(1000);
 			} else if ((answerLoc == s) && !quizMode) {
+				updateStats(true);
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				joystick.pauseSelection();
 				launchHomeScreen(100);
 			} else {
+				updateStats(false);
 				displayCorrectOrNot(answerLoc, s, "Wrong\n", false, false);
 				if (!quizMode)
 					attempts++;
@@ -704,11 +706,46 @@ public class MainActivity extends Activity {
 	}
 
 	private void setMoney() {
-		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
-		editor.putInt("money", money);
-		editor.putInt("paid_money", Pmoney);
-		editor.commit();
+		// SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		editorPrefsMoney.putInt("money", money);
+		editorPrefsMoney.putInt("paid_money", Pmoney);
+		editorPrefsMoney.commit();
 		coins.setText("" + (money + Pmoney));
+	}
+
+	private void updateStats(boolean right) {
+		long ms = System.currentTimeMillis() - startTime;
+		int correct = sharedPrefsStats.getInt("correct", 0);
+		int wrong = sharedPrefsStats.getInt("wrong", 0);
+		int total = correct + wrong;
+		int coins = sharedPrefsStats.getInt("coins", 0);
+		int bestStreak = sharedPrefsStats.getInt("bestStreak", 0);
+		int currentStreak = sharedPrefsStats.getInt("currentStreak", 0);
+		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
+		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", Long.MAX_VALUE);
+		if (right) {
+			editorPrefsStats.putInt("correct", correct + 1);
+			editorPrefsStats.putInt("coins", coins + questionWorth);
+			if (currentStreak >= bestStreak) {
+				editorPrefsStats.putInt("bestStreak", bestStreak + 1);
+				editorPrefsStats.putInt("currentStreak", currentStreak + 1);
+			} else if (currentStreak >= 0)
+				editorPrefsStats.putInt("currentStreak", currentStreak + 1);
+			else
+				editorPrefsStats.putInt("currentStreak", 1);
+			if (answerTimeFast > ms)
+				editorPrefsStats.putLong("answerTimeFast", ms);
+		} else {
+			editorPrefsStats.putInt("wrong", wrong + 1);
+			editorPrefsStats.putInt("coins", coins - questionWorth);
+			if (currentStreak >= 0)
+				editorPrefsStats.putInt("currentStreak", 0);
+			else
+				editorPrefsStats.putInt("currentStreak", currentStreak - 1);
+		}
+		editorPrefsStats.putLong("totalTime", totalTime + ms);
+		editorPrefsStats.putLong("answerTimeAve", (totalTime + ms) / (total + 1));
+		editorPrefsStats.commit();
 	}
 
 	private void toggleClockDate() {

@@ -27,7 +27,7 @@ import android.widget.TextView;
 public class ShowProgressActivity extends Activity {
 	private int money;
 	private int Pmoney;
-	private SharedPreferences sharedPrefsMoney;
+	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
 
 	private TextView clock;
 	final private float clockSize = 45, dateSize = 15;
@@ -75,6 +75,7 @@ public class ShowProgressActivity extends Activity {
 		graphView = (GraphView) findViewById(R.id.graph);
 
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 
@@ -84,7 +85,7 @@ public class ShowProgressActivity extends Activity {
 		initSpinners();
 		setTime();
 		setMoney();
-		// setGraph();
+		setGraph();
 	}
 
 	@Override
@@ -232,8 +233,17 @@ public class ShowProgressActivity extends Activity {
 		int test[] = new int[500];
 		Random rnd = new Random();
 		for (int i = 0; i < test.length; i++)
-			test[i] = rnd.nextInt(101);
+			test[i] = rnd.nextInt(2) * 100;
 		graphView.setMovingAverage(rnd.nextInt(50) + 1);
 		graphView.setArray(test);
+		int correct = sharedPrefsStats.getInt("correct", 0);
+		int wrong = sharedPrefsStats.getInt("wrong", 0);
+		int coins = sharedPrefsStats.getInt("coins", 0);
+		int bestStreak = sharedPrefsStats.getInt("bestStreak", 0);
+		int currentStreak = sharedPrefsStats.getInt("currentStreak", 0);
+		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
+		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", 0);
+		long answerTimeAve = sharedPrefsStats.getLong("answerTimeAve", 0);
+		graphView.setStats(correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve);
 	}
 }
