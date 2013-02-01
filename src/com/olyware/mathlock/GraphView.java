@@ -137,6 +137,8 @@ public class GraphView extends View {
 		StatsValues[7] = format(answerTimeAve);
 		if (totalTime != 0)
 			StatsValues[8] = coins * 1000 * 60 * 60 / totalTime + "";
+		else
+			StatsValues[8] = 0 + "";
 	}
 
 	// =========================================

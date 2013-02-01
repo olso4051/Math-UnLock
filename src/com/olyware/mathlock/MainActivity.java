@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +34,7 @@ import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.EZ;
 
 public class MainActivity extends Activity {
+	private long code;
 	final private int startingPmoney = 1000;
 	final private int multiplier = 5;
 	final private int decreaseRate = 1000;
@@ -43,7 +45,7 @@ public class MainActivity extends Activity {
 
 	private LinearLayout layout;
 	private TextView clock;
-	final private float clockSize = 45, dateSize = 20;
+	final private float clockSize = 40, dateSize = 20;
 	private float currentClockSize;
 	private TextView coins, worth;
 	private int questionWorth;
@@ -77,6 +79,7 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
+	private boolean attached = false;
 
 	private DatabaseManager dbManager;
 
@@ -135,17 +138,17 @@ public class MainActivity extends Activity {
 		reduceWorth = new Runnable() {
 			@Override
 			public void run() {
-				// int d = Integer.parseInt(worth.getText().toString());
-				// d -= 1;
 				questionWorth -= 1;
 				if (questionWorth <= 0) {
-					// d = 0;
 					questionWorth = 0;
-					worth.setText(String.valueOf(questionWorth));
+					if (attached)
+						getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 				} else {
-					worth.setText(String.valueOf(questionWorth));
 					timerHandler.postDelayed(this, decreaseRate);
+					if (attached)
+						getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 				}
+				worth.setText(String.valueOf(questionWorth));
 			}
 		};
 
@@ -166,31 +169,18 @@ public class MainActivity extends Activity {
 		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
-		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		sharedPrefsStats = getSharedPreferences("Stats", 0);
-		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
-			joystick.setLeftRightHanded(false);
-		else
-			joystick.setLeftRightHanded(true);
-		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
-
-		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsStats = sharedPrefsStats.edit();
-		if (sharedPrefsMoney.getBoolean("first", true)) {
-			Pmoney = sharedPrefsMoney.getInt("paid_money", startingPmoney);
-			editorPrefsMoney.putBoolean("first", false);	// will commit in setMoney() call
-		} else
-			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
-		money = sharedPrefsMoney.getInt("money", 0);
-
-		setMoney();
-
 		if (savedInstanceState != null) {
 			quizMode = joystick.setQuizMode(savedInstanceState.getBoolean("Quiz"));
 			currentClockSize = savedInstanceState.getFloat("ClockSize");
 		}
-		setTime();
+
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsStats = sharedPrefsStats.edit();
+		getEnabledPackages();
+		setProblemAndAnswer(0);
 	}
 
 	@Override
@@ -202,6 +192,8 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onAttachedToWindow() {
+		attached = true;
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 	}
@@ -209,14 +201,15 @@ public class MainActivity extends Activity {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// at this point the activity has been measured and we can get the height
-		// only allow problem to get 1/5 of screen
-		problem.setHeight(layout.getBottom() / 5);
+		// now we can set a max height for answerView since it is dynamic
 		answerView.setParentHeight(layout.getBottom());
 		super.onWindowFocusChanged(hasFocus);
 	}
 
 	@Override
 	protected void onStop() {
+		if (attached)
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		super.onStop();
 	}
 
@@ -229,15 +222,24 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		Log.d("lifecycle test", "I'm in onResume " + code);
 		super.onResume();
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsStats = sharedPrefsStats.edit();
+		if (sharedPrefsMoney.getBoolean("first", true)) {
+			Pmoney = sharedPrefsMoney.getInt("paid_money", startingPmoney);
+			editorPrefsMoney.putBoolean("first", false);	// will commit in setMoney() call
+		} else
+			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
-		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		// save money into shared preferences
 		setMoney();
-
+		// set the clock to the correct time
+		setTime();
 		// set the current handedness
 		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
 			joystick.setLeftRightHanded(false);
@@ -246,7 +248,7 @@ public class MainActivity extends Activity {
 		// set the unlock type
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 		// start background service to wait for screen to turn off
-		getEnabledPackages();
+
 		Intent sIntent = new Intent(this, ScreenService.class);
 		if (EnabledPackages > 0) {
 			this.startService(sIntent);
@@ -255,14 +257,21 @@ public class MainActivity extends Activity {
 		}
 		// reset attempts to first attempt
 		attempts = 1;
-		// setup the question and answer and display it
-		setProblemAndAnswer(0);
+		// setup the question and answers
+		int temp = EnabledPackages;
+		getEnabledPackages();
+		if (temp != EnabledPackages)
+			setProblemAndAnswer(0);
+		else
+			resetTimes();
+		// show the settings bar and slide it down after 3 seconds
 		joystick.showStartAnimation(0, 3000);
 	}
 
 	@Override
 	protected void onPause() {
-		// SharedPreferences.Editor editor = sharedPrefsMoney.edit();
+		if (attached)
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		editorPrefsMoney.putInt("money", money);
 		editorPrefsMoney.putInt("paid_money", Pmoney);
 		editorPrefsMoney.commit();
@@ -298,12 +307,11 @@ public class MainActivity extends Activity {
 			mHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					startTime = System.currentTimeMillis();
 					questionWorth = 0;
-					timerHandler.removeCallbacks(reduceWorth);
-					timerHandler.postDelayed(reduceWorth, decreaseRate);
+					resetTimes();
 					answerView.resetGuess();
-					problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+					// TODO problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+					// problem.setCompoundDrawables(null, null, null, null);
 					joystick.unPauseSelection();
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
@@ -365,6 +373,14 @@ public class MainActivity extends Activity {
 				answerView.setAnswers(answersRandom);
 			}
 		}
+	}
+
+	private void resetTimes() {
+		startTime = System.currentTimeMillis();
+		questionWorth = difficulty * multiplier;
+		worth.setText(String.valueOf(questionWorth));
+		timerHandler.removeCallbacks(reduceWorth);
+		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
 
 	private void setMathProblem(int diffNum) {
