@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,7 +33,6 @@ import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.EZ;
 
 public class MainActivity extends Activity {
-	private long code;
 	final private int startingPmoney = 1000;
 	final private int multiplier = 5;
 	final private int decreaseRate = 1000;
@@ -63,6 +61,7 @@ public class MainActivity extends Activity {
 	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_language", "difficulty_act", "difficulty_sat",
 			"difficulty_gre", "difficulty_toddler", "difficulty_engineer" };
 	private int EnabledPackages = 0;
+	private boolean EnabledPacks[] = new boolean[PackageKeys.length];
 	private boolean UnlockedPackages = false;
 
 	private int answerLoc = 1;		// {correct answer location}
@@ -122,8 +121,7 @@ public class MainActivity extends Activity {
 		answerView.setReadyListener(new AnswerReadyListener() {
 			@Override
 			public void Ready() {
-				if (!answerView.getAnswers().equals(answersRandom))
-					answerView.setAnswers(answersRandom);
+				answerView.setAnswers(answersRandom);
 			}
 		});
 		joystick = (JoystickView) findViewById(R.id.joystick);
@@ -179,6 +177,8 @@ public class MainActivity extends Activity {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		editorPrefsStats = sharedPrefsStats.edit();
+		for (int i = 0; i < EnabledPacks.length; i++)
+			EnabledPacks[i] = false;
 		getEnabledPackages();
 		setProblemAndAnswer(0);
 	}
@@ -222,7 +222,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		Log.d("lifecycle test", "I'm in onResume " + code);
 		super.onResume();
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -258,9 +257,8 @@ public class MainActivity extends Activity {
 		// reset attempts to first attempt
 		attempts = 1;
 		// setup the question and answers
-		int temp = EnabledPackages;
-		getEnabledPackages();
-		if (temp != EnabledPackages)
+		boolean changed = getEnabledPackages();
+		if (changed)
 			setProblemAndAnswer(0);
 		else
 			resetTimes();
@@ -581,20 +579,27 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void getEnabledPackages() {
+	private boolean getEnabledPackages() {
 		int count = 0;
+		boolean changed = false;
+		boolean EnabledPacksBefore[] = EnabledPacks;
 		if (sharedPrefsMoney.getBoolean(unlockPackageKeys[0], false)) {
 			UnlockedPackages = true;
 		}
 		for (int i = 0; i < PackageKeys.length; i++) {
 			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
+				EnabledPacks[i] = true;
 				count++;
-			}
+			} else
+				EnabledPacks[i] = false;
 			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i + 1], false)) {
 				UnlockedPackages = true;
 			}
+			if (EnabledPacksBefore[i] != EnabledPacks[i])
+				changed = true;
 		}
 		EnabledPackages = count;
+		return changed;
 	}
 
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String discription, boolean correct, boolean unknown) {
