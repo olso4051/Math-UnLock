@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
@@ -35,9 +36,8 @@ public class ShowProgressActivity extends Activity {
 	private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
 	private GraphView graphView;
-	private String unlockPackageKeys[] = { "unlock_all", "unlock_math", "unlock_vocab", "unlock_language", "unlock_act", "unlock_sat",
-			"unlock_gre", "unlock_toddler", "unlock_engineer" };
-	private String displayPackageKeys[] = { "All", "Math", "Vocab", "Language", "ACT", "SAT", "GRE", "Toddler", "Engineer" };
+	private String unlockPackageKeys[];
+	private String displayPackageKeys[];
 	private String[] times = { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
 	private List<String> packages;
 	private String[] difficulties = { "All", "Hard", "Medium", "Easy" };
@@ -58,6 +58,13 @@ public class ShowProgressActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_progress);
+
+		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		displayPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		for (int i = 0; i < displayPackageKeys.length; i++) {
+			displayPackageKeys[i] = displayPackageKeys[i].substring(7);
+			displayPackageKeys[i] = displayPackageKeys[i].substring(0, 1).toUpperCase(Locale.ENGLISH) + displayPackageKeys[i].substring(1);
+		}
 
 		clock = (TextView) findViewById(R.id.clock);
 		clock.setOnClickListener(new OnClickListener() {
@@ -171,11 +178,13 @@ public class ShowProgressActivity extends Activity {
 			for (int i = 0; i < unlockPackageKeys.length; i++) {
 				list.add(displayPackageKeys[i]);
 			}
-		else
+		else {
+			list.add(displayPackageKeys[0]);
 			for (int i = 1; i < unlockPackageKeys.length; i++) {
 				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
 					list.add(displayPackageKeys[i]);
 			}
+		}
 		return list;
 	}
 

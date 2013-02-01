@@ -39,4 +39,36 @@
         <item name="dSlide">2</item>
     </string-array>
     
+    <string-array name="unlock_package_keys">
+        <item>unlock_all</item>
+        <item>unlock_math</item>
+        <item>unlock_vocab</item>
+        <item>unlock_language</item>
+        <item>unlock_act</item>
+        <item>unlock_sat</item>
+		<item>unlock_gre</item>
+		<item>unlock_toddler</item>
+		<item>unlock_engineer</item>
+    </string-array>
+    <string-array name="enable_package_keys">
+        <item>enable_math</item>
+        <item>enable_vocab</item>
+        <item>enable_language</item>
+        <item>enable_act</item>
+        <item>enable_sat</item>
+		<item>enable_gre</item>
+		<item>enable_toddler</item>
+		<item>enable_engineer</item>
+    </string-array>
+    <string-array name="difficulty_keys">
+        <item>difficulty_math</item>
+        <item>difficulty_vocab</item>
+        <item>difficulty_language</item>
+        <item>difficulty_act</item>
+        <item>difficulty_sat</item>
+		<item>difficulty_gre</item>
+		<item>difficulty_toddler</item>
+		<item>difficulty_engineer</item>
+    </string-array>
+    
 </resources>

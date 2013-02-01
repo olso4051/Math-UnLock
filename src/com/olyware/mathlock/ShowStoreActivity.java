@@ -20,15 +20,16 @@ public class ShowStoreActivity extends Activity {
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button buyAll;
 	private Button buyMath, buyVocab, buyLanguage, buyACT, buySAT, buyGRE, buyToddler, buyEngineer;
-	private String unlockPackageKeys[] = { "unlock_all", "unlock_math", "unlock_vocab", "unlock_language", "unlock_act", "unlock_sat",
-			"unlock_gre", "unlock_toddler", "unlock_engineer" };
-	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_language", "enable_act", "enable_sat", "enable_gre",
-			"enable_toddler", "enable_engineer" };
+	private String unlockPackageKeys[];
+	private String PackageKeys[];
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
+
+		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
+		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 
 		moneyText = (TextView) findViewById(R.id.money);
 

@@ -8,18 +8,20 @@ import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,18 +52,15 @@ public class MainActivity extends Activity {
 	private TextView problem;
 	private AnswerView answerView;
 	private boolean quizMode = false;
-	private boolean silentMode;
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String PackageKeys[] = { "enable_math", "enable_vocab", "enable_language", "enable_act", "enable_sat", "enable_gre",
-			"enable_toddler", "enable_engineer" };
-	private String unlockPackageKeys[] = { "unlock_all", "unlock_math", "unlock_vocab", "unlock_language", "unlock_act", "unlock_sat",
-			"unlock_gre", "unlock_toddler", "unlock_engineer" };
-	private String DifficultyKeys[] = { "difficulty_math", "difficulty_vocab", "difficulty_language", "difficulty_act", "difficulty_sat",
-			"difficulty_gre", "difficulty_toddler", "difficulty_engineer" };
+	private String PackageKeys[];
+	private String unlockPackageKeys[];
+	private String DifficultyKeys[];
+
 	private int EnabledPackages = 0;
-	private boolean EnabledPacks[] = new boolean[PackageKeys.length];
+	private boolean EnabledPacks[];
 	private boolean UnlockedPackages = false;
 
 	private int answerLoc = 1;		// {correct answer location}
@@ -69,7 +68,6 @@ public class MainActivity extends Activity {
 	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
 	private int attempts = 1;
 
-	private AudioManager am;
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
@@ -101,6 +99,11 @@ public class MainActivity extends Activity {
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
 		setContentView(R.layout.activity_main);
+
+		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
+		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
+		EnabledPacks = new boolean[PackageKeys.length];
 
 		layout = (LinearLayout) findViewById(R.id.layout);
 
@@ -150,16 +153,6 @@ public class MainActivity extends Activity {
 			}
 		};
 
-		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		switch (am.getRingerMode()) {
-		case AudioManager.RINGER_MODE_SILENT:
-		case AudioManager.RINGER_MODE_VIBRATE:
-			silentMode = joystick.setSilentMode(true);
-			break;
-		case AudioManager.RINGER_MODE_NORMAL:
-			silentMode = joystick.setSilentMode(false);
-			break;
-		}
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
@@ -246,21 +239,26 @@ public class MainActivity extends Activity {
 			joystick.setLeftRightHanded(true);
 		// set the unlock type
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
-		// start background service to wait for screen to turn off
+		// reset attempts to first attempt
+		attempts = 1;
 
+		// get unlocked and enabled item changes
+		boolean changed = getEnabledPackages();
+
+		// start background service to wait for screen to turn off
 		Intent sIntent = new Intent(this, ScreenService.class);
 		if (EnabledPackages > 0) {
 			this.startService(sIntent);
 		} else {
 			this.stopService(sIntent);
 		}
-		// reset attempts to first attempt
-		attempts = 1;
 		// setup the question and answers
-		boolean changed = getEnabledPackages();
 		if (changed)
 			setProblemAndAnswer(0);
-		else
+		else if (!UnlockedPackages) {
+			Log.d("unlocked test", "unlocked packages = false");
+			displayInfo(true);
+		} else
 			resetTimes();
 		// show the settings bar and slide it down after 3 seconds
 		joystick.showStartAnimation(0, 3000);
@@ -582,7 +580,10 @@ public class MainActivity extends Activity {
 	private boolean getEnabledPackages() {
 		int count = 0;
 		boolean changed = false;
-		boolean EnabledPacksBefore[] = EnabledPacks;
+		boolean EnabledPacksBefore[] = new boolean[EnabledPacks.length];
+		for (int i = 0; i < EnabledPacks.length; i++)
+			EnabledPacksBefore[i] = EnabledPacks[i];
+
 		if (sharedPrefsMoney.getBoolean(unlockPackageKeys[0], false)) {
 			UnlockedPackages = true;
 		}
@@ -702,14 +703,8 @@ public class MainActivity extends Activity {
 				}
 			});
 			break;
-		case 5:		// sound/silent was selected
-			if (silentMode) {
-				am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-			} else {
-				am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-			}
-			silentMode = joystick.setSilentMode(!silentMode);
-
+		case 5:		// info was selected
+			displayInfo(false);
 			break;
 		case 6:		// Store was selected
 			startActivity(new Intent(this, ShowStoreActivity.class));
@@ -727,7 +722,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setMoney() {
-		// SharedPreferences.Editor editor = sharedPrefsMoney.edit();
 		editorPrefsMoney.putInt("money", money);
 		editorPrefsMoney.putInt("paid_money", Pmoney);
 		editorPrefsMoney.commit();
@@ -780,5 +774,35 @@ public class MainActivity extends Activity {
 			currentClockSize = dateSize;
 			setTime();
 		}
+	}
+
+	private void displayInfo(boolean first) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		if (first) {
+
+			builder.setTitle(R.string.info_title_first);
+			builder.setMessage(R.string.info_message_first);
+			builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					startActivity(new Intent(getApplicationContext(), ShowStoreActivity.class));
+				}
+			});
+			builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// nothing to do
+				}
+			});
+		} else {
+			builder.setTitle(R.string.info_title);
+			builder.setMessage(R.string.info_message).setCancelable(false);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// nothing to do
+				}
+			});
+		}
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 }

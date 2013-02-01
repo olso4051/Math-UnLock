@@ -23,12 +23,12 @@ public class JoystickView extends View {
 	// private Bitmap bmp, bmp_handle;
 	// private Bitmap bmp_silent, bmp_sound, bmp_quizMode, bmp_set, bmp_em, bmp_sil, bmp_A, bmp_B, bmp_C, bmp_D;
 	// private Bitmap bmp_select;
-	private Bitmap bmpA, bmpB, bmpC, bmpD, bmpU, bmpSet, bmpS, bmpQ, bmpP, bmpStore, bmpSil, bmpSnd;
+	private Bitmap bmpA, bmpB, bmpC, bmpD, bmpU, bmpSet, bmpS, bmpQ, bmpP, bmpStore, bmpI;
 	private Bitmap bmpAs, bmpBs, bmpCs, bmpDs, bmpUs, bmpQs;
 	// private Rect dstRectForRender, dstRectForHandle;
 	// private Rect srcRectForRender, srcRectForHandle;
 	private Rect dstRectForA, dstRectForB, dstRectForC, dstRectForD, dstRectForU;
-	private Rect dstRectForSet, dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForSnd;
+	private Rect dstRectForSet, dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI;
 	private Rect srcRectForAns, srcRectForBig, srcRectForSmall, srcRectForSet;
 	private Paint circlePaint[] = new Paint[NumAnswers];
 	private Paint textPaint, sidePaint, optionPaint;
@@ -51,10 +51,7 @@ public class JoystickView extends View {
 	private JoystickSelectListener listener;
 	private JoystickTouchListener listenerTouch;
 
-	private boolean settingsMode;
 	private boolean quizMode;
-	private boolean emergencyMode;
-	private boolean silentMode;
 	private boolean LtrueRfalse;
 	private boolean selectAnswers[] = new boolean[NumAnswers];
 	private boolean selectOptions[] = new boolean[5];
@@ -162,9 +159,10 @@ public class JoystickView extends View {
 		bmpQs = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2s);
 		bmpP = BitmapFactory.decodeResource(getResources(), R.drawable.select_p2);
 		bmpStore = BitmapFactory.decodeResource(getResources(), R.drawable.select_store2);
-		bmpSil = BitmapFactory.decodeResource(getResources(), R.drawable.select_sil2);
+		bmpI = BitmapFactory.decodeResource(getResources(), R.drawable.select_i2);
+		/*bmpSil = BitmapFactory.decodeResource(getResources(), R.drawable.select_sil2);
 		bmpSnd = BitmapFactory.decodeResource(getResources(), R.drawable.select_sound2);
-		/*bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background2);
+		bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background2);
 		bmp_handle = BitmapFactory.decodeResource(getResources(), R.drawable.unlock);
 		bmp_set = BitmapFactory.decodeResource(getResources(), R.drawable.select_s);
 		bmp_quizMode = BitmapFactory.decodeResource(getResources(), R.drawable.select_q);
@@ -207,7 +205,7 @@ public class JoystickView extends View {
 		dstRectForQ = new Rect();
 		dstRectForP = new Rect();
 		dstRectForE = new Rect();
-		dstRectForSnd = new Rect();
+		dstRectForI = new Rect();
 
 		initRunnables();
 
@@ -263,21 +261,6 @@ public class JoystickView extends View {
 	public boolean setQuizMode(boolean quizMode) {
 		this.quizMode = quizMode;
 		return this.quizMode;
-	}
-
-	public boolean setSettingsMode(boolean settingsMode) {
-		this.settingsMode = settingsMode;
-		return this.settingsMode;
-	}
-
-	public boolean setSilentMode(boolean silentMode) {
-		this.silentMode = silentMode;
-		return this.silentMode;
-	}
-
-	public boolean setEmergencyMode(boolean emergencyMode) {
-		this.emergencyMode = emergencyMode;
-		return this.emergencyMode;
 	}
 
 	public void setLeftRightHanded(boolean LtrueRfalse) {
@@ -421,11 +404,12 @@ public class JoystickView extends View {
 			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, sidePaint);
 		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, sidePaint);
 		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, sidePaint);
-		if (silentMode) {
+		canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, sidePaint);
+		/*if (silentMode) {
 			canvas.drawBitmap(bmpSil, srcRectForSmall, dstRectForSnd, sidePaint);
 		} else {
 			canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, sidePaint);
-		}
+		}*/
 
 		dstRectForA.set((int) X[0] - rAns, (int) Y[0] - rAns, (int) X[0] + rAns, (int) Y[0] + rAns);
 		dstRectForB.set((int) X[1] - rAns, (int) Y[1] - rAns, (int) X[1] + rAns, (int) Y[1] + rAns);
@@ -813,7 +797,7 @@ public class JoystickView extends View {
 			diffy = touchY - startY;
 			if (selectOptions[0]) {
 				s = 5;
-				dstRectForSnd.set((int) touchX - rSmall, (int) touchY - rSmall, (int) touchX + rSmall, (int) touchY + rSmall);
+				dstRectForI.set((int) touchX - rSmall, (int) touchY - rSmall, (int) touchX + rSmall, (int) touchY + rSmall);
 			} else if (selectOptions[1]) {
 				s = 6;
 				dstRectForE.set((int) touchX - rBig, (int) touchY - rBig, (int) touchX + rBig, (int) touchY + rBig);
@@ -980,7 +964,7 @@ public class JoystickView extends View {
 		dstRectForQ.set(selectLeft[3], temp - rBig * 2, selectRight[3], temp);
 		dstRectForP.set(selectLeft[2], temp - rBig * 2, selectRight[2], temp);
 		dstRectForE.set(selectLeft[1], temp - rBig * 2, selectRight[1], temp);
-		dstRectForSnd.set(selectLeft[0], temp - rBig - rSmall, selectRight[0], temp - rBig + rSmall);
+		dstRectForI.set(selectLeft[0], temp - rBig - rSmall, selectRight[0], temp - rBig + rSmall);
 	}
 	/*private void checkSelection(double ang, boolean send) {
 		select = false;

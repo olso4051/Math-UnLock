@@ -21,8 +21,14 @@
     <string name="extra_coins1">1000 Coins</string>
     <string name="extra_coins2">5000 Coins</string>
     <string name="extra_coins3">10000 Coins</string>
+    <string name="goto_store">Goto Store</string>
     <string name="handed_default">Right</string>
     <string name="handed_title">Handedness</string>
+    <string name="info_title">Info</string>
+    <string name="info_title_first">Thanks for trying hIghQ!</string>
+    <string name="info_message">Questions come up randomly based on your settings. Answer questions to earn coins, higher difficulty questions are worth more coins.</string>
+    <string name="info_message_first">We gave you 1000 coins to start! Go to the store (in the settings and info tab) and unlock your first question pack</string>
+    <string name="later">Not Now</string>
     <string name="max_tries_default">1</string>
     <string name="max_tries_title">Maximum Attempts</string>
     <string name="max_tries_summary">1</string>
