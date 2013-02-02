@@ -80,6 +80,7 @@ public class MainActivity extends Activity {
 	private boolean attached = false;
 
 	private DatabaseManager dbManager;
+	private static Context ctx;
 
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
@@ -93,13 +94,18 @@ public class MainActivity extends Activity {
 		}
 	};
 
+	public static Context getContext() {
+		return ctx;
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
-		setContentView(R.layout.activity_main);
+		ctx = this;
 
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
@@ -470,7 +476,7 @@ public class MainActivity extends Activity {
 		// Get random question
 		Random random = new Random();
 		List<Integer> questionIndexes = EZ.list();
-		int rand = random.nextInt(questions.size() - 1);
+		int rand = random.nextInt(questions.size());
 		questionIndexes.add(rand);
 		VocabQuestion question = questions.get(rand);
 
@@ -509,7 +515,7 @@ public class MainActivity extends Activity {
 		// Get random question
 		Random random = new Random();
 		List<Integer> questionIndexes = EZ.list();
-		int rand = random.nextInt(questions.size() - 1);
+		int rand = random.nextInt(questions.size());
 		questionIndexes.add(rand);
 		LanguageQuestion question = questions.get(rand);
 

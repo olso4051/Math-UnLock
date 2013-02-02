@@ -44,10 +44,22 @@
     <string-array name="language_entries">
         <item name="english">English</item>
         <item name="spanish">Spanish</item>
+        <item name="portuguese">Portuguese</item>
+        <item name="russian">Russian</item>
+        <item name="german">German</item>
+        <item name="czech">Czech</item>
+        <item name="danish">Danish</item>
+        <item name="dutch">Dutch</item>
     </string-array>
-    <string-array name="language_values">
+    <string-array name="language_values_not_localized">
         <item name="english">english</item>
         <item name="spanish">spanish</item>
+        <item name="portuguese">portuguese</item>
+        <item name="russian">russian</item>
+        <item name="german">german</item>
+        <item name="czech">czech</item>
+        <item name="danish">danish</item>
+        <item name="dutch">dutch</item>
     </string-array>
     
     <string-array name="unlock_package_keys">

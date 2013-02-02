@@ -1,30 +1,25 @@
 package com.olyware.mathlock.database.contracts;
 
+import com.olyware.mathlock.MainActivity;
+import com.olyware.mathlock.R;
+
 public class LanguageQuestionContract extends QuestionContract {
 
 	public static final String TABLE_NAME = "t_language_question";
-	public static final String[] ALL_COLUMNS;
+	public static final String[] ALL_COLUMNS = new String[LanguageQuestionContract.LANGUAGES.length + 2];
 
 	static {
-		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.DIFFICULTY, LanguageQuestionContract.ENGLISH,
-				LanguageQuestionContract.SPANISH, LanguageQuestionContract.PORTUGUESE, LanguageQuestionContract.RUSSIAN,
-				LanguageQuestionContract.GERMAN, LanguageQuestionContract.CZECH, LanguageQuestionContract.DANISH,
-				LanguageQuestionContract.DUTCH };
+		ALL_COLUMNS[0] = BaseContract._ID;
+		ALL_COLUMNS[1] = QuestionContract.DIFFICULTY;
+		for (int i = 2; i < LanguageQuestionContract.LANGUAGES.length + 2; i++)
+			ALL_COLUMNS[i] = LanguageQuestionContract.LANGUAGES[i];
 	}
 
 	// COLUMN DEFS
 	/**
 	 * Type: TEXT
 	 */
-	public static final String LANGUAGES[] = { "english", "spanish", "portuguese", "russian", "german", "czech", "danish", "dutch" };
-	public static final String ENGLISH = "english";
-	public static final String SPANISH = "spanish";
-	public static final String PORTUGUESE = "portuguese";
-	public static final String RUSSIAN = "russian";
-	public static final String GERMAN = "german";
-	public static final String CZECH = "czech";
-	public static final String DANISH = "danish";
-	public static final String DUTCH = "dutch";
+	public static final String LANGUAGES[] = MainActivity.getContext().getResources().getStringArray(R.array.language_values_not_localized);
 
 	// Prevent instantiation of this class
 	private LanguageQuestionContract() {

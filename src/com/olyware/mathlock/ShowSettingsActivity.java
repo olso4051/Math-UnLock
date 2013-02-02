@@ -1,7 +1,5 @@
 package com.olyware.mathlock;
 
-import java.util.Locale;
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
@@ -11,13 +9,11 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.view.WindowManager;
 
-import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
-
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private String unlockPackageKeys[];
 	private String settingsPackageKeys[];
 	private String DifficultyKeys[];
-	private String Languages[], UpperLanguages[];
+	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage;
 
 	@SuppressWarnings("deprecation")
@@ -28,21 +24,13 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
-		Languages = LanguageQuestionContract.LANGUAGES;
-		UpperLanguages = LanguageQuestionContract.LANGUAGES;
-		for (int i = 0; i < Languages.length; i++) {
-			UpperLanguages[i] = Languages[i].substring(0, 1).toUpperCase(Locale.ENGLISH) + Languages[i].substring(1);
-		}
+
 		SharedPreferences sharedPrefs = getPreferenceScreen().getSharedPreferences();
 		SharedPreferences sharedPrefsMoney = this.getSharedPreferences("Packages", 0);
 
-		// set valid language entries
+		// set valid language values
 		fromLanguage = (ListPreference) findPreference("from_language");
 		toLanguage = (ListPreference) findPreference("to_language");
-		fromLanguage.setEntries(UpperLanguages);
-		fromLanguage.setEntryValues(Languages);
-		toLanguage.setEntries(UpperLanguages);
-		toLanguage.setEntryValues(Languages);
 		setLanguageSummaries(sharedPrefs);
 
 		// Set summary to be the user-description for the selected value
@@ -93,17 +81,14 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		} else if (key.equals("type")) {
 			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "2")));
 		} else if (key.equals("from_language")) {
-			// if you changed from_language to the same as to_language then increment to_language by 1
-			boolean sameFromTo = sharedPrefs.getString("from_language", getString(R.string.language_from_default)).equals(
-					sharedPrefs.getString("to_language", getString(R.string.language_to_default)));
-			if (sameFromTo)
-				toLanguage.setValueIndex((toLanguage.findIndexOfValue(toLanguage.getValue()) + 1) % Languages.length);
+			// if you changed from_language to the same as to_language then swap to_language to old from_language
+			if (fromLanguage.findIndexOfValue(fromLanguage.getValue()) == toOldValueIndex)
+				toLanguage.setValueIndex(fromOldValueIndex);
 			setLanguageSummaries(sharedPrefs);
 		} else if (key.equals("to_language")) {
-			boolean sameFromTo = sharedPrefs.getString("from_language", getString(R.string.language_from_default)).equals(
-					sharedPrefs.getString("to_language", getString(R.string.language_to_default)));
-			if (sameFromTo)
-				fromLanguage.setValueIndex((fromLanguage.findIndexOfValue(fromLanguage.getValue()) + 1) % Languages.length);
+			// opposite of from_language change
+			if (toLanguage.findIndexOfValue(toLanguage.getValue()) == fromOldValueIndex)
+				fromLanguage.setValueIndex(toOldValueIndex);
 			setLanguageSummaries(sharedPrefs);
 		}
 	}
@@ -160,11 +145,9 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	}
 
 	private void setLanguageSummaries(SharedPreferences sharedPrefs) {
-		String summary = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
-		summary = summary.substring(0, 1).toUpperCase(Locale.ENGLISH) + summary.substring(1);
-		fromLanguage.setSummary(summary);
-		summary = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
-		summary = summary.substring(0, 1).toUpperCase(Locale.ENGLISH) + summary.substring(1);
-		toLanguage.setSummary(summary);
+		fromOldValueIndex = fromLanguage.findIndexOfValue(fromLanguage.getValue());
+		fromLanguage.setSummary(fromLanguage.getEntry());
+		toOldValueIndex = toLanguage.findIndexOfValue(toLanguage.getValue());
+		toLanguage.setSummary(toLanguage.getEntry());
 	}
 }
