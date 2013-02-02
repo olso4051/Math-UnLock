@@ -68,7 +68,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			// Set summary to be the user-description for the selected value
 			connectionPref.setSummary(difficultyIntToString(sharedPrefs.getString(key, "")));
 		} else if (key.equals("max_tries")) {
-			connectionPref.setSummary(sharedPrefs.getString(key, "1"));
+			String summary = ((sharedPrefs.getString(key, "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString(key, "1")));
+			connectionPref.setSummary(summary);
 		} else if (key.equals("handed")) {
 			connectionPref.setSummary(sharedPrefs.getString(key, "Right"));
 		} else if (key.equals("type")) {

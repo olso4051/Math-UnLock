@@ -16,11 +16,13 @@
         <item name="1">1</item>
         <item name="2">2</item>
         <item name="3">3</item>
+        <item name="4">Unlimited</item>
     </string-array>
     <string-array name="max_tries_values">
         <item name="1">1</item>
         <item name="2">2</item>
         <item name="3">3</item>
+        <item name="4">4</item>
     </string-array>
 
     <string-array name="handed_entries">

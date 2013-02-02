@@ -465,7 +465,7 @@ public class MainActivity extends Activity {
 	private void setVocabProblem(int diffNum) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum));
-
+		// questions.addAll(questions);
 		// Get random question
 		Random random = new Random();
 		List<Integer> questionIndexes = EZ.list();
@@ -650,6 +650,7 @@ public class MainActivity extends Activity {
 
 	private void JoystickSelected(int s) {
 		vib.vibrate(50);	// vibrate for 50ms
+		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
 		switch (s) {
 		case 0:		// A was selected
 		case 1:		// B was selected
@@ -658,7 +659,7 @@ public class MainActivity extends Activity {
 			timerHandler.removeCallbacks(reduceWorth);
 			if (EnabledPackages == 0) {
 				this.finish();
-			} else if (attempts >= Integer.parseInt(sharedPrefs.getString("max_tries", "1")) && !(answerLoc == s) && !quizMode) {
+			} else if (attempts >= maxAttempts && !(answerLoc == s) && !quizMode && maxAttempts < 4) {
 				updateStats(false);
 				displayCorrectOrNot(answerLoc, s, "Too Many Wrong\n", false, false);
 				joystick.pauseSelection();

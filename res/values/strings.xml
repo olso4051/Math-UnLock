@@ -5,7 +5,7 @@
     <string name="coins">Image of coins</string>
     <string name="date">Monday\nJanuary 1</string>
     <string name="default_money">0</string>
-    <string name="difficulty">Difficulty</string>
+    <string name="difficulty">Max Difficulty</string>
     <string name="difficulty_default">1</string>
     <string name="difficulty_summary">Easy</string>
     <string name="enable">Enable</string>
