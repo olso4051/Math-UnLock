@@ -41,6 +41,15 @@
         <item name="dSlide">2</item>
     </string-array>
     
+    <string-array name="language_entries">
+        <item name="english">English</item>
+        <item name="spanish">Spanish</item>
+    </string-array>
+    <string-array name="language_values">
+        <item name="english">english</item>
+        <item name="spanish">spanish</item>
+    </string-array>
+    
     <string-array name="unlock_package_keys">
         <item>unlock_all</item>
         <item>unlock_math</item>
@@ -71,6 +80,16 @@
 		<item>difficulty_gre</item>
 		<item>difficulty_toddler</item>
 		<item>difficulty_engineer</item>
+    </string-array>
+    <string-array name="settings_keys">
+        <item>settings_math</item>
+        <item>settings_vocab</item>
+        <item>settings_language</item>
+        <item>settings_act</item>
+        <item>settings_sat</item>
+		<item>settings_gre</item>
+		<item>settings_toddler</item>
+		<item>settings_engineer</item>
     </string-array>
     
 </resources>

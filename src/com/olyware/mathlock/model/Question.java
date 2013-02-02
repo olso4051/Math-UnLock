@@ -61,7 +61,7 @@ public abstract class Question {
 
 	@Override
 	public String toString() {
-		return "Question [text=" + text + ", correctAnswer=" + correctAnswer + ", difficulty=" + difficulty + "]";
+		return "Question [text=" + text + ",Answer=" + correctAnswer + ",difficulty=" + difficulty + "]";
 	}
 
 }

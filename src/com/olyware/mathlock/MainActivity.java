@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.EZ;
 
@@ -500,16 +501,42 @@ public class MainActivity extends Activity {
 	}
 
 	private void setLanguageProblem(int diffNum) {
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
+		// TODO: don't query the DB every time we display a question. Needs a cache.
+		String fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
+		String toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diffNum), fromLanguage, toLanguage);
+		// questions.addAll(questions);
+		// Get random question
+		Random random = new Random();
+		List<Integer> questionIndexes = EZ.list();
+		int rand = random.nextInt(questions.size() - 1);
+		questionIndexes.add(rand);
+		LanguageQuestion question = questions.get(rand);
+
+		// Add the correct answer to the answers list
+		List<String> answersList = EZ.list();
+		answersList.add(question.getCorrectAnswer());
+
+		// Set the new difficulty based on what question was picked
+		difficulty = question.getDifficulty().getValue();
+		questionWorth = difficulty * multiplier;
+		worth.setText(String.valueOf(questionWorth));
+
+		// Get 3 wrong answers and avoid duplicates
+		for (int i = 0; i < 3; i++) {
+			while (true) {
+				rand = random.nextInt(questions.size());
+				if (!questionIndexes.contains(rand)) {
+					questionIndexes.add(rand);
+					break;
+				}
+			}
+			answersList.add(questions.get(rand).getCorrectAnswer());
 		}
+
+		// Display the Language question and answers
+		answers = answersList.toArray(new String[answersList.size()]);
+		problem.setText("Define: " + question.getText());
 	}
 
 	private void setACTProblem(int diffNum) {

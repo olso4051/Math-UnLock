@@ -7,9 +7,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.VocabQuestion;
 
 public class DatabaseManager {
@@ -41,5 +43,23 @@ public class DatabaseManager {
 		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
 		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, whereArgs, null, null, null);
 		return DatabaseModelFactory.buildVocabQuestions(cursor);
+	}
+
+	/*
+	 * doesn't work because LanguageQuestion doesn't hold all the languages, just the from and to languages
+	public void addLanguageQuestion(LanguageQuestion question) {
+		ContentValues values = new ContentValues();
+		values.put(QuestionContract.ANSWER_CORRECT, question.getCorrectAnswer());
+		values.put(QuestionContract.DIFFICULTY, question.getDifficulty().getValue());
+		values.put(QuestionContract.QUESTION_TEXT, question.getText());
+		db.insert(LanguageQuestionContract.TABLE_NAME, null, values);
+	}*/
+
+	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
+		String where = "difficulty <= ?";
+		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
+		String[] columns = { fromLanguage, toLanguage };
+		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, whereArgs, null, null, null);
+		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
 }

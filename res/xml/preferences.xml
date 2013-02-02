@@ -79,6 +79,22 @@
 	        android:entries="@array/difficulty_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
+	    <ListPreference
+	        android:key="from_language"
+	        android:title="@string/language_from"
+	        android:summary="@string/language_from_default"
+	        android:dialogTitle="@string/language_from"
+	        android:entries="@array/language_entries"
+	        android:entryValues="@array/language_values"
+	        android:defaultValue="@string/language_from_default" />
+	    <ListPreference
+	        android:key="to_language"
+	        android:title="@string/language_to"
+	        android:summary="@string/language_to_default"
+	        android:dialogTitle="@string/language_to"
+	        android:entries="@array/language_entries"
+	        android:entryValues="@array/language_values"
+	        android:defaultValue="@string/language_to_default" />
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_act_title"

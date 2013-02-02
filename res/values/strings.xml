@@ -28,6 +28,10 @@
     <string name="info_title_first">Thanks for trying hIghQ!</string>
     <string name="info_message">Questions come up randomly based on your settings. Answer questions to earn coins, higher difficulty questions are worth more coins.</string>
     <string name="info_message_first">We gave you 1000 coins to start! Go to the store (in the settings and info tab) and unlock your first question pack</string>
+    <string name="language_from">Translate from</string>
+    <string name="language_to">Translate to</string>
+    <string name="language_from_default">english</string>
+    <string name="language_to_default">spanish</string>
     <string name="later">Not Now</string>
     <string name="max_tries_default">1</string>
     <string name="max_tries_title">Maximum Attempts</string>
