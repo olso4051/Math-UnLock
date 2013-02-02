@@ -12,7 +12,7 @@
     <string name="enable_act_summary">Answer ACT questions</string>
     <string name="enable_engineer_summary">Answer Engineering questions</string>
     <string name="enable_gre_summary">Answer GRE questions</string>
-    <string name="enable_language_summary">Answer EN->ES questions</string>
+    <string name="enable_language_summary">Answer Language questions</string>
     <string name="enable_math_summary">Answer math questions</string>
     <string name="enable_sat_summary">Answer SAT questions</string>
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
