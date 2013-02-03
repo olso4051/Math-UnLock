@@ -74,9 +74,9 @@
 	    <ListPreference
 	        android:key="difficulty_language"
 	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary"
+	        android:summary="@string/difficulty_summary_language"
 	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
+	        android:entries="@array/difficulty_language_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
 	    <ListPreference

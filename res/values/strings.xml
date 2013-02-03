@@ -7,7 +7,8 @@
     <string name="default_money">0</string>
     <string name="difficulty">Max Difficulty</string>
     <string name="difficulty_default">1</string>
-    <string name="difficulty_summary">Easy</string>
+    <string name="difficulty_summary">Very Easy</string>
+    <string name="difficulty_summary_language">Numbers</string>
     <string name="enable">Enable</string>
     <string name="enable_act_summary">Answer ACT questions</string>
     <string name="enable_engineer_summary">Answer Engineering questions</string>

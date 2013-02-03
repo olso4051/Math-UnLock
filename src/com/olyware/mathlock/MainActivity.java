@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,9 +55,7 @@ public class MainActivity extends Activity {
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String PackageKeys[];
-	private String unlockPackageKeys[];
-	private String DifficultyKeys[];
+	private String PackageKeys[], unlockPackageKeys[], DifficultyKeys[], LanguageEntries[], LanguageValues[];
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
@@ -110,6 +107,7 @@ public class MainActivity extends Activity {
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
+		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 		EnabledPacks = new boolean[PackageKeys.length];
 
 		layout = (LinearLayout) findViewById(R.id.layout);
@@ -246,6 +244,10 @@ public class MainActivity extends Activity {
 			joystick.setLeftRightHanded(true);
 		// set the unlock type
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+
+		// get the localized language entries
+		LanguageEntries = getResources().getStringArray(R.array.language_entries);
+
 		// reset attempts to first attempt
 		attempts = 1;
 
@@ -263,7 +265,6 @@ public class MainActivity extends Activity {
 		if (changed)
 			setProblemAndAnswer(0);
 		else if (!UnlockedPackages) {
-			Log.d("unlocked test", "unlocked packages = false");
 			displayInfo(true);
 		} else
 			resetTimes();
@@ -404,7 +405,10 @@ public class MainActivity extends Activity {
 			first = rand.nextInt(41) - 20;				// -20 through 20
 			second = rand.nextInt(41) - 20;				// -20 through 20
 			break;
-		case 3:				// Hard question
+		case 3:
+		case 4:
+		case 5:
+		case 6:				// Hard question
 			// add, subtract, multiply, and divide options
 			operator = rand.nextInt(4);
 			first = rand.nextInt(201) - 100;			// -100 through 100
@@ -503,13 +507,20 @@ public class MainActivity extends Activity {
 
 		// Display the vocab question and answers
 		answers = answersList.toArray(new String[answersList.size()]);
-		problem.setText("Define: " + question.getText());
+		problem.setText("Define: " + question.getQuestionText());
 	}
 
 	private void setLanguageProblem(int diffNum) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		String fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		String toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+		String fromLanguageLocal = fromLanguage, toLanguageLocal = toLanguage;
+		for (int i = 0; i < LanguageValues.length; i++) {
+			if (LanguageValues[i].equals(fromLanguage))
+				fromLanguageLocal = LanguageEntries[i];
+			else if (LanguageValues[i].equals(toLanguage))
+				toLanguageLocal = LanguageEntries[i];
+		}
 		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diffNum), fromLanguage, toLanguage);
 		// questions.addAll(questions);
 		// Get random question
@@ -542,7 +553,7 @@ public class MainActivity extends Activity {
 
 		// Display the Language question and answers
 		answers = answersList.toArray(new String[answersList.size()]);
-		problem.setText("Define: " + question.getText());
+		problem.setText(fromLanguageLocal + " -> " + toLanguageLocal + "\n" + question.getQuestionText());
 	}
 
 	private void setACTProblem(int diffNum) {

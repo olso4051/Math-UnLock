@@ -36,7 +36,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		// Set summary to be the user-description for the selected value
 		for (int i = 0; i < DifficultyKeys.length; i++) {
 			Preference Pref_diff = findPreference(DifficultyKeys[i]);
-			Pref_diff.setSummary(difficultyIntToString(sharedPrefs.getString(DifficultyKeys[i], "1")));
+			Pref_diff.setSummary(difficultyIntToString(DifficultyKeys[i], sharedPrefs.getString(DifficultyKeys[i], "1")));
 		}
 		Preference Pref_max_tries = findPreference("max_tries");
 		Preference Pref_handed = findPreference("handed");
@@ -72,7 +72,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		}
 		if (difficultyChanged) {
 			// Set summary to be the user-description for the selected value
-			connectionPref.setSummary(difficultyIntToString(sharedPrefs.getString(key, "")));
+			connectionPref.setSummary(difficultyIntToString(key, sharedPrefs.getString(key, "")));
 		} else if (key.equals("max_tries")) {
 			String summary = ((sharedPrefs.getString(key, "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString(key, "1")));
 			connectionPref.setSummary(summary);
@@ -113,23 +113,22 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 	}
 
-	private String difficultyIntToString(String key) {
+	private String difficultyIntToString(String key, String Number) {
 		int diffNum = 0;
 		try {
-			diffNum = Integer.parseInt(key);
+			diffNum = Integer.parseInt(Number);
 		} catch (NumberFormatException nfe) {
 			System.out.println("Could not parse " + nfe);
 		}
-		switch (diffNum) {
-		case 1:
-			return "Easy";
-		case 2:
-			return "Medium";
-		case 3:
-			return "Hard";
-		default:
-			return "Unknown";
-		}
+		if (key.equals("difficulty_language"))
+			return difficultyLanguageIntToString(diffNum);
+		String[] difficulty = getResources().getStringArray(R.array.difficulty_entries);
+		return difficulty[diffNum - 1];
+	}
+
+	private String difficultyLanguageIntToString(int diffNum) {
+		String[] difficulty = getResources().getStringArray(R.array.difficulty_language_entries);
+		return difficulty[diffNum - 1];
 	}
 
 	private String typeIntToString(String key) {

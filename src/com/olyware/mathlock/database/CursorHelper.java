@@ -2,11 +2,9 @@ package com.olyware.mathlock.database;
 
 import android.database.Cursor;
 
-
 public class CursorHelper {
 
 	Cursor cursor;
-
 
 	public CursorHelper(Cursor cursor) {
 		this.cursor = cursor;

@@ -2,7 +2,7 @@ package com.olyware.mathlock.model;
 
 public enum Difficulty {
 
-	EASY(1), MEDIUM(2), HARD(3);
+	VERY_EASY(1), EASY(2), MEDIUM(3), HARD(4), VERY_HARD(5), INSANE(6);
 
 	private int value;
 
@@ -15,13 +15,22 @@ public enum Difficulty {
 
 		switch (value) {
 		case 1:
-			difficulty = EASY;
+			difficulty = VERY_EASY;
 			break;
 		case 2:
-			difficulty = MEDIUM;
+			difficulty = EASY;
 			break;
 		case 3:
+			difficulty = MEDIUM;
+			break;
+		case 4:
 			difficulty = HARD;
+			break;
+		case 5:
+			difficulty = VERY_HARD;
+			break;
+		case 6:
+			difficulty = INSANE;
 			break;
 		}
 

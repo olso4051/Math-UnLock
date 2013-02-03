@@ -13,7 +13,7 @@ public abstract class Question {
 		this.difficulty = difficulty;
 	}
 
-	public String getText() {
+	public String getQuestionText() {
 		return text;
 	}
 

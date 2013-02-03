@@ -28,7 +28,7 @@ public class DatabaseManager {
 		ContentValues values = new ContentValues();
 		values.put(QuestionContract.ANSWER_CORRECT, question.getCorrectAnswer());
 		values.put(QuestionContract.DIFFICULTY, question.getDifficulty().getValue());
-		values.put(QuestionContract.QUESTION_TEXT, question.getText());
+		values.put(QuestionContract.QUESTION_TEXT, question.getQuestionText());
 		// values.put(VocabQuestionContract.PART_OF_SPEECH, question.getText());
 		db.insert(VocabQuestionContract.TABLE_NAME, null, values);
 	}
@@ -58,7 +58,7 @@ public class DatabaseManager {
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
 		String where = "difficulty <= ?";
 		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
-		String[] columns = { fromLanguage, toLanguage };
+		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, whereArgs, null, null, null);
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}

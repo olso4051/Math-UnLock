@@ -2,14 +2,28 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     
     <string-array name="difficulty_entries">
+        <item name="very_easy">Very Easy</item>
         <item name="easy">Easy</item>
         <item name="medium">Medium</item>
         <item name="hard">Hard</item>
+        <item name="very_hard">Very Hard</item>
+        <item name="insane">Insane</item>
     </string-array>
     <string-array name="difficulty_values">
-        <item name="easy">1</item>
-        <item name="medium">2</item>
-        <item name="hard">3</item>
+        <item name="very_easy">1</item>
+        <item name="easy">2</item>
+        <item name="medium">3</item>
+        <item name="hard">4</item>
+        <item name="very_hard">5</item>
+        <item name="insane">6</item>
+    </string-array>
+    <string-array name="difficulty_language_entries">
+        <item name="very_easy">Very Easy (Numbers)</item>
+        <item name="easy">Easy</item>
+        <item name="medium">Medium</item>
+        <item name="hard">Hard</item>
+        <item name="very_hard">Very Hard</item>
+        <item name="insane">Insane</item>
     </string-array>
     
     <string-array name="max_tries_entries">
@@ -45,9 +59,7 @@
         <item name="english">English</item>
         <item name="spanish">Spanish</item>
         <item name="portuguese">Portuguese</item>
-        <item name="russian">Russian</item>
         <item name="german">German</item>
-        <item name="czech">Czech</item>
         <item name="danish">Danish</item>
         <item name="dutch">Dutch</item>
     </string-array>
@@ -55,9 +67,7 @@
         <item name="english">english</item>
         <item name="spanish">spanish</item>
         <item name="portuguese">portuguese</item>
-        <item name="russian">russian</item>
         <item name="german">german</item>
-        <item name="czech">czech</item>
         <item name="danish">danish</item>
         <item name="dutch">dutch</item>
     </string-array>
