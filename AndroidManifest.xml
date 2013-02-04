@@ -53,10 +53,9 @@
             android:label="@string/menu_settings" >
         </activity>
 
-        <!-- TODO: register a backup api key: http://developer.android.com/training/cloudsync/backupapi.html -->
         <meta-data
             android:name="com.google.android.backup.api_key"
-            android:value="INSERT_API_KEY_HERE" />
+    		android:value="AEdPqrEAAAAImXbdgOeV5XdSON5zQBYbgeDfC4N9HkDgWEaSIA" />
     </application>
 
 </manifest>

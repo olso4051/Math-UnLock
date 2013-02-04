@@ -8,10 +8,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
+import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.LanguageQuestion;
+import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.VocabQuestion;
 
 public class DatabaseManager {
@@ -22,6 +24,14 @@ public class DatabaseManager {
 	public DatabaseManager(Context context) {
 		dbHelper = DatabaseOpenHelper.getInstance(context);
 		db = dbHelper.getWritableDatabase();
+	}
+
+	public MathQuestion getMathQuestion(Difficulty minDifficulty, Difficulty maxDifficulty) {
+		String order = "RANDOM() LIMIT 1";
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+				+ String.valueOf(minDifficulty.getValue());
+		Cursor cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, order);
+		return DatabaseModelFactory.buildMathQuestion(cursor);
 	}
 
 	public void addVocabQuestion(VocabQuestion question) {

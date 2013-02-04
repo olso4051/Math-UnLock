@@ -3,7 +3,7 @@ package com.olyware.mathlock.database.contracts;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 
-public class LanguageQuestionContract extends QuestionContract {
+public final class LanguageQuestionContract extends QuestionContract {
 	// COLUMN DEFS
 	/**
 	 * Type: TEXT
