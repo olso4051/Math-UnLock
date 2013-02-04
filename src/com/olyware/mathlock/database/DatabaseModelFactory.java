@@ -29,6 +29,15 @@ public class DatabaseModelFactory {
 		return questions;
 	}
 
+	public static VocabQuestion buildVocabQuestion(Cursor cursor) {
+		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
+		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
+		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
+		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
+		return new VocabQuestion(questionText, correctAnswer, difficulty, null);
+	}
+
 	public static List<LanguageQuestion> buildLanguageQuestions(Cursor cursor, String fromLanguage, String toLanguage) {
 		List<LanguageQuestion> questions = EZ.list();
 		cursor.moveToFirst();

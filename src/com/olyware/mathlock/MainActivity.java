@@ -32,12 +32,11 @@ import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.VocabQuestion;
-import com.olyware.mathlock.utils.EZ;
 
 public class MainActivity extends Activity {
-	final private int startingPmoney = 1000;
 	final private int multiplier = 5;
 	final private int decreaseRate = 1000;
+	final private int startingPmoney = 1000;
 	private int money;
 	private int Pmoney;
 	private int difficulty = 0;
@@ -221,6 +220,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
@@ -284,6 +284,7 @@ public class MainActivity extends Activity {
 
 	private void launchHomeScreen(int delay) {
 		mHandler.removeCallbacksAndMessages(null);
+		timerHandler.removeCallbacks(reduceWorth);
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -475,39 +476,17 @@ public class MainActivity extends Activity {
 	// TODO: Pass in a Difficulty enum instead of an integer
 	private void setVocabProblem(int diffNum) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
-		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum));
-		// questions.addAll(questions);
-		// Get random question
-		Random random = new Random();
-		List<Integer> questionIndexes = EZ.list();
-		int rand = random.nextInt(questions.size());
-		questionIndexes.add(rand);
-		VocabQuestion question = questions.get(rand);
+		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum), answers.length);
 
-		// Add the correct answer to the answers list
-		List<String> answersList = EZ.list();
-		answersList.add(question.getCorrectAnswer());
-
-		// Set the new difficulty based on what question was picked
-		difficulty = question.getDifficulty().getValue();
+		difficulty = questions.get(0).getDifficulty().getValue();
 		questionWorth = difficulty * multiplier;
 		worth.setText(String.valueOf(questionWorth));
 
-		// Get 3 wrong answers and avoid duplicates
-		for (int i = 0; i < 3; i++) {
-			while (true) {
-				rand = random.nextInt(questions.size());
-				if (!questionIndexes.contains(rand)) {
-					questionIndexes.add(rand);
-					break;
-				}
-			}
-			answersList.add(questions.get(rand).getCorrectAnswer());
-		}
-
 		// Display the vocab question and answers
-		answers = answersList.toArray(new String[answersList.size()]);
-		problem.setText("Define: " + question.getQuestionText());
+		for (int i = 0; i < answers.length; i++) {
+			answers[i] = questions.get(i).getCorrectAnswer();
+		}
+		problem.setText("Define: " + questions.get(0).getQuestionText());
 	}
 
 	private void setLanguageProblem(int diffNum) {
@@ -521,39 +500,19 @@ public class MainActivity extends Activity {
 			else if (LanguageValues[i].equals(toLanguage))
 				toLanguageLocal = LanguageEntries[i];
 		}
-		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diffNum), fromLanguage, toLanguage);
-		// questions.addAll(questions);
-		// Get random question
-		Random random = new Random();
-		List<Integer> questionIndexes = EZ.list();
-		int rand = random.nextInt(questions.size());
-		questionIndexes.add(rand);
-		LanguageQuestion question = questions.get(rand);
-
-		// Add the correct answer to the answers list
-		List<String> answersList = EZ.list();
-		answersList.add(question.getCorrectAnswer());
+		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diffNum), answers.length, fromLanguage,
+				toLanguage);
 
 		// Set the new difficulty based on what question was picked
-		difficulty = question.getDifficulty().getValue();
+		difficulty = questions.get(0).getDifficulty().getValue();
 		questionWorth = difficulty * multiplier;
 		worth.setText(String.valueOf(questionWorth));
 
-		// Get 3 wrong answers and avoid duplicates
-		for (int i = 0; i < 3; i++) {
-			while (true) {
-				rand = random.nextInt(questions.size());
-				if (!questionIndexes.contains(rand)) {
-					questionIndexes.add(rand);
-					break;
-				}
-			}
-			answersList.add(questions.get(rand).getCorrectAnswer());
+		// Display the vocab question and answers
+		for (int i = 0; i < answers.length; i++) {
+			answers[i] = questions.get(i).getCorrectAnswer();
 		}
-
-		// Display the Language question and answers
-		answers = answersList.toArray(new String[answersList.size()]);
-		problem.setText(fromLanguageLocal + " -> " + toLanguageLocal + "\n" + question.getQuestionText());
+		problem.setText(fromLanguageLocal + " -> " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
 	}
 
 	private void setACTProblem(int diffNum) {

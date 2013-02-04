@@ -42,7 +42,7 @@
 	        android:title="@string/difficulty"
 	        android:summary="@string/difficulty_summary"
 	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
+	        android:entries="@array/difficulty_math_vocab_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
@@ -59,7 +59,7 @@
 	        android:title="@string/difficulty"
 	        android:summary="@string/difficulty_summary"
 	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
+	        android:entries="@array/difficulty_math_vocab_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>

@@ -45,21 +45,28 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildVocabQuestions(cursor);
 	}
 
-	/*
-	 * doesn't work because LanguageQuestion doesn't hold all the languages, just the from and to languages
-	public void addLanguageQuestion(LanguageQuestion question) {
-		ContentValues values = new ContentValues();
-		values.put(QuestionContract.ANSWER_CORRECT, question.getCorrectAnswer());
-		values.put(QuestionContract.DIFFICULTY, question.getDifficulty().getValue());
-		values.put(QuestionContract.QUESTION_TEXT, question.getText());
-		db.insert(LanguageQuestionContract.TABLE_NAME, null, values);
-	}*/
+	public List<VocabQuestion> getVocabQuestions(Difficulty difficulty, int number) {
+		String order = "RANDOM() LIMIT " + number;
+		String where = "difficulty <= ?";
+		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
+		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, whereArgs, null, null, order);
+		return DatabaseModelFactory.buildVocabQuestions(cursor);
+	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
 		String where = "difficulty <= ?";
 		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
 		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, whereArgs, null, null, null);
+		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
+	}
+
+	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage) {
+		String order = "RANDOM() LIMIT " + number;
+		String where = "difficulty <= ?";
+		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
+		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
+		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, whereArgs, null, null, order);
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
 }

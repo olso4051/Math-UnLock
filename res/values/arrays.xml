@@ -9,14 +9,6 @@
         <item name="very_hard">Very Hard</item>
         <item name="insane">Insane</item>
     </string-array>
-    <string-array name="difficulty_values">
-        <item name="very_easy">1</item>
-        <item name="easy">2</item>
-        <item name="medium">3</item>
-        <item name="hard">4</item>
-        <item name="very_hard">5</item>
-        <item name="insane">6</item>
-    </string-array>
     <string-array name="difficulty_language_entries">
         <item name="very_easy">Very Easy (Numbers)</item>
         <item name="easy">Easy</item>
@@ -24,6 +16,22 @@
         <item name="hard">Hard</item>
         <item name="very_hard">Very Hard</item>
         <item name="insane">Insane</item>
+    </string-array>
+    <string-array name="difficulty_math_vocab_entries">
+        <item name="very_easy">Elementary</item>
+        <item name="easy">Middle School</item>
+        <item name="medium">High School (easy)</item>
+        <item name="hard">High School (advanced)</item>
+        <item name="very_hard">College (easy)</item>
+        <item name="insane">College (advanced)</item>
+    </string-array>
+    <string-array name="difficulty_values">
+        <item name="very_easy">1</item>
+        <item name="easy">2</item>
+        <item name="medium">3</item>
+        <item name="hard">4</item>
+        <item name="very_hard">5</item>
+        <item name="insane">6</item>
     </string-array>
     
     <string-array name="max_tries_entries">

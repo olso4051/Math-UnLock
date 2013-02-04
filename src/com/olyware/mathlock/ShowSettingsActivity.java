@@ -41,7 +41,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Preference Pref_max_tries = findPreference("max_tries");
 		Preference Pref_handed = findPreference("handed");
 		Preference Pref_type = findPreference("type");
-		Pref_max_tries.setSummary(sharedPrefs.getString("max_tries", "1"));
+		String summary = ((sharedPrefs.getString("max_tries", "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString("max_tries", "1")));
+		Pref_max_tries.setSummary(summary);
 		Pref_handed.setSummary(sharedPrefs.getString("handed", "Right"));
 		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "2")));
 
@@ -120,9 +121,16 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		} catch (NumberFormatException nfe) {
 			System.out.println("Could not parse " + nfe);
 		}
-		if (key.equals("difficulty_language"))
+		if (key.equals("difficulty_math") || key.equals("difficulty_vocab"))
+			return difficultyMathVocabIntToString(diffNum);
+		else if (key.equals("difficulty_language"))
 			return difficultyLanguageIntToString(diffNum);
 		String[] difficulty = getResources().getStringArray(R.array.difficulty_entries);
+		return difficulty[diffNum - 1];
+	}
+
+	private String difficultyMathVocabIntToString(int diffNum) {
+		String[] difficulty = getResources().getStringArray(R.array.difficulty_math_vocab_entries);
 		return difficulty[diffNum - 1];
 	}
 
