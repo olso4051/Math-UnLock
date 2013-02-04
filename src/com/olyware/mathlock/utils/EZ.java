@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.app.backup.BackupManager;
+import android.content.Context;
+
 public class EZ {
 	public static <T> List<T> list(T... objects) {
 		return new ArrayList<T>(Arrays.asList(objects));
@@ -22,5 +25,15 @@ public class EZ {
 
 	public static <T> Set<T> set(Collection<T> collection) {
 		return new HashSet<T>(collection);
+	}
+
+	/**
+	 * Starts a backup of all prefs files
+	 * 
+	 * @param context
+	 */
+	public static void requestBackup(Context context) {
+		BackupManager bm = new BackupManager(context);
+		bm.dataChanged();
 	}
 }
