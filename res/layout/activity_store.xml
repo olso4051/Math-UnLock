@@ -146,37 +146,15 @@
 		       	android:layout_height="wrap_content"
 		       	android:orientation="horizontal" >
 				<Button
-				    android:id="@+id/unlock_act" 
+				    android:id="@+id/unlock_act_sat" 
 				    android:layout_height="wrap_content"
 					android:layout_width="0dp"
 					android:layout_weight="4"
-					android:text="@string/unlock_act"
+					android:text="@string/unlock_act_sat"
 					android:textSize="20sp"
 					android:textStyle="bold"/>
 				<TextView
-			    	android:id="@+id/act_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_sat" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_sat"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/sat_cost"
+			    	android:id="@+id/act_sat_cost"
 			    	android:gravity="center_vertical|right"
 			    	android:layout_width="0dp"
 			    	android:layout_weight="3"

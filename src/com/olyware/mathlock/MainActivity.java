@@ -313,7 +313,6 @@ public class MainActivity extends Activity {
 				@Override
 				public void run() {
 					questionWorth = 0;
-					resetTimes();
 					answerView.resetGuess();
 					// TODO problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 					// problem.setCompoundDrawables(null, null, null, null);
@@ -323,27 +322,28 @@ public class MainActivity extends Activity {
 					difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[location[randPack]], "1"));
 					switch (location[randPack]) {
 					case 0:			// math question
-						setMathProblem(difficulty);
+						setMathProblem(0, difficulty);
 						break;
 					case 1:			// vocabulary question
-						setVocabProblem(difficulty);
+						setVocabProblem(0, difficulty);
 						break;
 					case 2:			// language question
 						setLanguageProblem(difficulty);
 						break;
-					case 3:			// act question
-						setACTProblem(difficulty);
+					case 3:			// enabled vocab act/sat question
+					case 4:			// enabled math act/sat question
+						setACT_SATProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[3], false),
+								sharedPrefs.getBoolean(PackageKeys[4], false));
 						break;
-					case 4:			// sat question
-						setSATProblem(difficulty);
+					case 5:			// gre vocab question
+					case 6:			// gre math question
+						setGREProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[5], false),
+								sharedPrefs.getBoolean(PackageKeys[6], false));
 						break;
-					case 5:			// gre question
-						setGREProblem(difficulty);
-						break;
-					case 6:			// toddler question
+					case 7:			// toddler question
 						setToddlerProblem(difficulty);
 						break;
-					case 7:			// engineer question
+					case 8:			// engineer question
 						setEngineerProblem(difficulty);
 						break;
 					default:
@@ -360,8 +360,11 @@ public class MainActivity extends Activity {
 							answersRandom[i] = answers[i + offset];
 						}
 					}
+					questionWorth = (difficulty + 1) * multiplier;
+					worth.setText(String.valueOf(questionWorth));
 					answerView.setAnswers(answersRandom);
 					problem.setTextColor(defaultTextColor);
+					resetTimes();
 				}
 			}, delay); // set new problem after delay time [ms]
 
@@ -388,28 +391,32 @@ public class MainActivity extends Activity {
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
 
-	private void setMathProblem(int diffNum) {
+	private void setMathProblem(int minDifficulty, int maxDifficulty) {
 		int operator = 0;
 		int first = 1;
 		int second = 1;
+		if (minDifficulty == 1)
+			difficulty = rand.nextInt(maxDifficulty);
+		else
+			difficulty = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
 
-		switch (diffNum) {
-		case 1:				// Easy question
+		switch (difficulty) {
+		case 0:				// Elementary
 			// add and subtract options
 			operator = rand.nextInt(2);
 			first = rand.nextInt(11);					// 0 through 10
 			second = rand.nextInt(11);					// 0 through 10
 			break;
-		case 2:				// Medium question
+		case 1:				// Middle School
 			// add, subtract, multiply options
 			operator = rand.nextInt(3);
 			first = rand.nextInt(41) - 20;				// -20 through 20
 			second = rand.nextInt(41) - 20;				// -20 through 20
 			break;
-		case 3:
-		case 4:
-		case 5:
-		case 6:				// Hard question
+		case 2:				// High School (basic)
+		case 3:				// High School (advanced)
+		case 4:				// College (basic)
+		case 5:				// College (advanced)
 			// add, subtract, multiply, and divide options
 			operator = rand.nextInt(4);
 			first = rand.nextInt(201) - 100;			// -100 through 100
@@ -429,15 +436,6 @@ public class MainActivity extends Activity {
 			}
 			break;
 		}
-
-		if ((first <= 10) && (first >= 0) && (second <= 10) && (second >= 0))
-			difficulty = 1;
-		else if (((first <= 20) && (first >= -20)) || ((second <= 20) && (second >= -20)))
-			difficulty = 2;
-		else
-			difficulty = 3;
-		questionWorth = difficulty * multiplier;
-		worth.setText(String.valueOf(questionWorth));
 
 		switch (operator) {
 		case 0:			// add
@@ -474,13 +472,13 @@ public class MainActivity extends Activity {
 	}
 
 	// TODO: Pass in a Difficulty enum instead of an integer
-	private void setVocabProblem(int diffNum) {
+	private void setVocabProblem(int minDifficulty, int maxDifficulty) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
-		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(diffNum), answers.length);
+		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(minDifficulty),
+				Difficulty.fromValue(maxDifficulty), answers.length);
 
+		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
-		questionWorth = difficulty * multiplier;
-		worth.setText(String.valueOf(questionWorth));
 
 		// Display the vocab question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -505,8 +503,6 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
-		questionWorth = difficulty * multiplier;
-		worth.setText(String.valueOf(questionWorth));
 
 		// Display the vocab question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -515,43 +511,33 @@ public class MainActivity extends Activity {
 		problem.setText(fromLanguageLocal + " -> " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
 	}
 
-	private void setACTProblem(int diffNum) {
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
-		}
+	private void setACT_SATProblem(int diffNum, boolean vocab, boolean math) {
+		int type;// 0-vocab,1-math
+		if ((vocab) && (math))
+			type = rand.nextInt(2);
+		else if (vocab)
+			type = 0;
+		else
+			type = 1;
+		if (type == 0)
+			setVocabProblem(2, diffNum);
+		else
+			setMathProblem(2, diffNum);
+
 	}
 
-	private void setSATProblem(int diffNum) {
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
-		}
-	}
-
-	private void setGREProblem(int diffNum) {
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
-		}
+	private void setGREProblem(int diffNum, boolean vocab, boolean math) {
+		int type;// 0-vocab,1-math
+		if ((vocab) && (math))
+			type = rand.nextInt(2);
+		else if (vocab)
+			type = 0;
+		else
+			type = 1;
+		if (type == 0)
+			setVocabProblem(4, diffNum);
+		else
+			setMathProblem(4, diffNum);
 	}
 
 	private void setToddlerProblem(int diffNum) {
@@ -587,18 +573,17 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacksBefore[i] = EnabledPacks[i];
 
-		if (sharedPrefsMoney.getBoolean(unlockPackageKeys[0], false)) {
-			UnlockedPackages = true;
-		}
+		for (int i = 0; i < unlockPackageKeys.length; i++)
+			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
+				UnlockedPackages = true;
+			}
+
 		for (int i = 0; i < PackageKeys.length; i++) {
 			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
 				EnabledPacks[i] = true;
 				count++;
 			} else
 				EnabledPacks[i] = false;
-			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i + 1], false)) {
-				UnlockedPackages = true;
-			}
 			if (EnabledPacksBefore[i] != EnabledPacks[i])
 				changed = true;
 		}

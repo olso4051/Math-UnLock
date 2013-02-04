@@ -97,55 +97,48 @@
 	        android:defaultValue="@string/language_to_default" />
 	</PreferenceCategory>
 	<PreferenceCategory
-        android:title="@string/settings_act_title"
-        android:key="settings_act">
+        android:title="@string/settings_act_sat_title"
+        android:key="settings_act_sat">
         <CheckBoxPreference
-	        android:key="enable_act"
+	        android:key="enable_act_sat_vocab"
 	        android:title="@string/enable"
-	        android:summary="@string/enable_act_summary"
+	        android:summary="@string/enable_act_sat_vocab_summary"
+	        android:defaultValue="false"/>
+        <CheckBoxPreference
+	        android:key="enable_act_sat_math"
+	        android:title="@string/enable"
+	        android:summary="@string/enable_act_sat_math_summary"
 	        android:defaultValue="false"/>
 	    <ListPreference
-	        android:key="difficulty_act"
+	        android:key="difficulty_act_sat"
 	        android:title="@string/difficulty"
 	        android:summary="@string/difficulty_summary"
 	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
-	</PreferenceCategory>
-	<PreferenceCategory
-        android:title="@string/settings_sat_title"
-        android:key="settings_sat">
-        <CheckBoxPreference
-	        android:key="enable_sat"
-	        android:title="@string/enable"
-	        android:summary="@string/enable_sat_summary"
-	        android:defaultValue="false"/>
-	    <ListPreference
-	        android:key="difficulty_sat"
-	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
+	        android:entries="@array/difficulty_act_sat_entries"
+	        android:entryValues="@array/difficulty_act_sat_values"
+	        android:defaultValue="@string/difficulty_default_act_sat" />
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_gre_title"
         android:key="settings_gre">
         <CheckBoxPreference
-	        android:key="enable_gre"
+	        android:key="enable_gre_vocab"
 	        android:title="@string/enable"
-	        android:summary="@string/enable_gre_summary"
+	        android:summary="@string/enable_gre_vocab_summary"
+	        android:defaultValue="false"/>
+        <CheckBoxPreference
+	        android:key="enable_gre_math"
+	        android:title="@string/enable"
+	        android:summary="@string/enable_gre_math_summary"
 	        android:defaultValue="false"/>
 	    <ListPreference
 	        android:key="difficulty_gre"
 	        android:title="@string/difficulty"
 	        android:summary="@string/difficulty_summary"
 	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
+	        android:entries="@array/difficulty_gre_entries"
+	        android:entryValues="@array/difficulty_gre_values"
+	        android:defaultValue="@string/difficulty_default_gre" />
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_toddler_title"

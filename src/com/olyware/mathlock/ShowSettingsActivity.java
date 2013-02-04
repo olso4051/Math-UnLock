@@ -125,18 +125,32 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			return difficultyMathVocabIntToString(diffNum);
 		else if (key.equals("difficulty_language"))
 			return difficultyLanguageIntToString(diffNum);
+		else if (key.equals("difficulty_act_sat"))
+			return difficultyACT_SATIntToString(diffNum);
+		else if (key.equals("difficulty_gre"))
+			return difficultyGREIntToString(diffNum);
 		String[] difficulty = getResources().getStringArray(R.array.difficulty_entries);
-		return difficulty[diffNum - 1];
+		return difficulty[diffNum];
 	}
 
 	private String difficultyMathVocabIntToString(int diffNum) {
 		String[] difficulty = getResources().getStringArray(R.array.difficulty_math_vocab_entries);
-		return difficulty[diffNum - 1];
+		return difficulty[diffNum];
 	}
 
 	private String difficultyLanguageIntToString(int diffNum) {
 		String[] difficulty = getResources().getStringArray(R.array.difficulty_language_entries);
-		return difficulty[diffNum - 1];
+		return difficulty[diffNum];
+	}
+
+	private String difficultyACT_SATIntToString(int diffNum) {
+		String[] difficulty = getResources().getStringArray(R.array.difficulty_act_sat_entries);
+		return difficulty[diffNum - 2];		// subtract 2 because act/sat diff is either 2 or 3 (2 indexed)
+	}
+
+	private String difficultyGREIntToString(int diffNum) {
+		String[] difficulty = getResources().getStringArray(R.array.difficulty_gre_entries);
+		return difficulty[diffNum - 4];		// gre diff is 4 indexed
 	}
 
 	private String typeIntToString(String key) {

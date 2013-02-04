@@ -15,11 +15,11 @@ import android.widget.TextView;
 public class ShowStoreActivity extends Activity {
 	final private int CostAll = 10000;
 	final private int CostSmall = 1000;
-	final private int CostLarge = 5000;
+	final private int CostLarge = 3000;
 	private TextView moneyText;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button buyAll;
-	private Button buyMath, buyVocab, buyLanguage, buyACT, buySAT, buyGRE, buyToddler, buyEngineer;
+	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer;
 	private String unlockPackageKeys[];
 	private String PackageKeys[];
 
@@ -78,16 +78,10 @@ public class ShowStoreActivity extends Activity {
 				buyProduct(3, CostSmall);
 			}
 		});
-		buyACT = (Button) findViewById(R.id.unlock_act);
-		buyACT.setOnClickListener(new OnClickListener() {
+		buyACT_SAT = (Button) findViewById(R.id.unlock_act_sat);
+		buyACT_SAT.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(4, CostSmall);
-			}
-		});
-		buySAT = (Button) findViewById(R.id.unlock_sat);
-		buySAT.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(5, CostSmall);
+				buyProduct(4, CostLarge);
 			}
 		});
 		buyGRE = (Button) findViewById(R.id.unlock_gre);
@@ -196,8 +190,7 @@ public class ShowStoreActivity extends Activity {
 			buyMath.setEnabled(false);
 			buyVocab.setEnabled(false);
 			buyLanguage.setEnabled(false);
-			buyACT.setEnabled(false);
-			buySAT.setEnabled(false);
+			buyACT_SAT.setEnabled(false);
 			buyGRE.setEnabled(false);
 			buyToddler.setEnabled(false);
 			buyEngineer.setEnabled(false);
@@ -218,16 +211,11 @@ public class ShowStoreActivity extends Activity {
 			buyLanguage.setEnabled(false);
 		} else
 			((TextView) findViewById(R.id.language_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_act", false)) {
-			((TextView) findViewById(R.id.act_cost)).setText(getString(R.string.purchased));
-			buyACT.setEnabled(false);
+		if (sharedPrefsMoney.getBoolean("unlock_act_sat", false)) {
+			((TextView) findViewById(R.id.act_sat_cost)).setText(getString(R.string.purchased));
+			buyACT_SAT.setEnabled(false);
 		} else
-			((TextView) findViewById(R.id.act_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_sat", false)) {
-			((TextView) findViewById(R.id.sat_cost)).setText(getString(R.string.purchased));
-			buySAT.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.sat_cost)).setText(CostSmall + " ");
+			((TextView) findViewById(R.id.act_sat_cost)).setText(CostSmall + " ");
 		if (sharedPrefsMoney.getBoolean("unlock_gre", false)) {
 			((TextView) findViewById(R.id.gre_cost)).setText(getString(R.string.purchased));
 			buyGRE.setEnabled(false);

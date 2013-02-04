@@ -53,6 +53,14 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildVocabQuestions(cursor);
 	}
 
+	public List<VocabQuestion> getVocabQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number) {
+		String order = "RANDOM() LIMIT " + number;
+		String where = "difficulty <= ? AND difficulty >= ?";
+		String[] whereArgs = new String[] { String.valueOf(maxDifficulty.getValue()), String.valueOf(minDifficulty.getValue()) };
+		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, whereArgs, null, null, order);
+		return DatabaseModelFactory.buildVocabQuestions(cursor);
+	}
+
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
 		String where = "difficulty <= ?";
 		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
