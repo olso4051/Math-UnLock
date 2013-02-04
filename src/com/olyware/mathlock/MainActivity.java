@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -317,9 +318,18 @@ public class MainActivity extends Activity {
 					// TODO problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 					// problem.setCompoundDrawables(null, null, null, null);
 					joystick.unPauseSelection();
+
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
-					difficulty = Integer.parseInt(sharedPrefs.getString(DifficultyKeys[location[randPack]], "1"));
+					String key = DifficultyKeys[location[randPack]];
+					String defaultDiff = "0";
+					if (key.equals("difficulty_act_sat"))
+						defaultDiff = "2";
+					else if (key.equals("difficulty_gre"))
+						defaultDiff = "4";
+
+					// get the difficulty from the selected package
+					difficulty = Integer.parseInt(sharedPrefs.getString(key, defaultDiff));
 					switch (location[randPack]) {
 					case 0:			// math question
 						setMathProblem(0, difficulty);
@@ -360,8 +370,7 @@ public class MainActivity extends Activity {
 							answersRandom[i] = answers[i + offset];
 						}
 					}
-					questionWorth = (difficulty + 1) * multiplier;
-					worth.setText(String.valueOf(questionWorth));
+
 					answerView.setAnswers(answersRandom);
 					problem.setTextColor(defaultTextColor);
 					resetTimes();
@@ -385,7 +394,7 @@ public class MainActivity extends Activity {
 
 	private void resetTimes() {
 		startTime = System.currentTimeMillis();
-		questionWorth = difficulty * multiplier;
+		questionWorth = (difficulty + 1) * multiplier;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
@@ -395,8 +404,9 @@ public class MainActivity extends Activity {
 		int operator = 0;
 		int first = 1;
 		int second = 1;
-		if (minDifficulty == 1)
-			difficulty = rand.nextInt(maxDifficulty);
+		Log.d("diff test", "min = " + minDifficulty + "|max = " + maxDifficulty);
+		if (minDifficulty == 0)
+			difficulty = rand.nextInt(maxDifficulty + 1);
 		else
 			difficulty = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
 

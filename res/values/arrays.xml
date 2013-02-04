@@ -122,6 +122,8 @@
         <item>difficulty_vocab</item>
         <item>difficulty_language</item>
         <item>difficulty_act_sat</item>
+        <item>difficulty_act_sat</item>
+		<item>difficulty_gre</item>
 		<item>difficulty_gre</item>
 		<item>difficulty_toddler</item>
 		<item>difficulty_engineer</item>

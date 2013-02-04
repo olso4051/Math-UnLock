@@ -15,7 +15,7 @@ import android.widget.TextView;
 public class ShowStoreActivity extends Activity {
 	final private int CostAll = 10000;
 	final private int CostSmall = 1000;
-	final private int CostLarge = 3000;
+	final private int CostLarge = 5000;
 	private TextView moneyText;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button buyAll;
@@ -87,19 +87,19 @@ public class ShowStoreActivity extends Activity {
 		buyGRE = (Button) findViewById(R.id.unlock_gre);
 		buyGRE.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(6, CostLarge);
+				buyProduct(5, CostLarge);
 			}
 		});
 		buyToddler = (Button) findViewById(R.id.unlock_toddler);
 		buyToddler.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(7, CostSmall);
+				buyProduct(6, CostSmall);
 			}
 		});
 		buyEngineer = (Button) findViewById(R.id.unlock_engineer);
 		buyEngineer.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(8, CostSmall);
+				buyProduct(7, CostSmall);
 			}
 		});
 		setCost();
@@ -174,8 +174,16 @@ public class ShowStoreActivity extends Activity {
 		if (product == 0)
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
-		else
+		else if (product <= 3)
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
+		else if (product == 4) {
+			editorPrefs.putBoolean(PackageKeys[product - 1], true);
+			editorPrefs.putBoolean(PackageKeys[product], true);
+		} else if (product == 5) {
+			editorPrefs.putBoolean(PackageKeys[product], true);
+			editorPrefs.putBoolean(PackageKeys[product + 1], true);
+		} else
+			editorPrefs.putBoolean(PackageKeys[product + 1], true);
 		editorPrefs.commit();
 		setCost();
 	}
@@ -215,7 +223,7 @@ public class ShowStoreActivity extends Activity {
 			((TextView) findViewById(R.id.act_sat_cost)).setText(getString(R.string.purchased));
 			buyACT_SAT.setEnabled(false);
 		} else
-			((TextView) findViewById(R.id.act_sat_cost)).setText(CostSmall + " ");
+			((TextView) findViewById(R.id.act_sat_cost)).setText(CostLarge + " ");
 		if (sharedPrefsMoney.getBoolean("unlock_gre", false)) {
 			((TextView) findViewById(R.id.gre_cost)).setText(getString(R.string.purchased));
 			buyGRE.setEnabled(false);
