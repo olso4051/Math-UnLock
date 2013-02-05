@@ -36,7 +36,7 @@
 	        android:key="enable_math"
 	        android:title="@string/enable"
 	        android:summary="@string/enable_math_summary"
-	        android:defaultValue="true"/>
+	        android:defaultValue="false"/>
 	    <ListPreference
 	        android:key="difficulty_math"
 	        android:title="@string/difficulty"

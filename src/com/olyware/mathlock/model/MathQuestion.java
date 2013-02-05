@@ -2,6 +2,10 @@ package com.olyware.mathlock.model;
 
 import java.util.Random;
 
+import android.util.Log;
+
+import com.olyware.mathlock.MathEval;
+
 public class MathQuestion extends Question {
 
 	public enum ParseMode {
@@ -29,9 +33,9 @@ public class MathQuestion extends Question {
 
 	ParseMode parseMode;
 	String image, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
-	private int questionVariableValues[] = new int[4];
 	private char questionVariables[] = { 'A', 'B', 'C', 'D' };
-	private Random rand=new Random();
+	public int questionVariableValues[] = new int[questionVariables.length];
+	private Random rand = new Random();
 
 	public MathQuestion(String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
 			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode) {
@@ -43,32 +47,53 @@ public class MathQuestion extends Question {
 		this.parseMode = parseMode;
 	}
 
+	public void setVariables() {
+		for (int i = 0; i < questionVariables.length; i++) {
+			questionVariableValues[i] = rand.nextInt(10) + 1;
+		}
+	}
+
+	public int[] getVariables() {
+		return questionVariableValues;
+	}
+
 	public String getImage() {
 		return image;
 	}
 
-	public String[] getIncorrectAnswers() {
-		// TODO parse wrong answer
-		return new String[] { incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
-	}
-
-	@Override
-	public String getCorrectAnswer() {
-		// TODO parse answer
-		return correctAnswer;
+	public String[] getAnswers() {
+		String preParse[] = new String[] { correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
+		String postParse[] = preParse;
+		MathEval math = new MathEval();
+		for (int i = 0; i < questionVariables.length; i++) {
+			math.setVariable(String.valueOf(questionVariables[i]), questionVariableValues[i]);
+		}
+		for (int i = 0; i < preParse.length; i++) {
+			switch (parseMode) {
+			case ALL:
+				postParse[i] = String.valueOf(math.evaluate(preParse[i]));
+			case PARENTHESIS_ONLY:
+				postParse[i] = removeParentheses(preParse[i]);
+			case NOTHING:
+				postParse[i] = preParse[i];
+			}
+		}
+		return postParse;
 	}
 
 	@Override
 	public String getQuestionText() {
-		// TODO parse answer
 		String preParse = super.getQuestionText();
 		String postParse = preParse;
-		int indices[] = new int[4];
+		int indices[] = new int[questionVariables.length];
 		for (int i = 0; i < indices.length; i++) {
 			indices[i] = preParse.indexOf(questionVariables[i]);
-			if (indices[i]!=-1){
-				questionVariableValues[i]=rand.nextInt(10)+1;
-				postParse.replace(String.valueOf(questionVariables[i]), String.valueOf(questionVariableValues[i]));
+			Log.d("question test", "Variable - " + questionVariables[i]);
+			Log.d("question test", "index - " + indices[i]);
+			if (indices[i] != -1) {
+				Log.d("question test", "before " + postParse);
+				postParse = postParse.replaceAll(String.valueOf(questionVariables[i]), String.valueOf(questionVariableValues[i]));
+				Log.d("question test", "after " + postParse);
 			}
 		}
 		return postParse;
@@ -76,6 +101,39 @@ public class MathQuestion extends Question {
 
 	public ParseMode getParseMode() {
 		return parseMode;
+	}
+
+	private String removeParentheses(String equation) {
+		char next;
+		int needs = 1;
+		int index = equation.indexOf('(');
+		int first = index;
+		String subEq;
+		MathEval math = new MathEval();
+		for (int i = 0; i < questionVariables.length; i++) {
+			math.setVariable(String.valueOf(questionVariables[i]), questionVariableValues[i]);
+		}
+		while (index < equation.length() - 1) {
+			next = equation.charAt(index + 1);
+			if ((next == ')') && (needs == 1)) {
+				subEq = equation.substring(first, index + 2);
+				subEq = String.valueOf(Math.round(math.evaluate(subEq)));
+				if (first > 0)
+					equation = equation.substring(0, first) + subEq + equation.substring(index + 2);
+				else
+					equation = subEq + equation.substring(index + 2);
+				index = -1;
+				needs -= 1;
+			} else if ((next == ')') && (needs > 1))
+				needs -= 1;
+			else if ((next == '(') && (needs == 0)) {
+				needs += 1;
+				first = index + 1;
+			} else if (next == '(')
+				needs += 1;
+			index += 1;
+		}
+		return equation;
 	}
 
 	@Override

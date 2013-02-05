@@ -1,4 +1,4 @@
-package com.olyware.mathlock.utils;
+package com.olyware.mathlock;
 
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.SharedPreferencesBackupHelper;

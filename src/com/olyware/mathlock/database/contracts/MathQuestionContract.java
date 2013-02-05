@@ -2,7 +2,7 @@ package com.olyware.mathlock.database.contracts;
 
 public final class MathQuestionContract extends QuestionContract {
 
-	public static final String TABLE_NAME = "t_vocab_question";
+	public static final String TABLE_NAME = "t_math_question";
 	public static final String[] ALL_COLUMNS;
 
 	static {

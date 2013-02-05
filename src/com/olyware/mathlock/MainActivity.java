@@ -16,12 +16,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.LanguageQuestion;
+import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.VocabQuestion;
 
 public class MainActivity extends Activity {
@@ -315,8 +316,7 @@ public class MainActivity extends Activity {
 				public void run() {
 					questionWorth = 0;
 					answerView.resetGuess();
-					// TODO problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-					// problem.setCompoundDrawables(null, null, null, null);
+					problem.setCompoundDrawables(null, null, null, null);
 					joystick.unPauseSelection();
 
 					// pick a random enabled package
@@ -404,12 +404,11 @@ public class MainActivity extends Activity {
 		int operator = 0;
 		int first = 1;
 		int second = 1;
-		Log.d("diff test", "min = " + minDifficulty + "|max = " + maxDifficulty);
+
 		if (minDifficulty == 0)
 			difficulty = rand.nextInt(maxDifficulty + 1);
 		else
 			difficulty = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
-
 		switch (difficulty) {
 		case 0:				// Elementary
 			// add and subtract options
@@ -424,9 +423,6 @@ public class MainActivity extends Activity {
 			second = rand.nextInt(41) - 20;				// -20 through 20
 			break;
 		case 2:				// High School (basic)
-		case 3:				// High School (advanced)
-		case 4:				// College (basic)
-		case 5:				// College (advanced)
 			// add, subtract, multiply, and divide options
 			operator = rand.nextInt(4);
 			first = rand.nextInt(201) - 100;			// -100 through 100
@@ -445,6 +441,26 @@ public class MainActivity extends Activity {
 				}
 			}
 			break;
+		case 3:				// High School (advanced)
+		case 4:				// College (basic)
+		case 5:				// College (advanced)
+			MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
+			question.setVariables();
+			// Set the new difficulty based on what question was picked
+			difficulty = question.getDifficulty().getValue();
+
+			if (!question.getImage().equals("none")) {
+				int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
+				Drawable image = getResources().getDrawable(id);
+				int h = image.getIntrinsicHeight();
+				int w = image.getIntrinsicWidth();
+				image.setBounds(0, 0, problem.getHeight() * w / h, problem.getHeight());
+				// problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+				problem.setCompoundDrawables(image, null, null, null);
+			}
+			problem.setText(question.getQuestionText());
+			answers = question.getAnswers();
+			return;
 		}
 
 		switch (operator) {
