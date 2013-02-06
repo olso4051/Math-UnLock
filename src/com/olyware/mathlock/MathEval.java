@@ -20,70 +20,21 @@ import java.util.TreeSet;
 
 /**
  * Math Evaluator. Provides the ability to evaluate a String math expression, with support for pureFunctions, variables and standard math
- * constants.
- * <p>
- * Supported Operators:
+ * constants. Supported Operators: Operator Precedence Unary Binding Description --------- ----------- --------------
+ * ------------------------------------------------ '=' 99 / 99 RIGHT_SIDE Simple assignment (internal, used for the final operation) '^' 80
+ * / 81 NO_SIDE Power '*' 40 / 40 NO_SIDE Multiple (conventional computer notation) '(' 40 / 40 NO_SIDE Multiply (implicit due to brackets,
+ * e.g "(a)(b)") '/' 40 / 40 NO_SIDE Divide (conventional computer notation) '%' 40 / 40 NO_SIDE Remainder '+' 20 / 20 NO_SIDE
+ * Add/unary-positive '-' 20 / 20 NO_SIDE Subtract/unary-negative
  * 
- * <pre>
- *     Operator  Precedence  Unary Binding  Description
- *     --------- ----------- -------------- ------------------------------------------------
- *     '='       99 / 99     RIGHT_SIDE     Simple assignment (internal, used for the final operation)
- *     '^'       80 / 81     NO_SIDE        Power
- *     '*'       40 / 40     NO_SIDE        Multiple (conventional computer notation)
- *     '('       40 / 40     NO_SIDE        Multiply (implicit due to brackets, e.g "(a)(b)")
- *     '/'       40 / 40     NO_SIDE        Divide (conventional computer notation)
- *     '%'       40 / 40     NO_SIDE        Remainder
- *     '+'       20 / 20     NO_SIDE        Add/unary-positive
- *     '-'       20 / 20     NO_SIDE        Subtract/unary-negative
- * </pre>
- * <p>
- * Predefined Constants:
+ * Predefined Constants: Name Description -------------------- ---------------------------------------------------------------- E The double
+ * value that is closer than any other to e, the base of the natural logarithms (2.718281828459045). Euler Euler's Constant
+ * (0.577215664901533). LN2 Log of 2 base e (0.693147180559945). LN10 Log of 10 base e (2.302585092994046). LOG2E Log of e base 2
+ * (1.442695040888963). LOG10E Log of e base 10 (0.434294481903252). PHI The golden ratio (1.618033988749895). PI The double value that is
+ * closer than any other to pi, the ratio of the circumference of a circle to its diameter (3.141592653589793).
  * 
- * <pre>
- *     Name                 Description
- *     -------------------- ----------------------------------------------------------------
- *     E                    The double value that is closer than any other to e, the base of the natural logarithms (2.718281828459045).
- *     Euler                Euler's Constant (0.577215664901533).
- *     LN2                  Log of 2 base e (0.693147180559945).
- *     LN10                 Log of 10 base e (2.302585092994046).
- *     LOG2E                Log of e base 2 (1.442695040888963).
- *     LOG10E               Log of e base 10 (0.434294481903252).
- *     PHI                  The golden ratio (1.618033988749895).
- *     PI                   The double value that is closer than any other to pi, the ratio of the circumference of a circle to its diameter (3.141592653589793).
- * </pre>
- * <p>
- * Supported Functions (see java.Math for detail and parameters):
- * <ul>
- * <li>abs
- * <li>acos
- * <li>asin
- * <li>atan
- * <li>cbrt
- * <li>ceil
- * <li>cos
- * <li>cosh
- * <li>exp
- * <li>expm1
- * <li>floor
- * <li>log
- * <li>log10
- * <li>log1p
- * <li>max
- * <li>min
- * <li>random
- * <li>round
- * <li>roundHE (maps to Math.rint)
- * <li>signum
- * <li>sin
- * <li>sinh
- * <li>sqrt
- * <li>tan
- * <li>tanh
- * <li>toDegrees
- * <li>toRadians
- * <li>ulp
- * </ul>
- * <p>
+ * Supported Functions (see java.Math for detail and parameters): abs acos asin atan cbrt ceil cos cosh exp expm1 floor gcd lcm log log10
+ * log1p max min random round roundHE (maps to Math.rint) signum sin sinh sqrt tan tanh toDegrees toRadians ulp
+ * 
  * Threading Design : [x] Single Threaded [ ] Threadsafe [ ] Immutable [ ] Isolated
  * 
  * @author Lawrence Dol
@@ -255,7 +206,7 @@ public class MathEval extends Object {
 		return this;
 	}
 
-	/** Set a named variable (variables names are not case-sensitive). */
+	/** Get a named variable (variables names are not case-sensitive). */
 	public double getVariable(String nam) {
 		Double val = variables.get(nam);
 
@@ -407,8 +358,8 @@ public class MathEval extends Object {
 	 *            Current operator (the operator for this subexpression).
 	 */
 	private double _evaluate(int beg, int end, double lft, Operator pnd, Operator cur) throws NumberFormatException, ArithmeticException {
-		Operator nxt = OPERAND;                                                // next operator
-		int ofs;                                                        // current expression offset
+		Operator nxt = OPERAND;			// next operator
+		int ofs;						// current expression offset
 
 		for (ofs = beg; (ofs = skipWhitespace(expression, ofs, end)) <= end; ofs++) {
 			boolean fnc = false;
@@ -618,6 +569,33 @@ public class MathEval extends Object {
 		return ofs;
 	}
 
+	private static double GCD(double a, double b) {
+		while (b > 0) {
+			double temp = b;
+			b = a % b; // % is remainder
+			a = temp;
+		}
+		return a;
+	}
+
+	private static double GCD(double[] input) {
+		double result = input[0];
+		for (int i = 1; i < input.length; i++)
+			result = GCD(result, input[i]);
+		return result;
+	}
+
+	private static double LCM(double a, double b) {
+		return a * (b / GCD(a, b));
+	}
+
+	private static double LCM(double[] input) {
+		double result = input[0];
+		for (int i = 1; i < input.length; i++)
+			result = LCM(result, input[i]);
+		return result;
+	}
+
 	// *************************************************************************************************
 	// INSTANCE INNER CLASSES - FUNCTION ARGUMENT PARSER
 	// *************************************************************************************************
@@ -673,6 +651,18 @@ public class MathEval extends Object {
 		/** Test whether there is another argument to parse. */
 		public boolean hasNext() {
 			return (expression.charAt(index) != ')');
+		}
+
+		public int size() {
+			int i = index;
+			int count = 1;
+			while (expression.charAt(i) != ')') {
+				if (expression.charAt(index) == ',') {
+					count++;
+				}
+				i++;
+			}
+			return count;
 		}
 
 		int getIndex() {
@@ -793,7 +783,7 @@ public class MathEval extends Object {
 			}
 		}
 
-		// To add/remove functions change evaluateOperator() and registration
+		// To add/remove functions change evaluateFunction() and registerFunction
 		public double evaluateFunction(String fncnam, ArgParser fncargs) throws ArithmeticException {
 			switch (Character.toLowerCase(fncnam.charAt(0))) {
 			case 'a': {
@@ -842,10 +832,24 @@ public class MathEval extends Object {
 			}
 				break;
 			case 'g': {
+				if (fncnam.equalsIgnoreCase("gcd")) {
+					int numOfArgs = fncargs.size();
+					double args[] = new double[numOfArgs];
+					for (int i = 0; i < numOfArgs; i++)
+						args[i] = fncargs.next();
+					return GCD(args);
+				}
 				// if (fncnam.equalsIgnoreCase("getExponent")) {return Math.getExponent(fncargs.next());} // needs API 9 min
 			}
 				break;
 			case 'l': {
+				if (fncnam.equalsIgnoreCase("lcm")) {
+					int numOfArgs = fncargs.size();
+					double args[] = new double[numOfArgs];
+					for (int i = 0; i < numOfArgs; i++)
+						args[i] = fncargs.next();
+					return LCM(args);
+				}
 				if (fncnam.equalsIgnoreCase("log")) {
 					return Math.log(fncargs.next());
 				}
@@ -939,7 +943,7 @@ public class MathEval extends Object {
 		static private final Operator OPR_ADD = new Operator('+', 20, DefaultImpl.INSTANCE); // add/unary-positive
 		static private final Operator OPR_SUB = new Operator('-', 20, DefaultImpl.INSTANCE); // subtract/unary-negative
 
-		// To add/remove operators change evaluateOperator() and registration
+		// To add/remove operators change evaluateOperator() and registerOperators
 		static void registerOperators(MathEval tgt) {
 			tgt.setOperator(OPR_EQU);
 			tgt.setOperator(OPR_PWR);
@@ -951,7 +955,7 @@ public class MathEval extends Object {
 			tgt.setOperator(OPR_SUB);
 		}
 
-		// To add/remove functions change evaluateOperator() and registration
+		// To add/remove functions change evaluateFunction() and registerFunctions
 		static void registerFunctions(MathEval tgt) {
 			tgt.setFunctionHandler("abs", INSTANCE);
 			tgt.setFunctionHandler("acos", INSTANCE);
@@ -964,13 +968,15 @@ public class MathEval extends Object {
 			tgt.setFunctionHandler("exp", INSTANCE);
 			tgt.setFunctionHandler("expm1", INSTANCE);
 			tgt.setFunctionHandler("floor", INSTANCE);
-			// tgt.setFunctionHandler("getExponent", INSTANCE); // needs API 9 min
+			tgt.setFunctionHandler("gcd", INSTANCE);
+			// tgt.setFunctionHandler("getExponent", INSTANCE); // min API 9
+			tgt.setFunctionHandler("lcm", INSTANCE);
 			tgt.setFunctionHandler("log", INSTANCE);
 			tgt.setFunctionHandler("log10", INSTANCE);
 			tgt.setFunctionHandler("log1p", INSTANCE);
 			tgt.setFunctionHandler("max", INSTANCE);
 			tgt.setFunctionHandler("min", INSTANCE);
-			// tgt.setFunctionHandler("nextUp", INSTANCE); // needs API 9 min
+			// tgt.setFunctionHandler("nextUp", INSTANCE); // min API 9
 			tgt.setFunctionHandler("random", INSTANCE, true); // impure
 			tgt.setFunctionHandler("round", INSTANCE);
 			tgt.setFunctionHandler("roundHE", INSTANCE); // round half-even

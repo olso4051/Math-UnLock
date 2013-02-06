@@ -2,8 +2,6 @@ package com.olyware.mathlock.model;
 
 import java.util.Random;
 
-import android.util.Log;
-
 import com.olyware.mathlock.MathEval;
 
 public class MathQuestion extends Question {
@@ -32,28 +30,37 @@ public class MathQuestion extends Question {
 	}
 
 	ParseMode parseMode;
-	String image, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
+	String image, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, range;
 	private char questionVariables[] = { 'A', 'B', 'C', 'D' };
-	public int questionVariableValues[] = new int[questionVariables.length];
+	public double questionVariableValues[] = new double[questionVariables.length];
+	public int precisions[] = new int[questionVariables.length];
+	public int precision;
 	private Random rand = new Random();
 
 	public MathQuestion(String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
-			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode) {
+			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int precision) {
 		super(text, correctAnswer, difficulty);
 		this.image = image;
 		this.incorrectAnswer1 = incorrectAnswer1;
 		this.incorrectAnswer2 = incorrectAnswer2;
 		this.incorrectAnswer3 = incorrectAnswer3;
 		this.parseMode = parseMode;
+		this.range = range;
+		this.precision = precision;
 	}
 
 	public void setVariables() {
-		for (int i = 0; i < questionVariables.length; i++) {
-			questionVariableValues[i] = rand.nextInt(10) + 1;
+		precisions = getFromQuestion();
+		if (range.equals("default")) {
+			for (int i = 0; i < questionVariables.length; i++) {
+				questionVariableValues[i] = rand.nextInt(9) + 1;	// default random number 1-9 precision=0
+			}
+		} else {
+			questionVariableValues = getFromRange();
 		}
 	}
 
-	public int[] getVariables() {
+	public double[] getVariables() {
 		return questionVariableValues;
 	}
 
@@ -71,7 +78,7 @@ public class MathQuestion extends Question {
 		for (int i = 0; i < preParse.length; i++) {
 			switch (parseMode) {
 			case ALL:
-				postParse[i] = String.valueOf(math.evaluate(preParse[i]));
+				postParse[i] = getStringPrecisionNumber(math.evaluate(preParse[i]), precision);
 			case PARENTHESIS_ONLY:
 				postParse[i] = removeParentheses(preParse[i]);
 			case NOTHING:
@@ -88,12 +95,9 @@ public class MathQuestion extends Question {
 		int indices[] = new int[questionVariables.length];
 		for (int i = 0; i < indices.length; i++) {
 			indices[i] = preParse.indexOf(questionVariables[i]);
-			Log.d("question test", "Variable - " + questionVariables[i]);
-			Log.d("question test", "index - " + indices[i]);
 			if (indices[i] != -1) {
-				Log.d("question test", "before " + postParse);
-				postParse = postParse.replaceAll(String.valueOf(questionVariables[i]), String.valueOf(questionVariableValues[i]));
-				Log.d("question test", "after " + postParse);
+				postParse = postParse.replaceAll(String.valueOf(questionVariables[i]) + precisions[i],
+						getStringPrecisionNumber(questionVariableValues[i], precisions[i]));
 			}
 		}
 		return postParse;
@@ -117,7 +121,7 @@ public class MathQuestion extends Question {
 			next = equation.charAt(index + 1);
 			if ((next == ')') && (needs == 1)) {
 				subEq = equation.substring(first, index + 2);
-				subEq = String.valueOf(Math.round(math.evaluate(subEq)));
+				subEq = getStringPrecisionNumber(math.evaluate(subEq), precision);
 				if (first > 0)
 					equation = equation.substring(0, first) + subEq + equation.substring(index + 2);
 				else
@@ -134,6 +138,101 @@ public class MathQuestion extends Question {
 			index += 1;
 		}
 		return equation;
+	}
+
+	private double[] getFromRange() {
+		int index = 0, first = 0, count = 0, needs = 0;
+		double min = 0, max;
+		char next;
+		String subEq;
+		MathEval math = new MathEval();
+		double Values[] = new double[questionVariableValues.length];
+		while (index < range.length()) {
+			next = range.charAt(index);
+			if ((next == '-') && (first != index) && (needs == 0)) {
+				subEq = range.substring(first, index);
+				min = Double.parseDouble(subEq);
+				first = index + 1;
+			} else if (next == ',') {
+				subEq = range.substring(first, index);
+				max = Double.parseDouble(subEq);
+				if (precisions[count] >= 0)
+					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precisions[count]);
+				else
+					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precision);
+				math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
+				count++;
+				first = index + 1;
+			} else if ((next == ')') && (needs == 1)) {
+				subEq = range.substring(first, index + 1);
+				if (index + 1 == range.length()) { 				// max
+					max = math.evaluate(subEq);
+					if (precisions[count] >= 0)
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precisions[count]);
+					else
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precision);
+					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
+					count++;
+				} else if (range.charAt(index + 1) == '-') {	// min
+					min = math.evaluate(subEq);
+				} else {										// max
+					max = math.evaluate(subEq);
+					if (precisions[count] >= 0)
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precisions[count]);
+					else
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precision);
+					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
+					count++;
+				}
+				index += 1;
+				first = index + 1;
+				needs -= 1;
+			} else if ((next == ')') && (needs > 1)) {
+				needs -= 1;
+			} else if ((next == '(') && (needs == 0)) {
+				needs += 1;
+				first = index;
+			} else if (next == '(')
+				needs += 1;
+			index += 1;
+		}
+		return Values;
+	}
+
+	private int[] getFromQuestion() {
+		String preParse = super.getQuestionText();
+		int index;
+		int p[] = new int[questionVariables.length];
+		for (int i = 0; i < questionVariables.length; i++) {
+			index = preParse.indexOf(questionVariables[i]);
+			if (index != -1)
+				p[i] = Integer.parseInt(preParse.substring(index + 1, index + 2));
+			else
+				p[i] = -1;
+		}
+		return p;
+	}
+
+	private double getDoublePrecisionNumber(double num, int decimalPrecision) {
+		if (decimalPrecision == -1)
+			return num;
+		else if (decimalPrecision == 0)
+			return Math.round(num);
+		else {
+			double factor = Math.pow(10, decimalPrecision);
+			return Math.round(num * factor) / factor;
+		}
+	}
+
+	private String getStringPrecisionNumber(double num, int decimalPrecision) {
+		if (decimalPrecision == -1)
+			return String.valueOf(num);
+		else if (decimalPrecision == 0)
+			return String.valueOf(Math.round(num));
+		else {
+			double factor = Math.pow(10, decimalPrecision);
+			return String.valueOf(Math.round(num * factor) / factor);
+		}
 	}
 
 	@Override

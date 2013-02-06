@@ -26,8 +26,10 @@ public class DatabaseModelFactory {
 		String incorrectAnswer3 = cursorHelper.getString(MathQuestionContract.ANSWER_INCORRECT3);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		ParseMode parseMode = ParseMode.fromValue(cursorHelper.getInteger(MathQuestionContract.PARSE_MODE));
+		String range = cursorHelper.getString(MathQuestionContract.RANGE);
+		int precision = cursorHelper.getInteger(MathQuestionContract.PRECISION);
 		return new MathQuestion(questionText, questionImage, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3,
-				difficulty, parseMode);
+				difficulty, parseMode, range, precision);
 	}
 
 	public static List<VocabQuestion> buildVocabQuestions(Cursor cursor) {
