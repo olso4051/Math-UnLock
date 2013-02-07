@@ -50,11 +50,16 @@ public class DatabaseManager {
 	}
 
 	public MathQuestion getMathQuestion(Difficulty minDifficulty, Difficulty maxDifficulty) {
-		String order = "RANDOM() LIMIT 1";
+
+		// String order = "RANDOM()";// LIMIT 1";
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue());
-		Cursor cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, order);
-		return DatabaseModelFactory.buildMathQuestion(cursor);
+		Cursor cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + MathQuestionContract.PRIORITY + ") FROM " + MathQuestionContract.TABLE_NAME, null);
+		cursor2.moveToFirst();
+		int sum = cursor2.getInt(0);
+		return DatabaseModelFactory.buildMathQuestion(cursor, sum);
 	}
 
 	public long addVocabQuestion(VocabQuestion question) {

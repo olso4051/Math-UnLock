@@ -1,6 +1,7 @@
 package com.olyware.mathlock.database;
 
 import java.util.List;
+import java.util.Random;
 
 import android.database.Cursor;
 
@@ -30,8 +31,19 @@ public class DatabaseModelFactory {
 		return stats;
 	}
 
-	public static MathQuestion buildMathQuestion(Cursor cursor) {
+	public static MathQuestion buildMathQuestion(Cursor cursor, int weighSum) {
+		Random rand = new Random();
+		int selection = rand.nextInt(weighSum) + 1;
+		int cumulativeWeight = 0;
 		cursor.moveToFirst();
+		while (!cursor.isLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			cumulativeWeight += cursorHelper.getInteger(MathQuestionContract.PRIORITY);
+			if (cumulativeWeight >= selection) {
+				break;
+			}
+			cursor.moveToNext();
+		}
 		CursorHelper cursorHelper = new CursorHelper(cursor);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String questionImage = cursorHelper.getString(MathQuestionContract.QUESTION_IMAGE);
@@ -43,8 +55,9 @@ public class DatabaseModelFactory {
 		ParseMode parseMode = ParseMode.fromValue(cursorHelper.getInteger(MathQuestionContract.PARSE_MODE));
 		String range = cursorHelper.getString(MathQuestionContract.RANGE);
 		int precision = cursorHelper.getInteger(MathQuestionContract.PRECISION);
+		int priority = cursorHelper.getInteger(MathQuestionContract.PRIORITY);
 		return new MathQuestion(questionText, questionImage, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3,
-				difficulty, parseMode, range, precision);
+				difficulty, parseMode, range, precision, priority);
 	}
 
 	public static List<VocabQuestion> buildVocabQuestions(Cursor cursor) {

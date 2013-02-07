@@ -9,7 +9,7 @@ public final class MathQuestionContract extends QuestionContract {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, MathQuestionContract.QUESTION_IMAGE,
 				QuestionContract.ANSWER_CORRECT, MathQuestionContract.ANSWER_INCORRECT1, MathQuestionContract.ANSWER_INCORRECT2,
 				MathQuestionContract.ANSWER_INCORRECT3, QuestionContract.DIFFICULTY, MathQuestionContract.PARSE_MODE,
-				MathQuestionContract.RANGE, MathQuestionContract.PRECISION };
+				MathQuestionContract.RANGE, MathQuestionContract.PRECISION, MathQuestionContract.PRIORITY };
 	}
 
 	// COLUMN DEFS
@@ -41,6 +41,10 @@ public final class MathQuestionContract extends QuestionContract {
 	 * Type: TEXT
 	 */
 	public static final String PRECISION = "precision";
+	/**
+	 * Type: INT 1-MAX_SQL_INT
+	 */
+	public static final String PRIORITY = "priority";
 
 	// Prevent instantiation of this class
 	private MathQuestionContract() {

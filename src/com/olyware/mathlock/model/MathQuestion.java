@@ -34,11 +34,11 @@ public class MathQuestion extends Question {
 	private char questionVariables[] = { 'A', 'B', 'C', 'D' };
 	public double questionVariableValues[] = new double[questionVariables.length];
 	public int variablePrecision[] = new int[questionVariables.length];
-	int answerPrecision;
+	int answerPrecision, priority;
 	private Random rand = new Random();
 
 	public MathQuestion(String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
-			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int answerPrecision) {
+			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int answerPrecision, int priority) {
 		super(text, correctAnswer, difficulty);
 		this.image = image;
 		this.incorrectAnswer1 = incorrectAnswer1;
@@ -47,6 +47,7 @@ public class MathQuestion extends Question {
 		this.parseMode = parseMode;
 		this.range = range;
 		this.answerPrecision = answerPrecision;
+		this.priority = priority;
 	}
 
 	public void setVariables() {
