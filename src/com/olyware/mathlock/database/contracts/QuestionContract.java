@@ -21,7 +21,7 @@ public abstract class QuestionContract implements BaseContract {
 	public static final String ANSWER_CORRECT = "answer_correct";
 
 	/**
-	 * 1 - Easy 2 - Medium 3 - Hard Type : INTEGER
+	 * 0 - Very Easy 1 - Easy 2 - Medium 3 - Hard 4 - Very Hard 5 - Insane Type : INTEGER
 	 */
 	public static final String DIFFICULTY = "difficulty";
 }

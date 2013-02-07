@@ -42,7 +42,7 @@ public class DatabaseManager {
 	public List<Integer> getStatPercentArray(long oldestTime, String Pack, String difficulty) {
 		String where = StatisticContract.TIME + " >= " + String.valueOf(oldestTime);
 		if (!Pack.equals(MainActivity.getContext().getResources().getString(R.string.all)))
-			where = where + " AND " + StatisticContract.PACKAGE + " = " + Pack;
+			where = where + " AND " + StatisticContract.PACKAGE + " = '" + Pack + "'";
 		if (!difficulty.equals(MainActivity.getContext().getResources().getString(R.string.all)))
 			where = where + " AND " + StatisticContract.DIFFICULTY + " = " + String.valueOf(Difficulty.fromValue(difficulty).getValue());
 		Cursor cursor = db.query(StatisticContract.TABLE_NAME, StatisticContract.ALL_COLUMNS, where, null, null, null, null);
@@ -95,19 +95,17 @@ public class DatabaseManager {
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
-		String where = "difficulty <= ?";
-		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
+		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
 		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
-		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, whereArgs, null, null, null);
+		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage) {
 		String order = "RANDOM() LIMIT " + number;
-		String where = "difficulty <= ?";
-		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
+		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
 		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
-		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, whereArgs, null, null, order);
+		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, order);
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
 }

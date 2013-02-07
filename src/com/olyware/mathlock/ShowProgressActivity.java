@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -263,8 +262,6 @@ public class ShowProgressActivity extends Activity {
 		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", 0);
 		long answerTimeAve = sharedPrefsStats.getLong("answerTimeAve", 0);
-		Log.d("stats test", correct + "|" + wrong + "|" + coins + "|" + totalTime + "|" + bestStreak + "|" + currentStreak + "|"
-				+ answerTimeFast + "|" + answerTimeAve);
 		graphView.setStats(correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve);
 	}
 
