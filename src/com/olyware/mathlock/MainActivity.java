@@ -306,6 +306,7 @@ public class MainActivity extends Activity {
 	@SuppressWarnings("deprecation")
 	private void showWallpaper() {
 		Drawable drawable = WallpaperManager.getInstance(this).getDrawable();
+		drawable.setAlpha(150);
 		findViewById(R.id.layout).setBackgroundDrawable(drawable);
 	}
 
