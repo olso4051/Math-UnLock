@@ -6,6 +6,7 @@ import android.database.Cursor;
 
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
+import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
@@ -14,6 +15,20 @@ import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.EZ;
 
 public class DatabaseModelFactory {
+
+	public static List<Integer> buildStats(Cursor cursor) {
+		List<Integer> stats = EZ.list();
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			if (Boolean.parseBoolean(cursorHelper.getString(StatisticContract.CORRECT)))
+				stats.add(100);
+			else
+				stats.add(0);
+			cursor.moveToNext();
+		}
+		return stats;
+	}
 
 	public static MathQuestion buildMathQuestion(Cursor cursor) {
 		cursor.moveToFirst();

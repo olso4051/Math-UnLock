@@ -33,12 +33,12 @@ public class MathQuestion extends Question {
 	String image, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, range;
 	private char questionVariables[] = { 'A', 'B', 'C', 'D' };
 	public double questionVariableValues[] = new double[questionVariables.length];
-	public int precisions[] = new int[questionVariables.length];
-	public int precision;
+	public int variablePrecision[] = new int[questionVariables.length];
+	int answerPrecision;
 	private Random rand = new Random();
 
 	public MathQuestion(String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
-			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int precision) {
+			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int answerPrecision) {
 		super(text, correctAnswer, difficulty);
 		this.image = image;
 		this.incorrectAnswer1 = incorrectAnswer1;
@@ -46,17 +46,17 @@ public class MathQuestion extends Question {
 		this.incorrectAnswer3 = incorrectAnswer3;
 		this.parseMode = parseMode;
 		this.range = range;
-		this.precision = precision;
+		this.answerPrecision = answerPrecision;
 	}
 
 	public void setVariables() {
-		precisions = getFromQuestion();
+		variablePrecision = getVariablePrecisionFromQuestion();
 		if (range.equals("default")) {
 			for (int i = 0; i < questionVariables.length; i++) {
 				questionVariableValues[i] = rand.nextInt(9) + 1;	// default random number 1-9 precision=0
 			}
 		} else {
-			questionVariableValues = getFromRange();
+			questionVariableValues = getValuesFromRangeAndPrecision();
 		}
 	}
 
@@ -78,7 +78,7 @@ public class MathQuestion extends Question {
 		for (int i = 0; i < preParse.length; i++) {
 			switch (parseMode) {
 			case ALL:
-				postParse[i] = getStringPrecisionNumber(math.evaluate(preParse[i]), precision);
+				postParse[i] = getStringPrecisionNumber(math.evaluate(preParse[i]), answerPrecision);
 			case PARENTHESIS_ONLY:
 				postParse[i] = removeParentheses(preParse[i]);
 			case NOTHING:
@@ -96,8 +96,8 @@ public class MathQuestion extends Question {
 		for (int i = 0; i < indices.length; i++) {
 			indices[i] = preParse.indexOf(questionVariables[i]);
 			if (indices[i] != -1) {
-				postParse = postParse.replaceAll(String.valueOf(questionVariables[i]) + precisions[i],
-						getStringPrecisionNumber(questionVariableValues[i], precisions[i]));
+				postParse = postParse.replaceAll(String.valueOf(questionVariables[i]) + variablePrecision[i],
+						getStringPrecisionNumber(questionVariableValues[i], variablePrecision[i]));
 			}
 		}
 		return postParse;
@@ -121,7 +121,7 @@ public class MathQuestion extends Question {
 			next = equation.charAt(index + 1);
 			if ((next == ')') && (needs == 1)) {
 				subEq = equation.substring(first, index + 2);
-				subEq = getStringPrecisionNumber(math.evaluate(subEq), precision);
+				subEq = getStringPrecisionNumber(math.evaluate(subEq), answerPrecision);
 				if (first > 0)
 					equation = equation.substring(0, first) + subEq + equation.substring(index + 2);
 				else
@@ -140,7 +140,7 @@ public class MathQuestion extends Question {
 		return equation;
 	}
 
-	private double[] getFromRange() {
+	private double[] getValuesFromRangeAndPrecision() {
 		int index = 0, first = 0, count = 0, needs = 0;
 		double min = 0, max;
 		char next;
@@ -156,10 +156,10 @@ public class MathQuestion extends Question {
 			} else if (next == ',') {
 				subEq = range.substring(first, index);
 				max = Double.parseDouble(subEq);
-				if (precisions[count] >= 0)
-					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precisions[count]);
+				if (variablePrecision[count] >= 0)
+					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, variablePrecision[count]);
 				else
-					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precision);
+					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, answerPrecision);
 				math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 				count++;
 				first = index + 1;
@@ -167,20 +167,20 @@ public class MathQuestion extends Question {
 				subEq = range.substring(first, index + 1);
 				if (index + 1 == range.length()) { 				// max
 					max = math.evaluate(subEq);
-					if (precisions[count] >= 0)
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precisions[count]);
+					if (variablePrecision[count] >= 0)
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, variablePrecision[count]);
 					else
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precision);
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, answerPrecision);
 					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 					count++;
 				} else if (range.charAt(index + 1) == '-') {	// min
 					min = math.evaluate(subEq);
 				} else {										// max
 					max = math.evaluate(subEq);
-					if (precisions[count] >= 0)
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precisions[count]);
+					if (variablePrecision[count] >= 0)
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, variablePrecision[count]);
 					else
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, precision);
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) + min, answerPrecision);
 					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 					count++;
 				}
@@ -199,7 +199,7 @@ public class MathQuestion extends Question {
 		return Values;
 	}
 
-	private int[] getFromQuestion() {
+	private int[] getVariablePrecisionFromQuestion() {
 		String preParse = super.getQuestionText();
 		int index;
 		int p[] = new int[questionVariables.length];
@@ -239,11 +239,13 @@ public class MathQuestion extends Question {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((parseMode == null) ? 0 : parseMode.hashCode());
+		result = prime * result + answerPrecision;
 		result = prime * result + ((image == null) ? 0 : image.hashCode());
 		result = prime * result + ((incorrectAnswer1 == null) ? 0 : incorrectAnswer1.hashCode());
 		result = prime * result + ((incorrectAnswer2 == null) ? 0 : incorrectAnswer2.hashCode());
 		result = prime * result + ((incorrectAnswer3 == null) ? 0 : incorrectAnswer3.hashCode());
+		result = prime * result + ((parseMode == null) ? 0 : parseMode.hashCode());
+		result = prime * result + ((range == null) ? 0 : range.hashCode());
 		return result;
 	}
 
@@ -256,15 +258,34 @@ public class MathQuestion extends Question {
 		if (getClass() != obj.getClass())
 			return false;
 		MathQuestion other = (MathQuestion) obj;
+		if (answerPrecision != other.answerPrecision)
+			return false;
+		if (image == null) {
+			if (other.image != null)
+				return false;
+		} else if (!image.equals(other.image))
+			return false;
+		if (incorrectAnswer1 == null) {
+			if (other.incorrectAnswer1 != null)
+				return false;
+		} else if (!incorrectAnswer1.equals(other.incorrectAnswer1))
+			return false;
+		if (incorrectAnswer2 == null) {
+			if (other.incorrectAnswer2 != null)
+				return false;
+		} else if (!incorrectAnswer2.equals(other.incorrectAnswer2))
+			return false;
+		if (incorrectAnswer3 == null) {
+			if (other.incorrectAnswer3 != null)
+				return false;
+		} else if (!incorrectAnswer3.equals(other.incorrectAnswer3))
+			return false;
 		if (parseMode != other.parseMode)
 			return false;
-		if (image != other.image)
-			return false;
-		if (incorrectAnswer1 != other.incorrectAnswer1)
-			return false;
-		if (incorrectAnswer2 != other.incorrectAnswer2)
-			return false;
-		if (incorrectAnswer3 != other.incorrectAnswer3)
+		if (range == null) {
+			if (other.range != null)
+				return false;
+		} else if (!range.equals(other.range))
 			return false;
 		return true;
 	}

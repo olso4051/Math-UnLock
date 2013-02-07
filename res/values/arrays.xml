@@ -128,6 +128,24 @@
 		<item>difficulty_toddler</item>
 		<item>difficulty_engineer</item>
     </string-array>
+    <string name="all">All</string>
+	<string name="math">Math</string>
+	<string name="vocab">Vocab</string>
+    <string name="language">Language</string>
+    <string name="act_sat">ACT/SAT</string>
+	<string name="gre">GRE</string>
+	<string name="toddler">Toddler</string>
+	<string name="engineer">Engineer</string>
+    <string-array name="display_packages">
+        <item>@string/all</item>
+        <item>@string/math</item>
+        <item>@string/vocab</item>
+        <item>@string/language</item>
+        <item>@string/act_sat</item>
+		<item>@string/gre</item>
+		<item>@string/toddler</item>
+		<item>@string/engineer</item>
+    </string-array>
     <string-array name="settings_keys">
         <item>settings_math</item>
         <item>settings_vocab</item>

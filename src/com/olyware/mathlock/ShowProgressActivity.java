@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -15,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +23,9 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.model.Difficulty;
 
 public class ShowProgressActivity extends Activity {
 	private int money;
@@ -39,8 +41,12 @@ public class ShowProgressActivity extends Activity {
 	private String unlockPackageKeys[];
 	private String displayPackageKeys[];
 	private String[] times = { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
+	private long[] oldestTimes = { System.currentTimeMillis(), 31536000000l, 15768000000l, 2628000000l, 604800000l, 86400000l };
 	private List<String> packages;
-	private String[] difficulties = { "All", "Hard", "Medium", "Easy" };
+	private String[] difficulties = new String[Difficulty.getSize() + 1];
+	private String selectedPackage, selectedDifficulty;
+
+	private DatabaseManager dbManager;
 
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
@@ -59,12 +65,9 @@ public class ShowProgressActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_progress);
 
+		dbManager = new DatabaseManager(getApplicationContext());
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		displayPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		for (int i = 0; i < displayPackageKeys.length; i++) {
-			displayPackageKeys[i] = displayPackageKeys[i].substring(7);
-			displayPackageKeys[i] = displayPackageKeys[i].substring(0, 1).toUpperCase(Locale.ENGLISH) + displayPackageKeys[i].substring(1);
-		}
+		displayPackageKeys = getResources().getStringArray(R.array.display_packages);
 
 		clock = (TextView) findViewById(R.id.clock);
 		clock.setOnClickListener(new OnClickListener() {
@@ -126,9 +129,11 @@ public class ShowProgressActivity extends Activity {
 	}
 
 	private void initSpinners() {
-		// String[] times = new String[] { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
 		packages = getUnlockedPackages();
-		// String[] difficulties = new String[] { "All", "Hard", "Medium", "Easy" };
+		difficulties[0] = getString(R.string.all);
+		for (int i = 1; i < difficulties.length; i++) {
+			difficulties[i] = Difficulty.fromValueString(i - 1);
+		}
 		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times);
 		ArrayAdapter<String> adapterPackages = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, packages);
 		ArrayAdapter<String> adapterDifficulties = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficulties);
@@ -140,7 +145,6 @@ public class ShowProgressActivity extends Activity {
 		spinTime.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-				// parent.getItemAtPosition(pos).toString();
 				setGraph();
 			}
 
@@ -149,9 +153,11 @@ public class ShowProgressActivity extends Activity {
 			}
 		});
 		spinPackage.setAdapter(adapterPackages);
+		selectedPackage = adapterPackages.getItem(0);
 		spinPackage.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+				selectedPackage = parent.getItemAtPosition(pos).toString();
 				setGraph();
 			}
 
@@ -160,9 +166,11 @@ public class ShowProgressActivity extends Activity {
 			}
 		});
 		spinDifficulty.setAdapter(adapterDifficulties);
+		selectedDifficulty = adapterDifficulties.getItem(0);
 		spinDifficulty.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+				selectedDifficulty = parent.getItemAtPosition(pos).toString();
 				setGraph();
 			}
 
@@ -233,17 +241,19 @@ public class ShowProgressActivity extends Activity {
 	}
 
 	private void setGraph() {
-		// String time = spinTime.getSelectedItem().toString();
-		// String pack = spinPackage.getSelectedItem().toString();
-		// String diff = spinDifficulty.getSelectedItem().toString();
-		// TODO use these selections to do a sql query and get the array to graph
+		long oldestTime = getOldestTime();
+		List<Integer> percent = dbManager.getStatPercentArray(oldestTime, selectedPackage, selectedDifficulty);
 
-		// random 1000 integers and moving average to test the graph view
-		int test[] = new int[500];
-		Random rnd = new Random();
-		for (int i = 0; i < test.length; i++)
-			test[i] = rnd.nextInt(2) * 100;
-		graphView.setMovingAverage(rnd.nextInt(50) + 1);
+		int test[];
+		if (percent.size() < 1) {
+			test = new int[1];
+			test[0] = 50;
+		} else {
+			test = new int[percent.size()];
+			for (int i = 0; i < test.length; i++)
+				test[i] = percent.get(i);
+		}
+		// graphView.setMovingAverage(rnd.nextInt(50) + 1);
 		graphView.setArray(test);
 		int correct = sharedPrefsStats.getInt("correct", 0);
 		int wrong = sharedPrefsStats.getInt("wrong", 0);
@@ -253,6 +263,12 @@ public class ShowProgressActivity extends Activity {
 		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", 0);
 		long answerTimeAve = sharedPrefsStats.getLong("answerTimeAve", 0);
+		Log.d("stats test", correct + "|" + wrong + "|" + coins + "|" + totalTime + "|" + bestStreak + "|" + currentStreak + "|"
+				+ answerTimeFast + "|" + answerTimeAve);
 		graphView.setStats(correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve);
+	}
+
+	private long getOldestTime() {
+		return System.currentTimeMillis() - oldestTimes[spinTime.getSelectedItemPosition()];
 	}
 }

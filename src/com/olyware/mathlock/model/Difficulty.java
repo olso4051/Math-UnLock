@@ -10,6 +10,10 @@ public enum Difficulty {
 		this.value = value;
 	}
 
+	public static int getSize() {
+		return 6;
+	}
+
 	public static Difficulty fromValue(int value) {
 		Difficulty difficulty = null;
 
@@ -34,6 +38,49 @@ public enum Difficulty {
 			break;
 		}
 
+		return difficulty;
+	}
+
+	public static Difficulty fromValue(String value) {
+		Difficulty difficulty = null;
+		if (value.equals("Very Easy"))
+			difficulty = VERY_EASY;
+		else if (value.equals("Easy"))
+			difficulty = EASY;
+		else if (value.equals("Medium"))
+			difficulty = MEDIUM;
+		else if (value.equals("Hard"))
+			difficulty = HARD;
+		else if (value.equals("Very_Hard"))
+			difficulty = VERY_HARD;
+		else if (value.equals("Insane"))
+			difficulty = INSANE;
+
+		return difficulty;
+	}
+
+	public static String fromValueString(int value) {
+		String difficulty = null;
+		switch (value) {
+		case 0:
+			difficulty = "Very Easy";
+			break;
+		case 1:
+			difficulty = "Easy";
+			break;
+		case 2:
+			difficulty = "Medium";
+			break;
+		case 3:
+			difficulty = "Hard";
+			break;
+		case 4:
+			difficulty = "Very Hard";
+			break;
+		case 5:
+			difficulty = "Insane";
+			break;
+		}
 		return difficulty;
 	}
 
