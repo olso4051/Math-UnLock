@@ -51,7 +51,7 @@ public enum Difficulty {
 			difficulty = MEDIUM;
 		else if (value.equals("Hard"))
 			difficulty = HARD;
-		else if (value.equals("Very_Hard"))
+		else if (value.equals("Very Hard"))
 			difficulty = VERY_HARD;
 		else if (value.equals("Insane"))
 			difficulty = INSANE;

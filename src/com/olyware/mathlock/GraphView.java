@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -135,10 +136,12 @@ public class GraphView extends View {
 		StatsValues[5] = format(totalTime);
 		StatsValues[6] = format(answerTimeFast);
 		StatsValues[7] = format(answerTimeAve);
+		Log.d("stats test", "coins = " + coins + "|totalTime = " + totalTime);
 		if (totalTime != 0)
-			StatsValues[8] = coins * 1000 * 60 * 60 / totalTime + "";
+			StatsValues[8] = coins * 1000l * 60l * 60l / totalTime + "";
 		else
 			StatsValues[8] = 0 + "";
+		Log.d("stats test", "cph = " + StatsValues[8]);
 	}
 
 	// =========================================

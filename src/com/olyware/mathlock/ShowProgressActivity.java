@@ -107,6 +107,7 @@ public class ShowProgressActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		setMoney();
