@@ -9,6 +9,7 @@ import java.util.Random;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -104,6 +105,8 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		showWallpaper();
 
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
@@ -300,6 +303,13 @@ public class MainActivity extends Activity {
 				finish();
 			}
 		}, delay); // launch home screen after delay time [ms]
+	}
+
+	@SuppressWarnings("deprecation")
+	private void showWallpaper() {
+		Drawable drawable = WallpaperManager.getInstance(this).getDrawable();
+		drawable.setAlpha(150);
+		findViewById(R.id.layout).setBackgroundDrawable(drawable);
 	}
 
 	private void setProblemAndAnswer(int delay) {
