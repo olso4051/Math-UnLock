@@ -56,7 +56,8 @@ public class DatabaseManager {
 				+ String.valueOf(minDifficulty.getValue());
 		Cursor cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
-		Cursor cursor2 = db.rawQuery("SELECT SUM(" + MathQuestionContract.PRIORITY + ") FROM " + MathQuestionContract.TABLE_NAME, null);
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + MathQuestionContract.TABLE_NAME + " WHERE "
+				+ where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
 		return DatabaseModelFactory.buildMathQuestion(cursor, sum);
@@ -73,44 +74,40 @@ public class DatabaseManager {
 
 	public List<VocabQuestion> getAllVocabQuestions() {
 		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, null, null, null, null, null);
-		return DatabaseModelFactory.buildVocabQuestions(cursor);
-	}
-
-	public List<VocabQuestion> getVocabQuestions(Difficulty difficulty) {
-		String where = "difficulty <= ?";
-		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
-		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, whereArgs, null, null, null);
-		return DatabaseModelFactory.buildVocabQuestions(cursor);
-	}
-
-	public List<VocabQuestion> getVocabQuestions(Difficulty difficulty, int number) {
-		String order = "RANDOM() LIMIT " + number;
-		String where = "difficulty <= ?";
-		String[] whereArgs = new String[] { String.valueOf(difficulty.getValue()) };
-		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, whereArgs, null, null, order);
-		return DatabaseModelFactory.buildVocabQuestions(cursor);
+		return DatabaseModelFactory.buildAllVocabQuestions(cursor);
 	}
 
 	public List<VocabQuestion> getVocabQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number) {
-		String order = "RANDOM() LIMIT " + number;
+		// String order = "RANDOM()";// LIMIT " + number;
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue());
-		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, null, null, null, order);
-		return DatabaseModelFactory.buildVocabQuestions(cursor);
+		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, null, null, null, null);
+
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + VocabQuestionContract.TABLE_NAME + " WHERE "
+				+ where, null);
+		cursor2.moveToFirst();
+		int sum = cursor2.getInt(0);
+		return DatabaseModelFactory.buildVocabQuestions(cursor, sum, number);
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
 		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
 		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
-		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
+		return DatabaseModelFactory.buildAllLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage) {
-		String order = "RANDOM() LIMIT " + number;
+		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
+		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
-		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
-		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, order);
-		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage);
+		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY };
+		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
+
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
+				+ LanguageQuestionContract.TABLE_NAME + " WHERE " + where, null);
+		cursor2.moveToFirst();
+		int sum = cursor2.getInt(0);
+		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 }

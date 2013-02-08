@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
 	private boolean UnlockedPackages = false;
+	private boolean dialogOn = false;
 
 	private int answerLoc = 1;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
@@ -204,7 +205,8 @@ public class MainActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// at this point the activity has been measured and we can get the height
 		// now we can set a max height for answerView since it is dynamic
-		answerView.setParentHeight(layout.getBottom());
+		if (hasFocus)
+			answerView.setParentHeight(layout.getBottom());
 		super.onWindowFocusChanged(hasFocus);
 	}
 
@@ -225,7 +227,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
@@ -238,8 +239,7 @@ public class MainActivity extends Activity {
 		} else
 			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
-		// save money into shared preferences
-		setMoney();
+
 		// set the clock to the correct time
 		setTime();
 		// set the current handedness
@@ -275,6 +275,8 @@ public class MainActivity extends Activity {
 			resetTimes();
 		// show the settings bar and slide it down after 3 seconds
 		joystick.showStartAnimation(0, 3000);
+		// save money into shared preferences
+		setMoney();
 	}
 
 	@Override
@@ -680,6 +682,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void JoystickSelected(int s) {
+		dialogOn = false;
 		vib.vibrate(50);	// vibrate for 50ms
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
 		switch (s) {
@@ -813,32 +816,36 @@ public class MainActivity extends Activity {
 	}
 
 	private void displayInfo(boolean first) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		if (first) {
-
-			builder.setTitle(R.string.info_title_first);
-			builder.setMessage(R.string.info_message_first);
-			builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					startActivity(new Intent(getApplicationContext(), ShowStoreActivity.class));
-				}
-			});
-			builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// nothing to do
-				}
-			});
-		} else {
-			builder.setTitle(R.string.info_title);
-			builder.setMessage(R.string.info_message).setCancelable(false);
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// nothing to do
-				}
-			});
+		if (!dialogOn) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			if (first) {
+				builder.setTitle(R.string.info_title_first);
+				builder.setMessage(R.string.info_message_first).setCancelable(false);
+				builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialogOn = false;
+						startActivity(new Intent(getApplicationContext(), ShowStoreActivity.class));
+					}
+				});
+				builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialogOn = false;
+					}
+				});
+			} else {
+				builder.setTitle(R.string.info_title);
+				builder.setMessage(R.string.info_message).setCancelable(false);
+				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialogOn = false;
+					}
+				});
+			}
+			AlertDialog alert = builder.create();
+			dialogOn = true;
+			alert.show();
+			if (!first)
+				alert.getWindow().setLayout(layout.getWidth(), layout.getHeight() * 2 / 3);
 		}
-		AlertDialog alert = builder.create();
-		alert.show();
 	}
 }

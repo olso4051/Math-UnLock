@@ -6,7 +6,7 @@ public abstract class QuestionContract implements BaseContract {
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, QuestionContract.ANSWER_CORRECT,
-				QuestionContract.DIFFICULTY };
+				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY };
 	}
 
 	// COLUMN DEFS
@@ -24,4 +24,8 @@ public abstract class QuestionContract implements BaseContract {
 	 * 0 - Very Easy 1 - Easy 2 - Medium 3 - Hard 4 - Very Hard 5 - Insane Type : INTEGER
 	 */
 	public static final String DIFFICULTY = "difficulty";
+	/**
+	 * Type : INTEGER default = 10
+	 */
+	public static final String PRIORITY = "priority";
 }

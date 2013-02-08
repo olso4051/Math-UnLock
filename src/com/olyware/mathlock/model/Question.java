@@ -5,12 +5,14 @@ public abstract class Question {
 	String text;
 	String correctAnswer;
 	Difficulty difficulty;
+	int priority;
 
-	public Question(String text, String correctAnswer, Difficulty difficulty) {
+	public Question(String text, String correctAnswer, Difficulty difficulty, int priority) {
 		super();
 		this.text = text;
 		this.correctAnswer = correctAnswer;
 		this.difficulty = difficulty;
+		this.priority = priority;
 	}
 
 	public String getQuestionText() {
@@ -23,6 +25,10 @@ public abstract class Question {
 
 	public Difficulty getDifficulty() {
 		return difficulty;
+	}
+
+	public int getPriority() {
+		return priority;
 	}
 
 	@Override
