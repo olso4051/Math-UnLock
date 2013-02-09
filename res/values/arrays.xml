@@ -103,6 +103,14 @@
         <item name="danish">danish_priority</item>
         <item name="dutch">dutch_priority</item>
     </string-array>
+    <string name="math_table">t_math_question</string>
+	<string name="vocab_table">t_vocab_question</string>
+    <string name="language_table">t_language_question</string>
+    <string-array name="table_names">
+        <item name="math">@string/math_table</item>
+        <item name="vocab">@string/vocab_table</item>
+        <item name="language">@string/language_table</item>
+    </string-array>
     
     <string-array name="unlock_package_keys">
         <item>unlock_all</item>

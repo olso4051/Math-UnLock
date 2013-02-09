@@ -60,7 +60,8 @@ public class MainActivity extends Activity {
 	private int defaultTextColor;
 
 	private String PackageKeys[], unlockPackageKeys[], DifficultyKeys[], LanguageEntries[], LanguageValues[];
-	private String currentPack;
+	private String currentPack, currentTableName, fromLanguage, toLanguage;
+	private int ID;
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
@@ -106,6 +107,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		layout = (LinearLayout) findViewById(R.id.layout);
 		showWallpaper();
 
 		mHandler = new Handler();
@@ -117,8 +119,6 @@ public class MainActivity extends Activity {
 		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 		EnabledPacks = new boolean[PackageKeys.length];
-
-		layout = (LinearLayout) findViewById(R.id.layout);
 
 		clock = (TextView) findViewById(R.id.clock);
 		clock.setOnClickListener(new OnClickListener() {
@@ -208,8 +208,10 @@ public class MainActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// at this point the activity has been measured and we can get the height
 		// now we can set a max height for answerView since it is dynamic
-		if (hasFocus)
+		if (hasFocus) {
+			showWallpaper();
 			answerView.setParentHeight(layout.getBottom());
+		}
 		super.onWindowFocusChanged(hasFocus);
 	}
 
@@ -308,8 +310,8 @@ public class MainActivity extends Activity {
 	@SuppressWarnings("deprecation")
 	private void showWallpaper() {
 		Drawable drawable = WallpaperManager.getInstance(this).getDrawable();
-		drawable.setAlpha(150);
-		findViewById(R.id.layout).setBackgroundDrawable(drawable);
+		drawable.setAlpha(200);
+		layout.setBackgroundDrawable(drawable);
 	}
 
 	private void setProblemAndAnswer(int delay) {
@@ -433,6 +435,10 @@ public class MainActivity extends Activity {
 			difficulty = rand.nextInt(maxDifficulty + 1);
 		else
 			difficulty = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
+		currentTableName = null;
+		fromLanguage = null;
+		toLanguage = null;
+		ID = 0;
 		switch (difficulty) {
 		case 0:				// Elementary
 			// add and subtract options
@@ -468,7 +474,11 @@ public class MainActivity extends Activity {
 		case 3:				// High School (advanced)
 		case 4:				// College (basic)
 		case 5:				// College (advanced)
+			currentTableName = getString(R.string.math_table);
+			fromLanguage = null;
+			toLanguage = null;
 			MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
+			ID = question.getID();
 			question.setVariables();
 			// Set the new difficulty based on what question was picked
 			difficulty = question.getDifficulty().getValue();
@@ -523,9 +533,13 @@ public class MainActivity extends Activity {
 
 	// TODO: Pass in a Difficulty enum instead of an integer
 	private void setVocabProblem(int minDifficulty, int maxDifficulty) {
+		currentTableName = getString(R.string.vocab_table);
+		fromLanguage = null;
+		toLanguage = null;
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(minDifficulty),
 				Difficulty.fromValue(maxDifficulty), answers.length);
+		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
@@ -539,8 +553,11 @@ public class MainActivity extends Activity {
 
 	private void setLanguageProblem(int diffNum) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
-		String fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
-		String toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+		currentTableName = getString(R.string.math_table);
+		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
+		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+		// String fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
+		// String toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 		String fromLanguageLocal = fromLanguage, toLanguageLocal = toLanguage;
 		for (int i = 0; i < LanguageValues.length; i++) {
 			if (LanguageValues[i].equals(fromLanguage))
@@ -550,6 +567,7 @@ public class MainActivity extends Activity {
 		}
 		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diffNum), answers.length, fromLanguage,
 				toLanguage);
+		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
@@ -591,6 +609,10 @@ public class MainActivity extends Activity {
 	}
 
 	private void setToddlerProblem(int diffNum) {
+		currentTableName = null;
+		fromLanguage = null;
+		toLanguage = null;
+		ID = 0;
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -604,6 +626,10 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineerProblem(int diffNum) {
+		currentTableName = null;
+		fromLanguage = null;
+		toLanguage = null;
+		ID = 0;
 		switch (diffNum) {
 		case 1:				// Easy question
 			break;
@@ -652,6 +678,7 @@ public class MainActivity extends Activity {
 				money += questionWorth;// Integer.parseInt(worth.getText().toString());
 				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficulty), System
 						.currentTimeMillis()));
+				dbManager.decreasePriority(currentTableName, fromLanguage, fromLanguage, ID);
 			} else {
 				answerView.setCorrectAnswer(correctLoc);
 				answerView.setIncorrectGuess(guessLoc);
@@ -659,6 +686,7 @@ public class MainActivity extends Activity {
 				money -= questionWorth;// Integer.parseInt(worth.getText().toString());
 				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficulty), System
 						.currentTimeMillis()));
+				dbManager.increasePriority(currentTableName, fromLanguage, fromLanguage, ID);
 			}
 			if (money < 0)
 				money = 0;

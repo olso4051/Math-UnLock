@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -109,5 +110,66 @@ public class DatabaseManager {
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
+	}
+
+	public void increasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
+		if (!tableName.equals(null)) {
+			String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
+			String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
+			String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
+			int priority[] = getPriority(tableName, fromLanguagePriority, toLanguagePriority, ID);
+			priority[0] = Math.max(QuestionContract.DEFAULT_PRIORITY, priority[0] * 2);
+			priority[1] = Math.max(QuestionContract.DEFAULT_PRIORITY, priority[1] * 2);
+			String where = " WHERE " + BaseContract._ID + "=" + ID;
+			String sql = "UPDATE " + tableName + " SET ";
+			String priorityUpdate;
+			if (tableName.equals(tableNames[2]))
+				priorityUpdate = fromLanguagePriority + "=" + priority[0] + "," + toLanguagePriority + "=" + priority[1];
+			else
+				priorityUpdate = QuestionContract.PRIORITY + "=" + priority[0];
+			sql = sql + priorityUpdate + where;
+			db.execSQL(sql);
+		}
+	}
+
+	public void decreasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
+		if (!tableName.equals(null)) {
+			String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
+			String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
+			String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
+			int priority[] = getPriority(tableName, fromLanguagePriority, toLanguagePriority, ID);
+			priority[0] = Math.min(QuestionContract.DEFAULT_PRIORITY, priority[0] / 4);
+			priority[1] = Math.min(QuestionContract.DEFAULT_PRIORITY, priority[1] / 4);
+			priority[0] = Math.max(1, priority[0]);
+			priority[1] = Math.max(1, priority[1]);
+			String where = " WHERE " + BaseContract._ID + "=" + ID;
+			String sql = "UPDATE " + tableName + " SET ";
+			String priorityUpdate;
+			if (tableName.equals(tableNames[2]))
+				priorityUpdate = fromLanguagePriority + "=" + priority[0] + "," + toLanguagePriority + "=" + priority[1];
+			else
+				priorityUpdate = QuestionContract.PRIORITY + "=" + priority[0];
+			sql = sql + priorityUpdate + where;
+			db.execSQL(sql);
+		}
+	}
+
+	private int[] getPriority(String tableName, String priority1, String priority2, int ID) {
+		String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
+		int priority[] = { 0, 0 };
+		if (tableName.equals(tableNames[2])) {
+			Cursor cursor = db.rawQuery("SELECT " + priority1 + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
+			cursor.moveToFirst();
+			priority[0] = cursor.getInt(0);
+			cursor = db.rawQuery("SELECT " + priority2 + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
+			cursor.moveToFirst();
+			priority[1] = cursor.getInt(0);
+		} else {
+			Cursor cursor1 = db.rawQuery("SELECT " + QuestionContract.PRIORITY + " FROM " + tableName + " WHERE " + QuestionContract._ID
+					+ "=" + ID, null);
+			cursor1.moveToFirst();
+			priority[0] = cursor1.getInt(0);
+		}
+		return priority;
 	}
 }

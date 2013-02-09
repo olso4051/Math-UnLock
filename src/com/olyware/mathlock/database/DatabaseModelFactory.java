@@ -46,6 +46,7 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		CursorHelper cursorHelper = new CursorHelper(cursor);
+		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String questionImage = cursorHelper.getString(MathQuestionContract.QUESTION_IMAGE);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
@@ -57,7 +58,7 @@ public class DatabaseModelFactory {
 		String range = cursorHelper.getString(MathQuestionContract.RANGE);
 		int precision = cursorHelper.getInteger(MathQuestionContract.PRECISION);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-		return new MathQuestion(questionText, questionImage, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3,
+		return new MathQuestion(id, questionText, questionImage, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3,
 				difficulty, parseMode, range, precision, priority);
 	}
 
@@ -66,12 +67,13 @@ public class DatabaseModelFactory {
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
+			int id = cursorHelper.getInteger(QuestionContract._ID);
 			String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 			String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
 			// PartOfSpeech partOfSpeech = PartOfSpeech.fromValue(cursorHelper.getString(VocabQuestionContract.PART_OF_SPEECH));
-			VocabQuestion question = new VocabQuestion(questionText, correctAnswer, difficulty, null, priority);
+			VocabQuestion question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
 			questions.add(question);
 
 			cursor.moveToNext();
@@ -95,24 +97,26 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		CursorHelper cursorHelper = new CursorHelper(cursor);
+		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
 		// PartOfSpeech partOfSpeech = PartOfSpeech.fromValue(cursorHelper.getString(VocabQuestionContract.PART_OF_SPEECH));
-		VocabQuestion question = new VocabQuestion(questionText, correctAnswer, difficulty, null, priority);
+		VocabQuestion question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
 		questions.add(question);
 		// get three more random question for the wrong answers
 		for (int i = 0; i < numOfWrongs; i++) {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
 				cursorHelper = new CursorHelper(cursor);
+				id = cursorHelper.getInteger(QuestionContract._ID);
 				correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 				priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
 				// PartOfSpeech partOfSpeech = PartOfSpeech.fromValue(cursorHelper.getString(VocabQuestionContract.PART_OF_SPEECH));
-				question = new VocabQuestion(questionText, correctAnswer, difficulty, null, priority);
+				question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
 				if (!questions.contains(question)) {
 					questions.add(question);	// add question then done for this iteration
 					break;
@@ -125,11 +129,12 @@ public class DatabaseModelFactory {
 	public static VocabQuestion buildVocabQuestion(Cursor cursor) {
 		cursor.moveToFirst();
 		CursorHelper cursorHelper = new CursorHelper(cursor);
+		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-		return new VocabQuestion(questionText, correctAnswer, difficulty, null, priority);
+		return new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
 	}
 
 	public static List<LanguageQuestion> buildAllLanguageQuestions(Cursor cursor, String fromLanguage, String toLanguage) {
@@ -139,11 +144,12 @@ public class DatabaseModelFactory {
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
+			int id = cursorHelper.getInteger(QuestionContract._ID);
 			String correctAnswer = cursorHelper.getString(toLanguage);
 			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 			String questionText = cursorHelper.getString(fromLanguage);
 			int priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-			LanguageQuestion question = new LanguageQuestion(questionText, correctAnswer, difficulty, priority);
+			LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
 			questions.add(question);
 
 			cursor.moveToNext();
@@ -171,22 +177,24 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		CursorHelper cursorHelper = new CursorHelper(cursor);
+		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String correctAnswer = cursorHelper.getString(toLanguage);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		String questionText = cursorHelper.getString(fromLanguage);
 		int priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-		LanguageQuestion question = new LanguageQuestion(questionText, correctAnswer, difficulty, priority);
+		LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
 		questions.add(question);
 		// get three more random question for the wrong answers
 		for (int i = 0; i < numOfWrongs; i++) {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
 				cursorHelper = new CursorHelper(cursor);
+				id = cursorHelper.getInteger(QuestionContract._ID);
 				correctAnswer = cursorHelper.getString(toLanguage);
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				questionText = cursorHelper.getString(fromLanguage);
 				priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-				question = new LanguageQuestion(questionText, correctAnswer, difficulty, priority);
+				question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
 				if (!questions.contains(question)) {
 					questions.add(question);	// add question then done for this iteration
 					break;

@@ -25,7 +25,11 @@ public abstract class QuestionContract implements BaseContract {
 	 */
 	public static final String DIFFICULTY = "difficulty";
 	/**
-	 * Type : INTEGER default = 10
+	 * Type : TEXT
 	 */
 	public static final String PRIORITY = "priority";
+	/**
+	 * Type : INTEGER default = 10
+	 */
+	public static final int DEFAULT_PRIORITY = 10;
 }

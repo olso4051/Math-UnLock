@@ -5,14 +5,19 @@ public abstract class Question {
 	String text;
 	String correctAnswer;
 	Difficulty difficulty;
-	int priority;
+	int id, priority;
 
-	public Question(String text, String correctAnswer, Difficulty difficulty, int priority) {
+	public Question(int id, String text, String correctAnswer, Difficulty difficulty, int priority) {
 		super();
+		this.id = id;
 		this.text = text;
 		this.correctAnswer = correctAnswer;
 		this.difficulty = difficulty;
 		this.priority = priority;
+	}
+
+	public int getID() {
+		return id;
 	}
 
 	public String getQuestionText() {
