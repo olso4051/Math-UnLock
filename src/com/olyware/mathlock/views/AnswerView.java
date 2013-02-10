@@ -129,6 +129,12 @@ public class AnswerView extends View {
 		this.listener = listener;
 	}
 
+	public void setColor(int color) {
+		TextLabelPaintR.setColor(color);
+		TextAnswerPaintL.setColor(color);
+		test.setColor(color);
+	}
+
 	public void setCorrectAnswer(int location) {
 		this.correctAnswer = location;
 		setLayouts();

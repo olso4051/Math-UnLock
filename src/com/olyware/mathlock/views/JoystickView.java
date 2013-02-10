@@ -110,7 +110,7 @@ public class JoystickView extends View {
 
 		res = getResources();
 
-		textSizeSP = 20; // 5dp
+		textSizeSP = 20;
 		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
 		textHandler = new Handler();
 		answerHandler = new Handler();

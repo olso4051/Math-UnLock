@@ -12,6 +12,7 @@
     <string name="difficulty_summary">Very Easy</string>
     <string name="difficulty_summary_language">Numbers</string>
     <string name="enable">Enable</string>
+    <string name="enable_wallpaper">Background On/Off</string>
     <string name="enable_act_sat_math_summary">ACT/SAT Math Questions</string>
     <string name="enable_act_sat_vocab_summary">ACT/SAT Vocab Questions</string>
     <string name="enable_engineer_summary">Engineering Questions</string>
@@ -22,6 +23,7 @@
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
     <string name="enable_toddler_summary">Answer toddler questions</string>
     <string name="enable_vocab_summary">Answer vocab questions</string>
+    <string name="enable_wallpaper_summary">Use Home Screen Wallpaper as Background</string>
     <string name="extra_coins1">1000 Coins</string>
     <string name="extra_coins2">5000 Coins</string>
     <string name="extra_coins3">10000 Coins</string>

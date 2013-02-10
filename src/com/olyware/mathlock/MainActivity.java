@@ -16,7 +16,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -116,7 +118,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		layout = (LinearLayout) findViewById(R.id.layout);
-		showWallpaper();
 
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
@@ -142,6 +143,7 @@ public class MainActivity extends Activity {
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
 		answerView = (AnswerView) findViewById(R.id.answers2);
+		answerView.setColor(defaultTextColor);
 		answerView.setReadyListener(new AnswerReadyListener() {
 			@Override
 			public void Ready() {
@@ -194,6 +196,7 @@ public class MainActivity extends Activity {
 		editorPrefsStats = sharedPrefsStats.edit();
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacks[i] = false;
+		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
 	}
@@ -322,9 +325,18 @@ public class MainActivity extends Activity {
 	@SuppressWarnings("deprecation")
 	private void showWallpaper() {
 		// TODO fix so it works on my phone
-		Drawable drawable = WallpaperManager.getInstance(this).getDrawable();
-		drawable.setAlpha(200);
-		layout.setBackgroundDrawable(drawable);
+		if (sharedPrefs.getBoolean("enable_wallpaper", true) && layout.getWidth() > 0) {
+			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
+			int left = bitmap.getWidth() / 2 - layout.getWidth() / 2;
+			// int right = drawable.getIntrinsicWidth() / 2 + layout.getWidth() / 2;
+			int top = bitmap.getHeight() / 2 - layout.getHeight() / 2;
+			// int bottom = drawable.getIntrinsicHeight() / 2 + layout.getHeight() / 2;
+			bitmap = Bitmap.createBitmap(bitmap, left, top, layout.getWidth(), layout.getHeight());
+			BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), bitmap);
+			Bdrawable.setAlpha(100);
+			layout.setBackgroundDrawable(Bdrawable);
+		} else
+			layout.setBackgroundDrawable(null);
 	}
 
 	private void setImage() {

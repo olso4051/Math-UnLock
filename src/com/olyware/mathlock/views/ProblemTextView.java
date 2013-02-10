@@ -30,28 +30,28 @@ public class ProblemTextView extends TextView {
 
 	public ProblemTextView(Context context) {
 		super(context);
-		initAnswerView();
+		initView();
 	}
 
 	public ProblemTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		initAnswerView();
+		initView();
 	}
 
 	public ProblemTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		initAnswerView();
+		initView();
 	}
 
 	// =========================================
 	// Initialization
 	// =========================================
 
-	private void initAnswerView() {
+	private void initView() {
 		textSizeSP = textConstSizeSP; // text size in scaled pixels
 		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
 		textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-		textPaint.setColor(Color.WHITE);
+		setTextColor(Color.WHITE);
 		textPaint.setTextAlign(Paint.Align.LEFT);
 		textPaint.setTextSize(textSizePix);
 
