@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
 	private TextView coins, worth;
 	private int questionWorth;
 	private ProblemTextView problem;
+	private Drawable imageLeft;	// left,top,right,bottom
 	private AnswerView answerView;
 	private boolean quizMode = false;
 	private JoystickView joystick;
@@ -145,6 +146,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void Ready() {
 				answerView.setAnswers(answersRandom);
+				setImage();
 			}
 		});
 		joystick = (JoystickView) findViewById(R.id.joystick);
@@ -215,6 +217,7 @@ public class MainActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// at this point the activity has been measured and we can get the height
 		// now we can set a max height for answerView since it is dynamic
+		setImage();
 		if (hasFocus) {
 			showWallpaper();
 			answerView.setParentHeight(layout.getBottom());
@@ -289,6 +292,8 @@ public class MainActivity extends Activity {
 		joystick.showStartAnimation(0, 3000);
 		// save money into shared preferences
 		setMoney();
+		// set image if it was set when the screen was off
+		setImage();
 	}
 
 	@Override
@@ -322,6 +327,17 @@ public class MainActivity extends Activity {
 		layout.setBackgroundDrawable(drawable);
 	}
 
+	private void setImage() {
+		// int h = image.getIntrinsicHeight();
+		// int w = image.getIntrinsicWidth();
+		if (imageLeft == null)
+			problem.setCompoundDrawables(null, null, null, null);
+		else {
+			imageLeft.setBounds(0, 0, problem.getHeight() /* *w/h */, problem.getHeight());
+			problem.setCompoundDrawables(imageLeft, null, null, null);
+		}
+	}
+
 	private void setProblemAndAnswer(int delay) {
 
 		if (EnabledPackages > 0) {
@@ -343,7 +359,8 @@ public class MainActivity extends Activity {
 				public void run() {
 					questionWorth = 0;
 					answerView.resetGuess();
-					problem.setCompoundDrawables(null, null, null, null);
+					imageLeft = null;
+					problem.setCompoundDrawables(imageLeft, null, null, null);
 					joystick.unPauseSelection();
 
 					// pick a random enabled package
@@ -493,12 +510,8 @@ public class MainActivity extends Activity {
 
 			if (!question.getImage().equals("none")) {
 				int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
-				Drawable image = getResources().getDrawable(id);
-				int h = image.getIntrinsicHeight();
-				int w = image.getIntrinsicWidth();
-				image.setBounds(0, 0, problem.getHeight() * w / h, problem.getHeight());
-				// problem.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-				problem.setCompoundDrawables(image, null, null, null);
+				imageLeft = getResources().getDrawable(id);
+				setImage();
 			}
 			problem.setText(question.getQuestionText());
 			answers = question.getAnswers();
