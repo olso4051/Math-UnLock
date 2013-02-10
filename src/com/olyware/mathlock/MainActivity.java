@@ -84,8 +84,8 @@ public class MainActivity extends Activity {
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
-	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats;
-	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
+	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats, sharedPrefsEggs;
+	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats, editorPrefsEggs;
 
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
@@ -862,6 +862,13 @@ public class MainActivity extends Activity {
 	}
 
 	private void toggleClockDate() {
+		sharedPrefsEggs = getSharedPreferences("Eggs", 0);
+		if (!sharedPrefsEggs.getBoolean("clock", false)) {
+			money += getAmount(1000);
+			editorPrefsEggs = sharedPrefsEggs.edit();
+			editorPrefsEggs.putBoolean("clock", true).commit();
+			setMoney();
+		}
 		if (currentClockSize == dateSize) {
 			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
 			currentClockSize = clockSize;
@@ -901,7 +908,8 @@ public class MainActivity extends Activity {
 				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						ShareHelper.share(ctx, getString(R.string.share_subject), getString(R.string.share_message));
+						ShareHelper.share(ctx, getString(R.string.share_subject), getString(R.string.share_message),
+								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 					}
 				});
 			}
@@ -911,5 +919,21 @@ public class MainActivity extends Activity {
 			if (!first)
 				alert.getWindow().setLayout(layout.getWidth(), layout.getHeight() * 2 / 3);
 		}
+	}
+
+	private int getAmount(int max) {
+		int grand = 1000000;
+		int odds[] = { grand * 3 / 4, grand * 9 / 10, grand };
+		int select = rand.nextInt(grand) + 1;
+		int amount = 0;
+		if (select <= odds[0])
+			amount = max / 10;
+		else if (select <= odds[1])
+			amount = max / 5;
+		else if (select < odds[2])
+			amount = max / 2;
+		else
+			amount = max;
+		return amount;
 	}
 }

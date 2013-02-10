@@ -44,15 +44,16 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="7"
+        android:layout_marginTop="10dp"
         android:orientation="vertical" >
 	    <com.olyware.mathlock.views.AnswerView
 	        android:id="@+id/answers2"
-	        android:layout_marginTop="5dp"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" />
 	    <LinearLayout
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
 	        android:orientation="horizontal" >
 			<TextView
 			    android:gravity="center_vertical|right"

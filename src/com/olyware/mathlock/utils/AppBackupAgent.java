@@ -8,6 +8,7 @@ public class AppBackupAgent extends BackupAgentHelper {
 	// are the same strings that are passed to getSharedPreferences(String, int).
 	static final String PREFS_PACKAGES = "Packages";
 	static final String PREFS_STATS = "Stats";
+	static final String PREFS_EGGS = "Eggs";
 
 	// An arbitrary string used within the BackupAgentHelper implementation to
 	// identify the SharedPreferencesBackupHelper's data.
@@ -16,7 +17,7 @@ public class AppBackupAgent extends BackupAgentHelper {
 	// Simply allocate a helper and install it
 	@Override
 	public void onCreate() {
-		SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, PREFS_PACKAGES, PREFS_STATS);
+		SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, PREFS_PACKAGES, PREFS_STATS, PREFS_EGGS);
 		addHelper(MY_PREFS_BACKUP_KEY, helper);
 	}
 }
