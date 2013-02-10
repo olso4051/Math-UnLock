@@ -32,7 +32,7 @@
 		    	android:text="@string/default_money"/>
 		</LinearLayout>
 	
-	    <TextView
+	    <com.olyware.mathlock.views.ProblemTextView
 	        android:id="@+id/problem"
 	        android:layout_width="match_parent"
 	        android:layout_height="fill_parent"
@@ -47,6 +47,7 @@
         android:orientation="vertical" >
 	    <com.olyware.mathlock.views.AnswerView
 	        android:id="@+id/answers2"
+	        android:layout_marginTop="5dp"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" />
 	    <LinearLayout

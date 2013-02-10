@@ -42,6 +42,7 @@ import com.olyware.mathlock.views.AnswerView;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
+import com.olyware.mathlock.views.ProblemTextView;
 
 public class MainActivity extends Activity {
 	final private int multiplier = 5;
@@ -59,7 +60,7 @@ public class MainActivity extends Activity {
 	private float currentClockSize;
 	private TextView coins, worth;
 	private int questionWorth;
-	private TextView problem;
+	private ProblemTextView problem;
 	private AnswerView answerView;
 	private boolean quizMode = false;
 	private JoystickView joystick;
@@ -136,7 +137,7 @@ public class MainActivity extends Activity {
 
 		coins = (TextView) findViewById(R.id.money);
 		worth = (TextView) findViewById(R.id.worth);
-		problem = (TextView) findViewById(R.id.problem);
+		problem = (ProblemTextView) findViewById(R.id.problem);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
 		answerView = (AnswerView) findViewById(R.id.answers2);

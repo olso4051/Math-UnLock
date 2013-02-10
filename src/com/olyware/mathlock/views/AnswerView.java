@@ -48,24 +48,24 @@ public class AnswerView extends View {
 
 	public AnswerView(Context context) {
 		super(context);
-		initGraphView();
+		initAnswerView();
 	}
 
 	public AnswerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		initGraphView();
+		initAnswerView();
 	}
 
 	public AnswerView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		initGraphView();
+		initAnswerView();
 	}
 
 	// =========================================
 	// Initialization
 	// =========================================
 
-	private void initGraphView() {
+	private void initAnswerView() {
 		textLabelSizeSP = textConstLabelSizeSP; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
 		TextLabelPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -165,7 +165,7 @@ public class AnswerView extends View {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		// Here we make sure that we have a perfect circle
+		// Here we get the width and height
 		Width = measure(widthMeasureSpec);
 		Height = measure(heightMeasureSpec);
 
