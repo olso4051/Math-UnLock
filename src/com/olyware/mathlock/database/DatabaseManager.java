@@ -92,8 +92,11 @@ public class DatabaseManager {
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
+		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
+		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
-		String[] columns = { fromLanguage, toLanguage, QuestionContract.DIFFICULTY };
+		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
+				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 		return DatabaseModelFactory.buildAllLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
@@ -102,7 +105,8 @@ public class DatabaseManager {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
-		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY };
+		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
+				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
@@ -113,7 +117,7 @@ public class DatabaseManager {
 	}
 
 	public void increasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
-		if (!tableName.equals(null)) {
+		if (!(tableName == null)) {
 			String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
 			String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 			String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
@@ -133,7 +137,7 @@ public class DatabaseManager {
 	}
 
 	public void decreasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
-		if (!tableName.equals(null)) {
+		if (!(tableName == null)) {
 			String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
 			String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 			String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;

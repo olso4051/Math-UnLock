@@ -553,7 +553,7 @@ public class MainActivity extends Activity {
 
 	private void setLanguageProblem(int diffNum) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
-		currentTableName = getString(R.string.math_table);
+		currentTableName = getString(R.string.language_table);
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 		// String fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
