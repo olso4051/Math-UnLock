@@ -69,9 +69,11 @@
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_toddler_title">Toddler Questions</string>
     <string name="settings_vocab_title">Vocabulary Questions</string>
+    <string name="share_message">HighQ is increasing my IQ</string>
+    <string name="share_subject">@string/app_name</string>
+    <string name="share_with">Share with…</string>
     <string name="side_bar">Settings and Info</string>
     <string name="silent">Sound Off</string>
-    <string name="share_with">Share with…</string>
     <string name="sound">Sound On</string>
     <string name="store">Store</string>
     <string name="sure">Sure?</string>

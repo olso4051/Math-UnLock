@@ -28,7 +28,7 @@ public class EZ {
 	}
 
 	/**
-	 * Starts a backup of all prefs files
+	 * Starts a backup of all preferences files
 	 * 
 	 * @param context
 	 */

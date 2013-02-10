@@ -45,7 +45,7 @@
         android:layout_height="0dp"
         android:layout_weight="7"
         android:orientation="vertical" >
-	    <com.olyware.mathlock.AnswerView
+	    <com.olyware.mathlock.views.AnswerView
 	        android:id="@+id/answers2"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" />
@@ -71,7 +71,7 @@
 		    	android:drawableLeft="@drawable/coin"
 		    	android:text="@string/default_money"/>
 		</LinearLayout>
-	    <com.olyware.mathlock.JoystickView
+	    <com.olyware.mathlock.views.JoystickView
 	        android:id="@+id/joystick"
 	        android:layout_width="match_parent"
 	        android:layout_height="fill_parent" />

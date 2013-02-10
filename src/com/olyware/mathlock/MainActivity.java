@@ -36,6 +36,12 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.utils.ShareHelper;
+import com.olyware.mathlock.views.AnswerReadyListener;
+import com.olyware.mathlock.views.AnswerView;
+import com.olyware.mathlock.views.JoystickSelectListener;
+import com.olyware.mathlock.views.JoystickTouchListener;
+import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
 	final private int multiplier = 5;
@@ -309,6 +315,7 @@ public class MainActivity extends Activity {
 
 	@SuppressWarnings("deprecation")
 	private void showWallpaper() {
+		// TODO fix so it works on my phone
 		Drawable drawable = WallpaperManager.getInstance(this).getDrawable();
 		drawable.setAlpha(200);
 		layout.setBackgroundDrawable(drawable);
@@ -876,6 +883,11 @@ public class MainActivity extends Activity {
 				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
+					}
+				});
+				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						ShareHelper.share(ctx, getString(R.string.share_subject), getString(R.string.share_message));
 					}
 				});
 			}

@@ -1,6 +1,7 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.views;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -9,7 +10,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -136,12 +136,10 @@ public class GraphView extends View {
 		StatsValues[5] = format(totalTime);
 		StatsValues[6] = format(answerTimeFast);
 		StatsValues[7] = format(answerTimeAve);
-		Log.d("stats test", "coins = " + coins + "|totalTime = " + totalTime);
 		if (totalTime != 0)
 			StatsValues[8] = coins * 1000l * 60l * 60l / totalTime + "";
 		else
 			StatsValues[8] = 0 + "";
-		Log.d("stats test", "cph = " + StatsValues[8]);
 	}
 
 	// =========================================
@@ -240,15 +238,15 @@ public class GraphView extends View {
 		days = days / day;
 		years = years / year;
 		if (time < minute)
-			return String.format("%.2fs", sec / 1000f);
+			return String.format(Locale.ENGLISH, "%.2fs", sec / 1000f);
 		else if (time < hour)
-			return String.format("%dm%.2fs", min, sec / 1000f);
+			return String.format(Locale.ENGLISH, "%dm%.2fs", min, sec / 1000f);
 		else if (time < day)
-			return String.format("%dh%dm%.2fs", hr, min, sec / 1000f);
+			return String.format(Locale.ENGLISH, "%dh%dm%.2fs", hr, min, sec / 1000f);
 		else if (time < year)
-			return String.format("%dd%dh%dm%.2fs", days, hr, min, sec / 1000f);
+			return String.format(Locale.ENGLISH, "%dd%dh%dm%.2fs", days, hr, min, sec / 1000f);
 		else
-			return String.format("%dy%dd%dh%dm%.2fs", years, days, hr, min, sec / 1000f);
+			return String.format(Locale.ENGLISH, "%dy%dd%dh%dm%.2fs", years, days, hr, min, sec / 1000f);
 	}
 
 	private void setMovingAveragePercent() {

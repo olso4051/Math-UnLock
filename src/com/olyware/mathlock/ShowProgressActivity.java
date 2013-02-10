@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
 	private int money;

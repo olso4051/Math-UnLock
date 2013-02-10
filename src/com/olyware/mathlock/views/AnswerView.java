@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.views;
 
 import android.content.Context;
 import android.graphics.Canvas;

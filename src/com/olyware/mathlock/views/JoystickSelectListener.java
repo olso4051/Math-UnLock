@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.views;
 
 public interface JoystickSelectListener {
 
