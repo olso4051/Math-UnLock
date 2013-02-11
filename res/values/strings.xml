@@ -15,6 +15,7 @@
     <string name="egg_message">Egg worth = </string>
     <string name="egg_title">Easter Egg Found!</string>
     <string name="enable">Enable</string>
+    <string name="enable_notification_bar">Show Notification Bar</string>
     <string name="enable_wallpaper">Background On/Off</string>
     <string name="enable_act_sat_math_summary">ACT/SAT Math Questions</string>
     <string name="enable_act_sat_vocab_summary">ACT/SAT Vocab Questions</string>
@@ -23,6 +24,7 @@
     <string name="enable_gre_vocab_summary">GRE Vocab Questions</string>
     <string name="enable_language_summary">Answer Language questions</string>
     <string name="enable_math_summary">Answer math questions</string>
+    <string name="enable_notification_bar_summary">close and restart app to apply change</string>
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
     <string name="enable_toddler_summary">Answer toddler questions</string>
     <string name="enable_vocab_summary">Answer vocab questions</string>

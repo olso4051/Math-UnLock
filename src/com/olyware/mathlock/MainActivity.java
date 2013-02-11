@@ -114,6 +114,13 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (sharedPrefs.getBoolean("notification_bar", true)) {
+			setTheme(R.style.AppTheme2);
+		} else {
+			setTheme(R.style.AppTheme);
+		}
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 

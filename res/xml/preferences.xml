@@ -33,6 +33,11 @@
 	        android:title="@string/enable_wallpaper"
 	        android:summary="@string/enable_wallpaper_summary"
 	        android:defaultValue="true"/>
+        <CheckBoxPreference
+	        android:key="notification_bar"
+	        android:title="@string/enable_notification_bar"
+	        android:summary="@string/enable_notification_bar_summary"
+	        android:defaultValue="true"/>
 	</PreferenceCategory>
     <PreferenceCategory
         android:title="@string/settings_math_title"
