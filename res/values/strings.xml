@@ -1,8 +1,9 @@
 <resources>
 
     <string name="app_name">HighQ</string>
+    <string name="cash_it">Cash In!</string>
     <string name="clock">10:15pm</string>
-    <string name="coins">Image of coins</string>
+    <string name="coins">Coins</string>
     <string name="date">Monday\nJanuary 1</string>
     <string name="default_money">0</string>
     <string name="difficulty">Max Difficulty</string>
@@ -11,6 +12,8 @@
     <string name="difficulty_default_gre">4</string>
     <string name="difficulty_summary">Very Easy</string>
     <string name="difficulty_summary_language">Numbers</string>
+    <string name="egg_message">Egg worth = </string>
+    <string name="egg_title">Easter Egg Found!</string>
     <string name="enable">Enable</string>
     <string name="enable_wallpaper">Background On/Off</string>
     <string name="enable_act_sat_math_summary">ACT/SAT Math Questions</string>

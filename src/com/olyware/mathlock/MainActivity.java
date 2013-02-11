@@ -324,14 +324,19 @@ public class MainActivity extends Activity {
 
 	@SuppressWarnings("deprecation")
 	private void showWallpaper() {
-		// TODO fix so it works on my phone
 		if (sharedPrefs.getBoolean("enable_wallpaper", true) && layout.getWidth() > 0) {
+			// get wallpaper as a bitmap
 			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
+
+			// set scaling factors
 			int left = bitmap.getWidth() / 2 - layout.getWidth() / 2;
 			// int right = drawable.getIntrinsicWidth() / 2 + layout.getWidth() / 2;
 			int top = bitmap.getHeight() / 2 - layout.getHeight() / 2;
 			// int bottom = drawable.getIntrinsicHeight() / 2 + layout.getHeight() / 2;
+
+			// scale the bitmap to fit on the background
 			bitmap = Bitmap.createBitmap(bitmap, left, top, layout.getWidth(), layout.getHeight());
+			// convert bitmap to BitmapDrawable so we can set it as the background
 			BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), bitmap);
 			Bdrawable.setAlpha(100);
 			layout.setBackgroundDrawable(Bdrawable);
@@ -340,6 +345,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setImage() {
+		// use the image height and width to set the bounds and not stretch the image
 		// int h = image.getIntrinsicHeight();
 		// int w = image.getIntrinsicWidth();
 		if (imageLeft == null)
@@ -351,7 +357,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void setProblemAndAnswer(int delay) {
-
 		if (EnabledPackages > 0) {
 			joystick.setProblem(true);
 			final String EnabledPackageKeys[] = new String[EnabledPackages];
@@ -797,6 +802,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 4:
+			unlockEgg("unkown", 500);
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
 			joystick.pauseSelection();
@@ -810,18 +816,23 @@ public class MainActivity extends Activity {
 			});
 			break;
 		case 5:		// info was selected
+			unlockEgg("info", 500);
 			displayInfo(false);
 			break;
 		case 6:		// Store was selected
+			unlockEgg("store", 1000);
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case 7:		// progress was selected
+			unlockEgg("progress", 500);
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
+			unlockEgg("quiz", 1000);
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case 9:		// settings was selected
+			unlockEgg("settings", 500);
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
 		}
@@ -874,13 +885,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void toggleClockDate() {
-		sharedPrefsEggs = getSharedPreferences("Eggs", 0);
-		if (!sharedPrefsEggs.getBoolean("clock", false)) {
-			money += getAmount(1000);
-			editorPrefsEggs = sharedPrefsEggs.edit();
-			editorPrefsEggs.putBoolean("clock", true).commit();
-			setMoney();
-		}
+		unlockEgg("clock", 1000);
 		if (currentClockSize == dateSize) {
 			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
 			currentClockSize = clockSize;
@@ -920,7 +925,8 @@ public class MainActivity extends Activity {
 				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						ShareHelper.share(ctx, getString(R.string.share_subject), getString(R.string.share_message),
+						// TODO make this work for images
+						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 					}
 				});
@@ -930,6 +936,28 @@ public class MainActivity extends Activity {
 			alert.show();
 			if (!first)
 				alert.getWindow().setLayout(layout.getWidth(), layout.getHeight() * 2 / 3);
+		}
+	}
+
+	private void unlockEgg(final String Egg, int max) {
+		sharedPrefsEggs = getSharedPreferences("Eggs", 0);
+		if (!sharedPrefsEggs.getBoolean(Egg, false)) {
+			final int amount = getAmount(max);
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.egg_title));
+			builder.setMessage(getString(R.string.egg_message) + amount).setCancelable(false);
+			builder.setIcon(R.drawable.egg);
+			builder.setPositiveButton(R.string.cash_it, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					money += amount;
+					editorPrefsEggs = sharedPrefsEggs.edit();
+					editorPrefsEggs.putBoolean(Egg, true).commit();
+					setMoney();
+				}
+			});
+			AlertDialog alert = builder.create();
+			alert.show();
 		}
 	}
 
