@@ -8,6 +8,8 @@ import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -340,8 +342,20 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onUserLeaveHint() {
-		// TODO Auto-generated method stub
 		super.onUserLeaveHint();
+		homeTest();
+	}
+
+	private void homeTest() {
+		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> recentTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+		if (recentTasks.get(1).baseActivity.toShortString().indexOf(getPackageName()) > -1) {
+			// TODO test on multiple devices I think this is when Home is pressed, can't stop from executing exit code however
+			money -= (difficulty + 1) * multiplier;
+			money = Math.max(0, money);
+			setMoney();
+			super.onBackPressed();
+		}
 	}
 
 	private void launchHomeScreen(int delay) {
