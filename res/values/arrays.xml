@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string-array name="dont_show_again">
+        <item name="dont_show">Don\'t ask me again</item>
+    </string-array>
     
     <string-array name="difficulty_entries">
         <item name="very_easy">Very Easy</item>

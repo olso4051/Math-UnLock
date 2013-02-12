@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -81,6 +82,8 @@ public class MainActivity extends Activity {
 	private boolean EnabledPacks[];
 	private boolean UnlockedPackages = false;
 	private boolean dialogOn = false;
+	private boolean dontShow = false;
+	final private long MONTH = 2592000000l;
 
 	private int answerLoc = 1;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
@@ -129,6 +132,17 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		layout = (LinearLayout) findViewById(R.id.layout);
+
+		/*View checkBoxView = View.inflate(this, R.layout.checkBox, null);
+		CheckBox checkBox = checkBoxView.findViewById(R.id.checkBox);
+		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+				// Save to shared preferences
+			}
+		});
+		checkBox.setText("Text to the right of the check box.");*/
 
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
@@ -264,7 +278,9 @@ public class MainActivity extends Activity {
 		editorPrefsStats = sharedPrefsStats.edit();
 		if (sharedPrefsMoney.getBoolean("first", true)) {
 			Pmoney = sharedPrefsMoney.getInt("paid_money", startingPmoney);
-			editorPrefsMoney.putBoolean("first", false);	// will commit in setMoney() call
+			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis() - MONTH * 3 / 4);// give them a week before asking
+			editorPrefsMoney.putBoolean("first", false);
+			editorPrefsMoney.commit();
 		} else
 			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
@@ -295,11 +311,19 @@ public class MainActivity extends Activity {
 		} else {
 			this.stopService(sIntent);
 		}
+
+		Log.d("test", "changed" + changed);
+		Log.d("test", "unlocked" + UnlockedPackages);
+		Log.d("test", "dontshow=" + (!sharedPrefsMoney.getBoolean("dontShowLastTime", false)));
+		Log.d("test", "timing=" + (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH));
 		// setup the question and answers
 		if (changed)
 			setProblemAndAnswer(0);
 		else if (!UnlockedPackages)
 			displayInfo(true);
+		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
+				&& (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH))
+			displayRateShare();
 		else
 			resetTimes();
 		// show the settings bar and slide it down after 3 seconds
@@ -318,6 +342,8 @@ public class MainActivity extends Activity {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		editorPrefsMoney.putInt("money", money);
 		editorPrefsMoney.putInt("paid_money", Pmoney);
+		if (!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
+			editorPrefsMoney.putBoolean("dontShowLastTime", dontShow);
 		editorPrefsMoney.commit();
 		super.onPause();
 	}
@@ -325,7 +351,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		int worth = (difficulty + 1) * multiplier;
-		if (money < worth) {
+		if (money + Pmoney < worth) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getString(R.string.not_enough_coins)).setCancelable(false);
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -337,6 +363,10 @@ public class MainActivity extends Activity {
 			alert.show();
 		} else {
 			money -= worth;
+			if (money < 0) {
+				Pmoney += money;
+				money = 0;
+			}
 			setMoney();
 			super.onBackPressed();
 		}
@@ -976,6 +1006,7 @@ public class MainActivity extends Activity {
 				});
 				builder.setNeutralButton(R.string.rate, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						dialogOn = false;
 						// open app in the Play store
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
@@ -984,6 +1015,7 @@ public class MainActivity extends Activity {
 				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						dialogOn = false;
 						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
@@ -995,6 +1027,49 @@ public class MainActivity extends Activity {
 			alert.show();
 			if (!first)
 				alert.getWindow().setLayout(layout.getWidth(), layout.getHeight() * 2 / 3);
+		}
+	}
+
+	private void displayRateShare() {
+		if (!dialogOn) {
+			sharedPrefsMoney = getSharedPreferences("Packages", 0);
+			editorPrefsMoney = sharedPrefsMoney.edit();
+			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
+
+			boolean initial[] = { dontShow };
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(R.string.rate_title).setCancelable(false);
+			builder.setMultiChoiceItems(R.array.dont_show_again, initial, new DialogInterface.OnMultiChoiceClickListener() {
+				public void onClick(DialogInterface dialogInterface, int item, boolean state) {
+					dontShow = state;
+				}
+			});
+			builder.setPositiveButton(R.string.rate, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					sharedPrefsMoney = getSharedPreferences("Packages", 0);
+					editorPrefsMoney = sharedPrefsMoney.edit();
+					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
+					dialogOn = false;
+					// open app in the Play store
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
+					startActivity(intent);
+				}
+			});
+			builder.setNeutralButton(R.string.share_with, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					sharedPrefsMoney = getSharedPreferences("Packages", 0);
+					editorPrefsMoney = sharedPrefsMoney.edit();
+					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
+					dialogOn = false;
+					// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
+					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
+							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
+				}
+			});
+			AlertDialog alert = builder.create();
+			dialogOn = true;
+			alert.show();
 		}
 	}
 
