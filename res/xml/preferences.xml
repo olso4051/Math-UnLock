@@ -38,6 +38,11 @@
 	        android:title="@string/enable_notification_bar"
 	        android:summary="@string/enable_notification_bar_summary"
 	        android:defaultValue="true"/>
+        <CheckBoxPreference
+	        android:key="vibration"
+	        android:title="@string/enable_vibration"
+	        android:summary="@string/enable_vibration_summary"
+	        android:defaultValue="true"/>
 	</PreferenceCategory>
     <PreferenceCategory
         android:title="@string/settings_math_title"

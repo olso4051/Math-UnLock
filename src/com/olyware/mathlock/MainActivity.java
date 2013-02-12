@@ -22,6 +22,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -43,10 +45,10 @@ import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.AnswerReadyListener;
 import com.olyware.mathlock.views.AnswerView;
+import com.olyware.mathlock.views.AutoResizeTextView;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
-import com.olyware.mathlock.views.AutoResizeTextView;
 
 public class MainActivity extends Activity {
 	final private int multiplier = 5;
@@ -806,7 +808,9 @@ public class MainActivity extends Activity {
 
 	private void JoystickSelected(int s) {
 		dialogOn = false;
-		vib.vibrate(50);	// vibrate for 50ms
+		if (sharedPrefs.getBoolean("vibration", true)
+				&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
+			vib.vibrate(50);	// vibrate for 50ms
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
 		switch (s) {
 		case 0:		// A was selected
@@ -950,7 +954,7 @@ public class MainActivity extends Activity {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
 				builder.setTitle(R.string.info_title_first);
-				builder.setMessage(R.string.info_message_first).setCancelable(false);
+				builder.setMessage(getString(R.string.info_message_first) + "\n\n" + getString(R.string.info_message)).setCancelable(false);
 				builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
@@ -970,9 +974,17 @@ public class MainActivity extends Activity {
 						dialogOn = false;
 					}
 				});
+				builder.setNeutralButton(R.string.rate, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// open app in the Play store
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
+						startActivity(intent);
+					}
+				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						// TODO make this work for images
+						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 					}
