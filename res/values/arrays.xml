@@ -96,7 +96,7 @@
         <item name="portuguese">Portuguese</item>
         <item name="spanish">Spanish</item>
         <item name="swedish">Swedish</item>
-        <item name="russian">Russain</item>
+        <item name="russian">Russian</item>
     </string-array>
     <string-array name="language_values_not_localized">
         <item name="bengali">bengali</item>
@@ -115,7 +115,7 @@
         <item name="portuguese">portuguese</item>
         <item name="spanish">spanish</item>
         <item name="swedish">swedish</item>
-        <item name="russian">russain</item>
+        <item name="russian">russian</item>
     </string-array>
     <string-array name="language_priorities_not_localized">
         <item name="bengali">bengali_priority</item>
@@ -134,7 +134,7 @@
         <item name="portuguese">portuguese_priority</item>
         <item name="spanish">spanish_priority</item>
         <item name="swedish">swedish_priority</item>
-        <item name="russian">russain_priority</item>
+        <item name="russian">russian_priority</item>
     </string-array>
     
     <string name="math_table">t_math_question</string>

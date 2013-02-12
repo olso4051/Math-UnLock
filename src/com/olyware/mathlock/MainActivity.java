@@ -318,6 +318,32 @@ public class MainActivity extends Activity {
 		super.onPause();
 	}
 
+	@Override
+	public void onBackPressed() {
+		int worth = (difficulty + 1) * multiplier;
+		if (money < worth) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.not_enough_coins)).setCancelable(false);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// nothing to do
+				}
+			});
+			AlertDialog alert = builder.create();
+			alert.show();
+		} else {
+			money -= worth;
+			setMoney();
+			super.onBackPressed();
+		}
+	}
+
+	@Override
+	protected void onUserLeaveHint() {
+		// TODO Auto-generated method stub
+		super.onUserLeaveHint();
+	}
+
 	private void launchHomeScreen(int delay) {
 		mHandler.removeCallbacksAndMessages(null);
 		timerHandler.removeCallbacks(reduceWorth);
@@ -970,7 +996,7 @@ public class MainActivity extends Activity {
 
 	private int getAmount(int max) {
 		int grand = 1000000;
-		int odds[] = { grand * 3 / 4, grand * 9 / 10, grand };
+		int odds[] = { grand * 9 / 10, grand * 99 / 100, grand };
 		int select = rand.nextInt(grand) + 1;
 		int amount = 0;
 		if (select <= odds[0])
