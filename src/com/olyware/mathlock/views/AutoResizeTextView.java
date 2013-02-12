@@ -11,12 +11,11 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
 
-public class ProblemTextView extends TextView {
+public class AutoResizeTextView extends TextView {
 
 	private int Width, Height;
-	private final int textConstSizeSP = 30;
 	private int textSizeSP;
-	private float textSizePix;
+	private float textSizePix, textSizePixDefault;
 	private String currentText;
 
 	private TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);;
@@ -24,22 +23,27 @@ public class ProblemTextView extends TextView {
 	private Rect bounds;
 	private boolean measured = false;
 
+	private Context ctx;
+
 	// =========================================
 	// Constructors
 	// =========================================
 
-	public ProblemTextView(Context context) {
+	public AutoResizeTextView(Context context) {
 		super(context);
+		ctx = context;
 		initView();
 	}
 
-	public ProblemTextView(Context context, AttributeSet attrs) {
+	public AutoResizeTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		ctx = context;
 		initView();
 	}
 
-	public ProblemTextView(Context context, AttributeSet attrs, int defStyle) {
+	public AutoResizeTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		ctx = context;
 		initView();
 	}
 
@@ -48,22 +52,17 @@ public class ProblemTextView extends TextView {
 	// =========================================
 
 	private void initView() {
-		textSizeSP = textConstSizeSP; // text size in scaled pixels
-		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
+		textSizePixDefault = getTextSize();
 		textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		setTextColor(Color.WHITE);
 		textPaint.setTextAlign(Paint.Align.LEFT);
-		textPaint.setTextSize(textSizePix);
+		resetTextSize();
 
 		bounds = new Rect();
 	}
 
 	// =========================================
-	// Public Methods
-	// =========================================
-
-	// =========================================
-	// Drawing Functionality
+	// Override Functions
 	// =========================================
 
 	@Override
@@ -110,14 +109,15 @@ public class ProblemTextView extends TextView {
 	}
 
 	private void decreaseTextSize() {
-		textSizeSP -= 1;
+		textSizeSP = Math.max(textSizeSP - 1, 1);
 		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
 		textPaint.setTextSize(textSizePix);
 	}
 
 	private void resetTextSize() {
-		textSizeSP = textConstSizeSP;
-		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
+		textSizePix = textSizePixDefault;
+		float scaledDensity = ctx.getResources().getDisplayMetrics().scaledDensity;
+		textSizeSP = (int) (textSizePix / scaledDensity);
 		textPaint.setTextSize(textSizePix);
 	}
 }
