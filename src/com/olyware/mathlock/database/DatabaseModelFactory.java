@@ -5,11 +5,13 @@ import java.util.Random;
 
 import android.database.Cursor;
 
+import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.model.EngineerQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.MathQuestion.ParseMode;
@@ -202,5 +204,27 @@ public class DatabaseModelFactory {
 			}
 		}
 		return questions;
+	}
+
+	public static EngineerQuestion buildEngineerQuestion(Cursor cursor, int weightSum) {
+		Random rand = new Random();
+		int selection = rand.nextInt(weightSum) + 1;
+		int cumulativeWeight = 0;
+		cursor.moveToFirst();
+		while (!cursor.isLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
+			if (cumulativeWeight >= selection) {
+				break;
+			}
+			cursor.moveToNext();
+		}
+		CursorHelper cursorHelper = new CursorHelper(cursor);
+		int id = cursorHelper.getInteger(QuestionContract._ID);
+		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
+		String variables = cursorHelper.getString(EngineerQuestionContract.VARIABLES);
+		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
+		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		return new EngineerQuestion(id, questionText, variables, difficulty, priority);
 	}
 }

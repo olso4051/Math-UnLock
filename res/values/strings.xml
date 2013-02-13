@@ -70,6 +70,14 @@
     <string name="prompt_package">Package</string>
     <string name="prompt_difficulty">Difficulty</string>
     <string name="purchased">Purchased</string>
+    <string name="package_info0">Unlocks all current and future question packs</string>
+    <string name="package_info1">Math questions from elementary to college difficulty</string>
+    <string name="package_info2">English vocabulary questions from elementary to college difficulty</string>
+    <string name="package_info3">Learn a new language by translating the 1000 most used words in 17 different languages</string>
+    <string name="package_info4">ACT/SAT vocab and math prep</string>
+    <string name="package_info5">GRE vocab and math prep</string>
+    <string name="package_info6">Help your young ones learn ABC\'s, shapes, colors all the way to simple math</string>
+    <string name="package_info7">Complete engineering and science related equations to keep fresh</string>
     <string name="purchase_package_message">Are you sure you want to unlock this package?</string>
     <string name="quiz_mode">Quiz Mode?</string>
     <string name="rate">Rate HighQ</string>

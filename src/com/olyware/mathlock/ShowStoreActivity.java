@@ -20,6 +20,7 @@ public class ShowStoreActivity extends Activity {
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button buyAll;
 	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer;
+	private String titles[];
 	private String unlockPackageKeys[];
 	private String PackageKeys[];
 
@@ -30,6 +31,7 @@ public class ShowStoreActivity extends Activity {
 
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		titles = new String[unlockPackageKeys.length];
 
 		moneyText = (TextView) findViewById(R.id.money);
 
@@ -55,48 +57,56 @@ public class ShowStoreActivity extends Activity {
 			}
 		});
 		buyAll = (Button) findViewById(R.id.unlock_all);
+		titles[0] = String.valueOf(buyAll.getText());
 		buyAll.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(0, CostAll);
 			}
 		});
 		buyMath = (Button) findViewById(R.id.unlock_math);
+		titles[1] = String.valueOf(buyMath.getText());
 		buyMath.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(1, CostSmall);
 			}
 		});
 		buyVocab = (Button) findViewById(R.id.unlock_vocab);
+		titles[2] = String.valueOf(buyVocab.getText());
 		buyVocab.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(2, CostSmall);
 			}
 		});
 		buyLanguage = (Button) findViewById(R.id.unlock_language);
+		titles[3] = String.valueOf(buyLanguage.getText());
 		buyLanguage.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(3, CostSmall);
 			}
 		});
 		buyACT_SAT = (Button) findViewById(R.id.unlock_act_sat);
+		titles[4] = String.valueOf(buyACT_SAT.getText());
 		buyACT_SAT.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(4, CostLarge);
 			}
 		});
 		buyGRE = (Button) findViewById(R.id.unlock_gre);
+		titles[5] = String.valueOf(buyGRE.getText());
 		buyGRE.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(5, CostLarge);
 			}
 		});
 		buyToddler = (Button) findViewById(R.id.unlock_toddler);
+		titles[6] = String.valueOf(buyToddler.getText());
 		buyToddler.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(6, CostSmall);
 			}
 		});
 		buyEngineer = (Button) findViewById(R.id.unlock_engineer);
+		titles[7] = String.valueOf(buyEngineer.getText());
 		buyEngineer.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(7, CostSmall);
@@ -125,10 +135,13 @@ public class ShowStoreActivity extends Activity {
 		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		int tempMoney = sharedPrefsMoney.getInt("money", 0);
 		int tempPMoney = sharedPrefsMoney.getInt("paid_money", 0);
+		int id = getResources().getIdentifier("package_info" + product, "string", getPackageName());
+		String info = getResources().getString(id) + "\n\n";
 		// check if they have enough coins
 		if (tempMoney + tempPMoney >= amount) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.purchase_package_message).setCancelable(false)
+			builder.setTitle(titles[product]);
+			builder.setMessage(info + getString(R.string.purchase_package_message)).setCancelable(false)
 					.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							purchase(product, amount);
@@ -143,7 +156,8 @@ public class ShowStoreActivity extends Activity {
 			alert.show();
 		} else {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.not_enough_coins).setCancelable(false)
+			titles[0] = String.valueOf(buyAll.getText());
+			builder.setMessage(info + getString(R.string.not_enough_coins)).setCancelable(false)
 					.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							dialog.cancel();

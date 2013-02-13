@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -39,6 +38,7 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.model.EngineerQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -312,10 +312,6 @@ public class MainActivity extends Activity {
 			this.stopService(sIntent);
 		}
 
-		Log.d("test", "changed" + changed);
-		Log.d("test", "unlocked" + UnlockedPackages);
-		Log.d("test", "dontshow=" + (!sharedPrefsMoney.getBoolean("dontShowLastTime", false)));
-		Log.d("test", "timing=" + (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH));
 		// setup the question and answers
 		if (changed)
 			setProblemAndAnswer(0);
@@ -743,20 +739,18 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineerProblem(int diffNum) {
-		currentTableName = null;
+		currentTableName = getString(R.string.engineer_table);
 		fromLanguage = null;
 		toLanguage = null;
-		ID = 0;
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
-		}
+		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(diffNum));
+		ID = question.getID();
+
+		// Set the new difficulty based on what question was picked
+		difficulty = question.getDifficulty().getValue();
+
+		problem.setText(question.getQuestionText());
+		answers = question.getAnswers();
+		return;
 	}
 
 	private boolean getEnabledPackages() {
@@ -1065,6 +1059,11 @@ public class MainActivity extends Activity {
 					// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
+				}
+			});
+			builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dialogOn = false;
 				}
 			});
 			AlertDialog alert = builder.create();
