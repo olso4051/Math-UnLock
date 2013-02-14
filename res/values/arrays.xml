@@ -140,15 +140,17 @@
         <item name="russian">russian_priority</item>
     </string-array>
     
-    <string name="engineer_table">t_engineer_question</string>
-    <string name="language_table">t_language_question</string>
     <string name="math_table">t_math_question</string>
 	<string name="vocab_table">t_vocab_question</string>
+    <string name="language_table">t_language_question</string>
+    <string name="engineer_table">t_engineer_question</string>
+    <string name="highq_trivia_table">t_highq_trivia_question</string>
     <string-array name="table_names">
         <item name="math">@string/math_table</item>
         <item name="vocab">@string/vocab_table</item>
         <item name="language">@string/language_table</item>
         <item name="engineer">@string/engineer_table</item>
+        <item name="engineer">@string/highq_trivia_table</item>
     </string-array>
     
     <string-array name="unlock_package_keys">
@@ -160,6 +162,7 @@
 		<item>unlock_gre</item>
 		<item>unlock_toddler</item>
 		<item>unlock_engineer</item>
+		<item>unlock_highq_trivia</item>
     </string-array>
     <string-array name="enable_package_keys">
         <item>enable_math</item>
@@ -171,6 +174,7 @@
 		<item>enable_gre_math</item>
 		<item>enable_toddler</item>
 		<item>enable_engineer</item>
+		<item>enable_highq_trivia</item>
     </string-array>
     <string-array name="difficulty_keys">
         <item>difficulty_math</item>
@@ -182,6 +186,7 @@
 		<item>difficulty_gre</item>
 		<item>difficulty_toddler</item>
 		<item>difficulty_engineer</item>
+		<item>difficulty_highq_trivia</item>
     </string-array>
     <string name="all">All</string>
 	<string name="math">Math</string>
@@ -191,6 +196,7 @@
 	<string name="gre">GRE</string>
 	<string name="toddler">Toddler</string>
 	<string name="engineer">Engineer</string>
+	<string name="highq_trivia">HighQ Trivia</string>
     <string-array name="display_packages">
         <item>@string/all</item>
         <item>@string/math</item>
@@ -200,6 +206,7 @@
 		<item>@string/gre</item>
 		<item>@string/toddler</item>
 		<item>@string/engineer</item>
+		<item>@string/highq_trivia</item>
     </string-array>
     <string-array name="settings_keys">
         <item>settings_math</item>
@@ -209,6 +216,7 @@
 		<item>settings_gre</item>
 		<item>settings_toddler</item>
 		<item>settings_engineer</item>
+		<item>settings_highq_trivia</item>
     </string-array>
     
 </resources>

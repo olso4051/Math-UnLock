@@ -19,7 +19,7 @@ public class ShowStoreActivity extends Activity {
 	private TextView moneyText;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button buyAll;
-	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer;
+	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer, buyHighQTrivia;
 	private String titles[];
 	private String unlockPackageKeys[];
 	private String PackageKeys[];
@@ -110,6 +110,13 @@ public class ShowStoreActivity extends Activity {
 		buyEngineer.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(7, CostSmall);
+			}
+		});
+		buyHighQTrivia = (Button) findViewById(R.id.unlock_highq_trivia);
+		titles[8] = String.valueOf(buyHighQTrivia.getText());
+		buyHighQTrivia.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				buyProduct(8, CostSmall);
 			}
 		});
 		setCost();
@@ -216,6 +223,7 @@ public class ShowStoreActivity extends Activity {
 			buyGRE.setEnabled(false);
 			buyToddler.setEnabled(false);
 			buyEngineer.setEnabled(false);
+			buyHighQTrivia.setEnabled(false);
 		} else
 			((TextView) findViewById(R.id.all_cost)).setText(CostAll + " ");
 		if (sharedPrefsMoney.getBoolean("unlock_math", false)) {
@@ -253,6 +261,11 @@ public class ShowStoreActivity extends Activity {
 			buyEngineer.setEnabled(false);
 		} else
 			((TextView) findViewById(R.id.engineer_cost)).setText(CostSmall + " ");
+		if (sharedPrefsMoney.getBoolean("unlock_highq_trivia", false)) {
+			((TextView) findViewById(R.id.highq_trivia_cost)).setText(getString(R.string.purchased));
+			buyHighQTrivia.setEnabled(false);
+		} else
+			((TextView) findViewById(R.id.highq_trivia_cost)).setText(CostSmall + " ");
 
 	}
 }

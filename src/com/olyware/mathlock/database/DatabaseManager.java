@@ -11,6 +11,7 @@ import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
+import com.olyware.mathlock.database.contracts.HighQTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -18,6 +19,7 @@ import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
+import com.olyware.mathlock.model.HighQTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -127,6 +129,18 @@ public class DatabaseManager {
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
 		return DatabaseModelFactory.buildEngineerQuestion(cursor, sum);
+	}
+
+	public HighQTriviaQuestion getHighQTriviaQuestion(Difficulty maxDifficulty) {
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue());
+		Cursor cursor = db.query(HighQTriviaQuestionContract.TABLE_NAME, HighQTriviaQuestionContract.ALL_COLUMNS, where, null, null, null,
+				null);
+
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + HighQTriviaQuestionContract.TABLE_NAME
+				+ " WHERE " + where, null);
+		cursor2.moveToFirst();
+		int sum = cursor2.getInt(0);
+		return DatabaseModelFactory.buildHighQTriviaQuestion(cursor, sum);
 	}
 
 	public void increasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {

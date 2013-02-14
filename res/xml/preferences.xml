@@ -189,4 +189,21 @@
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
+	<PreferenceCategory
+        android:title="@string/settings_highq_trivia_title"
+        android:key="settings_highq_trivia">
+        <CheckBoxPreference
+	        android:key="enable_highq_trivia"
+	        android:title="@string/enable"
+	        android:summary="@string/enable_highq_trivia_summary"
+	        android:defaultValue="false"/>
+	    <ListPreference
+	        android:key="difficulty_highq_trivia"
+	        android:title="@string/difficulty"
+	        android:summary="@string/difficulty_summary"
+	        android:dialogTitle="@string/difficulty"
+	        android:entries="@array/difficulty_entries"
+	        android:entryValues="@array/difficulty_values"
+	        android:defaultValue="@string/difficulty_default" />
+	</PreferenceCategory>
 </PreferenceScreen>

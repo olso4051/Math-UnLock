@@ -23,6 +23,7 @@
     <string name="enable_engineer_summary">Engineering Questions</string>
     <string name="enable_gre_math_summary">GRE Math Questions</string>
     <string name="enable_gre_vocab_summary">GRE Vocab Questions</string>
+    <string name="enable_highq_trivia_summary">HighQ Trivia Questions</string>
     <string name="enable_language_summary">Answer Language questions</string>
     <string name="enable_math_summary">Answer math questions</string>
     <string name="enable_notification_bar_summary">close and restart app to apply change</string>
@@ -77,7 +78,8 @@
     <string name="package_info4">ACT/SAT vocab and math prep</string>
     <string name="package_info5">GRE vocab and math prep</string>
     <string name="package_info6">Help your young ones learn ABC\'s, shapes, colors all the way to simple math</string>
-    <string name="package_info7">Complete engineering and science related equations to keep fresh</string>
+    <string name="package_info7">Complete math and science related equations to keep fresh</string>
+    <string name="package_info8">Fun trivia questions about the HighQ organization</string>
     <string name="purchase_package_message">Are you sure you want to unlock this package?</string>
     <string name="quiz_mode">Quiz Mode?</string>
     <string name="rate">Rate HighQ</string>
@@ -87,6 +89,7 @@
     <string name="settings_act_sat_title">ACT/SAT Questions</string>
     <string name="settings_engineer_title">Engineering Questions</string>
     <string name="settings_gre_title">GRE Questions</string>
+    <string name="settings_highq_trivia_title">HighQ Trivia Questions</string>
     <string name="settings_language_title">Language Questions</string>
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_toddler_title">Toddler Questions</string>
@@ -112,6 +115,7 @@
     <string name="unlock_all">All Packs</string>
     <string name="unlock_engineer">Engineering Pack</string>
     <string name="unlock_gre">GRE Pack</string>
+    <string name="unlock_highq_trivia">HighQ Trivia Pack</string>
     <string name="unlock_language">Language Pack</string>
     <string name="unlock_math">Math Pack</string>
     <string name="unlock_toddler">Toddler Pack</string>

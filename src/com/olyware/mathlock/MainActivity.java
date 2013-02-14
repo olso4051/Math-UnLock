@@ -39,6 +39,7 @@ import android.widget.TextView;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
+import com.olyware.mathlock.model.HighQTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -499,6 +500,10 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.engineer);
 						setEngineerProblem(difficulty);
 						break;
+					case 9:			// HighQ Trivia question
+						currentPack = getString(R.string.engineer);
+						setHighQTriviaProblem(difficulty);
+						break;
 					default:
 						break;
 					}
@@ -743,6 +748,21 @@ public class MainActivity extends Activity {
 		fromLanguage = null;
 		toLanguage = null;
 		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(diffNum));
+		ID = question.getID();
+
+		// Set the new difficulty based on what question was picked
+		difficulty = question.getDifficulty().getValue();
+
+		problem.setText(question.getQuestionText());
+		answers = question.getAnswers();
+		return;
+	}
+
+	private void setHighQTriviaProblem(int diffNum) {
+		currentTableName = getString(R.string.highq_trivia_table);
+		fromLanguage = null;
+		toLanguage = null;
+		HighQTriviaQuestion question = dbManager.getHighQTriviaQuestion(Difficulty.fromValue(diffNum));
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
