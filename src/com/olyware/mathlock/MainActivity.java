@@ -134,17 +134,6 @@ public class MainActivity extends Activity {
 
 		layout = (LinearLayout) findViewById(R.id.layout);
 
-		/*View checkBoxView = View.inflate(this, R.layout.checkBox, null);
-		CheckBox checkBox = checkBoxView.findViewById(R.id.checkBox);
-		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-				// Save to shared preferences
-			}
-		});
-		checkBox.setText("Text to the right of the check box.");*/
-
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
 		ctx = this;

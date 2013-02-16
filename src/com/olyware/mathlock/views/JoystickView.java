@@ -8,48 +8,55 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.olyware.mathlock.R;
 
 public class JoystickView extends View {
 	private final int NumAnswers = 5;
-	// private Bitmap bmp, bmp_handle;
-	// private Bitmap bmp_silent, bmp_sound, bmp_quizMode, bmp_set, bmp_em, bmp_sil, bmp_A, bmp_B, bmp_C, bmp_D;
-	// private Bitmap bmp_select;
-	private Bitmap bmpA, bmpB, bmpC, bmpD, bmpU, bmpSet, bmpS, bmpQ, bmpP, bmpStore, bmpI;
-	private Bitmap bmpAs, bmpBs, bmpCs, bmpDs, bmpUs, bmpQs;
-	// private Rect dstRectForRender, dstRectForHandle;
-	// private Rect srcRectForRender, srcRectForHandle;
-	private Rect dstRectForA, dstRectForB, dstRectForC, dstRectForD, dstRectForU;
+	private Bitmap bmpSet, bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI;
+	private Bitmap bmpAnswers[] = new Bitmap[NumAnswers];
+	private Bitmap bmpAnswersSelected[] = new Bitmap[NumAnswers];
+	private Rect RectForAnswers[] = new Rect[NumAnswers];
 	private Rect dstRectForSet, dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI;
 	private Rect srcRectForAns, srcRectForBig, srcRectForSmall, srcRectForSet;
+
 	private Paint circlePaint[] = new Paint[NumAnswers];
 	private Paint textPaint, sidePaint, optionPaint;
-	private int textSizeSP, textSizePix;
+
+	private int textSizeSP, textSizePix, answerSizeSP;
+	private float answerSizePix;
+	private final int answerSizeSPDefault = 30;
 	private double touchX, touchY;
 	private double startX, startY;
 	private float optionX, optionY, optionR;
-	private int Width, Height, dstHeight, pad = 10;
+	private int Width, Height, dstHeight, pad = 10, outlineWidth = pad / 2;
 	private double X[] = new double[NumAnswers];		// a=0,b=1,c=2,d=3
 	private double Y[] = new double[NumAnswers];
 	private int type = 0;
 	private int diffX1, diffY1, diffX, diffY;
+
+	private int correctAnswer, wrongAnswer;
+	final private int maxAnswers = 4;
+	private String answers[] = { "N/A", "N/A", "N/A", "N/A" };
+	private TextPaint answerPaint[] = new TextPaint[4];
+	private StaticLayout layout[] = new StaticLayout[4];
+	private Rect bounds[] = new Rect[4];
+
 	// direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
 	private int state = 0;
-	// private int handleRadius;
-	// private double thetaMax, rMax, fX, fY; // for maximum area of a rectangle in an ellipse
-	// private double rX, rY, rCurrent;
+
 	private int spacing, rAns, rBig, rSmall, swipeLength;
 	private int TextHeight;
+
 	private JoystickSelectListener listener;
 	private JoystickTouchListener listenerTouch;
 
@@ -59,12 +66,9 @@ public class JoystickView extends View {
 	private boolean selectOptions[] = new boolean[5];
 	private boolean options = true, selectSideBar = false;
 	private boolean problem = true, wrong = false, paused = false;
+	private boolean measured = false;
 	private int selectLeft[] = new int[5];
 	private int selectRight[] = new int[5];
-
-	// private double pi = Math.PI;
-
-	// private AngleSelect angles[] = new AngleSelect[8];
 
 	private Resources res;
 	private Runnable revealText, finishText, startAnimate, finishAnimate, revealCircle, finishCircle;
@@ -84,26 +88,26 @@ public class JoystickView extends View {
 	public JoystickView(Context context) {
 		super(context);
 		ctx = context;
-		initJoystickView();
+		initView();
 	}
 
 	public JoystickView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		ctx = context;
-		initJoystickView();
+		initView();
 	}
 
 	public JoystickView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		ctx = context;
-		initJoystickView();
+		initView();
 	}
 
 	// =========================================
 	// Initialization
 	// =========================================
 
-	private void initJoystickView() {
+	private void initView() {
 		setFocusable(true);
 		Width = getMeasuredWidth();
 		Height = getMeasuredHeight();
@@ -145,16 +149,24 @@ public class JoystickView extends View {
 		optionR = 0;
 		options = true;
 
-		bmpA = BitmapFactory.decodeResource(getResources(), R.drawable.select_a2);
-		bmpB = BitmapFactory.decodeResource(getResources(), R.drawable.select_b2);
-		bmpC = BitmapFactory.decodeResource(getResources(), R.drawable.select_c2);
-		bmpD = BitmapFactory.decodeResource(getResources(), R.drawable.select_d2);
-		bmpU = BitmapFactory.decodeResource(getResources(), R.drawable.select_u2);
-		bmpAs = BitmapFactory.decodeResource(getResources(), R.drawable.select_a2s);
-		bmpBs = BitmapFactory.decodeResource(getResources(), R.drawable.select_b2s);
-		bmpCs = BitmapFactory.decodeResource(getResources(), R.drawable.select_c2s);
-		bmpDs = BitmapFactory.decodeResource(getResources(), R.drawable.select_d2s);
-		bmpUs = BitmapFactory.decodeResource(getResources(), R.drawable.select_u2s);
+		answerSizeSP = answerSizeSPDefault;
+		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
+		for (int i = 0; i < answers.length; i++) {
+			answerPaint[i] = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+			answerPaint[i].setTextAlign(Paint.Align.CENTER);
+			answerPaint[i].setColor(Color.WHITE);
+			answerPaint[i].setTextSize(answerSizePix);
+			bounds[i] = new Rect();
+		}
+
+		for (int i = 0; i < bmpAnswers.length; i++) {
+			int id = getResources().getIdentifier("answer" + i, "drawable", ctx.getPackageName());
+			bmpAnswers[i] = BitmapFactory.decodeResource(getResources(), id);
+		}
+		for (int i = 0; i < bmpAnswersSelected.length; i++) {
+			int id = getResources().getIdentifier("answer_selected" + i, "drawable", ctx.getPackageName());
+			bmpAnswersSelected[i] = BitmapFactory.decodeResource(getResources(), id);
+		}
 		bmpSet = BitmapFactory.decodeResource(getResources(), R.drawable.settings_background);
 		bmpS = BitmapFactory.decodeResource(getResources(), R.drawable.select_s2);
 		bmpQ = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2);
@@ -162,46 +174,25 @@ public class JoystickView extends View {
 		bmpP = BitmapFactory.decodeResource(getResources(), R.drawable.select_p2);
 		bmpStore = BitmapFactory.decodeResource(getResources(), R.drawable.select_store2);
 		bmpI = BitmapFactory.decodeResource(getResources(), R.drawable.select_i2);
-		/*bmpSil = BitmapFactory.decodeResource(getResources(), R.drawable.select_sil2);
-		bmpSnd = BitmapFactory.decodeResource(getResources(), R.drawable.select_sound2);
-		bmp = BitmapFactory.decodeResource(getResources(), R.drawable.joystick_background2);
-		bmp_handle = BitmapFactory.decodeResource(getResources(), R.drawable.unlock);
-		bmp_set = BitmapFactory.decodeResource(getResources(), R.drawable.select_s);
-		bmp_quizMode = BitmapFactory.decodeResource(getResources(), R.drawable.select_q);
-		bmp_em = BitmapFactory.decodeResource(getResources(), R.drawable.select_e);
-		bmp_sil = BitmapFactory.decodeResource(getResources(), R.drawable.select_sil);
-		bmp_A = BitmapFactory.decodeResource(getResources(), R.drawable.select_a);
-		bmp_B = BitmapFactory.decodeResource(getResources(), R.drawable.select_b);
-		bmp_C = BitmapFactory.decodeResource(getResources(), R.drawable.select_c);
-		bmp_D = BitmapFactory.decodeResource(getResources(), R.drawable.select_d);
-		bmp_silent = BitmapFactory.decodeResource(getResources(), R.drawable.silent_background);
-		bmp_sound = BitmapFactory.decodeResource(getResources(), R.drawable.sound_background);
-		if (select)
-			bmp_select = BitmapFactory.decodeResource(getResources(), R.drawable.select_a);*/
 
 		touchX = 0;
 		touchY = 0;
-		// angle = 0;
-		rAns = Math.max(bmpA.getWidth(), bmpA.getHeight()) / 2;
+
+		rAns = Math.max(bmpAnswers[0].getWidth(), bmpAnswers[0].getHeight()) / 2;
 		rBig = Math.max(bmpQ.getWidth(), bmpQ.getHeight()) / 2;
 		swipeLength = rBig * 4;
 		rSmall = Math.max(bmpS.getWidth(), bmpS.getHeight()) / 2;
 
 		setDiffXY();
 
-		/*srcRectForRender = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
-		dstRectForRender = new Rect();
-		srcRectForHandle = new Rect(0, 0, bmp_handle.getWidth(), bmp_handle.getHeight());
-		dstRectForHandle = new Rect();*/
-		srcRectForAns = new Rect(0, 0, bmpA.getWidth(), bmpA.getHeight());
+		srcRectForAns = new Rect(0, 0, bmpAnswers[0].getWidth(), bmpAnswers[0].getHeight());
 		srcRectForBig = new Rect(0, 0, bmpQ.getWidth(), bmpQ.getHeight());
 		srcRectForSmall = new Rect(0, 0, bmpS.getWidth(), bmpS.getHeight());
 		srcRectForSet = new Rect(0, 0, bmpSet.getWidth(), bmpSet.getHeight());
-		dstRectForA = new Rect();
-		dstRectForB = new Rect();
-		dstRectForC = new Rect();
-		dstRectForD = new Rect();
-		dstRectForU = new Rect();
+
+		for (int i = 0; i < RectForAnswers.length; i++) {
+			RectForAnswers[i] = new Rect();
+		}
 		dstRectForSet = new Rect();
 		dstRectForS = new Rect();
 		dstRectForQ = new Rect();
@@ -209,44 +200,18 @@ public class JoystickView extends View {
 		dstRectForE = new Rect();
 		dstRectForI = new Rect();
 
-		initRunnables();
+		// initRunnables();
 
 		listener = new JoystickSelectListener() {
 			@Override
 			public void OnSelect(int s) {
 			}
 		};
-		/*for (int i = 0; i < angles.length; i++)
-			angles[i] = new AngleSelect();
-
-		angles[0].lessThan = -pi * 5 / 6;
-		angles[0].greaterThan = pi * 5 / 6;
-		angles[1].lessThan = pi * 5 / 6;
-		angles[1].greaterThan = pi / 2;
-		angles[2].lessThan = pi / 2;
-		angles[2].greaterThan = pi / 6;
-		angles[3].lessThan = pi / 6;
-		angles[3].greaterThan = -pi / 6;
-		angles[4].lessThan = -pi / 6;
-		angles[4].greaterThan = -pi / 4;
-		angles[5].lessThan = -pi / 4;
-		angles[5].greaterThan = -pi / 2;
-		angles[6].lessThan = -pi / 2;
-		angles[6].greaterThan = -pi * 3 / 4;
-		angles[7].lessThan = -pi * 3 / 4;
-		angles[7].greaterThan = -pi * 5 / 6;*/
 	}
 
 	// =========================================
 	// Public Methods
 	// =========================================
-
-	public boolean isTooSmall() {
-		if (Height < Width / 2)
-			return true;
-		else
-			return false;
-	}
 
 	public void setOnJostickSelectedListener(JoystickSelectListener listener) {
 		this.listener = listener;
@@ -317,9 +282,56 @@ public class JoystickView extends View {
 		this.paused = false;
 	}
 
+	public void setCorrectAnswer(int location) {
+		this.correctAnswer = location;
+		setLayouts();
+	}
+
+	public void setIncorrectGuess(int location) {
+		this.wrongAnswer = location;
+		setLayouts();
+	}
+
+	public void resetGuess() {
+		this.correctAnswer = maxAnswers;
+		this.wrongAnswer = maxAnswers;
+	}
+
+	public void setAnswers(String answers[]) {
+		switch (type) {
+		case 0:
+			break;
+		case 1:
+			this.answers = answers;
+			if (measured) {
+				resetTextSize();
+				setDimensions();
+			}
+			break;
+		case 2:
+			break;
+		}
+
+	}
+
 	// =========================================
 	// Drawing Functionality
 	// =========================================
+
+	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		switch (type) {
+		case 0:
+			break;
+		case 1:
+			measured = true;
+			setDimensions();
+			break;
+		case 2:
+			break;
+		}
+		super.onLayout(changed, left, top, right, bottom);
+	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -329,50 +341,23 @@ public class JoystickView extends View {
 		optionY = Height - rBig;
 
 		spacing = (Width - rBig * 6 - rSmall * 4) / 6;
-		selectLeft[4] = Width / 2 - rBig * 3 - rSmall * 2 - spacing * 2;
-		selectRight[4] = Width / 2 - rBig * 3 - spacing * 2;
-		selectLeft[3] = Width / 2 - rBig * 3 - spacing;
-		selectRight[3] = Width / 2 - rBig - spacing;
-		selectLeft[2] = Width / 2 - rBig;
-		selectRight[2] = Width / 2 + rBig;
-		selectLeft[1] = Width / 2 + rBig + spacing;
-		selectRight[1] = Width / 2 + rBig * 3 + spacing;
-		selectLeft[0] = Width / 2 + rBig * 3 + spacing * 2;
-		selectRight[0] = Width / 2 + rBig * 3 + rSmall * 2 + spacing * 2;
+		for (int i = 0; i < selectLeft.length; i++) {
+			selectLeft[i] = Width / 2 + rBig * (Math.max(3 - i * 2, -3)) + spacing * (2 - i);
+			selectRight[i] = Width / 2 + rBig * (Math.min(5 - i * 2, 3)) + spacing * (2 - i);
+		}
+		selectLeft[4] = selectLeft[4] - rSmall * 2;
+		selectRight[0] = selectRight[0] + rSmall * 2;
 
 		dstHeight = Width * bmpSet.getHeight() / bmpSet.getWidth();
+
 		if (options)
 			setSidePaths(Height - rBig * 2 - pad);// - dstHeight + textSizePix - pad);
 		else
 			setSidePaths(Height - pad);
-		// dstRectForSet.set(0, Height - dstHeight + textSizePix, Width, Height - textSizePix + dstHeight);
-		// dstRectForS.set(selectLeft[4], Height - rBig - rSmall, selectRight[4], Height - rBig + rSmall);
-		// dstRectForQ.set(selectLeft[3], Height - rBig * 2, selectRight[3], Height);
-		// dstRectForP.set(selectLeft[2], Height - rBig * 2, selectRight[2], Height);
-		// dstRectForE.set(selectLeft[1], Height - rBig * 2, selectRight[1], Height);
-		// dstRectForSnd.set(selectLeft[0], Height - rBig - rSmall, selectRight[0], Height - rBig + rSmall);
-
-		// W = Math.min(W, bmp.getWidth()); // use the size of the bmp so we don't have to scale
-
-		/*if (H > W) {
-			H = W; // use a circle if there is room
-			// int tempH = bmp.getHeight() * W / bmp.getWidth(); // use ellipse the size of the bmp
-			// H = Math.min(tempH, H); // use the space available
-		} else {
-			int tempH = bmp.getHeight() * W / bmp.getWidth();	// use ellipse the size of the bmp
-			H = Math.min(tempH, H);								// use the space available
-		}
-
-		rX = W / 2 * 0.8;
-		rY = H / 2 * 0.7;
-		thetaMax = Math.cos(rX / Math.sqrt(rX * rX + rY * rY));
-		rMax = rX * rY / Math.sqrt(Math.pow(rY * Math.cos(thetaMax), 2) + Math.pow(rX * Math.sin(thetaMax), 2));
-		fX = 1 / Math.cos(thetaMax);
-		fY = 1 / Math.sin(thetaMax);
-
-		handleRadius = (int) (W * 0.1);*/
 
 		setMeasuredDimension(Width, Height);
+		initRunnables();
+		measured = true;
 	}
 
 	private int measure(int measureSpec) {
@@ -393,9 +378,8 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		Width = getMeasuredWidth();
-		Height = getMeasuredHeight();
 
+		// Draw the option bar
 		canvas.drawBitmap(bmpSet, srcRectForSet, dstRectForSet, sidePaint);
 		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
 		canvas.drawText(res.getString(R.string.side_bar), Width / 2, TextHeight, sidePaint);
@@ -407,48 +391,31 @@ public class JoystickView extends View {
 		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, sidePaint);
 		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, sidePaint);
 		canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, sidePaint);
-		/*if (silentMode) {
-			canvas.drawBitmap(bmpSil, srcRectForSmall, dstRectForSnd, sidePaint);
-		} else {
-			canvas.drawBitmap(bmpSnd, srcRectForSmall, dstRectForSnd, sidePaint);
-		}*/
 
-		dstRectForA.set((int) X[0] - rAns, (int) Y[0] - rAns, (int) X[0] + rAns, (int) Y[0] + rAns);
-		dstRectForB.set((int) X[1] - rAns, (int) Y[1] - rAns, (int) X[1] + rAns, (int) Y[1] + rAns);
-		dstRectForC.set((int) X[2] - rAns, (int) Y[2] - rAns, (int) X[2] + rAns, (int) Y[2] + rAns);
-		dstRectForD.set((int) X[3] - rAns, (int) Y[3] - rAns, (int) X[3] + rAns, (int) Y[3] + rAns);
-		dstRectForU.set((int) X[4] - rAns, (int) Y[4] - rAns, (int) X[4] + rAns, (int) Y[4] + rAns);
-		if (selectAnswers[0])
-			canvas.drawBitmap(bmpAs, srcRectForAns, dstRectForA, circlePaint[0]);
-		else
-			canvas.drawBitmap(bmpA, srcRectForAns, dstRectForA, circlePaint[0]);
-		if (selectAnswers[1])
-			canvas.drawBitmap(bmpBs, srcRectForAns, dstRectForB, circlePaint[1]);
-		else
-			canvas.drawBitmap(bmpB, srcRectForAns, dstRectForB, circlePaint[1]);
-		if (selectAnswers[2])
-			canvas.drawBitmap(bmpCs, srcRectForAns, dstRectForC, circlePaint[2]);
-		else
-			canvas.drawBitmap(bmpC, srcRectForAns, dstRectForC, circlePaint[2]);
-		if (selectAnswers[3])
-			canvas.drawBitmap(bmpDs, srcRectForAns, dstRectForD, circlePaint[3]);
-		else
-			canvas.drawBitmap(bmpD, srcRectForAns, dstRectForD, circlePaint[3]);
-		if (selectAnswers[4])
-			canvas.drawBitmap(bmpUs, srcRectForAns, dstRectForU, circlePaint[4]);
-		else
-			canvas.drawBitmap(bmpU, srcRectForAns, dstRectForU, circlePaint[4]);
-
-		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]))
-			canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaint);
-		else if (problem)
-			if (!wrong)
-				canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
+		switch (type) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			for (int i = 0; i < RectForAnswers.length; i++) {
+				RectForAnswers[i].set((int) X[i] - rAns, (int) Y[i] - rAns, (int) X[i] + rAns, (int) Y[i] + rAns);
+				if (selectAnswers[i])
+					canvas.drawBitmap(bmpAnswersSelected[i], srcRectForAns, RectForAnswers[i], circlePaint[i]);
+				else
+					canvas.drawBitmap(bmpAnswers[i], srcRectForAns, RectForAnswers[i], circlePaint[i]);
+			}
+			if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]))
+				canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaint);
+			else if (problem)
+				if (!wrong)
+					canvas.drawText(res.getString(R.string.swipe_screen), Width / 2, (Height - rBig * 2) / 2, textPaint);
+				else
+					canvas.drawText(res.getString(R.string.swipe_new), Width / 2, (Height - rBig * 2) / 2, textPaint);
 			else
-				canvas.drawText(res.getString(R.string.swipe_new), Width / 2, (Height - rBig * 2) / 2, textPaint);
-		else
-			canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
-
+				canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
+			break;
+		}
 		canvas.save();
 	}
 
@@ -523,47 +490,10 @@ public class JoystickView extends View {
 				touchY = event.getY();
 				checkSelection(false);
 				invalidate();
-				/*double tempX = (event.getX() - px);
-				double tempY = (py - event.getY());
-
-				if ((touchX == 0) && (touchY == 0) && (Math.abs(tempX) < handleRadius * 1.25) && (Math.abs(tempY) < handleRadius * 1.25)) {
-					if (listener != null)
-						listener.OnSelect(-1);	// center selected
-					revealDisappearBackground(true);
-					touchX = tempX;
-					touchY = tempY;
-					rCurrent = rX;
-					angle = 0;
-					invalidate();
-				} else if ((touchX != 0) || (touchY != 0)) {
-					touchX = tempX;
-					touchY = tempY;
-					angle = Math.atan2(touchY, touchX);
-					// if ((Math.abs(touchX * fX) > rMax) || (Math.abs(touchY * fY) > rMax)) {
-					rCurrent = rX * rY / Math.sqrt(Math.pow(rY * Math.cos(angle), 2) + Math.pow(rX * Math.sin(angle), 2));
-					// set to radius if on edge
-					double dis = Math.sqrt(touchX * touchX + touchY * touchY);
-					if (dis > rCurrent) {
-						touchX = rCurrent * Math.cos(angle);
-						touchY = rCurrent * Math.sin(angle);
-						checkSelection(angle, false);
-					} else if (dis > rCurrent * .6) {
-						checkSelection(angle, false);
-					} else {
-						select = false;
-					}
-					invalidate();
-				}*/
 			} else if (actionType == MotionEvent.ACTION_UP) {
-				/*if (listenerTouch != null)
-					listenerTouch.OnTouch();*/
 				checkSelection(true);
 				returnToDefault();
 				flashText(false);
-				/*if ((Math.sqrt(touchX * touchX + touchY * touchY) > rCurrent * .6) && (rCurrent > 0))
-					checkSelection(angle, true);
-				revealDisappearBackground(false);
-				returnHandleToCenter();*/
 			}
 			return true;
 		}
@@ -616,7 +546,6 @@ public class JoystickView extends View {
 					maxDiff = 2;
 			}
 			if ((maxDiff >= 2) && (attempts == 3)) {
-				Width = getMeasuredWidth();
 				int centerX;
 				int centerY = rAns * 2;
 				if (startX <= Width / 2) {
@@ -678,8 +607,6 @@ public class JoystickView extends View {
 	}
 
 	private int checkDiff(int loc) {
-		Width = getMeasuredWidth();
-		Height = getMeasuredHeight() - rBig * 2;
 		int checks = 0;
 		boolean first = (loc == 0);
 		switch (state) {
@@ -704,7 +631,7 @@ public class JoystickView extends View {
 			}
 			break;
 		case 2:		// down-left
-			if (Y[loc] + rAns > Height) {		// below bottom boundary
+			if (Y[loc] + rAns > (Height - rBig * 2)) {		// below bottom boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;
 			}
@@ -714,7 +641,7 @@ public class JoystickView extends View {
 			}
 			break;
 		case 3:		// down-right
-			if (Y[loc] + rAns > Height) {		// below bottom boundary
+			if (Y[loc] + rAns > (Height - rBig * 2)) {		// below bottom boundary
 				checks += 1;
 				state = (state + 1) % 4;
 			}
@@ -753,9 +680,6 @@ public class JoystickView extends View {
 	}
 
 	private void returnToDefault() {
-		Height = getMeasuredHeight();
-		Width = getMeasuredWidth();
-
 		touchX = 0;
 		touchY = 0;
 		startX = -rAns;
@@ -867,24 +791,12 @@ public class JoystickView extends View {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	private void initRunnables() {
 		final int answerInterval = 255 / answerFrames;
 		final int textInterval = 255 / textFrames;
 		// final int startInterval = -255 / startFrames;
 		final int radiusInterval = (swipeLength - rSmall) / circleFrames;
-		WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
-		Display display = wm.getDefaultDisplay();
-		Point size = new Point();
-		int w;
-		if (android.os.Build.VERSION.SDK_INT >= 13) {
-			display.getSize(size);
-			w = size.x;
-		} else {
-			w = display.getWidth();
-		}
-		dstHeight = w * bmpSet.getHeight() / bmpSet.getWidth();
 		final int slideInterval = (dstHeight - pad) / startFrames;
 
 		startAnimate = new Runnable() {
@@ -968,144 +880,46 @@ public class JoystickView extends View {
 		dstRectForE.set(selectLeft[1], temp - rBig * 2, selectRight[1], temp);
 		dstRectForI.set(selectLeft[0], temp - rBig - rSmall, selectRight[0], temp - rBig + rSmall);
 	}
-	/*private void checkSelection(double ang, boolean send) {
-		select = false;
 
-		if (listener != null) {
-			if ((angle >= angles[3].greaterThan) && (angle < angles[3].lessThan)) {
-				// D selected
-				if (send)
-					listener.OnSelect(3);
-				else {
-					select = true;
-					bmp_select = bmp_D;
-				}
-			} else if ((angle >= angles[2].greaterThan) && (angle < angles[2].lessThan)) {
-				// C selected
-				if (send)
-					listener.OnSelect(2);
-				else {
-					select = true;
-					bmp_select = bmp_C;
-				}
-			} else if ((angle >= angles[1].greaterThan) && (angle < angles[1].lessThan)) {
-				// B selected
-				if (send)
-					listener.OnSelect(1);
-				else {
-					select = true;
-					bmp_select = bmp_B;
-				}
-			} else if ((angle >= angles[0].greaterThan) || (angle <= angles[0].lessThan)) {
-				// A selected
-				if (send)
-					listener.OnSelect(0);
-				else {
-					select = true;
-					bmp_select = bmp_A;
-				}
-			} else if ((angle >= angles[4].greaterThan) && (angle < angles[4].lessThan)) {
-				// sound/silent selected
-				if (send)
-					listener.OnSelect(4);
-				else {
-					select = true;
-					bmp_select = bmp_sil;
-				}
-			} else if ((angle >= angles[5].greaterThan) && (angle < angles[5].lessThan)) {
-				// emergency call selected
-				if (send)
-					listener.OnSelect(5);
-				else {
-					select = true;
-					bmp_select = bmp_em;
-				}
-			} else if ((angle >= angles[6].greaterThan) && (angle < angles[6].lessThan)) {
-				// quiz mode selected
-				if (send)
-					listener.OnSelect(6);
-				else {
-					select = true;
-					bmp_select = bmp_quizMode;
-				}
-			} else if ((angle >= angles[7].greaterThan) && (angle < angles[7].lessThan)) {
-				// settings selected
-				if (send)
-					listener.OnSelect(7);
-				else {
-					select = true;
-					bmp_select = bmp_set;
-				}
-			} else {
-				// nothing selected
-				if (send)
-					listener.OnSelect(-1);
-
+	private void setDimensions() {
+		setLayouts();
+		float maxH[] = { 0, 0, 0, 0 };
+		for (int i = 0; i < answers.length; i++) {
+			maxH[i] = Math.max(bounds[i].height(), answerSizePix);
+			maxH[i] = Math.max(layout[i].getHeight(), maxH[i]);
+			if ((maxH[i] > ((TextHeight - textSizePix) / 2 - outlineWidth * 4 - pad * 4)) && (Height > 0)) {
+				decreaseTextSize();
+				setDimensions();
+				return;
 			}
 		}
-	}*/
-
-	/*private void returnHandleToCenter() {
-
-		Handler handler = new Handler();
-		int numFrames = 5;
-		int frameTime = 20;
-		final double intervalsX = (0 - touchX) / numFrames;
-		final double intervalsY = (0 - touchY) / numFrames;
-
-		for (int i = 0; i < numFrames; i++) {
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					touchX += intervalsX;
-					touchY += intervalsY;
-					invalidate();
-				}
-			}, i * frameTime);
+		for (int i = 0; i < answers.length; i++) {
+			answerPaint[i].setTextSize(answerSizePix);
 		}
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				touchX = 0;
-				touchY = 0;
-				angle = 0;
-				rCurrent = 0;
-				invalidate();
-			}
-		}, numFrames * frameTime);
-	}*/
+		invalidate();
+	}
 
-	/*private void revealDisappearBackground(final boolean RorD) {
-		Handler handler = new Handler();
-		int numFrames = 10;
-		int frameTime = 40;
-		final int interval = 255 / numFrames;
-		if (RorD)
-			circlePaint.setAlpha(0);
-		else
-			circlePaint.setAlpha(255);
-
-		for (int i = 0; i < numFrames; i++) {
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					if (RorD)
-						circlePaint.setAlpha(circlePaint.getAlpha() + interval);
-					else
-						circlePaint.setAlpha(circlePaint.getAlpha() - interval);
-					invalidate();
-				}
-			}, i * frameTime);
+	private void setLayouts() {
+		for (int i = 0; i < answers.length; i++) {
+			answerPaint[i].getTextBounds(answers[i], 0, answers[i].length(), bounds[i]);
+			layout[i] = new StaticLayout(answers[i], answerPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (RorD)
-					circlePaint.setAlpha(255);
-				else
-					circlePaint.setAlpha(0);
-				invalidate();
-			}
-		}, numFrames * frameTime);
-	}*/
+		invalidate();
+	}
+
+	private void decreaseTextSize() {
+		answerSizeSP = Math.max(answerSizeSP - 1, 1);
+		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, getResources().getDisplayMetrics());
+		for (int i = 0; i < answers.length; i++) {
+			answerPaint[i].setTextSize(answerSizePix);
+		}
+	}
+
+	private void resetTextSize() {
+		answerSizeSP = answerSizeSPDefault;
+		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
+		for (int i = 0; i < answers.length; i++) {
+			answerPaint[i].setTextSize(answerSizePix);
+		}
+	}
 }
