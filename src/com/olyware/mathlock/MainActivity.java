@@ -239,6 +239,9 @@ public class MainActivity extends Activity {
 		if (hasFocus) {
 			showWallpaper();
 			answerView.setParentHeight(layout.getBottom());
+			// set the unlock type
+			joystick.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+			answerView.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 		}
 		super.onWindowFocusChanged(hasFocus);
 	}
@@ -284,6 +287,7 @@ public class MainActivity extends Activity {
 			joystick.setLeftRightHanded(true);
 		// set the unlock type
 		joystick.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+		answerView.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 
 		// get the localized language entries
 		LanguageEntries = getResources().getStringArray(R.array.language_entries);
@@ -441,6 +445,7 @@ public class MainActivity extends Activity {
 				public void run() {
 					questionWorth = 0;
 					answerView.resetGuess();
+					joystick.resetGuess();
 					imageLeft = null;
 					problem.setCompoundDrawables(imageLeft, null, null, null);
 					joystick.unPauseSelection();
@@ -509,6 +514,7 @@ public class MainActivity extends Activity {
 					}
 
 					answerView.setAnswers(answersRandom);
+					joystick.setAnswers(answersRandom);
 					problem.setTextColor(defaultTextColor);
 					resetTimes();
 				}
@@ -516,6 +522,7 @@ public class MainActivity extends Activity {
 
 		} else {
 			answerView.resetGuess();
+			joystick.resetGuess();
 			joystick.setProblem(false);
 			if (!UnlockedPackages)
 				problem.setText(R.string.none_unlocked);
@@ -525,6 +532,7 @@ public class MainActivity extends Activity {
 			answersRandom = temp;
 			for (int i = 0; i < 4; i++) {
 				answerView.setAnswers(answersRandom);
+				joystick.setAnswers(answersRandom);
 			}
 		}
 	}
@@ -791,9 +799,11 @@ public class MainActivity extends Activity {
 		int tempMoney = money;
 		if (unknown) {
 			answerView.setCorrectAnswer(correctLoc);
+			joystick.setCorrectAnswer(correctLoc);
 		} else {
 			if (correct) {
 				answerView.setCorrectAnswer(correctLoc);
+				joystick.setCorrectAnswer(correctLoc);
 				problem.setTextColor(Color.GREEN);
 				money += questionWorth;// Integer.parseInt(worth.getText().toString());
 				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficulty), System
@@ -801,7 +811,9 @@ public class MainActivity extends Activity {
 				dbManager.decreasePriority(currentTableName, fromLanguage, fromLanguage, ID);
 			} else {
 				answerView.setCorrectAnswer(correctLoc);
+				joystick.setCorrectAnswer(correctLoc);
 				answerView.setIncorrectGuess(guessLoc);
+				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
 				money -= questionWorth;// Integer.parseInt(worth.getText().toString());
 				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficulty), System
