@@ -7,9 +7,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader.TileMode;
 import android.os.Handler;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -23,19 +25,20 @@ import com.olyware.mathlock.R;
 
 public class JoystickView extends View {
 	private final int NumAnswers = 5;
-	private Bitmap bmpSet, bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock;
+	private Bitmap /*bmpSet, */bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock;
 	private Bitmap bmpAnswers[] = new Bitmap[NumAnswers];
 	private Bitmap bmpAnswersSelected[] = new Bitmap[NumAnswers];
 	private RectF RectForAnswers[] = new RectF[NumAnswers + 1];
-	private Rect dstRectForSet, dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI, RectForUnlock;
-	private Rect srcRectForAns, srcRectForBig, srcRectForSmall, srcRectForSet;
+	private RectF dstRectForSet;
+	private Rect dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI, RectForUnlock;
+	private Rect srcRectForAns, srcRectForBig, srcRectForSmall;// , srcRectForSet;
 
 	private Paint circlePaint[] = new Paint[NumAnswers];
-	private Paint textPaint, sidePaint, optionPaint;
+	private Paint textPaint, sidePaint, settingsPaint, optionPaint;
 
 	private int textSizeSP, textSizePix, answerSizeSP, answerHintSizeSP;
 	private float answerSizePix, answerHintSizePix;
-	private final int answerSizeSPDefault = 30, answerHintSizeSPDefault = 30;
+	private final int answerSizeSPDefault = 50, answerHintSizeSPDefault = 30;
 	private double touchX, touchY;
 	private double startX, startY;
 	private float optionX, optionY, optionR;
@@ -138,6 +141,9 @@ public class JoystickView extends View {
 		textPaint.setColor(Color.WHITE);
 		textPaint.setTextSize(textSizePix);
 
+		settingsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		settingsPaint.setStyle(Paint.Style.FILL);
+
 		sidePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		sidePaint.setStrokeJoin(Paint.Join.ROUND);
 		sidePaint.setStyle(Paint.Style.STROKE);
@@ -166,12 +172,12 @@ public class JoystickView extends View {
 			answerSelectedTextPaint[i].setColor(Color.BLUE);
 			answerSelectedTextPaint[i].setTextSize(answerSizePix);
 			answerPaint[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
-			answerPaint[i].setStyle(Paint.Style.STROKE);
-			answerPaint[i].setColor(Color.WHITE);
+			answerPaint[i].setStyle(Paint.Style.FILL_AND_STROKE);
+			answerPaint[i].setColor(Color.argb(100, 255, 255, 255));
 			answerPaint[i].setStrokeWidth(outlineWidth);
 			answerSelectedPaint[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
-			answerSelectedPaint[i].setStyle(Paint.Style.STROKE);
-			answerSelectedPaint[i].setColor(Color.BLUE);
+			answerSelectedPaint[i].setStyle(Paint.Style.FILL_AND_STROKE);
+			answerSelectedPaint[i].setColor(Color.argb(100, 0, 0, 255));
 			answerSelectedPaint[i].setStrokeWidth(outlineWidth);
 			bounds[i] = new Rect();
 			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
@@ -185,7 +191,7 @@ public class JoystickView extends View {
 			int id = getResources().getIdentifier("answer_selected" + i, "drawable", ctx.getPackageName());
 			bmpAnswersSelected[i] = BitmapFactory.decodeResource(getResources(), id);
 		}
-		bmpSet = BitmapFactory.decodeResource(getResources(), R.drawable.settings_background);
+		// bmpSet = BitmapFactory.decodeResource(getResources(), R.drawable.settings_background);
 		bmpS = BitmapFactory.decodeResource(getResources(), R.drawable.select_s2);
 		bmpQ = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2);
 		bmpQs = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2s);
@@ -208,12 +214,12 @@ public class JoystickView extends View {
 		srcRectForAns = new Rect(0, 0, bmpAnswers[0].getWidth(), bmpAnswers[0].getHeight());
 		srcRectForBig = new Rect(0, 0, bmpQ.getWidth(), bmpQ.getHeight());
 		srcRectForSmall = new Rect(0, 0, bmpS.getWidth(), bmpS.getHeight());
-		srcRectForSet = new Rect(0, 0, bmpSet.getWidth(), bmpSet.getHeight());
+		// srcRectForSet = new Rect(0, 0, bmpSet.getWidth(), bmpSet.getHeight());
 
 		for (int i = 0; i < RectForAnswers.length; i++) {
 			RectForAnswers[i] = new RectF();
 		}
-		dstRectForSet = new Rect();
+		dstRectForSet = new RectF();
 		dstRectForS = new Rect();
 		dstRectForQ = new Rect();
 		dstRectForP = new Rect();
@@ -324,7 +330,6 @@ public class JoystickView extends View {
 		case 0:
 			break;
 		case 1:
-
 			if (measured) {
 				resetAnswerSize();
 				setDimensions();
@@ -370,7 +375,7 @@ public class JoystickView extends View {
 		selectLeft[4] = selectLeft[4] - rSmall * 2;
 		selectRight[0] = selectRight[0] + rSmall * 2;
 
-		dstHeight = Width * bmpSet.getHeight() / bmpSet.getWidth();
+		dstHeight = rBig * 2 + textSizePix;
 
 		if (options)
 			setSidePaths(Height - rBig * 2 - pad);// - dstHeight + textSizePix - pad);
@@ -402,7 +407,8 @@ public class JoystickView extends View {
 	protected void onDraw(Canvas canvas) {
 
 		// Draw the option bar
-		canvas.drawBitmap(bmpSet, srcRectForSet, dstRectForSet, sidePaint);
+		// canvas.drawBitmap(bmpSet, srcRectForSet, dstRectForSet, sidePaint);
+		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
 		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
 		canvas.drawText(res.getString(R.string.side_bar), Width / 2, TextHeight, sidePaint);
 		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, sidePaint);
@@ -432,17 +438,19 @@ public class JoystickView extends View {
 					- outlineWidth, (TextHeight - textSizePix) / 2 - outlineWidth + rAns);
 
 			for (int i = 0; i <= NumAnswers; i++) {
-				canvas.save();
-				canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2, RectForAnswers[i].top + pad); // position the text
-				layout[Math.min(i, NumAnswers - 1)].draw(canvas);
-				canvas.restore();
-			}
-			for (int i = 0; i <= NumAnswers; i++) {
 				if (selectAnswers[Math.min(i, NumAnswers - 1)])
 					canvas.drawRoundRect(RectForAnswers[i], 5, 5, answerSelectedPaint[Math.min(i, NumAnswers - 1)]);
 				else
 					canvas.drawRoundRect(RectForAnswers[i], 5, 5, answerPaint[Math.min(i, NumAnswers - 1)]);
 			}
+			for (int i = 0; i <= NumAnswers; i++) {
+				canvas.save();
+				canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2, (RectForAnswers[i].top + RectForAnswers[i].bottom)
+						/ 2 - layout[Math.min(i, NumAnswers - 1)].getHeight() / 2); // position the text
+				layout[Math.min(i, NumAnswers - 1)].draw(canvas);
+				canvas.restore();
+			}
+
 			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
 
 			break;
@@ -976,6 +984,8 @@ public class JoystickView extends View {
 	private void setSidePaths(int side) {
 		TextHeight = side;
 		dstRectForSet.set(0, TextHeight - textSizePix, Width, TextHeight - textSizePix + dstHeight);
+		settingsPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, TextHeight - textSizePix + dstHeight, Color.WHITE,
+				Color.TRANSPARENT, TileMode.MIRROR));
 		int temp = side + rBig * 2 + pad;
 		dstRectForS.set(selectLeft[4], temp - rBig - rSmall, selectRight[4], temp - rBig + rSmall);
 		dstRectForQ.set(selectLeft[3], temp - rBig * 2, selectRight[3], temp);
@@ -991,18 +1001,29 @@ public class JoystickView extends View {
 		setLayouts();
 		float maxH[] = { 0, 0, 0, 0, 0 };
 		for (int i = 0; i < NumAnswers; i++) {
-			maxH[i] = Math.max(bounds[i].height(), answerSizePix);
-			maxH[i] = Math.max(layout[i].getHeight(), maxH[i]);
+			maxH[i] = Math.max(bounds[i].height(), layout[i].getHeight());
 			if (i < NumAnswers - 1) {
+				maxH[i] = Math.max(maxH[i], answerSizePix);
 				if ((maxH[i] > ((TextHeight - textSizePix) / 2 - outlineWidth * 3 - pad * 3 - rAns)) && (Height > 0)) {
 					decreaseAnswerSize();
 					setDimensions();
 					return;
+				} else if (isLayoutSplittingWords(answers[i], layout[i])) {
+					decreaseAnswerSize();
+					setDimensions();
+					return;
 				}
-			} else if ((maxH[i] > (rAns * 2 - outlineWidth * 2 - pad * 2)) && (Height > 0)) {
-				decreaseHintSize();
-				setDimensions();
-				return;
+			} else {
+				maxH[i] = Math.max(maxH[i], answerHintSizePix);
+				if ((maxH[i] > (rAns * 2 - outlineWidth * 2 - pad * 2)) && (Height > 0)) {
+					decreaseHintSize();
+					setDimensions();
+					return;
+				} else if (isLayoutSplittingWords(answers[i], layout[i])) {
+					decreaseHintSize();
+					setDimensions();
+					return;
+				}
 			}
 		}
 		for (int i = 0; i < NumAnswers - 1; i++) {
@@ -1022,7 +1043,7 @@ public class JoystickView extends View {
 			if (wrong)
 				str = res.getString(R.string.swipe_new);
 			else
-				str = res.getString(R.string.swipe_screen);
+				str = res.getString(R.string.swipe_unlock);
 		} else
 			str = res.getString(R.string.swipe_exit);
 		if (!answers[NumAnswers - 1].equals(str)) {
@@ -1033,14 +1054,14 @@ public class JoystickView extends View {
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].getTextBounds(answers[i], 0, answers[i].length(), bounds[i]);
 			if (i == correctAnswer) {
-				answerTextPaint[i].setColor(Color.GREEN);
-				answerPaint[i].setColor(Color.GREEN);
+				// answerTextPaint[i].setColor(Color.GREEN);
+				answerPaint[i].setColor(Color.argb(100, 0, 255, 0));
 			} else if (i == wrongAnswer) {
-				answerTextPaint[i].setColor(Color.RED);
-				answerPaint[i].setColor(Color.RED);
+				// answerTextPaint[i].setColor(Color.RED);
+				answerPaint[i].setColor(Color.argb(100, 255, 0, 0));
 			} else {
 				answerTextPaint[i].setColor(Color.WHITE);
-				answerPaint[i].setColor(Color.WHITE);
+				answerPaint[i].setColor(Color.argb(100, 255, 255, 255));
 			}
 			if (i < NumAnswers - 1)
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2,
@@ -1052,8 +1073,16 @@ public class JoystickView extends View {
 		invalidate();
 	}
 
+	private boolean isLayoutSplittingWords(String string, StaticLayout layout) {
+		for (int line = 0; line < layout.getLineCount() - 1; line++) {
+			if (string.charAt(layout.getLineEnd(line) - 1) != ' ')
+				return true;
+		}
+		return false;
+	}
+
 	private void decreaseAnswerSize() {
-		answerSizeSP = Math.max(answerSizeSP - 1, 1);
+		answerSizeSP = Math.max(answerSizeSP - 2, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, getResources().getDisplayMetrics());
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
