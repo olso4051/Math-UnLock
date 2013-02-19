@@ -108,8 +108,8 @@
     <string name="swipe_screen">Swipe Here to Answer</string>
     <string name="swipe_unlock">Swipe Lock to Answer</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="type_default">2</string>
-    <string name="type_summary">Dynamic Slide</string>
+    <string name="type_default">0</string>
+    <string name="type_summary">Static Slide</string>
     <string name="type_title">Unlocking Mechanism</string>
     <string name="unlock">Unlock</string>
     <string name="unlock_act_sat">ACT/SAT Pack</string>

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import android.util.Log;
-
 public class EngineerQuestion extends Question {
 
 	private String variables;
@@ -51,10 +49,8 @@ public class EngineerQuestion extends Question {
 				needs += 1;
 			index += 1;
 		}
-		Log.d("test", "rows = " + subEq);
 		int variableLocs[][] = getVariableLocations(subEq);
 		int rows = variableLocs.length;
-		Log.d("test", "rows = " + rows);
 		int loc = rand.nextInt(rows);
 		String variable = subEq.substring(variableLocs[loc][0], variableLocs[loc][1]);
 		if (variableLocs[loc][0] > 0) {

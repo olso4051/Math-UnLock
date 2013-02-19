@@ -450,6 +450,8 @@ public class MainActivity extends Activity {
 					imageLeft = null;
 					problem.setCompoundDrawables(imageLeft, null, null, null);
 					joystick.unPauseSelection();
+					sharedPrefsStats = getSharedPreferences("Stats", 0);
+					joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
 
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);

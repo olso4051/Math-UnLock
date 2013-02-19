@@ -47,6 +47,8 @@ public class JoystickView extends View {
 	private double X[] = new double[NumAnswers];		// a=0,b=1,c=2,d=3
 	private double Y[] = new double[NumAnswers];
 	private int type = 0;
+	private final float degreeStepInitial = 1;
+	private float degrees = 0, radians = 0, degreeStep = degreeStepInitial;
 	private int diffX1, diffY1, diffX, diffY;
 
 	private int correctAnswer, wrongAnswer;
@@ -79,12 +81,12 @@ public class JoystickView extends View {
 	private int selectRight[] = new int[5];
 
 	private Resources res;
-	private Runnable revealText, finishText, startAnimate, finishAnimate, revealCircle, finishCircle, pulseLock;
+	private Runnable revealText, finishText, startAnimate, finishAnimate, revealCircle, finishCircle, pulseLock, spin;
 	private Runnable revealAnswer[] = new Runnable[NumAnswers];
 	private Runnable finishAnswer[] = new Runnable[NumAnswers];
 	private Handler answerHandler, textHandler, animateHandler;
 	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10, startFrames = 30, startFrameTime = 50,
-			circleFrames = 30, circleFrameTime = 20, pulseFrames = 20, pulseFrameTime = 50;
+			circleFrames = 30, circleFrameTime = 20, pulseFrames = 20, pulseFrameTime = 50, spinFrameTime = 50;
 
 	private final Context ctx;
 
@@ -265,6 +267,20 @@ public class JoystickView extends View {
 
 	public void setUnlockType(int type) {
 		this.type = type;
+		switch (type) {
+		case 0:
+			break;
+		case 1:
+			animateHandler.removeCallbacks(spin);
+			if (degreeStep == 0) {
+				degrees = 0;
+				radians = 0;
+			} else
+				animateHandler.postDelayed(spin, spinFrameTime);
+			break;
+		case 2:
+			break;
+		}
 	}
 
 	public void showStartAnimation(int start, int delay) {
@@ -289,7 +305,24 @@ public class JoystickView extends View {
 
 	public void setWrongGuess() {
 		this.wrong = true;
+		if (type == 1) {
+			animateHandler.removeCallbacks(spin);
+			degrees = 0;
+			radians = 0;
+		}
 		invalidate();
+	}
+
+	public void setDegreeStep(int streak) {
+		if (type == 1) {
+			degreeStep = degreeStepInitial * Math.max(streak, 0);
+			animateHandler.removeCallbacks(spin);
+			if (degreeStep == 0) {
+				degrees = 0;
+				radians = 0;
+			} else
+				animateHandler.postDelayed(spin, spinFrameTime);
+		}
 	}
 
 	public void resetWrongGuess() {
@@ -322,20 +355,21 @@ public class JoystickView extends View {
 
 	public void setAnswers(String answers[]) {
 		this.answers = new String[] { answers[0], answers[1], answers[2], answers[3], "?" };
-		switch (type) {
-		case 0:
-		case 1:
-			if (measured) {
+		if (measured) {
+			animateHandler.removeCallbacks(pulseLock);
+			animateHandler.removeCallbacks(spin);
+			switch (type) {
+			case 1:
+				animateHandler.postDelayed(spin, spinFrameTime);
+			case 0:
 				resetAnswerSize();
 				setDimensions();
-				animateHandler.removeCallbacks(pulseLock);
 				animateHandler.postDelayed(pulseLock, pulseFrameTime);
+				break;
+			case 2:
+				break;
 			}
-			break;
-		case 2:
-			break;
 		}
-
 	}
 
 	// =========================================
@@ -344,12 +378,14 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		animateHandler.removeCallbacks(pulseLock);
+		animateHandler.removeCallbacks(spin);
 		switch (type) {
-		case 0:
 		case 1:
+			animateHandler.postDelayed(spin, spinFrameTime);
+		case 0:
 			measured = true;
 			setDimensions();
-			animateHandler.removeCallbacks(pulseLock);
 			animateHandler.postDelayed(pulseLock, pulseFrameTime);
 			break;
 		case 2:
@@ -449,6 +485,7 @@ public class JoystickView extends View {
 			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
 			break;
 		case 1:
+			canvas.rotate(-degrees, Width / 2, (TextHeight - textSizePix) / 2);
 			for (int i = 0; i <= NumAnswers; i++) {
 				if (selectAnswers[Math.min(i, NumAnswers - 1)])
 					canvas.drawRoundRect(RectForAnswers[i], 5, 5, answerSelectedPaint[Math.min(i, NumAnswers - 1)]);
@@ -462,6 +499,7 @@ public class JoystickView extends View {
 				layout[Math.min(i, NumAnswers - 1)].draw(canvas);
 				canvas.restore();
 			}
+			canvas.rotate(degrees, Width / 2, (TextHeight - textSizePix) / 2);
 			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
 			break;
 		case 2:
@@ -762,12 +800,20 @@ public class JoystickView extends View {
 			RectForUnlock.set(Width / 2 - rAns, (TextHeight - textSizePix) / 2 - rAns, Width / 2 + rAns, (TextHeight - textSizePix) / 2
 					+ rAns);
 		selectSideBar = false;
+
+		animateHandler.removeCallbacks(pulseLock);
 		switch (type) {
 		case 0:
+			degrees = 0;
+			radians = 0;
+			animateHandler.removeCallbacks(spin);
 		case 1:
 			animateHandler.postDelayed(pulseLock, pulseFrameTime);
 			break;
 		case 2:
+			degrees = 0;
+			radians = 0;
+			animateHandler.removeCallbacks(spin);
 			for (int ans = 0; ans < X.length; ans++) {
 				answerHandler.removeCallbacks(revealAnswer[ans]);
 				answerHandler.removeCallbacks(finishAnswer[ans]);
@@ -827,20 +873,31 @@ public class JoystickView extends View {
 				if (selectUnlock) {
 					diffx = touchX - startX;
 					diffy = touchY - startY;
+					double newX, newY;
+					if (type == 1) {
+						double oldX = touchX - Width / 2;
+						double oldY = (TextHeight - textSizePix) / 2 - touchY;
+						newX = (oldX * Math.cos(-radians) - oldY * Math.sin(-radians)) + Width / 2;
+						newY = (TextHeight - textSizePix) / 2 - (oldX * Math.sin(-radians) + oldY * Math.cos(-radians));
+					} else {
+						newX = touchX;
+						newY = touchY;
+					}
 					RectForUnlock.set((int) touchX - rAns, (int) touchY - rAns, (int) touchX + rAns, (int) touchY + rAns);
+
 					if (Math.sqrt(diffx * diffx + diffy * diffy) > swipeLength1) {
 						int select = -1;
-						if (touchX < RectForAnswers[0].right) {
-							if (touchY < RectForAnswers[0].bottom)
+						if (newX < RectForAnswers[0].right) {
+							if (newY < RectForAnswers[0].bottom)
 								select = 0;
-							else if (touchY > RectForAnswers[2].top)
+							else if (newY > RectForAnswers[2].top)
 								select = 2;
 							else
 								select = 4;
-						} else if (touchX > RectForAnswers[1].left) {
-							if (touchY < RectForAnswers[1].bottom)
+						} else if (newX > RectForAnswers[1].left) {
+							if (newY < RectForAnswers[1].bottom)
 								select = 1;
-							else if (touchY > RectForAnswers[3].top)
+							else if (newY > RectForAnswers[3].top)
 								select = 3;
 							else
 								select = 4;
@@ -999,6 +1056,16 @@ public class JoystickView extends View {
 				}
 				invalidate();
 				animateHandler.postDelayed(pulseLock, pulseFrameTime);
+			}
+		};
+		spin = new Runnable() {
+			@Override
+			public void run() {
+				degrees = (degrees + degreeStep) % 360;
+				radians = (float) (degrees * Math.PI / 180);
+				checkSelection(false, false);
+				invalidate();
+				animateHandler.postDelayed(spin, spinFrameTime);
 			}
 		};
 	}
