@@ -240,8 +240,8 @@ public class MainActivity extends Activity {
 			showWallpaper();
 			answerView.setParentHeight(layout.getBottom());
 			// set the unlock type
-			joystick.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
-			answerView.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+			joystick.setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
+			answerView.setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		}
 		super.onWindowFocusChanged(hasFocus);
 	}
@@ -286,8 +286,8 @@ public class MainActivity extends Activity {
 		else
 			joystick.setLeftRightHanded(true);
 		// set the unlock type
-		joystick.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
-		answerView.setUnlockType((java.lang.Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+		answerView.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 
 		// get the localized language entries
 		LanguageEntries = getResources().getStringArray(R.array.language_entries);
@@ -316,6 +316,7 @@ public class MainActivity extends Activity {
 			displayRateShare();
 		else
 			resetTimes();
+
 		// show the settings bar and slide it down after 3 seconds
 		joystick.showStartAnimation(0, 3000);
 		// save money into shared preferences

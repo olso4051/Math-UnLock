@@ -262,7 +262,6 @@ public class AnswerView extends View {
 	private void setDimensions(boolean fromOnMeasure) {
 		switch (type) {
 		case 0:
-			break;
 		case 1:
 			Height = 0;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
