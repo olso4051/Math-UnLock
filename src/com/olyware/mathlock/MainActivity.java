@@ -44,6 +44,8 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.AnswerReadyListener;
 import com.olyware.mathlock.views.AnswerView;
@@ -53,14 +55,13 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 5;
-	final private int decreaseRate = 1000;
-	final private int startingPmoney = 1000;
+	final private int multiplier = 5, decreaseRate = 1000, startingPmoney = 1000;
 	private int money;
 	private int Pmoney;
 	private int dMoney;// change in money after a question is answered
 	private int difficulty = 0;
 	private long startTime = 0;
+	private boolean fromSettings = false;
 
 	private LinearLayout layout;
 	private TextView clock;
@@ -94,8 +95,8 @@ public class MainActivity extends Activity {
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
-	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats, sharedPrefsEggs;
-	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats, editorPrefsEggs;
+	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats;// , sharedPrefsEggs;
+	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;// , editorPrefsEggs;
 
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
@@ -211,6 +212,7 @@ public class MainActivity extends Activity {
 		editorPrefsStats = sharedPrefsStats.edit();
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacks[i] = false;
+
 		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
@@ -277,6 +279,7 @@ public class MainActivity extends Activity {
 		} else
 			Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
+		coins.setText(String.valueOf(money + Pmoney));
 
 		// set the clock to the correct time
 		setTime();
@@ -320,9 +323,13 @@ public class MainActivity extends Activity {
 		// show the settings bar and slide it down after 3 seconds
 		joystick.showStartAnimation(0, 3000);
 		// save money into shared preferences
-		setMoney();
+		MoneyHelper.setMoney(this, coins, money, Pmoney);
 		// set image if it was set when the screen was off
 		setImage();
+		if (fromSettings) {
+			money += EggHelper.unlockEgg(this, coins, "settings", 500);
+			fromSettings = false;
+		}
 	}
 
 	@Override
@@ -358,7 +365,7 @@ public class MainActivity extends Activity {
 				Pmoney += money;
 				money = 0;
 			}
-			setMoney();
+			MoneyHelper.setMoney(this, coins, money, Pmoney);
 			super.onBackPressed();
 		}
 	}
@@ -373,10 +380,10 @@ public class MainActivity extends Activity {
 		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningTaskInfo> recentTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
 		if (recentTasks.get(1).baseActivity.toShortString().indexOf(getPackageName()) > -1) {
-			// TODO test on multiple devices I think this is when Home is pressed, can't stop from executing exit code however
+			// TODO test on multiple devices I think this is when Home or Notification is pressed, can't stop from executing exit code
 			money -= (difficulty + 1) * multiplier;
 			money = Math.max(0, money);
-			setMoney();
+			MoneyHelper.setMoney(this, coins, money, Pmoney);
 			super.onBackPressed();
 		}
 	}
@@ -826,7 +833,7 @@ public class MainActivity extends Activity {
 			if (money < 0)
 				money = 0;
 			dMoney = money - tempMoney;
-			setMoney();
+			MoneyHelper.setMoney(this, coins, money, Pmoney);
 			problem.setText(discription + problem.getText());
 		}
 	}
@@ -901,7 +908,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 4:
-			unlockEgg("unkown", 500);
+			money += EggHelper.unlockEgg(this, coins, "unknown", 500);
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
 			joystick.pauseSelection();
@@ -915,35 +922,24 @@ public class MainActivity extends Activity {
 			});
 			break;
 		case 5:		// info was selected
-			unlockEgg("info", 500);
+			money += EggHelper.unlockEgg(this, coins, "info", 500);
 			displayInfo(false);
 			break;
 		case 6:		// Store was selected
-			unlockEgg("store", 1000);
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case 7:		// progress was selected
-			unlockEgg("progress", 500);
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
-			unlockEgg("quiz", 1000);
+			money += EggHelper.unlockEgg(this, coins, "quiz", 1000);
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case 9:		// settings was selected
-			unlockEgg("settings", 500);
+			fromSettings = true;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
 		}
-	}
-
-	private void setMoney() {
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsMoney.putInt("money", money);
-		editorPrefsMoney.putInt("paid_money", Pmoney);
-		editorPrefsMoney.commit();
-		coins.setText("" + (money + Pmoney));
 	}
 
 	private void updateStats(boolean right) {
@@ -984,7 +980,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void toggleClockDate() {
-		unlockEgg("clock", 1000);
+		money += EggHelper.unlockEgg(this, coins, "clock", 1000);
 		if (currentClockSize == dateSize) {
 			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
 			currentClockSize = clockSize;
@@ -1094,43 +1090,5 @@ public class MainActivity extends Activity {
 			dialogOn = true;
 			alert.show();
 		}
-	}
-
-	private void unlockEgg(final String Egg, int max) {
-		sharedPrefsEggs = getSharedPreferences("Eggs", 0);
-		if (!sharedPrefsEggs.getBoolean(Egg, false)) {
-			final int amount = getAmount(max);
-
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.egg_title));
-			builder.setMessage(getString(R.string.egg_message) + amount).setCancelable(false);
-			builder.setIcon(R.drawable.egg);
-			builder.setPositiveButton(R.string.cash_it, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					money += amount;
-					editorPrefsEggs = sharedPrefsEggs.edit();
-					editorPrefsEggs.putBoolean(Egg, true).commit();
-					setMoney();
-				}
-			});
-			AlertDialog alert = builder.create();
-			alert.show();
-		}
-	}
-
-	private int getAmount(int max) {
-		int grand = 1000000;
-		int odds[] = { grand * 9 / 10, grand * 99 / 100, grand };
-		int select = rand.nextInt(grand) + 1;
-		int amount = 0;
-		if (select <= odds[0])
-			amount = max / 10;
-		else if (select <= odds[1])
-			amount = max / 5;
-		else if (select < odds[2])
-			amount = max / 2;
-		else
-			amount = max;
-		return amount;
 	}
 }

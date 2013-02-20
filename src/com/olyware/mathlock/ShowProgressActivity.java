@@ -25,6 +25,8 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
@@ -94,8 +96,8 @@ public class ShowProgressActivity extends Activity {
 		}
 		initSpinners();
 		setTime();
-		setMoney();
 		setGraph();
+		EggHelper.unlockEgg(this, coins, "progress", 1000);
 	}
 
 	@Override
@@ -111,7 +113,8 @@ public class ShowProgressActivity extends Activity {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
-		setMoney();
+		coins.setText(String.valueOf(money + Pmoney));
+		MoneyHelper.setMoney(this, coins, money, Pmoney);
 	}
 
 	@Override
@@ -195,14 +198,6 @@ public class ShowProgressActivity extends Activity {
 			}
 		}
 		return list;
-	}
-
-	private void setMoney() {
-		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
-		editor.putInt("money", money);
-		editor.putInt("paid_money", Pmoney);
-		editor.commit();
-		coins.setText("" + (money + Pmoney));
 	}
 
 	@SuppressLint("SimpleDateFormat")

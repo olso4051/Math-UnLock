@@ -12,6 +12,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.MoneyHelper;
+
 public class ShowStoreActivity extends Activity {
 	final private int CostAll = 10000;
 	final private int CostSmall = 1000;
@@ -23,6 +26,10 @@ public class ShowStoreActivity extends Activity {
 	private String titles[];
 	private String unlockPackageKeys[];
 	private String PackageKeys[];
+
+	private SharedPreferences sharedPrefsMoney;
+	private SharedPreferences.Editor editorPrefsMoney;
+	private int money, Pmoney;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -119,7 +126,10 @@ public class ShowStoreActivity extends Activity {
 				buyProduct(8, CostSmall);
 			}
 		});
+		initMoney();
 		setCost();
+		if (isPackageUnlocked())
+			EggHelper.unlockEgg(this, moneyText, "store", 1000);
 	}
 
 	@Override
@@ -130,16 +140,28 @@ public class ShowStoreActivity extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 	}
 
+	private void initMoney() {
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		money = sharedPrefsMoney.getInt("money", 0);
+		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		moneyText.setText(String.valueOf(money + Pmoney));
+	}
+
+	private boolean isPackageUnlocked() {
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		for (int i = 0; i < unlockPackageKeys.length; i++)
+			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
+				return true;
+		return false;
+	}
+
 	private void updateMoney(int amount) {
-		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
-		editor.putInt("paid_money", sharedPrefsMoney.getInt("paid_money", 0) + amount);
-		editor.commit();
-		moneyText.setText(sharedPrefsMoney.getInt("paid_money", 0) + sharedPrefsMoney.getInt("money", 0) + " ");
+		Pmoney += amount;
+		MoneyHelper.setMoney(this, moneyText, money, Pmoney);
 	}
 
 	private void buyProduct(final int product, final int amount) {
-		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		int tempMoney = sharedPrefsMoney.getInt("money", 0);
 		int tempPMoney = sharedPrefsMoney.getInt("paid_money", 0);
 		int id = getResources().getIdentifier("package_info" + product, "string", getPackageName());
@@ -176,8 +198,8 @@ public class ShowStoreActivity extends Activity {
 	}
 
 	private void purchase(int product, int amount) {
-		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		SharedPreferences.Editor editorMoney = sharedPrefsMoney.edit();
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
 		int tempMoney = sharedPrefsMoney.getInt("money", 0);
@@ -188,10 +210,12 @@ public class ShowStoreActivity extends Activity {
 			tempPMoney += tempMoney;
 			tempMoney = 0;
 		}
-		editorMoney.putInt("paid_money", tempPMoney);
-		editorMoney.putInt("money", tempMoney);
-		editorMoney.putBoolean(unlockPackageKeys[product], true);
-		editorMoney.commit();
+		money = tempMoney;
+		Pmoney = tempPMoney;
+		editorPrefsMoney.putInt("paid_money", Pmoney);
+		editorPrefsMoney.putInt("money", money);
+		editorPrefsMoney.putBoolean(unlockPackageKeys[product], true);
+		editorPrefsMoney.commit();
 		if (product == 0)
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
@@ -210,9 +234,8 @@ public class ShowStoreActivity extends Activity {
 	}
 
 	private void setCost() {
-		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
-
-		moneyText.setText(sharedPrefsMoney.getInt("paid_money", 0) + sharedPrefsMoney.getInt("money", 0) + " ");
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		MoneyHelper.setMoney(this, moneyText, money, Pmoney);
 		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
 			((TextView) findViewById(R.id.all_cost)).setText(getString(R.string.purchased));
 			buyAll.setEnabled(false);
@@ -266,6 +289,5 @@ public class ShowStoreActivity extends Activity {
 			buyHighQTrivia.setEnabled(false);
 		} else
 			((TextView) findViewById(R.id.highq_trivia_cost)).setText(CostSmall + " ");
-
 	}
 }
