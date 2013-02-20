@@ -129,7 +129,7 @@ public class ShowStoreActivity extends Activity {
 		initMoney();
 		setCost();
 		if (isPackageUnlocked())
-			EggHelper.unlockEgg(this, moneyText, "store", 1000);
+			money += EggHelper.unlockEgg(this, moneyText, "store", 1000);
 	}
 
 	@Override

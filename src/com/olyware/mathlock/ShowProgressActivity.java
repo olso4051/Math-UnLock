@@ -97,7 +97,7 @@ public class ShowProgressActivity extends Activity {
 		initSpinners();
 		setTime();
 		setGraph();
-		EggHelper.unlockEgg(this, coins, "progress", 1000);
+		money += EggHelper.unlockEgg(this, coins, "progress", 1000);
 	}
 
 	@Override
