@@ -1,5 +1,7 @@
 package com.olyware.mathlock;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
@@ -10,9 +12,7 @@ import android.preference.PreferenceActivity;
 import android.view.WindowManager;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-	private String unlockPackageKeys[];
-	private String settingsPackageKeys[];
-	private String DifficultyKeys[];
+	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, DifficultyKeys;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage;
 
@@ -22,6 +22,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
 
@@ -52,14 +53,16 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				Preference Pref_Packages = findPreference(settingsPackageKeys[i]);
 				Pref_Packages.setEnabled(true);
 			}
-		else
-			for (int i = 1; i < unlockPackageKeys.length; i++) {
+		else {
+			for (int i = 1; i < unlockAllKeys.length; i++) {
 				Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
-				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
+				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
 					Pref_Packages.setEnabled(true);
 				else
 					Pref_Packages.setEnabled(false);
 			}
+
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -80,7 +83,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		} else if (key.equals("handed")) {
 			connectionPref.setSummary(sharedPrefs.getString(key, "Right"));
 		} else if (key.equals("type")) {
-			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "2")));
+			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "0")));
 		} else if (key.equals("from_language")) {
 			// if you changed from_language to the same as to_language then swap to_language to old from_language
 			if (fromLanguage.findIndexOfValue(fromLanguage.getValue()) == toOldValueIndex)

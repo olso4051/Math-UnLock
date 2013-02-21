@@ -26,7 +26,6 @@ import android.widget.TextView;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.utils.EggHelper;
-import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
@@ -97,7 +96,7 @@ public class ShowProgressActivity extends Activity {
 		initSpinners();
 		setTime();
 		setGraph();
-		money += EggHelper.unlockEgg(this, coins, "progress", 1000);
+
 	}
 
 	@Override
@@ -114,7 +113,7 @@ public class ShowProgressActivity extends Activity {
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		coins.setText(String.valueOf(money + Pmoney));
-		MoneyHelper.setMoney(this, coins, money, Pmoney);
+		money += EggHelper.unlockEgg(this, coins, "progress", 1000);
 	}
 
 	@Override

@@ -907,7 +907,7 @@ public class MainActivity extends Activity {
 				});
 			}
 			break;
-		case 4:
+		case 4:	// unknown was selected
 			money += EggHelper.unlockEgg(this, coins, "unknown", 500);
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
@@ -1076,7 +1076,8 @@ public class MainActivity extends Activity {
 					editorPrefsMoney = sharedPrefsMoney.edit();
 					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
 					dialogOn = false;
-					// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
+					// TODO make this work for images, currently null is passed as the image, would like to pass app
+					// thumbnail(ic_launcher.png)
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 				}

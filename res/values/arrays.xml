@@ -164,6 +164,9 @@
 		<item>unlock_engineer</item>
 		<item>unlock_highq_trivia</item>
     </string-array>
+    <string-array name="unlock_extra_keys">
+        <item>unlock_harder</item>
+    </string-array>
     <string-array name="enable_package_keys">
         <item>enable_math</item>
         <item>enable_vocab</item>
@@ -217,6 +220,20 @@
 		<item>settings_toddler</item>
 		<item>settings_engineer</item>
 		<item>settings_highq_trivia</item>
+		<item>type</item>
+    </string-array>
+    <string-array name="package_info">
+        <item>Unlocks all current and future question packs</item>
+        <item>Math questions from elementary to college difficulty</item>
+        <item>English vocabulary questions from elementary to college difficulty</item>
+        <item>Learn a new language by translating the 1000 most used words in 17 different languages</item>
+        <item>ACT &amp; SAT vocab and math prep</item>
+		<item>GRE vocab and math prep</item>
+		<item>Help your young ones learn ABC\'s, shapes, colors all the way to simple math</item>
+		<item>Complete math and science related equations to keep fresh</item>
+		<item>Fun trivia questions about the HighQ organization</item>
+		<item>More Unlock types to challenge your brain in a different way</item>
+		<item>Create your own questions, study for a test, It\'s up to you!</item>
     </string-array>
     
 </resources>

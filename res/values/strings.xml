@@ -4,6 +4,7 @@
     <string name="cash_it">Cash In!</string>
     <string name="clock">10:15pm</string>
     <string name="coins">Coins</string>
+    <string name="custom">Custom Pack</string>
     <string name="date">Monday\nJanuary 1</string>
     <string name="default_money">0</string>
     <string name="difficulty">Max Difficulty</string>
@@ -32,12 +33,14 @@
     <string name="enable_vibration_summary">Vibrate on key presses</string>
     <string name="enable_vocab_summary">Vocab questions</string>
     <string name="enable_wallpaper_summary">Use Home Screen Wallpaper as Background</string>
+    <string name="extras">Extras</string>
     <string name="extra_coins1">1000 Coins</string>
     <string name="extra_coins2">5000 Coins</string>
     <string name="extra_coins3">10000 Coins</string>
     <string name="goto_store">Goto Store</string>
     <string name="handed_default">Right</string>
     <string name="handed_title">Handedness</string>
+    <string name="harder">Unlock Types</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying HighQ!</string>
     <string name="info_message">-HighQ is trying hard to increase your IQ. Because of that we wont show you ads. We hope you like our product and rate and comment it in the Play Store!\n\n
@@ -65,22 +68,14 @@
     <string name="none_unlocked">Go to the Store and choose a question pack</string>
     <string name="not_enough_coins">You do not have enough coins, Sorry</string>
     <string name="ok">OK</string>
+    <string name="packs">Question Packs</string>
     <string name="phone">Phone</string>
     <string name="problem">1 + 1 = ?</string>
     <string name="prompt_time">Time Scale</string>
     <string name="prompt_package">Package</string>
     <string name="prompt_difficulty">Difficulty</string>
-    <string name="purchased">Purchased</string>
-    <string name="package_info0">Unlocks all current and future question packs</string>
-    <string name="package_info1">Math questions from elementary to college difficulty</string>
-    <string name="package_info2">English vocabulary questions from elementary to college difficulty</string>
-    <string name="package_info3">Learn a new language by translating the 1000 most used words in 17 different languages</string>
-    <string name="package_info4">ACT &amp; SAT vocab and math prep</string>
-    <string name="package_info5">GRE vocab and math prep</string>
-    <string name="package_info6">Help your young ones learn ABC\'s, shapes, colors all the way to simple math</string>
-    <string name="package_info7">Complete math and science related equations to keep fresh</string>
-    <string name="package_info8">Fun trivia questions about the HighQ organization</string>
     <string name="purchase_package_message">Are you sure you want to unlock this package?</string>
+    <string name="purchased">Purchased</string>
     <string name="quiz_mode">Quiz Mode?</string>
     <string name="rate">Rate HighQ</string>
     <string name="rate_title">Rate, Comment, or Share HighQ!</string>

@@ -1,9 +1,13 @@
 package com.olyware.mathlock;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -19,13 +23,12 @@ public class ShowStoreActivity extends Activity {
 	final private int CostAll = 10000;
 	final private int CostSmall = 1000;
 	final private int CostLarge = 5000;
-	private TextView moneyText;
+	private TextView moneyText, packsTitle, extrasTitle;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button buyAll;
 	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer, buyHighQTrivia;
-	private String titles[];
-	private String unlockPackageKeys[];
-	private String PackageKeys[];
+	private Button buyHarder, custom;
+	private String[] unlockPackageKeys, unlockAllKeys, PackageKeys, packageInfo;
 
 	private SharedPreferences sharedPrefsMoney;
 	private SharedPreferences.Editor editorPrefsMoney;
@@ -38,7 +41,9 @@ public class ShowStoreActivity extends Activity {
 
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		titles = new String[unlockPackageKeys.length];
+		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
+		packageInfo = getResources().getStringArray(R.array.package_info);
+		// titles = new String[unlockPackageKeys.length];
 
 		moneyText = (TextView) findViewById(R.id.money);
 
@@ -63,69 +68,86 @@ public class ShowStoreActivity extends Activity {
 				updateMoney(CostAll);
 			}
 		});
+
+		packsTitle = ((TextView) findViewById(R.id.packs));
+		packsTitle.setPaintFlags(packsTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
 		buyAll = (Button) findViewById(R.id.unlock_all);
-		titles[0] = String.valueOf(buyAll.getText());
 		buyAll.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(0, CostAll);
+				buyProduct(String.valueOf(buyAll.getText()), 0, CostAll, null);
 			}
 		});
 		buyMath = (Button) findViewById(R.id.unlock_math);
-		titles[1] = String.valueOf(buyMath.getText());
 		buyMath.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(1, CostSmall);
+				buyProduct(String.valueOf(buyMath.getText()), 1, CostSmall, null);
 			}
 		});
 		buyVocab = (Button) findViewById(R.id.unlock_vocab);
-		titles[2] = String.valueOf(buyVocab.getText());
 		buyVocab.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(2, CostSmall);
+				buyProduct(String.valueOf(buyVocab.getText()), 2, CostSmall, null);
 			}
 		});
 		buyLanguage = (Button) findViewById(R.id.unlock_language);
-		titles[3] = String.valueOf(buyLanguage.getText());
 		buyLanguage.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(3, CostSmall);
+				buyProduct(String.valueOf(buyLanguage.getText()), 3, CostSmall, null);
 			}
 		});
 		buyACT_SAT = (Button) findViewById(R.id.unlock_act_sat);
-		titles[4] = String.valueOf(buyACT_SAT.getText());
 		buyACT_SAT.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(4, CostLarge);
+				buyProduct(String.valueOf(buyACT_SAT.getText()), 4, CostLarge, null);
 			}
 		});
 		buyGRE = (Button) findViewById(R.id.unlock_gre);
-		titles[5] = String.valueOf(buyGRE.getText());
 		buyGRE.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(5, CostLarge);
+				buyProduct(String.valueOf(buyGRE.getText()), 5, CostLarge, null);
 			}
 		});
 		buyToddler = (Button) findViewById(R.id.unlock_toddler);
-		titles[6] = String.valueOf(buyToddler.getText());
 		buyToddler.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(6, CostSmall);
+				buyProduct(String.valueOf(buyToddler.getText()), 6, CostSmall, null);
 			}
 		});
 		buyEngineer = (Button) findViewById(R.id.unlock_engineer);
-		titles[7] = String.valueOf(buyEngineer.getText());
 		buyEngineer.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(7, CostSmall);
+				buyProduct(String.valueOf(buyEngineer.getText()), 7, CostSmall, null);
 			}
 		});
 		buyHighQTrivia = (Button) findViewById(R.id.unlock_highq_trivia);
-		titles[8] = String.valueOf(buyHighQTrivia.getText());
 		buyHighQTrivia.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(8, CostSmall);
+				buyProduct(String.valueOf(buyHighQTrivia.getText()), 8, CostSmall, null);
 			}
 		});
+
+		extrasTitle = ((TextView) findViewById(R.id.extras));
+		extrasTitle.setPaintFlags(extrasTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+		buyHarder = (Button) findViewById(R.id.harder);
+		buyHarder.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				buyProduct(String.valueOf(buyHarder.getText()), 9, CostSmall, null);
+			}
+		});
+		custom = (Button) findViewById(R.id.custom);
+		final Intent i = new Intent(this, ShowProgressActivity.class);
+		custom.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				buyProduct(String.valueOf(custom.getText()), 10, 0, i);
+				// TODO start build question pack activity
+			}
+		});
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
 		initMoney();
 		setCost();
 		if (isPackageUnlocked())
@@ -160,22 +182,23 @@ public class ShowStoreActivity extends Activity {
 		MoneyHelper.setMoney(this, moneyText, money, Pmoney);
 	}
 
-	private void buyProduct(final int product, final int amount) {
+	private void buyProduct(String title, final int product, final int amount, final Intent i) {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		int tempMoney = sharedPrefsMoney.getInt("money", 0);
 		int tempPMoney = sharedPrefsMoney.getInt("paid_money", 0);
-		int id = getResources().getIdentifier("package_info" + product, "string", getPackageName());
-		String info = getResources().getString(id) + "\n\n";
 		// check if they have enough coins
 		if (tempMoney + tempPMoney >= amount) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(titles[product]);
-			builder.setMessage(info + getString(R.string.purchase_package_message)).setCancelable(false)
-					.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							purchase(product, amount);
-						}
-					});
+			builder.setTitle(title);
+			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message)).setCancelable(false);
+			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					if (i != null)
+						startActivity(i);
+					else
+						purchase(product, amount);
+				}
+			});
 			builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
@@ -185,13 +208,13 @@ public class ShowStoreActivity extends Activity {
 			alert.show();
 		} else {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			titles[0] = String.valueOf(buyAll.getText());
-			builder.setMessage(info + getString(R.string.not_enough_coins)).setCancelable(false)
-					.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							dialog.cancel();
-						}
-					});
+			builder.setTitle(title);
+			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.not_enough_coins)).setCancelable(false);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.cancel();
+				}
+			});
 			AlertDialog alert = builder.create();
 			alert.show();
 		}
@@ -214,7 +237,7 @@ public class ShowStoreActivity extends Activity {
 		Pmoney = tempPMoney;
 		editorPrefsMoney.putInt("paid_money", Pmoney);
 		editorPrefsMoney.putInt("money", money);
-		editorPrefsMoney.putBoolean(unlockPackageKeys[product], true);
+		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);
 		editorPrefsMoney.commit();
 		if (product == 0)
 			for (int i = 0; i < PackageKeys.length; i++)
@@ -247,6 +270,7 @@ public class ShowStoreActivity extends Activity {
 			buyToddler.setEnabled(false);
 			buyEngineer.setEnabled(false);
 			buyHighQTrivia.setEnabled(false);
+			buyHarder.setEnabled(false);
 		} else
 			((TextView) findViewById(R.id.all_cost)).setText(CostAll + " ");
 		if (sharedPrefsMoney.getBoolean("unlock_math", false)) {
@@ -289,5 +313,11 @@ public class ShowStoreActivity extends Activity {
 			buyHighQTrivia.setEnabled(false);
 		} else
 			((TextView) findViewById(R.id.highq_trivia_cost)).setText(CostSmall + " ");
+		if (sharedPrefsMoney.getBoolean("unlock_harder", false)) {
+			((TextView) findViewById(R.id.harder_cost)).setText(getString(R.string.purchased));
+			buyHarder.setEnabled(false);
+		} else
+			((TextView) findViewById(R.id.harder_cost)).setText(CostSmall + " ");
+		((TextView) findViewById(R.id.custom_cost)).setText("FREE");
 	}
 }

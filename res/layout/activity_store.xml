@@ -52,8 +52,14 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
 		    android:orientation="vertical" >
+		    <TextView
+		    	android:id="@+id/packs"
+		    	android:gravity="center"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:textSize="30sp"
+		    	android:text="@string/packs"/>
 			<LinearLayout
-			    android:layout_marginTop="10dp"
 			   	android:layout_width="match_parent"
 		       	android:layout_height="wrap_content"
 		       	android:orientation="horizontal" >
@@ -243,6 +249,57 @@
 					android:textStyle="bold"/>
 				<TextView
 			    	android:id="@+id/highq_trivia_cost"
+			    	android:gravity="center_vertical|right"
+			    	android:layout_width="0dp"
+			    	android:layout_weight="3"
+			    	android:layout_height="fill_parent"
+			    	android:textSize="20sp"
+			    	android:drawableRight="@drawable/coin"
+			    	android:text="@string/purchased"/>
+			</LinearLayout>
+			<TextView
+		    	android:id="@+id/extras"
+		    	android:gravity="center"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:textSize="30sp"
+		    	android:text="@string/extras"/>
+			<LinearLayout
+			   	android:layout_width="match_parent"
+		       	android:layout_height="wrap_content"
+		       	android:orientation="horizontal" >
+				<Button
+				    android:id="@+id/harder"
+				    android:layout_height="wrap_content"
+					android:layout_width="0dp"
+					android:layout_weight="4"
+					android:text="@string/harder"
+					android:textSize="20sp"
+					android:textStyle="bold"/>
+				<TextView
+			    	android:id="@+id/harder_cost"
+			    	android:gravity="center_vertical|right"
+			    	android:layout_width="0dp"
+			    	android:layout_weight="3"
+			    	android:layout_height="fill_parent"
+			    	android:textSize="20sp"
+			    	android:drawableRight="@drawable/coin"
+			    	android:text="@string/purchased"/>
+			</LinearLayout>
+			<LinearLayout
+			   	android:layout_width="match_parent"
+		       	android:layout_height="wrap_content"
+		       	android:orientation="horizontal" >
+				<Button
+				    android:id="@+id/custom"
+				    android:layout_height="wrap_content"
+					android:layout_width="0dp"
+					android:layout_weight="4"
+					android:text="@string/custom"
+					android:textSize="20sp"
+					android:textStyle="bold"/>
+				<TextView
+			    	android:id="@+id/custom_cost"
 			    	android:gravity="center_vertical|right"
 			    	android:layout_width="0dp"
 			    	android:layout_weight="3"
