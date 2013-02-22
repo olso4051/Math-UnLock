@@ -37,6 +37,7 @@
     <string name="extra_coins1">1000 Coins</string>
     <string name="extra_coins2">5000 Coins</string>
     <string name="extra_coins3">10000 Coins</string>
+    <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
     <string name="handed_default">Right</string>
     <string name="handed_title">Handedness</string>
@@ -66,7 +67,9 @@
     <string name="no">No</string>
     <string name="none_enabled">Go to Settings and enable your question pack</string>
     <string name="none_unlocked">Go to the Store and choose a question pack</string>
-    <string name="not_enough_coins">You do not have enough coins, Sorry</string>
+    <string name="not_enough_coins">You do not have enough coins, sorry</string>
+    <string name="not_enough_coins_title">Not Enough Coins</string>
+    <string name="not_enough_coins_message">Needed to skip this question</string>
     <string name="ok">OK</string>
     <string name="packs">Question Packs</string>
     <string name="phone">Phone</string>

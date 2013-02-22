@@ -25,12 +25,14 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
-	private int money;
-	private int Pmoney;
+	private Coins Money = new Coins(0, 0);
+	// private int money;
+	// private int Pmoney;
 	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
 	private TextView clock;
 	final private float clockSize = 45, dateSize = 15;
@@ -89,8 +91,9 @@ public class ShowProgressActivity extends Activity {
 
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
-		money = sharedPrefsMoney.getInt("money", 0);
-		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		Money = new Coins(sharedPrefsMoney.getInt("money", 0), sharedPrefsMoney.getInt("paid_money", 0));
+		// money = sharedPrefsMoney.getInt("money", 0);
+		// Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 
 		if (savedInstanceState != null) {
 			currentClockSize = savedInstanceState.getFloat("ClockSize");
@@ -111,17 +114,20 @@ public class ShowProgressActivity extends Activity {
 		super.onResume();
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
-		money = sharedPrefsMoney.getInt("money", 0);
-		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
-		coins.setText(String.valueOf(money + Pmoney));
-		money += EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]);
+		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
+		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
+		// money = sharedPrefsMoney.getInt("money", 0);
+		// Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
+		Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]));
+		// money += EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]);
 	}
 
 	@Override
 	protected void onPause() {
 		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
-		editor.putInt("money", money);
-		editor.putInt("paid_money", Pmoney);
+		editor.putInt("money", Money.getMoney());
+		editor.putInt("paid_money", Money.getMoneyPaid());
 		editor.commit();
 		super.onPause();
 	}

@@ -10,12 +10,14 @@ import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.MoneyHelper;
 
@@ -33,7 +35,9 @@ public class ShowStoreActivity extends Activity {
 
 	private SharedPreferences sharedPrefsMoney;
 	private SharedPreferences.Editor editorPrefsMoney;
-	private int money, Pmoney;
+	private Coins Money = new Coins(0, 0);
+
+	// private int money, Pmoney;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -153,7 +157,8 @@ public class ShowStoreActivity extends Activity {
 		initMoney();
 		setCost();
 		if (isPackageUnlocked())
-			money += EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]);
+			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]));
+		// money += EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]);
 	}
 
 	@Override
@@ -166,9 +171,11 @@ public class ShowStoreActivity extends Activity {
 
 	private void initMoney() {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		money = sharedPrefsMoney.getInt("money", 0);
-		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
-		moneyText.setText(String.valueOf(money + Pmoney));
+		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
+		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
+		// money = sharedPrefsMoney.getInt("money", 0);
+		// Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
+		moneyText.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
 	}
 
 	private boolean isPackageUnlocked() {
@@ -180,8 +187,9 @@ public class ShowStoreActivity extends Activity {
 	}
 
 	private void updateMoney(int amount) {
-		Pmoney += amount;
-		MoneyHelper.setMoney(this, moneyText, money, Pmoney);
+		Money.increaseMoneyPaid(amount);
+		// Pmoney += amount;
+		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
 	}
 
 	private void buyProduct(String title, final int product, final int amount, final Intent i) {
@@ -240,7 +248,11 @@ public class ShowStoreActivity extends Activity {
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
-		int tempMoney = sharedPrefsMoney.getInt("money", 0);
+		Log.d("test", "amount = " + amount);
+		Log.d("test", "money before = " + Money.getMoney());
+		Money.decreaseMoneyAndPaidWithDebt(amount);
+		Log.d("test", "money after = " + Money.getMoney());
+		/*int tempMoney = sharedPrefsMoney.getInt("money", 0);
 		int tempPMoney = sharedPrefsMoney.getInt("paid_money", 0);
 
 		tempMoney -= amount;
@@ -249,9 +261,11 @@ public class ShowStoreActivity extends Activity {
 			tempMoney = 0;
 		}
 		money = tempMoney;
-		Pmoney = tempPMoney;
-		editorPrefsMoney.putInt("paid_money", Pmoney);
-		editorPrefsMoney.putInt("money", money);
+		Pmoney = tempPMoney;*/
+		editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
+		editorPrefsMoney.putInt("money", Money.getMoney());
+		// editorPrefsMoney.putInt("paid_money", Pmoney);
+		// editorPrefsMoney.putInt("money", money);
 		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);
 		editorPrefsMoney.commit();
 		if (product == 0)												// 0 is unlock_all
@@ -273,7 +287,7 @@ public class ShowStoreActivity extends Activity {
 
 	private void setCost() {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		MoneyHelper.setMoney(this, moneyText, money, Pmoney);
+		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
 		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
 			((TextView) findViewById(R.id.all_cost)).setText(getString(R.string.purchased));
 			buyAll.setEnabled(false);
