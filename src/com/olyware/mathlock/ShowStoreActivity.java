@@ -28,7 +28,8 @@ public class ShowStoreActivity extends Activity {
 	private Button buyAll;
 	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer, buyHighQTrivia;
 	private Button buyHarder, custom;
-	private String[] unlockPackageKeys, unlockAllKeys, PackageKeys, packageInfo;
+	private String[] unlockPackageKeys, unlockAllKeys, PackageKeys, packageInfo, EggKeys;
+	private int[] EggMaxValues;
 
 	private SharedPreferences sharedPrefsMoney;
 	private SharedPreferences.Editor editorPrefsMoney;
@@ -43,6 +44,8 @@ public class ShowStoreActivity extends Activity {
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		packageInfo = getResources().getStringArray(R.array.package_info);
+		EggKeys = getResources().getStringArray(R.array.egg_keys);
+		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 
 		moneyText = (TextView) findViewById(R.id.money);
 
@@ -150,7 +153,7 @@ public class ShowStoreActivity extends Activity {
 		initMoney();
 		setCost();
 		if (isPackageUnlocked())
-			money += EggHelper.unlockEgg(this, moneyText, "store", 1000);
+			money += EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]);
 	}
 
 	@Override
@@ -182,33 +185,10 @@ public class ShowStoreActivity extends Activity {
 	}
 
 	private void buyProduct(String title, final int product, final int amount, final Intent i) {
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		int tempMoney = sharedPrefsMoney.getInt("money", 0);
-		int tempPMoney = sharedPrefsMoney.getInt("paid_money", 0);
-		// check if they have enough coins
-		if (tempMoney + tempPMoney >= amount) {
+		if ((product >= unlockPackageKeys.length) && (!isPackageUnlocked())) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(title);
-			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message)).setCancelable(false);
-			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					if (i != null)
-						startActivity(i);
-					else
-						purchase(product, amount);
-				}
-			});
-			builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-				}
-			});
-			AlertDialog alert = builder.create();
-			alert.show();
-		} else {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(title);
-			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.not_enough_coins)).setCancelable(false);
+			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first)).setCancelable(false);
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
@@ -216,6 +196,42 @@ public class ShowStoreActivity extends Activity {
 			});
 			AlertDialog alert = builder.create();
 			alert.show();
+		} else {
+			sharedPrefsMoney = getSharedPreferences("Packages", 0);
+			int tempMoney = sharedPrefsMoney.getInt("money", 0);
+			int tempPMoney = sharedPrefsMoney.getInt("paid_money", 0);
+			// check if they have enough coins
+			if (tempMoney + tempPMoney >= amount) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(title);
+				builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message)).setCancelable(false);
+				builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						if (i != null)
+							startActivity(i);
+						else
+							purchase(product, amount);
+					}
+				});
+				builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+			} else {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(title);
+				builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.not_enough_coins)).setCancelable(false);
+				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
 		}
 	}
 

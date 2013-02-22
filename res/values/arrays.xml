@@ -236,4 +236,25 @@
 		<item>Create your own questions, study for a test, It\'s up to you!</item>
     </string-array>
     
+    <string-array name="egg_keys">
+        <item>settings</item>
+        <item>unknown</item>
+        <item>info</item>
+        <item>quiz</item>
+        <item>clock</item>
+        <item>store</item>
+        <item>progress</item>
+        <item>type</item>
+    </string-array>
+    <integer-array name="egg_max_values">
+        <item>1000</item>
+        <item>500</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>1000</item>
+        <item>1000</item>
+        <item>1000</item>
+        <item>1000</item>
+    </integer-array>
+    
 </resources>

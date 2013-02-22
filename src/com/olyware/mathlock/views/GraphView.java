@@ -25,7 +25,7 @@ public class GraphView extends View {
 	private float left, top, right, bottom;
 
 	private String Stats[] = { "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak", "Current Streak", "Total Study Time",
-			"Fastest Time", "Average Time", "coins/hr (cph)" };
+			"Fastest Time", "Average Time", "coins/hr (cph)", "Eggs Found" };
 	private String StatsValues[] = new String[Stats.length];
 
 	private Paint TextLabelPaint, TextStatsPaintL, TextStatsPaintR, TextStatsPaintC, GraphPaint, LinePaint;
@@ -80,7 +80,7 @@ public class GraphView extends View {
 		TextStatsPaintC.setTextSize(textStatsSizePix);
 
 		movingAverage = 20;
-		setStats(0, 0, 0, 0, 0, 0, 0, 0);
+		setStats(0, 0, 0, 0, 0, 0, 0, 0, "0 / 0");
 		padVert = textStatsSizePix / 2;
 		padHorz = 5;
 		textBounds = new Rect();
@@ -127,7 +127,7 @@ public class GraphView extends View {
 	}
 
 	public void setStats(int correct, int wrong, int coins, long totalTime, int streakBest, int streakCurrent, long answerTimeFast,
-			long answerTimeAve) {
+			long answerTimeAve, String eggs) {
 		StatsValues[0] = correct + "";
 		StatsValues[1] = wrong + "";
 		StatsValues[2] = coins + "";
@@ -140,6 +140,7 @@ public class GraphView extends View {
 			StatsValues[8] = coins * 1000l * 60l * 60l / totalTime + "";
 		else
 			StatsValues[8] = 0 + "";
+		StatsValues[9] = eggs;
 	}
 
 	// =========================================

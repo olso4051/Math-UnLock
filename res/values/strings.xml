@@ -118,5 +118,6 @@
     <string name="unlock_vocab">Vocab Pack</string>
     <string name="worth">Question Worth </string>
     <string name="yes">Yes</string>
+    <string name="get_pack_first">Unlock a Question Pack first so you can use your extras</string>
     
 </resources>

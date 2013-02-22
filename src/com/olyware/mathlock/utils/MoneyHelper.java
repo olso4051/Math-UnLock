@@ -49,4 +49,14 @@ public class MoneyHelper {
 			timerHandler.postDelayed(updateMoney, updateMoneyStep);
 		}
 	}
+
+	public static void setMoney(Context context, int m, int p) {
+		money = m;
+		Pmoney = p;
+		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsMoney.putInt("money", money);
+		editorPrefsMoney.putInt("paid_money", Pmoney);
+		editorPrefsMoney.commit();
+	}
 }

@@ -38,12 +38,12 @@ public class ShowProgressActivity extends Activity {
 	private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
 	private GraphView graphView;
-	private String unlockPackageKeys[];
-	private String displayPackageKeys[];
+	private String[] unlockPackageKeys, displayPackageKeys, EggKeys;
+	private int[] EggMaxValues;
 	private String[] times = { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
 	private long[] oldestTimes = { System.currentTimeMillis(), 31536000000l, 15768000000l, 2628000000l, 604800000l, 86400000l };
 	private List<String> packages;
-	private String[] difficulties = new String[Difficulty.getSize() + 1];
+	private String[] difficulties = new String[Difficulty.getSize() + 1];	// +1 for all difficulties
 	private String selectedPackage, selectedDifficulty;
 
 	private DatabaseManager dbManager;
@@ -66,8 +66,11 @@ public class ShowProgressActivity extends Activity {
 		setContentView(R.layout.activity_progress);
 
 		dbManager = new DatabaseManager(getApplicationContext());
+
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		displayPackageKeys = getResources().getStringArray(R.array.display_packages);
+		EggKeys = getResources().getStringArray(R.array.egg_keys);
+		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 
 		clock = (TextView) findViewById(R.id.clock);
 		clock.setOnClickListener(new OnClickListener() {
@@ -95,7 +98,6 @@ public class ShowProgressActivity extends Activity {
 		initSpinners();
 		setTime();
 		setGraph();
-
 	}
 
 	@Override
@@ -112,7 +114,7 @@ public class ShowProgressActivity extends Activity {
 		money = sharedPrefsMoney.getInt("money", 0);
 		Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		coins.setText(String.valueOf(money + Pmoney));
-		money += EggHelper.unlockEgg(this, coins, "progress", 1000);
+		money += EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]);
 	}
 
 	@Override
@@ -235,6 +237,7 @@ public class ShowProgressActivity extends Activity {
 	}
 
 	private void setGraph() {
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		long oldestTime = getOldestTime();
 		List<Integer> percent = dbManager.getStatPercentArray(oldestTime, selectedPackage, selectedDifficulty);
 
@@ -257,7 +260,8 @@ public class ShowProgressActivity extends Activity {
 		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", 0);
 		long answerTimeAve = sharedPrefsStats.getLong("answerTimeAve", 0);
-		graphView.setStats(correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve);
+		String eggs = EggHelper.getNumberUnlocked(this) + " / " + EggHelper.getTotalEggs(this);
+		graphView.setStats(correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve, eggs);
 	}
 
 	private long getOldestTime() {

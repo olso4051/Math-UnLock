@@ -47,6 +47,48 @@ public class EggHelper {
 		return amount;
 	}
 
+	public static int unlockEgg(Context contex, final String Egg, int max) {
+		ctx = contex;
+		sharedPrefsEggs = ctx.getSharedPreferences("Eggs", 0);
+		int amount;
+		if (!sharedPrefsEggs.getBoolean(Egg, false)) {
+			sharedPrefsMoney = ctx.getSharedPreferences("Packages", 0);
+
+			amount = getAmount(max);
+			final int a = amount;
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+			builder.setTitle(ctx.getString(R.string.egg_title));
+			builder.setMessage(ctx.getString(R.string.egg_message) + amount).setCancelable(false);
+			builder.setIcon(R.drawable.egg);
+			builder.setPositiveButton(R.string.cash_it, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					editorPrefsEggs = sharedPrefsEggs.edit();
+					editorPrefsEggs.putBoolean(Egg, true).commit();
+					MoneyHelper.setMoney(ctx, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));
+				}
+			});
+			AlertDialog alert = builder.create();
+			alert.show();
+		} else
+			amount = 0;
+		return amount;
+	}
+
+	public static int getNumberUnlocked(Context context) {
+		String[] keys = context.getResources().getStringArray(R.array.egg_keys);
+		sharedPrefsEggs = context.getSharedPreferences("Eggs", 0);
+		int count = 0;
+		for (int i = 0; i < keys.length; i++)
+			if (sharedPrefsEggs.getBoolean(keys[i], false))
+				count++;
+		return count;
+	}
+
+	public static int getTotalEggs(Context context) {
+		return context.getResources().getIntArray(R.array.egg_max_values).length;
+	}
+
 	private static int getAmount(int max) {
 		int grand = 1000000;
 		int odds[] = { grand * 9 / 10, grand * 99 / 100, grand };

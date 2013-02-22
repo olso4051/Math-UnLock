@@ -73,7 +73,8 @@ public class MainActivity extends Activity {
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String PackageKeys[], unlockPackageKeys[], DifficultyKeys[], LanguageEntries[], LanguageValues[];
+	private String[] PackageKeys, unlockPackageKeys, DifficultyKeys, LanguageEntries, LanguageValues, EggKeys;
+	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
 	private int ID;
 
@@ -92,8 +93,8 @@ public class MainActivity extends Activity {
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
-	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats;// , sharedPrefsEggs;
-	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;// , editorPrefsEggs;
+	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats;
+	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
 
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
@@ -144,6 +145,8 @@ public class MainActivity extends Activity {
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
+		EggKeys = getResources().getStringArray(R.array.egg_keys);
+		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 		EnabledPacks = new boolean[PackageKeys.length];
 
 		clock = (TextView) findViewById(R.id.clock);
@@ -328,7 +331,8 @@ public class MainActivity extends Activity {
 		// set image if it was set when the screen was off
 		setImage();
 		if (fromSettings) {
-			money += EggHelper.unlockEgg(this, coins, "settings", 500);
+			// money += EggHelper.unlockEgg(this, coins, "settings", 500);
+			money += EggHelper.unlockEgg(this, coins, EggKeys[0], EggMaxValues[0]);
 			fromSettings = false;
 		}
 	}
@@ -403,7 +407,7 @@ public class MainActivity extends Activity {
 	private void showWallpaper() {
 		if (sharedPrefs.getBoolean("enable_wallpaper", true)) {
 			// dims the wallpaper so stuff app has more contrast
-			layout.setBackgroundColor(Color.argb(100, 0, 0, 0));
+			layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
 		} else
 			// puts a black image over the wallpaper so we don't have to recreate the activity with a different theme
 			layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
@@ -897,7 +901,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 4:	// unknown was selected
-			money += EggHelper.unlockEgg(this, coins, "unknown", 500);
+			money += EggHelper.unlockEgg(this, coins, EggKeys[1], EggMaxValues[1]);
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
 			joystick.pauseSelection();
@@ -911,7 +915,7 @@ public class MainActivity extends Activity {
 			});
 			break;
 		case 5:		// info was selected
-			money += EggHelper.unlockEgg(this, coins, "info", 500);
+			money += EggHelper.unlockEgg(this, coins, EggKeys[2], EggMaxValues[2]);
 			displayInfo(false);
 			break;
 		case 6:		// Store was selected
@@ -921,7 +925,7 @@ public class MainActivity extends Activity {
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
-			money += EggHelper.unlockEgg(this, coins, "quiz", 1000);
+			money += EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]);
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case 9:		// settings was selected
@@ -969,7 +973,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void toggleClockDate() {
-		money += EggHelper.unlockEgg(this, coins, "clock", 1000);
+		money += EggHelper.unlockEgg(this, coins, EggKeys[4], EggMaxValues[4]);
 		if (currentClockSize == dateSize) {
 			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
 			currentClockSize = clockSize;

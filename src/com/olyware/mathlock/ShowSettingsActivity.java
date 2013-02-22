@@ -11,8 +11,11 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.view.WindowManager;
 
+import com.olyware.mathlock.utils.EggHelper;
+
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, DifficultyKeys;
+	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, DifficultyKeys, EggKeys;
+	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage;
 
@@ -25,6 +28,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
+		EggKeys = getResources().getStringArray(R.array.egg_keys);
+		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 
 		SharedPreferences sharedPrefs = getPreferenceScreen().getSharedPreferences();
 		SharedPreferences sharedPrefsMoney = this.getSharedPreferences("Packages", 0);
@@ -83,6 +88,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		} else if (key.equals("handed")) {
 			connectionPref.setSummary(sharedPrefs.getString(key, "Right"));
 		} else if (key.equals("type")) {
+			EggHelper.unlockEgg(this, EggKeys[7], EggMaxValues[7]);
 			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "0")));
 		} else if (key.equals("from_language")) {
 			// if you changed from_language to the same as to_language then swap to_language to old from_language
