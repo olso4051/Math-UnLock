@@ -32,7 +32,6 @@ public class ShowProgressActivity extends Activity {
 	private int money;
 	private int Pmoney;
 	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
-
 	private TextView clock;
 	final private float clockSize = 45, dateSize = 15;
 	private float currentClockSize;

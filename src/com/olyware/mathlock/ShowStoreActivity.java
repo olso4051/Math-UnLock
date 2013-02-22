@@ -43,7 +43,6 @@ public class ShowStoreActivity extends Activity {
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		packageInfo = getResources().getStringArray(R.array.package_info);
-		// titles = new String[unlockPackageKeys.length];
 
 		moneyText = (TextView) findViewById(R.id.money);
 

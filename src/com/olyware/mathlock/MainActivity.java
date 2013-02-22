@@ -11,16 +11,13 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
-import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -124,11 +121,15 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (sharedPrefs.getBoolean("notification_bar", true)) {
-			setTheme(R.style.AppTheme2);
-		} else {
-			setTheme(R.style.AppTheme);
-		}
+		if (sharedPrefs.getBoolean("notification_bar", true))
+			if (sharedPrefs.getBoolean("enable_wallpaper", true))
+				setTheme(R.style.AppThemeWall);
+			else
+				setTheme(R.style.AppThemeBlack);
+		else if (sharedPrefs.getBoolean("enable_wallpaper", true))
+			setTheme(R.style.AppThemeWallFull);
+		else
+			setTheme(R.style.AppThemeBlackFull);
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -399,26 +400,13 @@ public class MainActivity extends Activity {
 		}, delay); // launch home screen after delay time [ms]
 	}
 
-	@SuppressWarnings("deprecation")
 	private void showWallpaper() {
-		if (sharedPrefs.getBoolean("enable_wallpaper", true) && layout.getWidth() > 0) {
-			// get wallpaper as a bitmap
-			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
-
-			// set scaling factors
-			int left = bitmap.getWidth() / 2 - layout.getWidth() / 2;
-			// int right = drawable.getIntrinsicWidth() / 2 + layout.getWidth() / 2;
-			int top = bitmap.getHeight() / 2 - layout.getHeight() / 2;
-			// int bottom = drawable.getIntrinsicHeight() / 2 + layout.getHeight() / 2;
-
-			// scale the bitmap to fit on the background
-			bitmap = Bitmap.createBitmap(bitmap, left, top, layout.getWidth(), layout.getHeight());
-			// convert bitmap to BitmapDrawable so we can set it as the background
-			BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), bitmap);
-			Bdrawable.setAlpha(100);
-			layout.setBackgroundDrawable(Bdrawable);
+		if (sharedPrefs.getBoolean("enable_wallpaper", true)) {
+			// dims the wallpaper so stuff app has more contrast
+			layout.setBackgroundColor(Color.argb(100, 0, 0, 0));
 		} else
-			layout.setBackgroundDrawable(null);
+			// puts a black image over the wallpaper so we don't have to recreate the activity with a different theme
+			layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
 	}
 
 	private void setImage() {

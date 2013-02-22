@@ -1,7 +1,8 @@
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.Black.NoTitleBar.Fullscreen" />
-    <style name="AppTheme2" parent="android:Theme.Black.NoTitleBar" />
-    <style name="SettingsTheme" parent="android:Theme.Black" />
+    <style name="AppThemeBlackFull" parent="android:Theme.Black.NoTitleBar.Fullscreen" />
+    <style name="AppThemeBlack" parent="android:Theme.Black.NoTitleBar" />
+    <style name="AppThemeWallFull" parent="android:Theme.Wallpaper.NoTitleBar.Fullscreen" />
+    <style name="AppThemeWall" parent="android:Theme.Wallpaper.NoTitleBar" />
 
 </resources>
