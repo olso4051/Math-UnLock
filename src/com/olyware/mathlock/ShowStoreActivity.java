@@ -101,7 +101,7 @@ public class ShowStoreActivity extends Activity {
 		final Intent i = new Intent(this, ShowProgressActivity.class);
 		custom.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				buyProduct(String.valueOf(custom.getText()), 10, 0, i);
+				buyProduct(String.valueOf(custom.getText()), packageInfo.length - 1, 0, i);
 				// TODO start build question pack activity
 			}
 		});
