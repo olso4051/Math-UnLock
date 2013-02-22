@@ -475,7 +475,7 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.language);
 						setLanguageProblem(difficulty);
 						break;
-					case 3:			// enabled vocab act/sat question
+					/*case 3:			// enabled vocab act/sat question
 					case 4:			// enabled math act/sat question
 						currentPack = getString(R.string.act_sat);
 						setACT_SATProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[3], false),
@@ -486,16 +486,16 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.gre);
 						setGREProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[5], false),
 								sharedPrefs.getBoolean(PackageKeys[6], false));
-						break;
-					case 7:			// toddler question
+						break;*/
+					case 3:			// toddler question
 						currentPack = getString(R.string.toddler);
 						setToddlerProblem(difficulty);
 						break;
-					case 8:			// engineer question
+					case 4:			// engineer question
 						currentPack = getString(R.string.engineer);
 						setEngineerProblem(difficulty);
 						break;
-					case 9:			// HighQ Trivia question
+					case 5:			// HighQ Trivia question
 						currentPack = getString(R.string.engineer);
 						setHighQTriviaProblem(difficulty);
 						break;
@@ -696,7 +696,7 @@ public class MainActivity extends Activity {
 		problem.setText(fromLanguageLocal + " -> " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
 	}
 
-	private void setACT_SATProblem(int diffNum, boolean vocab, boolean math) {
+	/*private void setACT_SATProblem(int diffNum, boolean vocab, boolean math) {
 		int type;// 0-vocab,1-math
 		if ((vocab) && (math))
 			type = rand.nextInt(2);
@@ -723,7 +723,7 @@ public class MainActivity extends Activity {
 			setVocabProblem(4, diffNum);
 		else
 			setMathProblem(4, diffNum);
-	}
+	}*/
 
 	private void setToddlerProblem(int diffNum) {
 		currentTableName = null;

@@ -112,6 +112,7 @@
 	        android:entryValues="@array/language_values_not_localized"
 	        android:defaultValue="@string/language_to_default" />
 	</PreferenceCategory>
+	<!--
 	<PreferenceCategory
         android:title="@string/settings_act_sat_title"
         android:key="settings_act_sat">
@@ -156,6 +157,7 @@
 	        android:entryValues="@array/difficulty_gre_values"
 	        android:defaultValue="@string/difficulty_default_gre" />
 	</PreferenceCategory>
+	-->
 	<PreferenceCategory
         android:title="@string/settings_toddler_title"
         android:key="settings_toddler">

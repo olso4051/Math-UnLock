@@ -25,7 +25,7 @@ public class ShowStoreActivity extends Activity {
 	final private int CostAll = 10000;
 	final private int CostSmall = 1000;
 	final private int CostLarge = 5000;
-	private TextView moneyText, packsTitle, extrasTitle;
+	private TextView moneyText, packsTitle, extrasTitle, testPrepTitle;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button[] buy;
 	private TextView[] cost;
@@ -105,6 +105,9 @@ public class ShowStoreActivity extends Activity {
 				// TODO start build question pack activity
 			}
 		});
+
+		testPrepTitle = ((TextView) findViewById(R.id.test_prep));
+		testPrepTitle.setPaintFlags(testPrepTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
 	@Override
@@ -202,7 +205,9 @@ public class ShowStoreActivity extends Activity {
 		if (product == 0)												// 0 is unlock_all
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
-		else if (product <= 3)											// before test prep
+		else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
+			editorPrefs.putBoolean(PackageKeys[product - 1], true);
+		/*else if (product <= 3)											// before test prep
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
 		else if (product == 4) {										// need to unlock act_sat math and vocab
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
@@ -211,7 +216,7 @@ public class ShowStoreActivity extends Activity {
 			editorPrefs.putBoolean(PackageKeys[product], true);
 			editorPrefs.putBoolean(PackageKeys[product + 1], true);
 		} else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
-			editorPrefs.putBoolean(PackageKeys[product + 1], true);
+			editorPrefs.putBoolean(PackageKeys[product + 1], true);*/
 		editorPrefs.commit();
 		setCost();
 	}
