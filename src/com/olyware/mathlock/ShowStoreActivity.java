@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -26,11 +27,11 @@ public class ShowStoreActivity extends Activity {
 	final private int CostLarge = 5000;
 	private TextView moneyText, packsTitle, extrasTitle;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
-	private Button buyAll;
-	private Button buyMath, buyVocab, buyLanguage, buyACT_SAT, buyGRE, buyToddler, buyEngineer, buyHighQTrivia;
-	private Button buyHarder, custom;
+	private Button[] buy;
+	private TextView[] cost;
+	private Button custom;
 	private String[] unlockPackageKeys, unlockAllKeys, PackageKeys, packageInfo, EggKeys;
-	private int[] EggMaxValues;
+	private int[] unlockCost, EggMaxValues;
 
 	private SharedPreferences sharedPrefsMoney;
 	private SharedPreferences.Editor editorPrefsMoney;
@@ -44,11 +45,14 @@ public class ShowStoreActivity extends Activity {
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
+		unlockCost = getResources().getIntArray(R.array.unlock_cost);
 		packageInfo = getResources().getStringArray(R.array.package_info);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 
 		moneyText = (TextView) findViewById(R.id.money);
+		buy = new Button[unlockCost.length];
+		cost = new TextView[unlockCost.length];
 
 		buttonCoins1 = (Button) findViewById(R.id.extra_coins1);
 		buttonCoins1.setOnClickListener(new OnClickListener() {
@@ -75,69 +79,24 @@ public class ShowStoreActivity extends Activity {
 		packsTitle = ((TextView) findViewById(R.id.packs));
 		packsTitle.setPaintFlags(packsTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
-		buyAll = (Button) findViewById(R.id.unlock_all);
-		buyAll.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyAll.getText()), 0, CostAll, null);
-			}
-		});
-		buyMath = (Button) findViewById(R.id.unlock_math);
-		buyMath.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyMath.getText()), 1, CostSmall, null);
-			}
-		});
-		buyVocab = (Button) findViewById(R.id.unlock_vocab);
-		buyVocab.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyVocab.getText()), 2, CostSmall, null);
-			}
-		});
-		buyLanguage = (Button) findViewById(R.id.unlock_language);
-		buyLanguage.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyLanguage.getText()), 3, CostSmall, null);
-			}
-		});
-		buyACT_SAT = (Button) findViewById(R.id.unlock_act_sat);
-		buyACT_SAT.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyACT_SAT.getText()), 4, CostLarge, null);
-			}
-		});
-		buyGRE = (Button) findViewById(R.id.unlock_gre);
-		buyGRE.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyGRE.getText()), 5, CostLarge, null);
-			}
-		});
-		buyToddler = (Button) findViewById(R.id.unlock_toddler);
-		buyToddler.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyToddler.getText()), 6, CostSmall, null);
-			}
-		});
-		buyEngineer = (Button) findViewById(R.id.unlock_engineer);
-		buyEngineer.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyEngineer.getText()), 7, CostSmall, null);
-			}
-		});
-		buyHighQTrivia = (Button) findViewById(R.id.unlock_highq_trivia);
-		buyHighQTrivia.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyHighQTrivia.getText()), 8, CostSmall, null);
-			}
-		});
+		for (int i = 0; i < buy.length; i++) {
+			final int loc = i;
+			int idButton = getResources().getIdentifier(unlockAllKeys[i], "id", getPackageName());
+			int idText = getResources().getIdentifier(unlockAllKeys[i].substring(7) + "_cost", "id", getPackageName());
+			cost[i] = (TextView) findViewById(idText);
+			buy[i] = (Button) findViewById(idButton);
+			Log.d("test", "i = " + i);
+			Log.d("test", "idButton = " + idButton + "|idText = " + idText);
+			buy[i].setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					buyProduct(String.valueOf(buy[loc].getText()), loc, unlockCost[loc], null);
+				}
+			});
+		}
 
 		extrasTitle = ((TextView) findViewById(R.id.extras));
 		extrasTitle.setPaintFlags(extrasTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-		buyHarder = (Button) findViewById(R.id.harder);
-		buyHarder.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(buyHarder.getText()), 9, CostSmall, null);
-			}
-		});
+
 		custom = (Button) findViewById(R.id.custom);
 		final Intent i = new Intent(this, ShowProgressActivity.class);
 		custom.setOnClickListener(new OnClickListener() {
@@ -261,64 +220,20 @@ public class ShowStoreActivity extends Activity {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
 		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
-			((TextView) findViewById(R.id.all_cost)).setText(getString(R.string.purchased));
-			buyAll.setEnabled(false);
-			buyMath.setEnabled(false);
-			buyVocab.setEnabled(false);
-			buyLanguage.setEnabled(false);
-			buyACT_SAT.setEnabled(false);
-			buyGRE.setEnabled(false);
-			buyToddler.setEnabled(false);
-			buyEngineer.setEnabled(false);
-			buyHighQTrivia.setEnabled(false);
-			buyHarder.setEnabled(false);
+			cost[0].setText(getString(R.string.purchased));
+			for (int i = 0; i < buy.length; i++) {
+				buy[i].setEnabled(false);
+			}
 		} else
-			((TextView) findViewById(R.id.all_cost)).setText(CostAll + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_math", false)) {
-			((TextView) findViewById(R.id.math_cost)).setText(getString(R.string.purchased));
-			buyMath.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.math_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_vocab", false)) {
-			((TextView) findViewById(R.id.vocab_cost)).setText(getString(R.string.purchased));
-			buyVocab.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.vocab_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_language", false)) {
-			((TextView) findViewById(R.id.language_cost)).setText(getString(R.string.purchased));
-			buyLanguage.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.language_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_act_sat", false)) {
-			((TextView) findViewById(R.id.act_sat_cost)).setText(getString(R.string.purchased));
-			buyACT_SAT.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.act_sat_cost)).setText(CostLarge + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_gre", false)) {
-			((TextView) findViewById(R.id.gre_cost)).setText(getString(R.string.purchased));
-			buyGRE.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.gre_cost)).setText(CostLarge + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_toddler", false)) {
-			((TextView) findViewById(R.id.toddler_cost)).setText(getString(R.string.purchased));
-			buyToddler.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.toddler_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_engineer", false)) {
-			((TextView) findViewById(R.id.engineer_cost)).setText(getString(R.string.purchased));
-			buyEngineer.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.engineer_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_highq_trivia", false)) {
-			((TextView) findViewById(R.id.highq_trivia_cost)).setText(getString(R.string.purchased));
-			buyHighQTrivia.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.highq_trivia_cost)).setText(CostSmall + " ");
-		if (sharedPrefsMoney.getBoolean("unlock_harder", false)) {
-			((TextView) findViewById(R.id.harder_cost)).setText(getString(R.string.purchased));
-			buyHarder.setEnabled(false);
-		} else
-			((TextView) findViewById(R.id.harder_cost)).setText(CostSmall + " ");
+			cost[0].setText(String.valueOf(unlockCost[0]));
+
+		for (int i = 1; i < buy.length; i++) {
+			if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false)) {
+				cost[i].setText(getString(R.string.purchased));
+				buy[i].setEnabled(false);
+			} else
+				cost[i].setText(String.valueOf(unlockCost[i]));
+		}
 		((TextView) findViewById(R.id.custom_cost)).setText("FREE");
 	}
 }

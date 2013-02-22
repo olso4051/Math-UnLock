@@ -167,6 +167,18 @@
     <string-array name="unlock_extra_keys">
         <item>unlock_harder</item>
     </string-array>
+    <integer-array name="unlock_cost">
+        <item>10000</item>
+        <item>1000</item>
+        <item>1000</item>
+        <item>1000</item>
+        <item>5000</item>
+		<item>5000</item>
+		<item>1000</item>
+		<item>1000</item>
+		<item>1000</item>
+        <item>500</item>
+    </integer-array>
     <string-array name="enable_package_keys">
         <item>enable_math</item>
         <item>enable_vocab</item>

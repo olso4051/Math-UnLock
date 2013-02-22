@@ -270,7 +270,7 @@
 		       	android:layout_height="wrap_content"
 		       	android:orientation="horizontal" >
 				<Button
-				    android:id="@+id/harder"
+				    android:id="@+id/unlock_harder"
 				    android:layout_height="wrap_content"
 					android:layout_width="0dp"
 					android:layout_weight="4"
