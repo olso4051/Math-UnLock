@@ -416,7 +416,8 @@ public class MainActivity extends Activity {
 		if (imageLeft == null)
 			problem.setCompoundDrawables(null, null, null, null);
 		else {
-			imageLeft.setBounds(0, 0, problem.getHeight() /* *w/h */, problem.getHeight());
+			// imageLeft.setBounds(0, 0, problem.getHeight() * w / h, problem.getHeight());//no stretch
+			imageLeft.setBounds(0, 0, problem.getHeight(), problem.getHeight());	// stretch to square
 			problem.setCompoundDrawables(imageLeft, null, null, null);
 		}
 	}

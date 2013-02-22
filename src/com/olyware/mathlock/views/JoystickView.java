@@ -86,7 +86,7 @@ public class JoystickView extends View {
 	private Runnable finishAnswer[] = new Runnable[NumAnswers];
 	private Handler answerHandler, textHandler, animateHandler;
 	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10, startFrames = 30, startFrameTime = 50,
-			circleFrames = 30, circleFrameTime = 20, pulseFrames = 20, pulseFrameTime = 50, spinFrameTime = 50;
+			circleFrames = 30, circleFrameTime = 20, pulseFrames = 20, pulseFrameTime = 50, spinFrameTime = 25;
 
 	private final Context ctx;
 
@@ -440,18 +440,6 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		// Draw the option bar
-		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
-		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
-		canvas.drawText(res.getString(R.string.side_bar), Width / 2, TextHeight, sidePaint);
-		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, sidePaint);
-		if (quizMode)
-			canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, sidePaint);
-		else
-			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, sidePaint);
-		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, sidePaint);
-		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, sidePaint);
-		canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, sidePaint);
 
 		if ((type == 0) || (type == 1)) {
 			RectForAnswers[0].set(outlineWidth, outlineWidth, Width / 2 - outlineWidth, (TextHeight - textSizePix) / 2 - outlineWidth
@@ -468,6 +456,8 @@ public class JoystickView extends View {
 					- outlineWidth, (TextHeight - textSizePix) / 2 - outlineWidth + rAns);
 		}
 		switch (type) {
+		case 1:
+			canvas.rotate(-degrees, Width / 2, (TextHeight - textSizePix) / 2);	// intentional fall through
 		case 0:
 			for (int i = 0; i <= NumAnswers; i++) {
 				if (selectAnswers[Math.min(i, NumAnswers - 1)])
@@ -482,9 +472,11 @@ public class JoystickView extends View {
 				layout[Math.min(i, NumAnswers - 1)].draw(canvas);
 				canvas.restore();
 			}
+			if (type == 1)
+				canvas.rotate(degrees, Width / 2, (TextHeight - textSizePix) / 2);
 			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
 			break;
-		case 1:
+		/*case 1:
 			canvas.rotate(-degrees, Width / 2, (TextHeight - textSizePix) / 2);
 			for (int i = 0; i <= NumAnswers; i++) {
 				if (selectAnswers[Math.min(i, NumAnswers - 1)])
@@ -501,7 +493,7 @@ public class JoystickView extends View {
 			}
 			canvas.rotate(degrees, Width / 2, (TextHeight - textSizePix) / 2);
 			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
-			break;
+			break;*/
 		case 2:
 			for (int i = 0; i < X.length; i++) {
 				RectForAnswers[i].set((int) X[i] - rAns, (int) Y[i] - rAns, (int) X[i] + rAns, (int) Y[i] + rAns);
@@ -521,6 +513,18 @@ public class JoystickView extends View {
 				canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
 			break;
 		}
+		// Draw the option bar
+		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
+		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
+		canvas.drawText(res.getString(R.string.side_bar), Width / 2, TextHeight, sidePaint);
+		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, sidePaint);
+		if (quizMode)
+			canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, sidePaint);
+		else
+			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, sidePaint);
+		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, sidePaint);
+		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, sidePaint);
+		canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, sidePaint);
 		canvas.save();
 	}
 

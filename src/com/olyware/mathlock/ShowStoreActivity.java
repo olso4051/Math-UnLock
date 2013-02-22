@@ -238,18 +238,18 @@ public class ShowStoreActivity extends Activity {
 		editorPrefsMoney.putInt("money", money);
 		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);
 		editorPrefsMoney.commit();
-		if (product == 0)
+		if (product == 0)												// 0 is unlock_all
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
-		else if (product <= 3)
+		else if (product <= 3)											// before test prep
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
-		else if (product == 4) {
+		else if (product == 4) {										// need to unlock act_sat math and vocab
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
 			editorPrefs.putBoolean(PackageKeys[product], true);
-		} else if (product == 5) {
+		} else if (product == 5) {										// need to unlock gre math and vocab
 			editorPrefs.putBoolean(PackageKeys[product], true);
 			editorPrefs.putBoolean(PackageKeys[product + 1], true);
-		} else
+		} else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
 			editorPrefs.putBoolean(PackageKeys[product + 1], true);
 		editorPrefs.commit();
 		setCost();
