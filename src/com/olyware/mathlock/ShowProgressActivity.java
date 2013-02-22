@@ -31,8 +31,6 @@ import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
 	private Coins Money = new Coins(0, 0);
-	// private int money;
-	// private int Pmoney;
 	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
 	private TextView clock;
 	final private float clockSize = 45, dateSize = 15;
@@ -92,8 +90,6 @@ public class ShowProgressActivity extends Activity {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		Money = new Coins(sharedPrefsMoney.getInt("money", 0), sharedPrefsMoney.getInt("paid_money", 0));
-		// money = sharedPrefsMoney.getInt("money", 0);
-		// Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 
 		if (savedInstanceState != null) {
 			currentClockSize = savedInstanceState.getFloat("ClockSize");
@@ -116,11 +112,8 @@ public class ShowProgressActivity extends Activity {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
-		// money = sharedPrefsMoney.getInt("money", 0);
-		// Pmoney = sharedPrefsMoney.getInt("paid_money", 0);
 		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
 		Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]));
-		// money += EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]);
 	}
 
 	@Override
