@@ -26,15 +26,14 @@ import com.olyware.mathlock.R;
 public class JoystickView extends View {
 	private final int NumAnswers = 5;
 	private final int alpha = 75;
-	private Bitmap /*bmpSet, */bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock;
-	private Bitmap bmpAnswers[] = new Bitmap[NumAnswers];
-	private Bitmap bmpAnswersSelected[] = new Bitmap[NumAnswers];
+	private Bitmap bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock;
 	private RectF RectForAnswers[] = new RectF[NumAnswers + 1];
 	private RectF dstRectForSet;
 	private Rect dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI, RectForUnlock;
-	private Rect srcRectForAns, srcRectForBig, srcRectForSmall;// , srcRectForSet;
+	private Rect srcRectForUnlock, srcRectForBig, srcRectForSmall;
 
 	private Paint circlePaint[] = new Paint[NumAnswers];
+	private TextPaint circleTextPaint[] = new TextPaint[NumAnswers];
 	private Paint textPaint, sidePaint, settingsPaint, optionPaint;
 
 	private int textSizeSP, textSizePix, answerSizeSP, answerHintSizeSP;
@@ -53,17 +52,19 @@ public class JoystickView extends View {
 
 	private int correctAnswer, wrongAnswer;
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A", "?" };
+	private String answerTitles[];
 	private TextPaint answerTextPaint[] = new TextPaint[NumAnswers];
 	private TextPaint answerSelectedTextPaint[] = new TextPaint[NumAnswers];
 	private Paint answerPaint[] = new Paint[NumAnswers];
 	private Paint answerSelectedPaint[] = new Paint[NumAnswers];
 	private StaticLayout layout[] = new StaticLayout[NumAnswers];
+	private StaticLayout layoutAnswers[] = new StaticLayout[NumAnswers];
 	private Rect bounds[] = new Rect[NumAnswers];
 
 	// direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
 	private int state = 0;
 
-	private int spacing, rAns, rBig, rSmall, swipeLengthOption, swipeLength1;
+	private int spacing, rUnlock, rBig, rSmall, swipeLengthOption, swipeLength1;
 	private int TextHeight;
 
 	private JoystickSelectListener listener;
@@ -82,13 +83,10 @@ public class JoystickView extends View {
 
 	private Resources res;
 	private Runnable revealText, finishText, startAnimate, finishAnimate, revealCircle, finishCircle, pulseLock, spin;
-	private Runnable revealAnswer[] = new Runnable[NumAnswers];
 	private Runnable finishAnswer[] = new Runnable[NumAnswers];
 	private Handler answerHandler, textHandler, animateHandler;
 	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10, startFrames = 30, startFrameTime = 50,
 			circleFrames = 30, circleFrameTime = 20, pulseFrames = 20, pulseFrameTime = 50, spinFrameTime = 25;
-
-	private final Context ctx;
 
 	// =========================================
 	// Constructors
@@ -96,19 +94,16 @@ public class JoystickView extends View {
 
 	public JoystickView(Context context) {
 		super(context);
-		ctx = context;
 		initView();
 	}
 
 	public JoystickView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		ctx = context;
 		initView();
 	}
 
 	public JoystickView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		ctx = context;
 		initView();
 	}
 
@@ -122,21 +117,13 @@ public class JoystickView extends View {
 		Height = getMeasuredHeight();
 
 		res = getResources();
+		answerTitles = res.getStringArray(R.array.answer_titles);
 
 		textSizeSP = 20;
 		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
 		textHandler = new Handler();
 		answerHandler = new Handler();
 		animateHandler = new Handler();
-
-		for (int ans = 0; ans < X.length; ans++) {
-			selectAnswers[ans] = false;
-			selectOptions[ans] = false;
-			circlePaint[ans] = new Paint(Paint.ANTI_ALIAS_FLAG);
-			circlePaint[ans].setAlpha(0);
-		}
-		selectOptions[4] = false;
-		selectUnlock = false;
 
 		textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		textPaint.setTextAlign(Paint.Align.CENTER);
@@ -185,15 +172,6 @@ public class JoystickView extends View {
 			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
 
-		for (int i = 0; i < bmpAnswers.length; i++) {
-			int id = getResources().getIdentifier("answer" + i, "drawable", ctx.getPackageName());
-			bmpAnswers[i] = BitmapFactory.decodeResource(getResources(), id);
-		}
-		for (int i = 0; i < bmpAnswersSelected.length; i++) {
-			int id = getResources().getIdentifier("answer_selected" + i, "drawable", ctx.getPackageName());
-			bmpAnswersSelected[i] = BitmapFactory.decodeResource(getResources(), id);
-		}
-		// bmpSet = BitmapFactory.decodeResource(getResources(), R.drawable.settings_background);
 		bmpS = BitmapFactory.decodeResource(getResources(), R.drawable.select_s2);
 		bmpQ = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2);
 		bmpQs = BitmapFactory.decodeResource(getResources(), R.drawable.select_q2s);
@@ -205,21 +183,19 @@ public class JoystickView extends View {
 		touchX = 0;
 		touchY = 0;
 
-		rAns = Math.max(bmpAnswers[0].getWidth(), bmpAnswers[0].getHeight()) / 2;
+		rUnlock = Math.max(bmpUnlock.getWidth(), bmpUnlock.getHeight()) / 2;
 		rBig = Math.max(bmpQ.getWidth(), bmpQ.getHeight()) / 2;
+		rUnlock = rBig;
 		swipeLengthOption = rBig * 4;
-		swipeLength1 = rAns * 2;
+		swipeLength1 = rUnlock * 2;
 		rSmall = Math.max(bmpS.getWidth(), bmpS.getHeight()) / 2;
 
 		setDiffXY();
 
-		srcRectForAns = new Rect(0, 0, bmpAnswers[0].getWidth(), bmpAnswers[0].getHeight());
+		srcRectForUnlock = new Rect(0, 0, bmpUnlock.getWidth(), bmpUnlock.getHeight());
 		srcRectForBig = new Rect(0, 0, bmpQ.getWidth(), bmpQ.getHeight());
 		srcRectForSmall = new Rect(0, 0, bmpS.getWidth(), bmpS.getHeight());
 
-		for (int i = 0; i < RectForAnswers.length; i++) {
-			RectForAnswers[i] = new RectF();
-		}
 		dstRectForSet = new RectF();
 		dstRectForS = new Rect();
 		dstRectForQ = new Rect();
@@ -227,6 +203,25 @@ public class JoystickView extends View {
 		dstRectForE = new Rect();
 		dstRectForI = new Rect();
 		RectForUnlock = new Rect();
+
+		for (int i = 0; i < NumAnswers; i++) {
+			selectAnswers[i] = false;
+			selectOptions[i] = false;
+			RectForAnswers[i] = new RectF();
+			circlePaint[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
+			circlePaint[i].setStyle(Paint.Style.STROKE);
+			circlePaint[i].setStrokeWidth(rUnlock / 5);
+			circlePaint[i].setAlpha(0);
+			circleTextPaint[i] = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+			circleTextPaint[i].setTextAlign(Paint.Align.CENTER);
+			circleTextPaint[i].setColor(Color.WHITE);
+			circleTextPaint[i].setTextSize(rUnlock * 1.5f);
+			circleTextPaint[i].setAlpha(0);
+			layoutAnswers[i] = new StaticLayout(answerTitles[i], circleTextPaint[i], rUnlock * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
+					false);
+		}
+		RectForAnswers[5] = new RectF();
+		selectUnlock = false;
 
 		listener = new JoystickSelectListener() {
 			@Override
@@ -443,17 +438,17 @@ public class JoystickView extends View {
 
 		if ((type == 0) || (type == 1)) {
 			RectForAnswers[0].set(outlineWidth, outlineWidth, Width / 2 - outlineWidth, (TextHeight - textSizePix) / 2 - outlineWidth
-					- rAns);
+					- rUnlock);
 			RectForAnswers[1].set(Width / 2 + outlineWidth, outlineWidth, Width - outlineWidth, (TextHeight - textSizePix) / 2
-					- outlineWidth - rAns);
-			RectForAnswers[2].set(outlineWidth, (TextHeight - textSizePix) / 2 + outlineWidth + rAns, Width / 2 - outlineWidth,
+					- outlineWidth - rUnlock);
+			RectForAnswers[2].set(outlineWidth, (TextHeight - textSizePix) / 2 + outlineWidth + rUnlock, Width / 2 - outlineWidth,
 					(TextHeight - textSizePix) - outlineWidth);
-			RectForAnswers[3].set(Width / 2 + outlineWidth, (TextHeight - textSizePix) / 2 + outlineWidth + rAns, Width - outlineWidth,
+			RectForAnswers[3].set(Width / 2 + outlineWidth, (TextHeight - textSizePix) / 2 + outlineWidth + rUnlock, Width - outlineWidth,
 					(TextHeight - textSizePix) - outlineWidth);
-			RectForAnswers[4].set(outlineWidth, (TextHeight - textSizePix) / 2 + outlineWidth - rAns, Width / 2 - outlineWidth - rAns,
-					(TextHeight - textSizePix) / 2 - outlineWidth + rAns);
-			RectForAnswers[5].set(Width / 2 + outlineWidth + rAns, (TextHeight - textSizePix) / 2 + outlineWidth - rAns, Width
-					- outlineWidth, (TextHeight - textSizePix) / 2 - outlineWidth + rAns);
+			RectForAnswers[4].set(outlineWidth, (TextHeight - textSizePix) / 2 + outlineWidth - rUnlock,
+					Width / 2 - outlineWidth - rUnlock, (TextHeight - textSizePix) / 2 - outlineWidth + rUnlock);
+			RectForAnswers[5].set(Width / 2 + outlineWidth + rUnlock, (TextHeight - textSizePix) / 2 + outlineWidth - rUnlock, Width
+					- outlineWidth, (TextHeight - textSizePix) / 2 - outlineWidth + rUnlock);
 		}
 		switch (type) {
 		case 1:
@@ -474,33 +469,20 @@ public class JoystickView extends View {
 			}
 			if (type == 1)
 				canvas.rotate(degrees, Width / 2, (TextHeight - textSizePix) / 2);
-			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
+			canvas.drawBitmap(bmpUnlock, srcRectForUnlock, RectForUnlock, sidePaint);
 			break;
-		/*case 1:
-			canvas.rotate(-degrees, Width / 2, (TextHeight - textSizePix) / 2);
-			for (int i = 0; i <= NumAnswers; i++) {
-				if (selectAnswers[Math.min(i, NumAnswers - 1)])
-					canvas.drawRoundRect(RectForAnswers[i], 5, 5, answerSelectedPaint[Math.min(i, NumAnswers - 1)]);
-				else
-					canvas.drawRoundRect(RectForAnswers[i], 5, 5, answerPaint[Math.min(i, NumAnswers - 1)]);
-			}
-			for (int i = 0; i <= NumAnswers; i++) {
-				canvas.save();
-				canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2, (RectForAnswers[i].top + RectForAnswers[i].bottom)
-						/ 2 - layout[Math.min(i, NumAnswers - 1)].getHeight() / 2); // position the text
-				layout[Math.min(i, NumAnswers - 1)].draw(canvas);
-				canvas.restore();
-			}
-			canvas.rotate(degrees, Width / 2, (TextHeight - textSizePix) / 2);
-			canvas.drawBitmap(bmpUnlock, srcRectForAns, RectForUnlock, sidePaint);
-			break;*/
 		case 2:
 			for (int i = 0; i < X.length; i++) {
-				RectForAnswers[i].set((int) X[i] - rAns, (int) Y[i] - rAns, (int) X[i] + rAns, (int) Y[i] + rAns);
-				if (selectAnswers[i])
-					canvas.drawBitmap(bmpAnswersSelected[i], srcRectForAns, RectForAnswers[i], circlePaint[i]);
-				else
-					canvas.drawBitmap(bmpAnswers[i], srcRectForAns, RectForAnswers[i], circlePaint[i]);
+				RectForAnswers[i].set((int) X[i] - rUnlock + circlePaint[i].getStrokeWidth() / 2,
+						(int) Y[i] - rUnlock + circlePaint[i].getStrokeWidth() / 2, (int) X[i] + rUnlock - circlePaint[i].getStrokeWidth()
+								/ 2, (int) Y[i] + rUnlock - circlePaint[i].getStrokeWidth() / 2);
+
+				canvas.drawRoundRect(RectForAnswers[i], rUnlock, rUnlock, circlePaint[i]);
+				canvas.save();
+				canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2, (RectForAnswers[i].top + RectForAnswers[i].bottom)
+						/ 2 - layoutAnswers[i].getHeight() / 2); // position the text
+				layoutAnswers[i].draw(canvas);
+				canvas.restore();
 			}
 			if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]))
 				canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaint);
@@ -513,6 +495,7 @@ public class JoystickView extends View {
 				canvas.drawText(res.getString(R.string.swipe_exit), Width / 2, (Height - rBig * 2) / 2, textPaint);
 			break;
 		}
+
 		// Draw the option bar
 		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
 		canvas.drawCircle(optionX, optionY, optionR, optionPaint);
@@ -590,7 +573,15 @@ public class JoystickView extends View {
 						break;
 					}
 				}
-				setDimensions();
+				switch (type) {
+				case 0:
+				case 1:
+					setDimensions();
+					break;
+				case 2:
+					invalidate();
+					break;
+				}
 			}
 			if (actionType == MotionEvent.ACTION_MOVE) {
 				touchX = event.getX();
@@ -653,24 +644,24 @@ public class JoystickView extends View {
 			}
 			if ((maxDiff >= 2) && (attempts == 3)) {
 				int centerX;
-				int centerY = rAns * 2;
+				int centerY = rUnlock * 2;
 				if (startX <= Width / 2) {
-					centerX = Width - (int) (rAns * (Math.sqrt(3) + 1));
-					X[4] = centerX + (int) (rAns * Math.sqrt(3));
-					X[0] = centerX - (int) (rAns * Math.sqrt(3));
+					centerX = Width - (int) (rUnlock * (Math.sqrt(3) + 1));
+					X[4] = centerX + (int) (rUnlock * Math.sqrt(3));
+					X[0] = centerX - (int) (rUnlock * Math.sqrt(3));
 				} else {
-					centerX = (int) (rAns * (Math.sqrt(3) + 1));
-					X[4] = centerX - (int) (rAns * Math.sqrt(3));
-					X[0] = centerX + (int) (rAns * Math.sqrt(3));
+					centerX = (int) (rUnlock * (Math.sqrt(3) + 1));
+					X[4] = centerX - (int) (rUnlock * Math.sqrt(3));
+					X[0] = centerX + (int) (rUnlock * Math.sqrt(3));
 				}
 				Y[0] = centerY;
 				X[1] = centerX;
-				Y[1] = centerY - rAns;
+				Y[1] = centerY - rUnlock;
 				X[2] = X[4];
 				Y[2] = centerY;
 				X[3] = centerX;
-				Y[3] = centerY + rAns;
-				Y[4] = centerY + rAns * 2;
+				Y[3] = centerY + rUnlock;
+				Y[4] = centerY + rUnlock * 2;
 			}
 			state = startingState;
 			break;
@@ -692,20 +683,20 @@ public class JoystickView extends View {
 		// sets the direction to display the answers in
 		switch (state) {
 		case 0:		// up-right
-			diffX = (int) (rAns * Math.sqrt(3));
-			diffY = -rAns;
+			diffX = (int) (rUnlock * Math.sqrt(3));
+			diffY = -rUnlock;
 			break;
 		case 1:		// up-left
-			diffX = (int) (-rAns * Math.sqrt(3));
-			diffY = -rAns;
+			diffX = (int) (-rUnlock * Math.sqrt(3));
+			diffY = -rUnlock;
 			break;
 		case 2:		// down-left
-			diffX = (int) (-rAns * Math.sqrt(3));
-			diffY = rAns;
+			diffX = (int) (-rUnlock * Math.sqrt(3));
+			diffY = rUnlock;
 			break;
 		case 3:		// down-right
-			diffX = (int) (rAns * Math.sqrt(3));
-			diffY = rAns;
+			diffX = (int) (rUnlock * Math.sqrt(3));
+			diffY = rUnlock;
 			break;
 		}
 		diffX1 = diffX * 2;
@@ -717,41 +708,41 @@ public class JoystickView extends View {
 		boolean first = (loc == 0);
 		switch (state) {
 		case 0:		// up-right
-			if (Y[loc] - rAns < 0) {				// above top boundary
+			if (Y[loc] - rUnlock < 0) {				// above top boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;	// state-> 3=down-right
 			}
-			if (X[loc] + rAns > Width) {			// right of right boundary
+			if (X[loc] + rUnlock > Width) {			// right of right boundary
 				checks += 1;
 				state = (state + checks) % 4;		// state-> 1=up-left or 2=down-left
 			}
 			break;
 		case 1:		// up-left
-			if (Y[loc] - rAns < 0) {		// above top boundary
+			if (Y[loc] - rUnlock < 0) {		// above top boundary
 				checks += 1;
 				state = (state + 1) % 4;
 			}
-			if (X[loc] - rAns < 0) {		// left of left boundary
+			if (X[loc] - rUnlock < 0) {		// left of left boundary
 				checks += 1;
 				state = ((state - checks) % 4 + 4) % 4;
 			}
 			break;
 		case 2:		// down-left
-			if (Y[loc] + rAns > (Height - rBig * 2)) {		// below bottom boundary
+			if (Y[loc] + rUnlock > (Height - rBig * 2)) {		// below bottom boundary
 				checks += 1;
 				state = ((state - 1) % 4 + 4) % 4;
 			}
-			if (X[loc] - rAns < 0) {		// left of left boundary
+			if (X[loc] - rUnlock < 0) {		// left of left boundary
 				checks += 1;
 				state = (state + checks) % 4;
 			}
 			break;
 		case 3:		// down-right
-			if (Y[loc] + rAns > (Height - rBig * 2)) {		// below bottom boundary
+			if (Y[loc] + rUnlock > (Height - rBig * 2)) {		// below bottom boundary
 				checks += 1;
 				state = (state + 1) % 4;
 			}
-			if (X[loc] + rAns > Width) {		// right of right boundary
+			if (X[loc] + rUnlock > Width) {		// right of right boundary
 				checks += 1;
 				state = ((state - checks) % 4 + 4) % 4;
 			}
@@ -770,17 +761,15 @@ public class JoystickView extends View {
 
 	private void revealAnswers() {
 		for (int ans = 0; ans < X.length; ans++) {
-			answerHandler.removeCallbacks(revealAnswer[ans]);
 			answerHandler.removeCallbacks(finishAnswer[ans]);
 		}
 
-		for (int ans = 0; ans < X.length; ans++)
+		for (int ans = 0; ans < X.length; ans++) {
 			circlePaint[ans].setAlpha(0);
+			circleTextPaint[ans].setAlpha(0);
+		}
 
 		for (int ans = 0; ans < X.length; ans++) {
-			for (int i = 0; i < answerFrames; i++) {
-				answerHandler.postDelayed(revealAnswer[ans], i * answerFrameTime + ans * answerFrames * answerFrameTime);
-			}
 			answerHandler.postDelayed(finishAnswer[ans], answerFrames * answerFrameTime * (ans + 1));
 		}
 	}
@@ -788,9 +777,11 @@ public class JoystickView extends View {
 	private void returnToDefault() {
 		touchX = 0;
 		touchY = 0;
-		startX = -rAns;
-		startY = -rAns;
+		startX = -rUnlock;
+		startY = -rUnlock;
 		for (int ans = 0; ans < X.length; ans++) {
+			circlePaint[ans].setColor(Color.WHITE);
+			circleTextPaint[ans].setColor(Color.WHITE);
 			selectAnswers[ans] = false;
 			selectOptions[ans] = false;
 		}
@@ -801,34 +792,32 @@ public class JoystickView extends View {
 		else if (selectSideBar)
 			showStartAnimation(1, 0);
 		else
-			RectForUnlock.set(Width / 2 - rAns, (TextHeight - textSizePix) / 2 - rAns, Width / 2 + rAns, (TextHeight - textSizePix) / 2
-					+ rAns);
+			RectForUnlock.set(Width / 2 - rUnlock, (TextHeight - textSizePix) / 2 - rUnlock, Width / 2 + rUnlock,
+					(TextHeight - textSizePix) / 2 + rUnlock);
 		selectSideBar = false;
 
 		animateHandler.removeCallbacks(pulseLock);
+		degrees = 0;
+		radians = 0;
+		animateHandler.removeCallbacks(spin);
+		for (int ans = 0; ans < X.length; ans++) {
+			answerHandler.removeCallbacks(finishAnswer[ans]);
+			X[ans] = -rUnlock;
+			Y[ans] = -rUnlock;
+			circlePaint[ans].setAlpha(0);
+			circleTextPaint[ans].setAlpha(0);
+		}
 		switch (type) {
 		case 0:
-			degrees = 0;
-			radians = 0;
-			animateHandler.removeCallbacks(spin);
 		case 1:
 			animateHandler.postDelayed(pulseLock, pulseFrameTime);
+			setDimensions();
 			break;
 		case 2:
-			degrees = 0;
-			radians = 0;
-			animateHandler.removeCallbacks(spin);
-			for (int ans = 0; ans < X.length; ans++) {
-				answerHandler.removeCallbacks(revealAnswer[ans]);
-				answerHandler.removeCallbacks(finishAnswer[ans]);
-				X[ans] = -rAns;
-				Y[ans] = -rAns;
-				circlePaint[ans].setAlpha(0);
-			}
+			invalidate();
 			break;
 		}
-		setDimensions();
-		// invalidate();
+
 	}
 
 	private void checkSelection(boolean send, boolean firstTouch) {
@@ -871,8 +860,11 @@ public class JoystickView extends View {
 			switch (type) {
 			case 0:
 			case 1:
-				for (int i = 0; i < NumAnswers; i++)
+				for (int i = 0; i < NumAnswers; i++) {
+					circlePaint[i].setColor(Color.WHITE);
+					circleTextPaint[i].setColor(Color.WHITE);
 					selectAnswers[i] = false;
+				}
 
 				if (selectUnlock) {
 					diffx = touchX - startX;
@@ -887,7 +879,7 @@ public class JoystickView extends View {
 						newX = touchX;
 						newY = touchY;
 					}
-					RectForUnlock.set((int) touchX - rAns, (int) touchY - rAns, (int) touchX + rAns, (int) touchY + rAns);
+					RectForUnlock.set((int) touchX - rUnlock, (int) touchY - rUnlock, (int) touchX + rUnlock, (int) touchY + rUnlock);
 
 					if (Math.sqrt(diffx * diffx + diffy * diffy) > swipeLength1) {
 						int select = -1;
@@ -910,16 +902,19 @@ public class JoystickView extends View {
 						if (select >= 0)
 							if (send)
 								listener.OnSelect(select);
-							else
+							else {
+								circlePaint[select].setColor(Color.BLUE);
+								circleTextPaint[select].setColor(Color.BLUE);
 								selectAnswers[select] = true;
+							}
 					}
 				} else {
 					touchX = startX;
 					touchY = startY;
 					diffx = startX - (RectForUnlock.right + RectForUnlock.left) / 2;
 					diffy = startY - (RectForUnlock.top + RectForUnlock.bottom) / 2;
-					if (Math.sqrt(diffx * diffx + diffy * diffy) < rAns) {
-						RectForUnlock.set((int) touchX - rAns, (int) touchY - rAns, (int) touchX + rAns, (int) touchY + rAns);
+					if (Math.sqrt(diffx * diffx + diffy * diffy) < rUnlock) {
+						RectForUnlock.set((int) touchX - rUnlock, (int) touchY - rUnlock, (int) touchX + rUnlock, (int) touchY + rUnlock);
 						selectUnlock = true;
 						animateHandler.removeCallbacks(pulseLock);
 						if (listener != null)
@@ -931,14 +926,22 @@ public class JoystickView extends View {
 				for (int i = 0; i < X.length; i++) {
 					diffx = touchX - X[i];
 					diffy = touchY - Y[i];
-					if (Math.sqrt(diffx * diffx + diffy * diffy) < rAns)
+					if (Math.sqrt(diffx * diffx + diffy * diffy) < rUnlock)
 						if (send) {
+							circlePaint[i].setColor(Color.WHITE);
+							circleTextPaint[i].setColor(Color.WHITE);
 							selectAnswers[i] = false;
 							listener.OnSelect(i);
-						} else
+						} else {
+							circlePaint[i].setColor(Color.BLUE);
+							circleTextPaint[i].setColor(Color.BLUE);
 							selectAnswers[i] = true;
-					else
+						}
+					else {
+						circlePaint[i].setColor(Color.WHITE);
+						circleTextPaint[i].setColor(Color.WHITE);
 						selectAnswers[i] = false;
+					}
 				}
 				break;
 			}
@@ -971,12 +974,12 @@ public class JoystickView extends View {
 
 	@SuppressLint("NewApi")
 	private void initRunnables() {
-		final int answerInterval = 255 / answerFrames;
+		// final int answerInterval = 255 / answerFrames;
 		final int textInterval = 255 / textFrames;
 		// final int startInterval = -255 / startFrames;
 		final int radiusInterval = (swipeLengthOption - rSmall) / circleFrames;
 		final int slideInterval = (dstHeight - pad) / startFrames;
-		final int pulseMaxChange = rAns / 5;
+		final int pulseMaxChange = rUnlock / 5;
 
 		startAnimate = new Runnable() {
 			@Override
@@ -1002,17 +1005,11 @@ public class JoystickView extends View {
 
 		for (int i = 0; i < X.length; i++) {
 			final int a = i;
-			revealAnswer[a] = new Runnable() {
-				@Override
-				public void run() {
-					circlePaint[a].setAlpha(circlePaint[a].getAlpha() + answerInterval);
-					invalidate();
-				}
-			};
 			finishAnswer[a] = new Runnable() {
 				@Override
 				public void run() {
 					circlePaint[a].setAlpha(255);
+					circleTextPaint[a].setAlpha(255);
 					invalidate();
 				}
 			};
@@ -1053,7 +1050,7 @@ public class JoystickView extends View {
 				if (!selectUnlock) {
 					int size = (RectForUnlock.right - RectForUnlock.left) / 2;
 					int change = ((int) (pulseMaxChange * Math.sin(Math.PI * 2 * System.currentTimeMillis()
-							/ (pulseFrames * pulseFrameTime))) + rAns)
+							/ (pulseFrames * pulseFrameTime))) + rUnlock)
 							- size;
 					RectForUnlock.set(RectForUnlock.left - change, RectForUnlock.top - change, RectForUnlock.right + change,
 							RectForUnlock.bottom + change);
@@ -1100,7 +1097,7 @@ public class JoystickView extends View {
 			maxH[i] = Math.max(bounds[i].height(), layout[i].getHeight());
 			if (i < NumAnswers - 1) {
 				maxH[i] = Math.max(maxH[i], answerSizePix);
-				if ((maxH[i] > ((TextHeight - textSizePix) / 2 - outlineWidth * 3 - pad * 3 - rAns)) && (Height > 0)) {
+				if ((maxH[i] > ((TextHeight - textSizePix) / 2 - outlineWidth * 3 - pad * 3 - rUnlock)) && (Height > 0)) {
 					decreaseAnswerSize();
 					setDimensions();
 					return;
@@ -1111,7 +1108,7 @@ public class JoystickView extends View {
 				}
 			} else {
 				maxH[i] = Math.max(maxH[i], answerHintSizePix);
-				if ((maxH[i] > (rAns * 2 - outlineWidth * 2 - pad * 2)) && (Height > 0)) {
+				if ((maxH[i] > (rUnlock * 2 - outlineWidth * 2 - pad * 2)) && (Height > 0)) {
 					decreaseHintSize();
 					setDimensions();
 					return;
@@ -1169,7 +1166,7 @@ public class JoystickView extends View {
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2,
 						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 			else
-				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2 - rAns,
+				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2 - rUnlock,
 						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
 		invalidate();
@@ -1213,6 +1210,7 @@ public class JoystickView extends View {
 
 	private void removePulseAnimation() {
 		animateHandler.removeCallbacks(pulseLock);
-		RectForUnlock.set(Width / 2 - rAns, (TextHeight - textSizePix) / 2 - rAns, Width / 2 + rAns, (TextHeight - textSizePix) / 2 + rAns);
+		RectForUnlock.set(Width / 2 - rUnlock, (TextHeight - textSizePix) / 2 - rUnlock, Width / 2 + rUnlock, (TextHeight - textSizePix)
+				/ 2 + rUnlock);
 	}
 }

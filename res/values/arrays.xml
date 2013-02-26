@@ -283,4 +283,12 @@
         <item>1000</item>
     </integer-array>
     
+    <string-array name="answer_titles">
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+        <item>D</item>
+        <item>\?</item>
+    </string-array>
+    
 </resources>
