@@ -54,7 +54,7 @@ import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
 	final private int multiplier = 5, decreaseRate = 1000, startingPmoney = 1000;
-	private Coins Money = new Coins(0, 0);
+	final private Coins Money = new Coins(0, 0);
 	private int dMoney;// change in money after a question is answered
 	private int difficulty = 0;
 	private long startTime = 0;
