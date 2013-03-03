@@ -20,7 +20,7 @@ public class GraphView extends View {
 	private int Width, Height;
 	private int movingAverage;
 	private int textLabelSizeSP, textStatsSizeSP;
-	private float padVert, padHorz;
+	private float padVert, padHorz, padScrollPix;
 	private float textLabelSizePix, textStatsSizePix;
 	private float left, top, right, bottom;
 
@@ -82,7 +82,8 @@ public class GraphView extends View {
 		movingAverage = 20;
 		setStats(0, 0, 0, 0, 0, 0, 0, 0, "0 / 0");
 		padVert = textStatsSizePix / 2;
-		padHorz = 5;
+		padHorz = 7;
+		padScrollPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, padHorz, getResources().getDisplayMetrics());
 		textBounds = new Rect();
 		Xlabel = new Path();
 		percentPath = new Path();
@@ -209,8 +210,8 @@ public class GraphView extends View {
 		canvas.drawText("All Time Stats", Width / 2, Height - textStatsSizePix * StatsNum - padVert * padNum, TextLabelPaint);
 		for (int i = 0; i < StatsNum; i++) {
 			canvas.drawText(Stats[i], 0, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1), TextStatsPaintL);
-			canvas.drawText(StatsValues[i], Width, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1),
-					TextStatsPaintR);
+			canvas.drawText(StatsValues[i], Width - padScrollPix, Height - textStatsSizePix * (StatsNum - i - 1) - padVert
+					* (padNum - i - 1), TextStatsPaintR);
 		}
 		canvas.save();
 	}
