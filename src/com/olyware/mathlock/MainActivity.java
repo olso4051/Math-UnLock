@@ -29,6 +29,7 @@ import android.text.Html;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,7 +42,9 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Coins;
+import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.ShareHelper;
@@ -103,6 +106,8 @@ public class MainActivity extends Activity {
 	private DatabaseManager dbManager;
 	private static Context ctx;
 
+	private Typefaces typefaces;
+
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -136,6 +141,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		layout = (LinearLayout) findViewById(R.id.layout);
+
+		typefaces = Typefaces.getInstance(this);
+		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
