@@ -40,7 +40,7 @@ public class ShowProgressActivity extends Activity {
 	private GraphView graphView;
 	private String[] unlockPackageKeys, displayPackageKeys, EggKeys;
 	private int[] EggMaxValues;
-	private String[] times = { "All", "Last Year", "Last 6 Months", "Last Month", "Last Week", "Today" };
+	private String[] times;
 	private long[] oldestTimes = { System.currentTimeMillis(), 31536000000l, 15768000000l, 2628000000l, 604800000l, 86400000l };
 	private List<String> packages;
 	private String[] difficulties = new String[Difficulty.getSize() + 1];	// +1 for all difficulties
@@ -69,6 +69,7 @@ public class ShowProgressActivity extends Activity {
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		displayPackageKeys = getResources().getStringArray(R.array.display_packages);
+		times = getResources().getStringArray(R.array.times);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 

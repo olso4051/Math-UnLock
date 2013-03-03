@@ -40,7 +40,7 @@ public class DatabaseManager {
 		values.put(StatisticContract.PACKAGE, stat.getPack());
 		values.put(StatisticContract.CORRECT, stat.getCorrect());
 		values.put(QuestionContract.DIFFICULTY, stat.getDifficulty().getValue());
-		values.put(StatisticContract.TIME, String.valueOf(stat.getTime()));
+		values.put(StatisticContract.TIME, stat.getTime());
 		return db.insert(StatisticContract.TABLE_NAME, null, values);
 	}
 

@@ -53,6 +53,15 @@
         <item name="insane">5</item>
     </string-array>
     
+    <string-array name="times">
+        <item>All</item>
+        <item>Last Year</item>
+        <item>Last 6 Months</item>
+        <item>Last Month</item>
+        <item>Last Week</item>
+        <item>Today</item>
+    </string-array>
+    
     <string-array name="max_tries_entries">
         <item name="1">1</item>
         <item name="2">2</item>
