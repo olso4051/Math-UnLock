@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -20,7 +21,7 @@ public class AnswerView extends View {
 	private int Width, Height;
 	private int maxHeight = 0;
 	private int layout;
-	private final int textConstLabelSizeSP = 30, textConstAnswerSizeSP = 20;
+	private final int textConstLabelSizeSP = 30, textConstAnswerSizeSP = 25;
 	private int type = 0;
 	private int textLabelSizeSP, textAnswerSizeSP;
 	private int correctAnswer, wrongAnswer;
@@ -35,9 +36,7 @@ public class AnswerView extends View {
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A" };
 	final private String labels[] = { "A) ", "B) ", "C) ", "D) ", "E) " };
 
-	private Paint TextLabelPaintR, TextAnswerPaintL;
-	private TextPaint correctAnswerPaint, correctLabelPaint, wrongAnswerPaint, wrongLabelPaint;
-	private TextPaint test;
+	private TextPaint TextLabelPaintR, TextAnswerPaintL, correctAnswerPaint, correctLabelPaint, wrongAnswerPaint, wrongLabelPaint;
 
 	private Rect answerBounds[] = new Rect[maxAnswers], labelBounds[] = new Rect[maxAnswers];
 	private StaticLayout layouts[] = new StaticLayout[maxAnswers];
@@ -69,7 +68,7 @@ public class AnswerView extends View {
 	private void initAnswerView() {
 		textLabelSizeSP = textConstLabelSizeSP; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
-		TextLabelPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
+		TextLabelPaintR = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		TextLabelPaintR.setColor(Color.WHITE);
 		TextLabelPaintR.setTextAlign(Paint.Align.RIGHT);
 		TextLabelPaintR.setTextSize(textLabelSizePix);
@@ -84,7 +83,7 @@ public class AnswerView extends View {
 
 		textAnswerSizeSP = textConstAnswerSizeSP;
 		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
-		TextAnswerPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
+		TextAnswerPaintL = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		TextAnswerPaintL.setColor(Color.WHITE);
 		TextAnswerPaintL.setTextAlign(Paint.Align.LEFT);
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
@@ -96,11 +95,6 @@ public class AnswerView extends View {
 		wrongAnswerPaint.setColor(Color.RED);
 		wrongAnswerPaint.setTextAlign(Paint.Align.LEFT);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-
-		test = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-		test.setColor(Color.WHITE);
-		test.setTextAlign(Paint.Align.LEFT);
-		test.setTextSize(textAnswerSizePix);
 
 		padVert = 5;
 		padHorz = 0;
@@ -130,10 +124,19 @@ public class AnswerView extends View {
 		this.listener = listener;
 	}
 
+	public void setTypeface(Typeface font) {
+		TextLabelPaintR.setTypeface(font);
+		TextAnswerPaintL.setTypeface(font);
+		correctAnswerPaint.setTypeface(font);
+		correctLabelPaint.setTypeface(font);
+		wrongAnswerPaint.setTypeface(font);
+		wrongLabelPaint.setTypeface(font);
+	}
+
 	public void setColor(int color) {
 		TextLabelPaintR.setColor(color);
 		TextAnswerPaintL.setColor(color);
-		test.setColor(color);
+		TextAnswerPaintL.setColor(color);
 	}
 
 	public void setUnlockType(int type) {
@@ -399,7 +402,7 @@ public class AnswerView extends View {
 					layouts[i] = new StaticLayout(answers[i], wrongAnswerPaint, Width - (int) Math.abs(labelBoundsWidth[i]),
 							Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 				else
-					layouts[i] = new StaticLayout(answers[i], test, Width - (int) Math.abs(labelBoundsWidth[i]),
+					layouts[i] = new StaticLayout(answers[i], TextAnswerPaintL, Width - (int) Math.abs(labelBoundsWidth[i]),
 							Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 				Widths[i] = Math.abs(answerBoundsWidth[i]) + Math.abs(labelBoundsWidth[i]);
 				totalWidth += Widths[i];
@@ -423,7 +426,7 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 		correctAnswerPaint.setTextSize(textAnswerSizePix);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		test.setTextSize(textAnswerSizePix);
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 
 	}
 
@@ -439,6 +442,6 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 		correctAnswerPaint.setTextSize(textAnswerSizePix);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		test.setTextSize(textAnswerSizePix);
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 	}
 }

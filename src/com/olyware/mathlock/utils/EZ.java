@@ -14,6 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.olyware.mathlock.views.AnswerView;
+import com.olyware.mathlock.views.JoystickView;
+
 public class EZ {
 	private static final Loggy log = new Loggy(EZ.class);
 
@@ -58,6 +61,10 @@ public class EZ {
 			if (mChild instanceof TextView) {
 				// Set the font if it is a TextView.
 				((TextView) mChild).setTypeface(font);
+			} else if (mChild instanceof JoystickView) {
+				((JoystickView) mChild).setTypeface(font);
+			} else if (mChild instanceof AnswerView) {
+				((AnswerView) mChild).setTypeface(font);
 			} else if (mChild instanceof ViewGroup) {
 				// Recursively attempt another ViewGroup.
 				setFont((ViewGroup) mChild, font);
