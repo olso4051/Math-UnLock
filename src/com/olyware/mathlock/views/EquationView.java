@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 public class EquationView extends AutoResizeTextView {
 
 	private EquationLayout layout;
-	private Context ctx;
 
 	// =========================================
 	// Constructors
@@ -15,19 +14,16 @@ public class EquationView extends AutoResizeTextView {
 
 	public EquationView(Context context) {
 		super(context);
-		ctx = context;
 		initView();
 	}
 
 	public EquationView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		ctx = context;
 		initView();
 	}
 
 	public EquationView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		ctx = context;
 		initView();
 	}
 
