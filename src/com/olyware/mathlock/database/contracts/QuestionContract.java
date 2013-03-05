@@ -31,5 +31,5 @@ public abstract class QuestionContract implements BaseContract {
 	/**
 	 * Type : INTEGER default = 10
 	 */
-	public static final int DEFAULT_PRIORITY = 10;
+	public static final int DEFAULT_PRIORITY = 100;
 }

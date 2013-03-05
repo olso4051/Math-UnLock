@@ -16,7 +16,6 @@ public class AutoResizeTextView extends TextView {
 	private int Width, Height;
 	private int textSizeSP;
 	private float textSizePix, textSizePixDefault;
-	private String currentText;
 
 	private TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);;
 	private StaticLayout layout;
@@ -62,13 +61,23 @@ public class AutoResizeTextView extends TextView {
 	}
 
 	// =========================================
+	// Public Functions
+	// =========================================
+	public int getTextAreaWidth() {
+		return Width;
+	}
+
+	public int getTextAreaHeight() {
+		return Height;
+	}
+
+	// =========================================
 	// Override Functions
 	// =========================================
 
 	@Override
 	public void setText(CharSequence text, BufferType type) {
 		super.setText(text, type);
-		currentText = String.valueOf(text);
 		if (measured) {
 			resetTextSize();
 			setDimensions();
@@ -92,8 +101,7 @@ public class AutoResizeTextView extends TextView {
 		setLayouts();
 		float maxH = Math.max(bounds.height(), textSizePix);
 		maxH = Math.max(layout.getHeight(), maxH);
-
-		if ((maxH > Height) && (Height > 0)) {
+		if ((maxH > Height - textSizePix) && (Height > 0)) {
 			decreaseTextSize();
 			setDimensions();
 			return;
@@ -103,8 +111,8 @@ public class AutoResizeTextView extends TextView {
 	}
 
 	private void setLayouts() {
-		textPaint.getTextBounds(currentText, 0, currentText.length(), bounds);
-		layout = new StaticLayout(currentText, textPaint, Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+		textPaint.getTextBounds(String.valueOf(getText()), 0, getText().length(), bounds);
+		layout = new StaticLayout(getText(), textPaint, Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		invalidate();
 	}
 

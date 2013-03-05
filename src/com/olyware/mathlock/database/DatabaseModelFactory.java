@@ -165,30 +165,38 @@ public class DatabaseModelFactory {
 			int numOfWrongs) {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
-		Random rand = new Random();
-		int selection = rand.nextInt(weightSum) + 1;
-		int cumulativeWeight = 0;
 		List<LanguageQuestion> questions = EZ.list();
-		cursor.moveToFirst();
-		// get weighted random language question
-		while (!cursor.isLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
-			cumulativeWeight += cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-			;
-			if (cumulativeWeight >= selection) {
-				break;
-			}
-			cursor.moveToNext();
-		}
+		List<String> answers = EZ.list();
+
+		// get weighted random language question, skip null questions and answers
+		Random rand = new Random();
+		String correctAnswer = null, questionText = null;
 		CursorHelper cursorHelper = new CursorHelper(cursor);
+		do {
+			int selection = rand.nextInt(weightSum) + 1;
+			int cumulativeWeight = 0;
+			cursor.moveToFirst();
+			while (!cursor.isLast()) {
+				cursorHelper = new CursorHelper(cursor);
+				cumulativeWeight += cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
+				if (cumulativeWeight >= selection) {
+					break;
+				}
+				cursor.moveToNext();
+			}
+			cursorHelper = new CursorHelper(cursor);
+			correctAnswer = cursorHelper.getString(toLanguage);
+			questionText = cursorHelper.getString(fromLanguage);
+		} while ((correctAnswer == null) || (questionText == null));
+
 		int id = cursorHelper.getInteger(QuestionContract._ID);
-		String correctAnswer = cursorHelper.getString(toLanguage);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
-		String questionText = cursorHelper.getString(fromLanguage);
 		int priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
 		LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
+		answers.add(correctAnswer);
 		questions.add(question);
-		// get three more random question for the wrong answers
+
+		// get three more random question for the wrong answers, don't duplicate answers
 		for (int i = 0; i < numOfWrongs; i++) {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
@@ -199,7 +207,8 @@ public class DatabaseModelFactory {
 				questionText = cursorHelper.getString(fromLanguage);
 				priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
 				question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
-				if (!questions.contains(question)) {
+				if (!questions.contains(question) && !answers.contains(correctAnswer) && correctAnswer != null) {
+					answers.add(correctAnswer);
 					questions.add(question);	// add question then done for this iteration
 					break;
 				}

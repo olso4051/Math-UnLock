@@ -108,7 +108,7 @@ public class DatabaseManager {
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage) {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
-		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
+		String where = "difficulty = " + String.valueOf(difficulty.getValue());
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
@@ -165,7 +165,7 @@ public class DatabaseManager {
 
 	public void decreasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
 		if (!(tableName == null)) {
-			String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
+			// String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
 			String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 			String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 			int priority[] = getPriority(tableName, fromLanguagePriority, toLanguagePriority, ID);
@@ -176,7 +176,7 @@ public class DatabaseManager {
 			String where = " WHERE " + BaseContract._ID + "=" + ID;
 			String sql = "UPDATE " + tableName + " SET ";
 			String priorityUpdate;
-			if (tableName.equals(tableNames[2]))
+			if (tableName.equals(MainActivity.getContext().getResources().getString(R.string.language_table)))
 				priorityUpdate = fromLanguagePriority + "=" + priority[0] + "," + toLanguagePriority + "=" + priority[1];
 			else
 				priorityUpdate = QuestionContract.PRIORITY + "=" + priority[0];
@@ -186,9 +186,9 @@ public class DatabaseManager {
 	}
 
 	private int[] getPriority(String tableName, String priority1, String priority2, int ID) {
-		String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
+		// String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
 		int priority[] = { 0, 0 };
-		if (tableName.equals(tableNames[2])) {
+		if (tableName.equals(MainActivity.getContext().getResources().getString(R.string.language_table))) {
 			Cursor cursor = db.rawQuery("SELECT " + priority1 + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
 			cursor.moveToFirst();
 			priority[0] = cursor.getInt(0);
