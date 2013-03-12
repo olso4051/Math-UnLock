@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -21,7 +20,7 @@ public class EquationLayout {
 	private float textSizePix, textSizePixDefault;
 	private String equationTextFull;// , equationText;
 	private Typeface font;
-	private List<Integer> testList = new ArrayList<Integer>();
+	private int color;
 	private List<BracketGroup> bracketGroups = new ArrayList<BracketGroup>();
 	private List<Attributes> attributes = new ArrayList<Attributes>();
 	private List<Bracket> opened = new ArrayList<Bracket>();
@@ -105,7 +104,7 @@ public class EquationLayout {
 			this.text = text;
 			paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 			paint.setTypeface(font);
-			paint.setColor(Color.WHITE);
+			paint.setColor(color);
 			paint.setTextSize(SizePix);
 			bounds = new Rect();
 			paint.getTextBounds(String.valueOf(text), 0, 1, bounds);
@@ -162,13 +161,13 @@ public class EquationLayout {
 		}
 	}
 
-	public class BracketGroup {
+	private class BracketGroup {
 		private int Width, Height, Start, End, X, Parent;
 
 		public BracketGroup() {
 			this.Width = 0;
 			this.Height = 0;
-			this.Start = 0;
+			this.Start = -1;
 			this.End = 0;
 			this.X = 0;
 			this.Parent = 0;
@@ -232,11 +231,12 @@ public class EquationLayout {
 		}
 	}
 
-	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font) {
+	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color) {
 		this.equationTextFull = equation;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
 		this.font = font;
+		this.color = color;
 		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
 				.getResources().getDisplayMetrics());
 		textSizeSP = textSizeSPDefault;
@@ -245,17 +245,21 @@ public class EquationLayout {
 		setSize();
 	}
 
+	public void setBounds(int maxWidth, int maxHeight) {
+		this.maxWidth = maxWidth;
+		this.maxHeight = maxHeight;
+		setSize();
+	}
+
 	/** Draws the current layout to the supplied canvas **/
 	public void draw(Canvas c) {
 
 		for (int i = 0; i < equationTextFull.length(); i++) {
-			Log.d("test", "shown = " + attributes.get(i).getShown());
 			if (attributes.get(i).getShown()) {
 				c.drawText(equationTextFull.substring(i, i + 1), textAttributes.get(i).getX(), textAttributes.get(i).getY(), textAttributes
 						.get(i).getTextPaint());
 			}
 		}
-		// c.drawCircle(c.getWidth()/2, c.getHeight()/2, c.getHeight()/4, textAttributes.get(0).getTextPaint());
 		c.save();
 	}
 
@@ -272,19 +276,23 @@ public class EquationLayout {
 			int locC = closed.get(a).getLocation();
 			int locO = opened.get(closed.get(a).getBracketSet()).getLocation();
 			bracketGroups.get(closed.get(a).getBracketSet()).setEnd(locC);
+			Log.d("test", "bracketGroup = " + closed.get(a).getBracketSet());
+			Log.d("test", "start = " + locO);
 			bracketGroups.get(closed.get(a).getBracketSet()).setStart(locO);
-			char charAfter = equationTextFull.charAt(locC + 1);
-			char charBefore = equationTextFull.charAt(locO - 1);
 			Att att = Att.Normal;
-			if (charBefore == '_')
-				att = Att.Subscript;
-			else if (charBefore == '^')
-				att = Att.Superscript;
-			else if (charBefore == '/')
-				att = Att.Denominator;
-			else if (charAfter == '/')
-				att = Att.Numerator;
-
+			char charAfter, charBefore;
+			if ((locO > 0) && (locC < equationTextFull.length() - 1)) {
+				charAfter = equationTextFull.charAt(locC + 1);
+				charBefore = equationTextFull.charAt(locO - 1);
+				if (charBefore == '_')
+					att = Att.Subscript;
+				else if (charBefore == '^')
+					att = Att.Superscript;
+				else if (charBefore == '/')
+					att = Att.Denominator;
+				else if (charAfter == '/')
+					att = Att.Numerator;
+			}
 			boolean ignore = false;
 			int needs = 0;
 			int start = locO + 1, end = locC - 1;
@@ -345,12 +353,12 @@ public class EquationLayout {
 			}
 		}
 
-		for (int i = 0; i < equationTextFull.length(); i++) {
-			if (bracketGroups.get(attributes.get(i).getBracketGroup()).getStart() <= 0)
+		/*for (int i = 0; i < equationTextFull.length(); i++) {
+			if (bracketGroups.get(attributes.get(i).getBracketGroup()).getStart() < 0)
 				bracketGroups.get(attributes.get(i).getBracketGroup()).setStart(i);
 			else
 				bracketGroups.get(attributes.get(i).getBracketGroup()).setEnd(i);
-		}
+		}*/
 
 		int currentGroup = 0;
 		for (int i = 0; i < bracketGroups.size(); i++) {
@@ -369,7 +377,7 @@ public class EquationLayout {
 		int set = 0;
 		List<Integer> bSet = new ArrayList<Integer>();
 		bSet.add(set);
-		opened.add(new Bracket(1, 0));
+		opened.add(new Bracket(0, 0));
 		int currentSet = 0;
 		for (int i = 0; i < s.length(); i++) {
 			currentChar = s.charAt(i);
@@ -432,10 +440,9 @@ public class EquationLayout {
 				attributes.get(i).setBracketGroup(currentSet);
 			}
 		}
-		closed.add(new Bracket(s.length() - 2, 0));
+		closed.add(new Bracket(s.length() - 1, 0));
 		for (int i = 0; i < set + 1; i++) {
 			bracketGroups.add(new BracketGroup());
-			testList.add(0);
 		}
 	}
 

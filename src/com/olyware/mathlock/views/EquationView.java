@@ -2,6 +2,7 @@ package com.olyware.mathlock.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -53,7 +54,7 @@ public class EquationView extends AutoResizeTextView {
 
 		if (equation) {
 			super.setText("", type);
-			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface());
+			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), Color.WHITE);
 		} else {
 			layout = null;
 			super.setText(text, type);
@@ -62,11 +63,21 @@ public class EquationView extends AutoResizeTextView {
 	}
 
 	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
+		if (layout != null) {
+			layout.setBounds(getTextAreaWidth(), getTextAreaHeight());
+			invalidate();
+		}
+	}
+
+	@Override
 	protected void onDraw(Canvas canvas) {
 		if (layout == null)
 			super.onDraw(canvas);
 		else {
 			layout.draw(canvas);
+			canvas.save();
 		}
 	}
 }
