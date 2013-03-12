@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,7 +51,7 @@ import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.AnswerReadyListener;
 import com.olyware.mathlock.views.AnswerView;
-import com.olyware.mathlock.views.AutoResizeTextView;
+import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
@@ -69,7 +70,7 @@ public class MainActivity extends Activity {
 	private float currentClockSize;
 	private TextView coins, worth;
 	private int questionWorth, questionWorthMax;
-	private AutoResizeTextView problem;
+	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
 	private AnswerView answerView;
 	private boolean quizMode = false;
@@ -167,7 +168,7 @@ public class MainActivity extends Activity {
 
 		coins = (TextView) findViewById(R.id.money);
 		worth = (TextView) findViewById(R.id.worth);
-		problem = (AutoResizeTextView) findViewById(R.id.problem);
+		problem = (EquationView) findViewById(R.id.problem);
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
 		answerView = (AnswerView) findViewById(R.id.answers2);
@@ -504,7 +505,7 @@ public class MainActivity extends Activity {
 						setEngineerProblem(difficulty);
 						break;
 					case 5:			// HighQ Trivia question
-						currentPack = getString(R.string.engineer);
+						currentPack = getString(R.string.highq_trivia);
 						setHighQTriviaProblem(difficulty);
 						break;
 					default:
@@ -625,11 +626,11 @@ public class MainActivity extends Activity {
 		switch (operator) {
 		case 0:			// add
 			answers[0] = String.valueOf(first + second);
-			problem.setText(String.valueOf(first) + " + " + String.valueOf(second) + " = ?");
+			problem.setText("$" + String.valueOf(first) + " + " + String.valueOf(second) + " = ?$");
 			break;
 		case 1:			// subtract
 			answers[0] = String.valueOf(first - second);
-			problem.setText(String.valueOf(first) + " - " + String.valueOf(second) + " = ?");
+			problem.setText("$" + String.valueOf(first) + " - " + String.valueOf(second) + " = ?$");
 			break;
 		case 2:			// multiply
 			answers[0] = String.valueOf(first * second);
@@ -640,6 +641,7 @@ public class MainActivity extends Activity {
 			problem.setText(String.valueOf(first) + " / " + String.valueOf(second) + " = ?");
 			break;
 		}
+		Log.d("test", "problem = " + problem.getText());
 
 		// generate 3 random numbers to add to correct answer, not equal to zero or themselves
 		List<Integer> generated = new ArrayList<Integer>();

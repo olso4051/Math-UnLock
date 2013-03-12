@@ -40,7 +40,7 @@
                 android:textSize="40sp" />
         </LinearLayout>
 
-        <com.olyware.mathlock.views.AutoResizeTextView
+        <com.olyware.mathlock.views.EquationView
             android:id="@+id/problem"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
