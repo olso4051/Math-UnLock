@@ -2,7 +2,9 @@ package com.olyware.mathlock.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 
 public class EquationView extends AutoResizeTextView {
 
@@ -41,12 +43,31 @@ public class EquationView extends AutoResizeTextView {
 
 	@Override
 	public void setText(CharSequence text, BufferType type) {
-		if (text.charAt(0) != '$') {		// string starts with $ then it is a equation
+		boolean equation = false;
+		Log.d("test", "text = " + text);
+		if (text.charAt(0) == '$')
+			if (text.length() > 1)
+				if (text.charAt(1) != '$')
+					equation = true;
+				else
+					text = text.subSequence(1, text.length());
+
+		if (equation) {
+			super.setText("", type);
+			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), Color.WHITE);
+		} else {
 			layout = null;
 			super.setText(text, type);
-		} else {
-			super.setText("", type);
-			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight());
+		}
+		invalidate();
+	}
+
+	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
+		if (layout != null) {
+			layout.setBounds(getTextAreaWidth(), getTextAreaHeight());
+			invalidate();
 		}
 	}
 
@@ -56,6 +77,7 @@ public class EquationView extends AutoResizeTextView {
 			super.onDraw(canvas);
 		else {
 			layout.draw(canvas);
+			canvas.save();
 		}
 	}
 }
