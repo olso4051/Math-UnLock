@@ -10,7 +10,7 @@ public class ShareHelper {
 
 	public static void share(Context context, String subject, String fileName, String message, String link) {
 		Intent i = new Intent(Intent.ACTION_SEND);
-		i.setType("text/plain");
+		i.setType("*/*");
 		if (subject != null) {
 			i.putExtra(Intent.EXTRA_SUBJECT, subject);
 		}
