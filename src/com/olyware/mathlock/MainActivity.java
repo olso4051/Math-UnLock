@@ -626,11 +626,11 @@ public class MainActivity extends Activity {
 		switch (operator) {
 		case 0:			// add
 			answers[0] = String.valueOf(first + second);
-			problem.setText("$\\(a\\)/(b//c)" + String.valueOf(first) + " + " + String.valueOf(second) + " = ?$");
+			problem.setText("$∫(xdx,1//(r^2),2)" + String.valueOf(first) + " + " + String.valueOf(second) + " = ?$");
 			break;
 		case 1:			// subtract
 			answers[0] = String.valueOf(first - second);
-			problem.setText("$\\(a\\)/(b//c)" + String.valueOf(first) + " - " + String.valueOf(second) + " = ?$");
+			problem.setText("$∫(xdx,1//(r^2),2)" + String.valueOf(first) + " - " + String.valueOf(second) + " = ?$");
 			break;
 		case 2:			// multiply
 			answers[0] = String.valueOf(first * second);
