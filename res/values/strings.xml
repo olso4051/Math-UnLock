@@ -37,6 +37,7 @@
     <string name="extra_coins1">1000 Coins</string>
     <string name="extra_coins2">5000 Coins</string>
     <string name="extra_coins3">10000 Coins</string>
+    <string name="get_pack_first">Unlock a Question Pack first so you can use your extras</string>
     <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
     <string name="handed_default">Right</string>
@@ -71,6 +72,11 @@
     <string name="not_enough_coins_title">Not Enough Coins</string>
     <string name="not_enough_coins_message">Needed to skip this question</string>
     <string name="ok">OK</string>
+    <string name="option0">Info</string>
+    <string name="option1">Store</string>
+    <string name="option2">Progress</string>
+    <string name="option3">Quiz Mode</string>
+    <string name="option4">Settings</string>
     <string name="packs">Question Packs</string>
     <string name="phone">Phone</string>
     <string name="problem">1 + 1 = ?</string>
@@ -101,6 +107,7 @@
     <string name="store">Store</string>
     <string name="sure">Sure?</string>
     <string name="swipe_exit">Touch Here to Exit</string>
+    <string name="swipe_here">Swipe to Here</string>
     <string name="swipe_new">Tap for new Question</string>
     <string name="swipe_option">Swipe Option to Select</string>
     <string name="swipe_screen">Swipe Here to Answer</string>
@@ -122,6 +129,6 @@
     <string name="unlock_vocab">Vocab Pack</string>
     <string name="worth">Question Worth </string>
     <string name="yes">Yes</string>
-    <string name="get_pack_first">Unlock a Question Pack first so you can use your extras</string>
+    
     
 </resources>

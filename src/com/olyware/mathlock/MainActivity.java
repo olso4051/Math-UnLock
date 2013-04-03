@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -626,11 +625,11 @@ public class MainActivity extends Activity {
 		switch (operator) {
 		case 0:			// add
 			answers[0] = String.valueOf(first + second);
-			problem.setText("$Limit(x,x->1/2)" + String.valueOf(first) + " + " + String.valueOf(second) + " = ?$");// √∫
+			problem.setText(String.valueOf(first) + " + " + String.valueOf(second) + " = ?");
 			break;
 		case 1:			// subtract
 			answers[0] = String.valueOf(first - second);
-			problem.setText("$Limit(x,x->1/2)" + String.valueOf(first) + " - " + String.valueOf(second) + " = ?$");
+			problem.setText(String.valueOf(first) + " - " + String.valueOf(second) + " = ?");
 			break;
 		case 2:			// multiply
 			answers[0] = String.valueOf(first * second);
@@ -641,7 +640,6 @@ public class MainActivity extends Activity {
 			problem.setText(String.valueOf(first) + " / " + String.valueOf(second) + " = ?");
 			break;
 		}
-		Log.d("test", "problem = " + problem.getText());
 
 		// generate 3 random numbers to add to correct answer, not equal to zero or themselves
 		List<Integer> generated = new ArrayList<Integer>();
@@ -807,7 +805,7 @@ public class MainActivity extends Activity {
 		return changed;
 	}
 
-	private void displayCorrectOrNot(int correctLoc, int guessLoc, String discription, boolean correct, boolean unknown) {
+	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
 		if (unknown) {
 			answerView.setCorrectAnswer(correctLoc);
 			joystick.setCorrectAnswer(correctLoc);
@@ -832,7 +830,7 @@ public class MainActivity extends Activity {
 				dbManager.increasePriority(currentTableName, fromLanguage, fromLanguage, ID);
 			}
 			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
-			problem.setText(discription + problem.getText());
+			// problem.setText(description + problem.getText());
 		}
 	}
 

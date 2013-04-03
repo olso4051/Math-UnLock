@@ -4,11 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 
 public class EquationView extends AutoResizeTextView {
 
 	private EquationLayout layout;
+	private int color = Color.WHITE;
 
 	// =========================================
 	// Constructors
@@ -44,7 +44,6 @@ public class EquationView extends AutoResizeTextView {
 	@Override
 	public void setText(CharSequence text, BufferType type) {
 		boolean equation = false;
-		Log.d("test", "text = " + text);
 		if (text.charAt(0) == '$')
 			if (text.length() > 1)
 				if (text.charAt(1) != '$')
@@ -54,7 +53,7 @@ public class EquationView extends AutoResizeTextView {
 
 		if (equation) {
 			super.setText("", type);
-			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), Color.WHITE);
+			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color);
 		} else {
 			layout = null;
 			super.setText(text, type);
@@ -80,4 +79,13 @@ public class EquationView extends AutoResizeTextView {
 			canvas.save();
 		}
 	}
+
+	@Override
+	public void setTextColor(int color) {
+		this.color = color;
+		super.setTextColor(color);
+		if (layout != null)
+			layout.setColor(color);
+	}
+
 }
