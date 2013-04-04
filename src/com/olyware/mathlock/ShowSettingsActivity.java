@@ -17,7 +17,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, DifficultyKeys, EggKeys;
 	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
-	private ListPreference fromLanguage, toLanguage;
+	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -37,7 +37,13 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		// set valid language values
 		fromLanguage = (ListPreference) findPreference("from_language");
 		toLanguage = (ListPreference) findPreference("to_language");
-		setLanguageSummaries(sharedPrefs);
+		setLanguageSummaries();
+
+		// set difficulty
+		minDiff = (ListPreference) findPreference("difficulty_min");
+		maxDiff = (ListPreference) findPreference("difficulty_max");
+		minDiff.setSummary(minDiff.getEntry());
+		maxDiff.setSummary(maxDiff.getEntry());
 
 		// Set summary to be the user-description for the selected value
 		for (int i = 0; i < DifficultyKeys.length; i++) {
@@ -45,12 +51,15 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			Pref_diff.setSummary(difficultyIntToString(DifficultyKeys[i], sharedPrefs.getString(DifficultyKeys[i], "1")));
 		}
 		Preference Pref_max_tries = findPreference("max_tries");
-		Preference Pref_handed = findPreference("handed");
 		Preference Pref_type = findPreference("type");
+		// Preference Pref_diff_min = findPreference("difficulty_min");
+		// Preference Pref_diff_max = findPreference("difficulty_max");
+
 		String summary = ((sharedPrefs.getString("max_tries", "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString("max_tries", "1")));
 		Pref_max_tries.setSummary(summary);
-		Pref_handed.setSummary(sharedPrefs.getString("handed", "Right"));
 		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "2")));
+		// Pref_diff_min.setSummary(difficultyIntToString("difficulty_min", sharedPrefs.getString("difficulty_min", "0")));
+		// Pref_diff_max.setSummary(difficultyIntToString("difficulty_max", sharedPrefs.getString("difficulty_max", "0")));
 
 		// enable settings for unlocked packages
 		if (sharedPrefsMoney.getBoolean("unlock_all", false))
@@ -81,12 +90,16 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		}
 		if (difficultyChanged) {
 			// Set summary to be the user-description for the selected value
-			connectionPref.setSummary(difficultyIntToString(key, sharedPrefs.getString(key, "")));
+			connectionPref.setSummary(difficultyIntToString(key, sharedPrefs.getString(key, "0")));
+		} else if (key.equals("difficulty_max") || key.equals("difficulty_min")) {
+			int max = Math.max(Integer.parseInt(sharedPrefs.getString(key, "0")),
+					Integer.parseInt(sharedPrefs.getString("difficulty_max", "0")));
+			int min = Math.min(Integer.parseInt(sharedPrefs.getString(key, "0")),
+					Integer.parseInt(sharedPrefs.getString("difficulty_min", "0")));
+			setDifficultySummaries(min, max);
 		} else if (key.equals("max_tries")) {
 			String summary = ((sharedPrefs.getString(key, "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString(key, "1")));
 			connectionPref.setSummary(summary);
-		} else if (key.equals("handed")) {
-			connectionPref.setSummary(sharedPrefs.getString(key, "Right"));
 		} else if (key.equals("type")) {
 			EggHelper.unlockEgg(this, EggKeys[7], EggMaxValues[7]);
 			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "0")));
@@ -94,12 +107,12 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			// if you changed from_language to the same as to_language then swap to_language to old from_language
 			if (fromLanguage.findIndexOfValue(fromLanguage.getValue()) == toOldValueIndex)
 				toLanguage.setValueIndex(fromOldValueIndex);
-			setLanguageSummaries(sharedPrefs);
+			setLanguageSummaries();
 		} else if (key.equals("to_language")) {
 			// opposite of from_language change
 			if (toLanguage.findIndexOfValue(toLanguage.getValue()) == fromOldValueIndex)
 				fromLanguage.setValueIndex(toOldValueIndex);
-			setLanguageSummaries(sharedPrefs);
+			setLanguageSummaries();
 		}
 	}
 
@@ -174,10 +187,17 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		return s[diffNum];
 	}
 
-	private void setLanguageSummaries(SharedPreferences sharedPrefs) {
+	private void setLanguageSummaries() {
 		fromOldValueIndex = fromLanguage.findIndexOfValue(fromLanguage.getValue());
 		fromLanguage.setSummary(fromLanguage.getEntry());
 		toOldValueIndex = toLanguage.findIndexOfValue(toLanguage.getValue());
 		toLanguage.setSummary(toLanguage.getEntry());
+	}
+
+	private void setDifficultySummaries(int min, int max) {
+		minDiff.setValueIndex(min);
+		maxDiff.setValueIndex(max);
+		minDiff.setSummary(minDiff.getEntry());
+		maxDiff.setSummary(maxDiff.getEntry());
 	}
 }

@@ -73,7 +73,7 @@ public class JoystickView extends View {
 	private JoystickTouchListener listenerTouch;
 
 	private boolean quizMode;
-	private boolean LtrueRfalse;
+	// private boolean LtrueRfalse;
 	private boolean selectAnswers[] = new boolean[NumAnswers];
 	private boolean selectOptions[] = new boolean[5];
 	private boolean selectUnlock;
@@ -257,14 +257,14 @@ public class JoystickView extends View {
 		return this.quizMode;
 	}
 
-	public void setLeftRightHanded(boolean LtrueRfalse) {
+	/*public void setLeftRightHanded(boolean LtrueRfalse) {
 		if (LtrueRfalse)
 			state = 1;
 		else
 			state = 0;
 		this.LtrueRfalse = LtrueRfalse;
 		setDiffXY();
-	}
+	}*/
 
 	public void setUnlockType(int type) {
 		this.type = type;
@@ -514,7 +514,7 @@ public class JoystickView extends View {
 			for (int i = 0; i < selectOptions.length; i++) {
 				if (selectOptions[i]) {
 					int id = res.getIdentifier("option" + i, "string", ctx.getPackageName());
-					canvas.drawTextOnPath(res.getString(id), optionPath, 0, textPaintWhite.getTextSize(), textPaintWhite);
+					canvas.drawTextOnPath(res.getString(id), optionPath, 0, -textPaintWhite.getTextSize(), textPaintWhite);
 				}
 			}
 		}
@@ -641,10 +641,10 @@ public class JoystickView extends View {
 			int startingState = state;
 			while ((maxDiff >= 2) && (attempts < 3)) {
 				maxDiff = 0;
-				if (LtrueRfalse)
+				/*if (LtrueRfalse)
 					state = ((startingState - attempts) % 4 + 4) % 4;
-				else
-					state = (startingState + attempts) % 4;
+				else*/
+				state = (startingState + attempts) % 4;
 				attempts += 1;
 				setDiffXY();
 

@@ -74,11 +74,6 @@
         <item name="3">3</item>
         <item name="4">4</item>
     </string-array>
-
-    <string-array name="handed_entries">
-        <item name="left">Left</item>
-        <item name="right">Right</item>
-    </string-array>
     
     <string-array name="type_entries">
         <item name="sSlide">Static Slide</item>

@@ -14,13 +14,21 @@
 	        android:entryValues="@array/max_tries_values"
 	        android:defaultValue="@string/max_tries_default" />
         <ListPreference
-      		android:key="handed"
-      		android:title="@string/handed_title"
-      		android:summary="@string/handed_default"
-      		android:dialogTitle="@string/handed_title"
-	        android:entries="@array/handed_entries"
-	        android:entryValues="@array/handed_entries"
-	        android:defaultValue="@string/handed_default" />
+	        android:key="difficulty_min"
+	        android:title="@string/difficulty_min"
+	        android:summary="@string/difficulty_summary"
+	        android:dialogTitle="@string/difficulty"
+	        android:entries="@array/difficulty_entries"
+	        android:entryValues="@array/difficulty_values"
+	        android:defaultValue="@string/difficulty_default" />
+        <ListPreference
+	        android:key="difficulty_max"
+	        android:title="@string/difficulty_max"
+	        android:summary="@string/difficulty_summary"
+	        android:dialogTitle="@string/difficulty"
+	        android:entries="@array/difficulty_entries"
+	        android:entryValues="@array/difficulty_values"
+	        android:defaultValue="@string/difficulty_default" />
         <ListPreference
       		android:key="type"
       		android:title="@string/type_title"
@@ -29,16 +37,6 @@
 	        android:entries="@array/type_entries"
 	        android:entryValues="@array/type_values"
 	        android:defaultValue="@string/type_default" />
-        <CheckBoxPreference
-	        android:key="enable_wallpaper"
-	        android:title="@string/enable_wallpaper"
-	        android:summary="@string/enable_wallpaper_summary"
-	        android:defaultValue="true"/>
-        <CheckBoxPreference
-	        android:key="notification_bar"
-	        android:title="@string/enable_notification_bar"
-	        android:summary="@string/enable_notification_bar_summary"
-	        android:defaultValue="true"/>
         <CheckBoxPreference
 	        android:key="vibration"
 	        android:title="@string/enable_vibration"

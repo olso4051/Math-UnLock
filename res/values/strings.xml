@@ -11,14 +11,14 @@
     <string name="difficulty_default">0</string>
     <string name="difficulty_default_act_sat">2</string>
     <string name="difficulty_default_gre">4</string>
+    <string name="difficulty_max">Max Difficulty</string>
+    <string name="difficulty_min">Min Difficulty</string>
     <string name="difficulty_summary">Very Easy</string>
     <string name="difficulty_summary_language">Numbers</string>
     <string name="egg_message">Egg worth = </string>
     <string name="egg_title">Easter Egg Found!</string>
     <string name="enable">Enable</string>
-    <string name="enable_notification_bar">Show Notification Bar</string>
     <string name="enable_vibration">Vibration On/Off</string>
-    <string name="enable_wallpaper">Background On/Off</string>
     <string name="enable_act_sat_math_summary">ACT &amp; SAT Math Questions</string>
     <string name="enable_act_sat_vocab_summary">ACT &amp; SAT Vocab Questions</string>
     <string name="enable_engineer_summary">Engineering Questions</string>
@@ -27,12 +27,10 @@
     <string name="enable_highq_trivia_summary">HighQ Trivia Questions</string>
     <string name="enable_language_summary">Language questions</string>
     <string name="enable_math_summary">Math questions</string>
-    <string name="enable_notification_bar_summary">close and restart app to apply change</string>
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
     <string name="enable_toddler_summary">Answer toddler questions</string>
     <string name="enable_vibration_summary">Vibrate on key presses</string>
     <string name="enable_vocab_summary">Vocab questions</string>
-    <string name="enable_wallpaper_summary">Use Home Screen Wallpaper as Background</string>
     <string name="extras">Extras</string>
     <string name="extra_coins1">1000 Coins</string>
     <string name="extra_coins2">5000 Coins</string>
@@ -40,8 +38,6 @@
     <string name="get_pack_first">Unlock a Question Pack first so you can use your extras</string>
     <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
-    <string name="handed_default">Right</string>
-    <string name="handed_title">Handedness</string>
     <string name="harder">Unlock Types</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying HighQ!</string>

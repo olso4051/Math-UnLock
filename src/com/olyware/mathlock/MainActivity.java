@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
 	final private int multiplier = 5, decreaseRate = 1000, startingPmoney = 1000;
 	final private Coins Money = new Coins(0, 0);
 	private int dMoney;// change in money after a question is answered
-	private int difficulty = 0;
+	private int difficultyMax = 0, difficultyMin = 0;
 	private long startTime = 0;
 	private boolean fromSettings = false;
 
@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String[] PackageKeys, unlockPackageKeys, DifficultyKeys, LanguageEntries, LanguageValues, EggKeys;
+	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
 	private int ID;
@@ -127,15 +127,6 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (sharedPrefs.getBoolean("notification_bar", true))
-			if (sharedPrefs.getBoolean("enable_wallpaper", true))
-				setTheme(R.style.AppThemeWall);
-			else
-				setTheme(R.style.AppThemeBlack);
-		else if (sharedPrefs.getBoolean("enable_wallpaper", true))
-			setTheme(R.style.AppThemeWallFull);
-		else
-			setTheme(R.style.AppThemeBlackFull);
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -151,7 +142,6 @@ public class MainActivity extends Activity {
 
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
@@ -296,11 +286,7 @@ public class MainActivity extends Activity {
 
 		// set the clock to the correct time
 		setTime();
-		// set the current handedness
-		if (sharedPrefs.getString("handed", getString(R.string.handed_default)).equals(getString(R.string.handed_default)))
-			joystick.setLeftRightHanded(false);
-		else
-			joystick.setLeftRightHanded(true);
+
 		// set the unlock type
 		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
 		answerView.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
@@ -411,12 +397,12 @@ public class MainActivity extends Activity {
 	}
 
 	private void showWallpaper() {
-		if (sharedPrefs.getBoolean("enable_wallpaper", true)) {
-			// dims the wallpaper so stuff app has more contrast
-			layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
-		} else
-			// puts a black image over the wallpaper so we don't have to recreate the activity with a different theme
-			layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
+		// if (sharedPrefs.getBoolean("enable_wallpaper", true)) {
+		// dims the wallpaper so app has more contrast
+		layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
+		// } else
+		// puts a black image over the wallpaper so we don't have to recreate the activity with a different theme
+		// layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
 	}
 
 	private void setImage() {
@@ -461,27 +447,22 @@ public class MainActivity extends Activity {
 
 					// pick a random enabled package
 					int randPack = rand.nextInt(EnabledPackageKeys.length);
-					String key = DifficultyKeys[location[randPack]];
-					String defaultDiff = "0";
-					if (key.equals("difficulty_act_sat"))
-						defaultDiff = "2";
-					else if (key.equals("difficulty_gre"))
-						defaultDiff = "4";
 
-					// get the difficulty from the selected package
-					difficulty = Integer.parseInt(sharedPrefs.getString(key, defaultDiff));
+					// get the difficulty
+					difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
+					difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
 					switch (location[randPack]) {
 					case 0:			// math question
 						currentPack = getString(R.string.math);
-						setMathProblem(0, difficulty);
+						setMathProblem(difficultyMin, difficultyMax);
 						break;
 					case 1:			// vocabulary question
 						currentPack = getString(R.string.vocab);
-						setVocabProblem(0, difficulty);
+						setVocabProblem(difficultyMin, difficultyMax);
 						break;
 					case 2:			// language question
 						currentPack = getString(R.string.language);
-						setLanguageProblem(difficulty);
+						setLanguageProblem(difficultyMin, difficultyMax);
 						break;
 					/*case 3:			// enabled vocab act/sat question
 					case 4:			// enabled math act/sat question
@@ -497,15 +478,15 @@ public class MainActivity extends Activity {
 						break;*/
 					case 3:			// toddler question
 						currentPack = getString(R.string.toddler);
-						setToddlerProblem(difficulty);
+						setToddlerProblem(difficultyMax);
 						break;
 					case 4:			// engineer question
 						currentPack = getString(R.string.engineer);
-						setEngineerProblem(difficulty);
+						setEngineerProblem(difficultyMin, difficultyMax);
 						break;
 					case 5:			// HighQ Trivia question
 						currentPack = getString(R.string.highq_trivia);
-						setHighQTriviaProblem(difficulty);
+						setHighQTriviaProblem(difficultyMin, difficultyMax);
 						break;
 					default:
 						break;
@@ -548,7 +529,7 @@ public class MainActivity extends Activity {
 
 	private void resetTimes() {
 		startTime = System.currentTimeMillis();
-		questionWorth = (difficulty + 1) * multiplier;
+		questionWorth = (difficultyMax + 1) * multiplier;
 		questionWorthMax = questionWorth;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
@@ -561,14 +542,14 @@ public class MainActivity extends Activity {
 		int second = 1;
 
 		if (minDifficulty == 0)
-			difficulty = rand.nextInt(maxDifficulty + 1);
+			difficultyMax = rand.nextInt(maxDifficulty + 1);
 		else
-			difficulty = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
+			difficultyMax = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
 		currentTableName = null;
 		fromLanguage = null;
 		toLanguage = null;
 		ID = 0;
-		switch (difficulty) {
+		switch (difficultyMax) {
 		case 0:				// Elementary
 			// add and subtract options
 			operator = rand.nextInt(2);
@@ -610,7 +591,7 @@ public class MainActivity extends Activity {
 			ID = question.getID();
 			question.setVariables();
 			// Set the new difficulty based on what question was picked
-			difficulty = question.getDifficulty().getValue();
+			difficultyMax = question.getDifficulty().getValue();
 
 			if (!question.getImage().equals("none")) {
 				int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
@@ -667,7 +648,7 @@ public class MainActivity extends Activity {
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
-		difficulty = questions.get(0).getDifficulty().getValue();
+		difficultyMax = questions.get(0).getDifficulty().getValue();
 
 		// Display the vocab question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -676,7 +657,7 @@ public class MainActivity extends Activity {
 		problem.setText("Define: " + questions.get(0).getQuestionText());
 	}
 
-	private void setLanguageProblem(int diffNum) {
+	private void setLanguageProblem(int minDifficulty, int maxDifficulty) {
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		currentTableName = getString(R.string.language_table);
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
@@ -690,12 +671,12 @@ public class MainActivity extends Activity {
 			else if (LanguageValues[i].equals(toLanguage))
 				toLanguageLocal = LanguageEntries[i];
 		}
-		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diffNum), answers.length, fromLanguage,
-				toLanguage);
+		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(minDifficulty),
+				Difficulty.fromValue(maxDifficulty), answers.length, fromLanguage, toLanguage);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
-		difficulty = questions.get(0).getDifficulty().getValue();
+		difficultyMax = questions.get(0).getDifficulty().getValue();
 
 		// Display the vocab question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -750,30 +731,31 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void setEngineerProblem(int diffNum) {
+	private void setEngineerProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.engineer_table);
 		fromLanguage = null;
 		toLanguage = null;
-		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(diffNum));
+		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
-		difficulty = question.getDifficulty().getValue();
+		difficultyMax = question.getDifficulty().getValue();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
 		return;
 	}
 
-	private void setHighQTriviaProblem(int diffNum) {
+	private void setHighQTriviaProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.highq_trivia_table);
 		fromLanguage = null;
 		toLanguage = null;
-		HighQTriviaQuestion question = dbManager.getHighQTriviaQuestion(Difficulty.fromValue(diffNum));
+		HighQTriviaQuestion question = dbManager.getHighQTriviaQuestion(Difficulty.fromValue(minDifficulty),
+				Difficulty.fromValue(maxDifficulty));
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
-		difficulty = question.getDifficulty().getValue();
+		difficultyMax = question.getDifficulty().getValue();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -815,7 +797,7 @@ public class MainActivity extends Activity {
 				joystick.setCorrectAnswer(correctLoc);
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficulty), System
+				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficultyMax), System
 						.currentTimeMillis()));
 				dbManager.decreasePriority(currentTableName, fromLanguage, fromLanguage, ID);
 			} else {
@@ -825,7 +807,7 @@ public class MainActivity extends Activity {
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
 				dMoney = Money.decreaseMoneyNoDebt(questionWorth);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficulty), System
+				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficultyMax), System
 						.currentTimeMillis()));
 				dbManager.increasePriority(currentTableName, fromLanguage, fromLanguage, ID);
 			}

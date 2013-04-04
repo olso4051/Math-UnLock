@@ -105,10 +105,12 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildAllLanguageQuestions(cursor, fromLanguage, toLanguage);
 	}
 
-	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage) {
+	public List<LanguageQuestion> getLanguageQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, String fromLanguage,
+			String toLanguage) {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
-		String where = "difficulty = " + String.valueOf(difficulty.getValue());
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+				+ String.valueOf(minDifficulty.getValue());
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
@@ -120,8 +122,9 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 
-	public EngineerQuestion getEngineerQuestion(Difficulty maxDifficulty) {
-		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue());
+	public EngineerQuestion getEngineerQuestion(Difficulty minDifficulty, Difficulty maxDifficulty) {
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+				+ String.valueOf(minDifficulty.getValue());
 		Cursor cursor = db.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + EngineerQuestionContract.TABLE_NAME
@@ -131,8 +134,9 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildEngineerQuestion(cursor, sum);
 	}
 
-	public HighQTriviaQuestion getHighQTriviaQuestion(Difficulty maxDifficulty) {
-		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue());
+	public HighQTriviaQuestion getHighQTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty) {
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+				+ String.valueOf(minDifficulty.getValue());
 		Cursor cursor = db.query(HighQTriviaQuestionContract.TABLE_NAME, HighQTriviaQuestionContract.ALL_COLUMNS, where, null, null, null,
 				null);
 
