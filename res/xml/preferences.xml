@@ -6,18 +6,10 @@
         android:title="@string/settings"
         android:key="settings">
         <ListPreference
-      		android:key="max_tries"
-      		android:title="@string/max_tries_title"
-      		android:summary="@string/max_tries_summary"
-      		android:dialogTitle="@string/max_tries_title"
-	        android:entries="@array/max_tries_entries"
-	        android:entryValues="@array/max_tries_values"
-	        android:defaultValue="@string/max_tries_default" />
-        <ListPreference
 	        android:key="difficulty_min"
 	        android:title="@string/difficulty_min"
 	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
+	        android:dialogTitle="@string/difficulty_min"
 	        android:entries="@array/difficulty_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
@@ -25,10 +17,18 @@
 	        android:key="difficulty_max"
 	        android:title="@string/difficulty_max"
 	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
+	        android:dialogTitle="@string/difficulty_max"
 	        android:entries="@array/difficulty_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
+        <ListPreference
+      		android:key="max_tries"
+      		android:title="@string/max_tries_title"
+      		android:summary="@string/max_tries_summary"
+      		android:dialogTitle="@string/max_tries_title"
+	        android:entries="@array/max_tries_entries"
+	        android:entryValues="@array/max_tries_values"
+	        android:defaultValue="@string/max_tries_default" />
         <ListPreference
       		android:key="type"
       		android:title="@string/type_title"
@@ -44,21 +44,13 @@
 	        android:defaultValue="true"/>
 	</PreferenceCategory>
     <PreferenceCategory
-        android:title="@string/settings_math_title"
+        android:title="@string/settings_questions"
         android:key="settings_math">
         <CheckBoxPreference
 	        android:key="enable_math"
 	        android:title="@string/enable"
 	        android:summary="@string/enable_math_summary"
 	        android:defaultValue="false"/>
-	    <ListPreference
-	        android:key="difficulty_math"
-	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_math_vocab_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_vocab_title"
@@ -68,14 +60,6 @@
 	        android:title="@string/enable"
 	        android:summary="@string/enable_vocab_summary"
 	        android:defaultValue="false"/>
-	    <ListPreference
-	        android:key="difficulty_vocab"
-	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_math_vocab_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_language_title"
@@ -85,14 +69,6 @@
 	        android:title="@string/enable"
 	        android:summary="@string/enable_language_summary"
 	        android:defaultValue="false"/>
-	    <ListPreference
-	        android:key="difficulty_language"
-	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary_language"
-	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_language_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
 	    <ListPreference
 	        android:key="from_language"
 	        android:title="@string/language_from"
@@ -155,7 +131,6 @@
 	        android:entryValues="@array/difficulty_gre_values"
 	        android:defaultValue="@string/difficulty_default_gre" />
 	</PreferenceCategory>
-	-->
 	<PreferenceCategory
         android:title="@string/settings_toddler_title"
         android:key="settings_toddler">
@@ -173,6 +148,7 @@
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
+	-->
 	<PreferenceCategory
         android:title="@string/settings_engineer_title"
         android:key="settings_engineer">
@@ -181,14 +157,6 @@
 	        android:title="@string/enable"
 	        android:summary="@string/enable_engineer_summary"
 	        android:defaultValue="false"/>
-	    <ListPreference
-	        android:key="difficulty_engineer"
-	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_highq_trivia_title"
@@ -198,13 +166,5 @@
 	        android:title="@string/enable"
 	        android:summary="@string/enable_highq_trivia_summary"
 	        android:defaultValue="false"/>
-	    <ListPreference
-	        android:key="difficulty_highq_trivia"
-	        android:title="@string/difficulty"
-	        android:summary="@string/difficulty_summary"
-	        android:dialogTitle="@string/difficulty"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
 	</PreferenceCategory>
 </PreferenceScreen>

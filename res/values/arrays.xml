@@ -12,43 +12,11 @@
         <item name="very_hard">Very Hard</item>
         <item name="insane">Insane</item>
     </string-array>
-    <string-array name="difficulty_language_entries">
-        <item name="very_easy">Very Easy (Numbers)</item>
-        <item name="easy">Easy</item>
-        <item name="medium">Medium</item>
-        <item name="hard">Hard</item>
-        <item name="very_hard">Very Hard</item>
-        <item name="insane">Insane</item>
-    </string-array>
-    <string-array name="difficulty_math_vocab_entries">
-        <item name="very_easy">Elementary</item>
-        <item name="easy">Middle School</item>
-        <item name="medium">High School (basic)</item>
-        <item name="hard">High School (advanced)</item>
-        <item name="very_hard">College (basic)</item>
-        <item name="insane">College (advanced)</item>
-    </string-array>
     <string-array name="difficulty_values">
         <item name="very_easy">0</item>
         <item name="easy">1</item>
         <item name="medium">2</item>
         <item name="hard">3</item>
-        <item name="very_hard">4</item>
-        <item name="insane">5</item>
-    </string-array>
-    <string-array name="difficulty_act_sat_entries">
-        <item name="medium">Basic</item>
-        <item name="hard">Advanced</item>
-    </string-array>
-    <string-array name="difficulty_act_sat_values">
-        <item name="medium">2</item>
-        <item name="hard">3</item>
-    </string-array>
-    <string-array name="difficulty_gre_entries">
-        <item name="very_hard">Basic</item>
-        <item name="insane">Advanced</item>
-    </string-array>
-    <string-array name="difficulty_gre_values">
         <item name="very_hard">4</item>
         <item name="insane">5</item>
     </string-array>
@@ -165,8 +133,8 @@
         <!--
         <item>unlock_act_sat</item>
 		<item>unlock_gre</item>
-		-->
 		<item>unlock_toddler</item>
+		-->
 		<item>unlock_engineer</item>
 		<item>unlock_highq_trivia</item>
     </string-array>
@@ -181,8 +149,8 @@
         <!--
         <item>5000</item>
 		<item>5000</item>
-		-->
 		<item>1000</item>
+		-->
 		<item>1000</item>
 		<item>1000</item>
         <item>500</item>
@@ -196,25 +164,12 @@
         <item>enable_act_sat_math</item>
 		<item>enable_gre_vocab</item>
 		<item>enable_gre_math</item>
-		-->
 		<item>enable_toddler</item>
+		-->
 		<item>enable_engineer</item>
 		<item>enable_highq_trivia</item>
     </string-array>
-    <string-array name="difficulty_keys">
-        <item>difficulty_math</item>
-        <item>difficulty_vocab</item>
-        <item>difficulty_language</item>
-        <!--
-        <item>difficulty_act_sat</item>
-        <item>difficulty_act_sat</item>
-		<item>difficulty_gre</item>
-		<item>difficulty_gre</item>
-		-->
-		<item>difficulty_toddler</item>
-		<item>difficulty_engineer</item>
-		<item>difficulty_highq_trivia</item>
-    </string-array>
+
     <string name="all">All</string>
 	<string name="math">Math</string>
 	<string name="vocab">Vocab</string>
@@ -232,8 +187,8 @@
         <!--
         <item>@string/act_sat</item>
 		<item>@string/gre</item>
-		-->
 		<item>@string/toddler</item>
+		-->
 		<item>@string/engineer</item>
 		<item>@string/highq_trivia</item>
     </string-array>
@@ -244,8 +199,8 @@
         <!--
         <item>settings_act_sat</item>
 		<item>settings_gre</item>
-		-->
 		<item>settings_toddler</item>
+		-->
 		<item>settings_engineer</item>
 		<item>settings_highq_trivia</item>
 		<item>type</item>
@@ -258,8 +213,8 @@
         <!--
         <item>ACT &amp; SAT vocab and math prep</item>
 		<item>GRE vocab and math prep</item>
-		-->
 		<item>Help your young ones learn ABC\'s, shapes, colors all the way to simple math</item>
+		-->
 		<item>Complete math and science related equations to keep fresh</item>
 		<item>Fun trivia questions about the HighQ organization</item>
 		<item>More Unlock types to challenge your brain in a different way</item>

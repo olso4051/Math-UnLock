@@ -363,6 +363,19 @@ public class EquationLayout {
 		setSize();
 	}
 
+	public void setTypeface(Typeface font) {
+		this.font = font;
+		setSize();
+	}
+
+	public Typeface getTypeface() {
+		return font;
+	}
+
+	public int getHeight() {
+		return bracketGroups.get(0).getHeight();
+	}
+
 	public void setBounds(int maxWidth, int maxHeight) {
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -371,18 +384,18 @@ public class EquationLayout {
 
 	/** Draws the current layout to the supplied canvas **/
 	public void draw(Canvas c) {
-
 		for (int i = 0; i < equationText.length(); i++) {
 			if (attributes.get(i).getShown()) {
 				if ((equationText.charAt(i) == '/') && ((equationText.charAt(i - 1) != '/') && (equationText.charAt(i + 1) != '/'))) {
 					c.drawLine(textAttributes.get(i).getLeft(), textAttributes.get(i).getY(), textAttributes.get(i).getRight(),
-							textAttributes.get(i).getY(), textAttributes.get(i).getTextPaint());
+							textAttributes.get(i).getY(), testPaintWhite);
 				} else {
 					c.drawText(textAttributes.get(i).getText(), textAttributes.get(i).getX(), textAttributes.get(i).getY(), textAttributes
 							.get(i).getTextPaint());
 				}
 			}
 		}
+		// c.drawRect(0, 0, maxWidth, maxHeight, testPaintBlue);
 		for (int i = 0; i < bracketGroups.size(); i++) {
 			/*c.drawRect(bracketGroups.get(i).getLeft(), bracketGroups.get(i).getTop(), bracketGroups.get(i).getRight(), bracketGroups.get(i)
 					.getBottom(), testPaintBlue);*/
@@ -401,13 +414,14 @@ public class EquationLayout {
 						.get(i).getBottom(), testPaintWhite);
 			}
 		}
-		c.save();
 	}
 
 	public void setColor(int color) {
+		this.color = color;
 		testPaintWhite.setColor(color);
-		for (int i = 0; i < textAttributes.size(); i++)
+		for (int i = 0; i < textAttributes.size(); i++) {
 			textAttributes.get(i).getTextPaint().setColor(color);
+		}
 	}
 
 	private void parseEquation() {

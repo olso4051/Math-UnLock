@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -475,16 +476,16 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.gre);
 						setGREProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[5], false),
 								sharedPrefs.getBoolean(PackageKeys[6], false));
-						break;*/
-					case 3:			// toddler question
+						break;
+					case 7:			// toddler question
 						currentPack = getString(R.string.toddler);
 						setToddlerProblem(difficultyMax);
-						break;
-					case 4:			// engineer question
+						break;*/
+					case 3:			// engineer question
 						currentPack = getString(R.string.engineer);
 						setEngineerProblem(difficultyMin, difficultyMax);
 						break;
-					case 5:			// HighQ Trivia question
+					case 4:			// HighQ Trivia question
 						currentPack = getString(R.string.highq_trivia);
 						setHighQTriviaProblem(difficultyMin, difficultyMax);
 						break;
@@ -712,7 +713,7 @@ public class MainActivity extends Activity {
 			setVocabProblem(4, diffNum);
 		else
 			setMathProblem(4, diffNum);
-	}*/
+	}
 
 	private void setToddlerProblem(int diffNum) {
 		currentTableName = null;
@@ -729,7 +730,7 @@ public class MainActivity extends Activity {
 		default:
 			break;
 		}
-	}
+	}*/
 
 	private void setEngineerProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.engineer_table);
@@ -741,6 +742,7 @@ public class MainActivity extends Activity {
 		// Set the new difficulty based on what question was picked
 		difficultyMax = question.getDifficulty().getValue();
 
+		Log.d("test", "problem = " + question.getQuestionText());
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
 		return;

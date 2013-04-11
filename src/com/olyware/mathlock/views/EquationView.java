@@ -52,12 +52,11 @@ public class EquationView extends AutoResizeTextView {
 					text = text.subSequence(1, text.length());
 
 		if (equation) {
-			super.setText("", type);
 			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color);
 		} else {
 			layout = null;
-			super.setText(text, type);
 		}
+		super.setText(text, type);
 		invalidate();
 	}
 
@@ -86,6 +85,7 @@ public class EquationView extends AutoResizeTextView {
 		super.setTextColor(color);
 		if (layout != null)
 			layout.setColor(color);
+		invalidate();
 	}
 
 }

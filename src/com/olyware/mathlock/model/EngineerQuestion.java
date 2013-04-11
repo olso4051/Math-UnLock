@@ -36,11 +36,12 @@ public class EngineerQuestion extends Question {
 		int needs = 1;
 		int index = equation.indexOf('(');
 		int first = index;
-		String subEq = "x";
+		String subEq = "x", subEqFinal = "";
 		while (index < equation.length() - 1) {
 			next = equation.charAt(index + 1);
 			if ((next == ')') && (needs == 1)) {
 				subEq = equation.substring(first + 1, index + 1);
+				subEqFinal = equation.substring(Math.min(index + 2, equation.length()), equation.length());
 				equation = equation.substring(0, first);
 				break;
 			} else if ((next == ')') && (needs > 1))
@@ -66,7 +67,7 @@ public class EngineerQuestion extends Question {
 		}
 		if (wrong.size() > 3)
 			wrong = shuffleStringList(wrong);
-		equation = equation + subEq;
+		equation = equation + subEq + subEqFinal;
 		return new String[] { equation, variable, wrong.get(0), wrong.get(1), wrong.get(2) };
 	}
 

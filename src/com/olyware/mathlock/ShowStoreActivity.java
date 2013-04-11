@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -85,8 +84,6 @@ public class ShowStoreActivity extends Activity {
 			int idText = getResources().getIdentifier(unlockAllKeys[i].substring(7) + "_cost", "id", getPackageName());
 			cost[i] = (TextView) findViewById(idText);
 			buy[i] = (Button) findViewById(idButton);
-			Log.d("test", "i = " + i);
-			Log.d("test", "idButton = " + idButton + "|idText = " + idText);
 			buy[i].setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					buyProduct(String.valueOf(buy[loc].getText()), loc, unlockCost[loc], null);

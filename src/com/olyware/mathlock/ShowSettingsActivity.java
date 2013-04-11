@@ -14,7 +14,7 @@ import android.view.WindowManager;
 import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, DifficultyKeys, EggKeys;
+	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
 	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff;
@@ -26,7 +26,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		addPreferencesFromResource(R.xml.preferences);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
-		DifficultyKeys = getResources().getStringArray(R.array.difficulty_keys);
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
@@ -46,20 +45,11 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		maxDiff.setSummary(maxDiff.getEntry());
 
 		// Set summary to be the user-description for the selected value
-		for (int i = 0; i < DifficultyKeys.length; i++) {
-			Preference Pref_diff = findPreference(DifficultyKeys[i]);
-			Pref_diff.setSummary(difficultyIntToString(DifficultyKeys[i], sharedPrefs.getString(DifficultyKeys[i], "1")));
-		}
 		Preference Pref_max_tries = findPreference("max_tries");
 		Preference Pref_type = findPreference("type");
-		// Preference Pref_diff_min = findPreference("difficulty_min");
-		// Preference Pref_diff_max = findPreference("difficulty_max");
-
 		String summary = ((sharedPrefs.getString("max_tries", "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString("max_tries", "1")));
 		Pref_max_tries.setSummary(summary);
 		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "2")));
-		// Pref_diff_min.setSummary(difficultyIntToString("difficulty_min", sharedPrefs.getString("difficulty_min", "0")));
-		// Pref_diff_max.setSummary(difficultyIntToString("difficulty_max", sharedPrefs.getString("difficulty_max", "0")));
 
 		// enable settings for unlocked packages
 		if (sharedPrefsMoney.getBoolean("unlock_all", false))
@@ -83,15 +73,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPrefs, String key) {
 		Preference connectionPref = findPreference(key);
-		boolean difficultyChanged = false;
-		for (int i = 0; i < DifficultyKeys.length; i++) {
-			if (key.equals(DifficultyKeys[i]))
-				difficultyChanged = true;
-		}
-		if (difficultyChanged) {
-			// Set summary to be the user-description for the selected value
-			connectionPref.setSummary(difficultyIntToString(key, sharedPrefs.getString(key, "0")));
-		} else if (key.equals("difficulty_max") || key.equals("difficulty_min")) {
+
+		if (key.equals("difficulty_max") || key.equals("difficulty_min")) {
 			int max = Math.max(Integer.parseInt(sharedPrefs.getString(key, "0")),
 					Integer.parseInt(sharedPrefs.getString("difficulty_max", "0")));
 			int min = Math.min(Integer.parseInt(sharedPrefs.getString(key, "0")),
@@ -134,45 +117,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	public void onAttachedToWindow() {
 		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-	}
-
-	private String difficultyIntToString(String key, String Number) {
-		int diffNum = 0;
-		try {
-			diffNum = Integer.parseInt(Number);
-		} catch (NumberFormatException nfe) {
-			System.out.println("Could not parse " + nfe);
-		}
-		if (key.equals("difficulty_math") || key.equals("difficulty_vocab"))
-			return difficultyMathVocabIntToString(diffNum);
-		else if (key.equals("difficulty_language"))
-			return difficultyLanguageIntToString(diffNum);
-		else if (key.equals("difficulty_act_sat"))
-			return difficultyACT_SATIntToString(diffNum);
-		else if (key.equals("difficulty_gre"))
-			return difficultyGREIntToString(diffNum);
-		String[] difficulty = getResources().getStringArray(R.array.difficulty_entries);
-		return difficulty[diffNum];
-	}
-
-	private String difficultyMathVocabIntToString(int diffNum) {
-		String[] difficulty = getResources().getStringArray(R.array.difficulty_math_vocab_entries);
-		return difficulty[diffNum];
-	}
-
-	private String difficultyLanguageIntToString(int diffNum) {
-		String[] difficulty = getResources().getStringArray(R.array.difficulty_language_entries);
-		return difficulty[diffNum];
-	}
-
-	private String difficultyACT_SATIntToString(int diffNum) {
-		String[] difficulty = getResources().getStringArray(R.array.difficulty_act_sat_entries);
-		return difficulty[diffNum - 2];		// subtract 2 because act/sat diff is either 2 or 3 (2 indexed)
-	}
-
-	private String difficultyGREIntToString(int diffNum) {
-		String[] difficulty = getResources().getStringArray(R.array.difficulty_gre_entries);
-		return difficulty[diffNum - 4];		// gre diff is 4 indexed
 	}
 
 	private String typeIntToString(String key) {
