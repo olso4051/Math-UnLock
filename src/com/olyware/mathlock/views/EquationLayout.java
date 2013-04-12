@@ -505,6 +505,8 @@ public class EquationLayout {
 	}
 
 	private void findKeywords() {
+		equationText = equationText.replaceAll("Phi", "ϕ");
+		equationText = equationText.replaceAll("Theta", "θ");
 		equationText = equationText.replaceAll("Pi", "π");
 		equationText = equationText.replaceAll("Integrate", "∫");
 		equationText = equationText.replaceAll("Sum", "∑");
