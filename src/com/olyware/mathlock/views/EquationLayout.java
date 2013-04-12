@@ -15,7 +15,8 @@ import android.util.TypedValue;
 import com.olyware.mathlock.MainActivity;
 
 public class EquationLayout {
-	private final int textSizeSPDefault = 30, extraPadding = 20;
+	private final int extraPadding = 20;
+	private int textSizeSPDefault = 40;
 	private int maxWidth, maxHeight;
 	private int textSizeSP;
 	private float textSizePix, textSizePixDefault;
@@ -196,6 +197,7 @@ public class EquationLayout {
 		private int Width, Height, Start, End, X, dX, Y, Bottom, Parent;
 		private Att att, modifier;
 		private float SizePix;
+		private Path path;
 		private List<Integer> children = new ArrayList<Integer>();
 
 		public BracketGroup() {
@@ -211,6 +213,7 @@ public class EquationLayout {
 			this.att = Att.Normal;
 			this.modifier = Att.Normal;
 			this.SizePix = textSizePixDefault;
+			this.path = new Path();
 		}
 
 		public void resetSize() {
@@ -336,6 +339,36 @@ public class EquationLayout {
 		public float getSizePix() {
 			return SizePix;
 		}
+
+		public Path getPath() {
+			return path;
+		}
+	}
+
+	public EquationLayout(String equation, int maxWidth, int maxHeight, TextPaint textPaint) {
+		this.equationText = equation;
+		this.maxWidth = maxWidth;
+		this.maxHeight = maxHeight;
+		this.font = textPaint.getTypeface();
+		this.color = textPaint.getColor();
+
+		testPaintWhite = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		testPaintWhite.setColor(color);
+		testPaintWhite.setStyle(Paint.Style.STROKE);
+		testPaintWhite.setStrokeWidth(3);
+
+		testPaintBlue = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		testPaintBlue.setColor(Color.BLUE);
+		testPaintBlue.setStyle(Paint.Style.STROKE);
+		testPaintBlue.setStrokeWidth(2);
+
+		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
+				.getResources().getDisplayMetrics());
+		textSizeSP = textSizeSPDefault;
+		textSizePix = textSizePixDefault;
+
+		parseEquation();
+		setSize();
 	}
 
 	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color) {
@@ -359,6 +392,7 @@ public class EquationLayout {
 				.getResources().getDisplayMetrics());
 		textSizeSP = textSizeSPDefault;
 		textSizePix = textSizePixDefault;
+
 		parseEquation();
 		setSize();
 	}
@@ -384,6 +418,8 @@ public class EquationLayout {
 
 	/** Draws the current layout to the supplied canvas **/
 	public void draw(Canvas c) {
+		c.save();
+		c.translate(-maxWidth / 2, -maxHeight / 2);
 		for (int i = 0; i < equationText.length(); i++) {
 			if (attributes.get(i).getShown()) {
 				if ((equationText.charAt(i) == '/') && ((equationText.charAt(i - 1) != '/') && (equationText.charAt(i + 1) != '/'))) {
@@ -400,13 +436,7 @@ public class EquationLayout {
 			/*c.drawRect(bracketGroups.get(i).getLeft(), bracketGroups.get(i).getTop(), bracketGroups.get(i).getRight(), bracketGroups.get(i)
 					.getBottom(), testPaintBlue);*/
 			if (bracketGroups.get(i).getModifier().equals(Att.SquareRoot)) {
-				Path p = new Path();
-				p.moveTo(bracketGroups.get(i).getLeft(), bracketGroups.get(i).getBottom() - bracketGroups.get(i).getSizePix() / 2);
-				p.lineTo(bracketGroups.get(i).getLeft() + extraPadding / 3, bracketGroups.get(i).getBottom());
-				p.lineTo(bracketGroups.get(i).getLeft() + extraPadding * 2 / 3, bracketGroups.get(i).getTop());
-				p.lineTo(bracketGroups.get(i).getRight(), bracketGroups.get(i).getTop());
-				p.lineTo(bracketGroups.get(i).getRight(), bracketGroups.get(i).getTop() + extraPadding);
-				c.drawPath(p, testPaintWhite);
+				c.drawPath(bracketGroups.get(i).getPath(), testPaintWhite);
 			} else if (bracketGroups.get(i).getModifier().equals(Att.Abs)) {
 				c.drawLine(bracketGroups.get(i).getLeft(), bracketGroups.get(i).getTop(), bracketGroups.get(i).getLeft(), bracketGroups
 						.get(i).getBottom(), testPaintWhite);
@@ -414,6 +444,7 @@ public class EquationLayout {
 						.get(i).getBottom(), testPaintWhite);
 			}
 		}
+		c.restore();
 	}
 
 	public void setColor(int color) {
@@ -422,6 +453,15 @@ public class EquationLayout {
 		for (int i = 0; i < textAttributes.size(); i++) {
 			textAttributes.get(i).getTextPaint().setColor(color);
 		}
+	}
+
+	public void setDefaultSize(int size) {
+		textSizeSPDefault = size;
+		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
+				.getResources().getDisplayMetrics());
+		textSizeSP = textSizeSPDefault;
+		textSizePix = textSizePixDefault;
+		setSize();
 	}
 
 	private void parseEquation() {
@@ -465,6 +505,7 @@ public class EquationLayout {
 	}
 
 	private void findKeywords() {
+		equationText = equationText.replaceAll("Pi", "π");
 		equationText = equationText.replaceAll("Integrate", "∫");
 		equationText = equationText.replaceAll("Sum", "∑");
 		equationText = equationText.replaceAll("Product", "∏");
@@ -642,8 +683,10 @@ public class EquationLayout {
 				bracketGroups.get(i).setSizePix(parentSizePix / 2);
 				bracketGroups.get(i).setY(parentY - (int) (parentSizePix * 3 / 4));
 			} else if (att.equals(Att.Numerator)) {
+				bracketGroups.get(i).setSizePix(parentSizePix);
 				bracketGroups.get(i).setY(parentY - (int) (parentSizePix * 3 / 4));
 			} else if (att.equals(Att.Denominator)) {
+				bracketGroups.get(i).setSizePix(parentSizePix);
 				bracketGroups.get(i).setY(parentY + (int) (parentSizePix * 3 / 4));
 			} else if (att.equals(Att.BracketSuper)) {
 				bracketGroups.get(i).setSizePix(parentSizePix / 2);
@@ -850,6 +893,18 @@ public class EquationLayout {
 
 		// center equation vertically
 		moveGroup(bracketGroups.get(0), 0, (maxHeight - bracketGroups.get(0).getHeight()) / 2 - (int) bracketGroups.get(0).getTop());
+
+		// store paths for square roots
+		for (int i = 0; i < bracketGroups.size(); i++) {
+			if (bracketGroups.get(i).getModifier().equals(Att.SquareRoot)) {
+				bracketGroups.get(i).getPath()
+						.moveTo(bracketGroups.get(i).getLeft(), bracketGroups.get(i).getBottom() - bracketGroups.get(i).getSizePix() / 2);
+				bracketGroups.get(i).getPath().lineTo(bracketGroups.get(i).getLeft() + extraPadding / 3, bracketGroups.get(i).getBottom());
+				bracketGroups.get(i).getPath().lineTo(bracketGroups.get(i).getLeft() + extraPadding * 2 / 3, bracketGroups.get(i).getTop());
+				bracketGroups.get(i).getPath().lineTo(bracketGroups.get(i).getRight(), bracketGroups.get(i).getTop());
+				bracketGroups.get(i).getPath().lineTo(bracketGroups.get(i).getRight(), bracketGroups.get(i).getTop() + extraPadding);
+			}
+		}
 
 		return;
 	}

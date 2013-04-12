@@ -13,6 +13,7 @@ import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
+import com.olyware.mathlock.model.EngineerQuestion.ParseModeE;
 import com.olyware.mathlock.model.HighQTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
@@ -235,8 +236,9 @@ public class DatabaseModelFactory {
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String variables = cursorHelper.getString(EngineerQuestionContract.VARIABLES);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
+		ParseModeE parseMode = ParseModeE.fromValue(cursorHelper.getInteger(EngineerQuestionContract.PARSE_MODE));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-		return new EngineerQuestion(id, questionText, variables, difficulty, priority);
+		return new EngineerQuestion(id, questionText, variables, difficulty, parseMode, priority);
 	}
 
 	public static HighQTriviaQuestion buildHighQTriviaQuestion(Cursor cursor, int weightSum) {

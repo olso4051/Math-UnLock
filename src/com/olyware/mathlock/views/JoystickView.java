@@ -46,7 +46,7 @@ public class JoystickView extends View {
 	private Paint settingsPaint, optPaint, unlockPaint;
 	private int textSizeSP, textSizePix, answerSizeSP, answerHintSizeSP;
 	private float answerSizePix, answerHintSizePix;
-	private final int answerSizeSPDefault = 50, answerHintSizeSPDefault = 30;
+	private final int answerSizeSPDefault = 40, answerHintSizeSPDefault = 30;
 	private Typeface font;
 
 	private double touchX, touchY;
@@ -160,6 +160,7 @@ public class JoystickView extends View {
 			answerTextPaint[i].setTextAlign(Paint.Align.CENTER);
 			answerTextPaint[i].setColor(Color.WHITE);
 			answerTextPaint[i].setTextSize(answerSizePix);
+			answerTextPaint[i].setTypeface(font);
 			bounds[i] = new Rect();
 			Log.d("test", "answer = " + answers[i]);
 			equation[i] = false;
@@ -168,7 +169,7 @@ public class JoystickView extends View {
 					if (answers[i].charAt(1) != '$')
 						equation[i] = true;
 			if (equation[i])
-				layoutE[i] = new EquationLayout(answers[i], Width, Height, font, Color.WHITE);
+				layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i]);
 			else
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 
@@ -482,7 +483,8 @@ public class JoystickView extends View {
 				canvas.save();
 				if (equation[Math.min(i, NumAnswers - 1)]) {
 					// position the text then draw the layout
-					canvas.translate(RectForAnswers[i].left, RectForAnswers[i].top);
+					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
 					layoutE[Math.min(i, NumAnswers - 1)].draw(canvas);
 				} else {
 					// position the text then draw the layout
@@ -615,7 +617,7 @@ public class JoystickView extends View {
 				switch (type) {
 				case 0:
 				case 1:
-					setDimensions();
+					setHintDimensions();
 					break;
 				case 2:
 					invalidate();
@@ -849,7 +851,7 @@ public class JoystickView extends View {
 		case 1:
 			// circlePaint[0].setAlpha(255);
 			animateHandler.postDelayed(pulseLock, pulseFrameTime);
-			setDimensions();
+			setHintDimensions();
 			break;
 		case 2:
 			invalidate();
@@ -1110,37 +1112,44 @@ public class JoystickView extends View {
 
 	}
 
+	private void setHintDimensions() {
+		setHintLayouts();
+		float maxH = 0;
+		maxH = Math.max(bounds[NumAnswers - 1].height(), layout[NumAnswers - 1].getHeight());
+		maxH = Math.max(maxH, answerHintSizePix);
+		if ((maxH > (rUnlock * 2 - outlineWidth * 2 - pad * 2)) && (Height > 0)) {
+			decreaseHintSize();
+			setHintDimensions();
+			return;
+		} else if (isLayoutSplittingWords(answers[NumAnswers - 1], layout[NumAnswers - 1])) {
+			decreaseHintSize();
+			setHintDimensions();
+			return;
+		}
+		answerTextPaint[NumAnswers - 1].setTextSize(answerHintSizePix);
+		invalidate();
+	}
+
 	private void setDimensions() {
 		setLayouts();
-		float maxH[] = { 0, 0, 0, 0, 0 };
-		for (int i = 0; i < NumAnswers; i++) {
+		float maxH = 0;
+		for (int i = 0; i < NumAnswers - 1; i++) {
 			if (!equation[i]) {
-				maxH[i] = Math.max(bounds[i].height(), layout[i].getHeight());
-				if (i < NumAnswers - 1) {
-					maxH[i] = Math.max(maxH[i], answerSizePix);
-					if ((maxH[i] > ((TextHeight - textSizePix) / 2 - outlineWidth * 3 - pad * 3 - rUnlock)) && (Height > 0)) {
-						decreaseAnswerSize();
-						setDimensions();
-						return;
-					} else if (isLayoutSplittingWords(answers[i], layout[i])) {
-						decreaseAnswerSize();
-						setDimensions();
-						return;
-					}
-				} else {
-					maxH[i] = Math.max(maxH[i], answerHintSizePix);
-					if ((maxH[i] > (rUnlock * 2 - outlineWidth * 2 - pad * 2)) && (Height > 0)) {
-						decreaseHintSize();
-						setDimensions();
-						return;
-					} else if (isLayoutSplittingWords(answers[i], layout[i])) {
-						decreaseHintSize();
-						setDimensions();
-						return;
-					}
+				maxH = Math.max(bounds[i].height(), layout[i].getHeight());
+				maxH = Math.max(maxH, answerSizePix);
+				if ((maxH > ((TextHeight - textSizePix) / 2 - outlineWidth * 3 - pad * 3 - rUnlock)) && (Height > 0)) {
+					decreaseAnswerSize();
+					setDimensions();
+					return;
+				} else if (isLayoutSplittingWords(answers[i], layout[i])) {
+					decreaseAnswerSize();
+					setDimensions();
+					return;
 				}
 			}
 		}
+		setHintDimensions();
+
 		for (int i = 0; i < NumAnswers - 1; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
@@ -1148,7 +1157,7 @@ public class JoystickView extends View {
 		invalidate();
 	}
 
-	private void setLayouts() {
+	private void setHintLayouts() {
 		String str = "?";
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
 			removePulseAnimation();
@@ -1171,29 +1180,26 @@ public class JoystickView extends View {
 			resetHintSize();
 			answers[NumAnswers - 1] = str;
 		}
+		answerTextPaint[NumAnswers - 1].getTextBounds(answers[NumAnswers - 1], 0, answers[NumAnswers - 1].length(), bounds[NumAnswers - 1]);
+		layout[NumAnswers - 1] = new StaticLayout(answers[NumAnswers - 1], answerTextPaint[NumAnswers - 1], Width / 2 - outlineWidth * 2
+				- pad * 2 - rUnlock, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+		invalidate();
+	}
 
-		for (int i = 0; i < NumAnswers; i++) {
+	private void setLayouts() {
+		for (int i = 0; i < NumAnswers - 1; i++) {
 			equation[i] = false;
 			if (answers[i].charAt(0) == '$')
 				if (answers[i].length() > 1)
 					if (answers[i].charAt(1) != '$')
 						equation[i] = true;
 			answerTextPaint[i].getTextBounds(answers[i], 0, answers[i].length(), bounds[i]);
-			if (i < NumAnswers - 1) {
-				if (equation[i])
-					layoutE[i] = new EquationLayout(answers[i], Width / 2 - outlineWidth * 2 - pad * 2, (TextHeight - textSizePix) / 2
-							- outlineWidth * 3 - pad * 3 - rUnlock, font, answerTextPaint[i].getColor());
-				else
-					layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2,
-							Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
-			} else {
-				if (equation[i])
-					layoutE[i] = new EquationLayout(answers[i], Width / 2 - outlineWidth * 2 - pad * 2 - rUnlock, rUnlock * 2
-							- outlineWidth * 2 - pad * 2, font, answerTextPaint[i].getColor());
-				else
-					layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2 - rUnlock,
-							Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
-			}
+			if (equation[i])
+				layoutE[i] = new EquationLayout(answers[i], Width / 2 - outlineWidth * 2 - pad * 2, (Height - rBig * 2 - pad - textSizePix)
+						/ 2 - outlineWidth * 3 - pad * 3 - rUnlock, answerTextPaint[i]);
+			else
+				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2,
+						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
 		invalidate();
 	}

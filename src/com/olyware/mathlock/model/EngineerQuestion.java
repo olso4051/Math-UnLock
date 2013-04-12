@@ -6,13 +6,36 @@ import java.util.Random;
 
 public class EngineerQuestion extends Question {
 
+	public enum ParseModeE {
+		SINGLE(0), ALL(1);
+
+		int value;
+
+		private ParseModeE(int value) {
+			this.value = value;
+		}
+
+		public static ParseModeE fromValue(int value) {
+			switch (value) {
+			case 0:
+				return SINGLE;
+			case 1:
+				return ALL;
+			default:
+				return null;
+			}
+		}
+	}
+
+	private ParseModeE parseMode;
 	private String variables;
 	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
 	private Random rand = new Random();
 
-	public EngineerQuestion(int id, String text, String variables, Difficulty difficulty, int priority) {
+	public EngineerQuestion(int id, String text, String variables, Difficulty difficulty, ParseModeE parseMode, int priority) {
 		super(id, text, variables.substring(0, 1), difficulty, priority);// not the right correct answer at this point
 		this.variables = variables;
+		this.parseMode = parseMode;
 		setVariables();
 	}
 
@@ -32,12 +55,17 @@ public class EngineerQuestion extends Question {
 	}
 
 	private String[] setQuestionAndAnswer(String equation) {
-		char next;
-		int needs = 1;
-		int index = equation.indexOf('(');
-		int first = index;
-		String subEq = "x", subEqFinal = "";
-		while (index < equation.length() - 1) {
+		// char next;
+		// int needs = 1;
+		// int index = equation.indexOf('(');
+		// int first = index;
+		String subEq = "", subEqFinal = "";
+		int indexs = equation.indexOf('|');
+		int indexf = equation.indexOf('|', indexs + 1);
+		subEq = equation.substring(indexs + 1, indexf);
+		subEqFinal = equation.substring(Math.min(indexf + 1, equation.length()), equation.length());
+		equation = equation.substring(0, indexs);
+		/*while (index < equation.length() - 1) {
 			next = equation.charAt(index + 1);
 			if ((next == ')') && (needs == 1)) {
 				subEq = equation.substring(first + 1, index + 1);
@@ -49,7 +77,7 @@ public class EngineerQuestion extends Question {
 			else if (next == '(')
 				needs += 1;
 			index += 1;
-		}
+		}*/
 		int variableLocs[][] = getVariableLocations(subEq);
 		int rows = variableLocs.length;
 		int loc = rand.nextInt(rows);
@@ -68,6 +96,14 @@ public class EngineerQuestion extends Question {
 		if (wrong.size() > 3)
 			wrong = shuffleStringList(wrong);
 		equation = equation + subEq + subEqFinal;
+		if (text.charAt(0) == '$')
+			if (text.length() > 1)
+				if (text.charAt(1) != '$') {
+					variable = "$" + variable + "$";
+					wrong.set(0, "$" + wrong.get(0) + "$");
+					wrong.set(1, "$" + wrong.get(1) + "$");
+					wrong.set(2, "$" + wrong.get(2) + "$");
+				}
 		return new String[] { equation, variable, wrong.get(0), wrong.get(1), wrong.get(2) };
 	}
 
@@ -80,45 +116,50 @@ public class EngineerQuestion extends Question {
 		boolean variable = false;
 		List<Integer> locs = new ArrayList<Integer>();
 		List<Integer> locf = new ArrayList<Integer>();
-		while (index < s.length()) {
-			next = s.codePointAt(index);
-			nextC = s.charAt(index);
-			if (number) {
-				// check if next is not a number and still a variable
-				if ((!(Character.isDigit(next) || (nextC == '.'))) && (variable)) {
+		if (parseMode.equals(ParseModeE.SINGLE)) {
+			while (index < s.length()) {
+				next = s.codePointAt(index);
+				nextC = s.charAt(index);
+				if (number) {
+					// check if next is not a number and still a variable
+					if ((!(Character.isDigit(next) || (nextC == '.'))) && (variable)) {
+						locs.add(indexStart);
+						locf.add(index);
+						number = false;
+						variable = false;
+						// if next is a number set variable to false
+					} else if (Character.isDigit(next) || (nextC == '.')) {
+						variable = false;
+						// next is not a number or variable so reset number to false
+					} else
+						number = false;
+					// if not a number then if next is math symbol and variable is true then we found a variable
+				} else if (((nextC == '+') || (nextC == '-') || (nextC == '*') || (nextC == '/') || (nextC == '(') || (nextC == ')') || (nextC == '^'))
+						&& (variable)) {
 					locs.add(indexStart);
 					locf.add(index);
 					number = false;
 					variable = false;
-					// if next is a number set variable to false
+					// if next is a number then we may have found a variable
 				} else if (Character.isDigit(next) || (nextC == '.')) {
-					variable = false;
-					// next is not a number or variable so reset number to false
-				} else
-					number = false;
-				// if not a number then if next is math symbol and variable is true then we found a variable
-			} else if (((nextC == '+') || (nextC == '-') || (nextC == '*') || (nextC == '/') || (nextC == '(') || (nextC == ')') || (nextC == '^'))
-					&& (variable)) {
+					number = true;
+					variable = true;
+					indexStart = index;
+					// if variable is false then we have found the start of a variable
+				} else if (!variable) {
+					variable = true;
+					indexStart = index;
+				}
+				index += 1;
+			}
+			// if the last char was a variable then we found the last variable
+			if (variable) {
 				locs.add(indexStart);
 				locf.add(index);
-				number = false;
-				variable = false;
-				// if next is a number then we may have found a variable
-			} else if (Character.isDigit(next) || (nextC == '.')) {
-				number = true;
-				variable = true;
-				indexStart = index;
-				// if variable is false then we have found the start of a variable
-			} else if (!variable) {
-				variable = true;
-				indexStart = index;
 			}
-			index += 1;
-		}
-		// if the last char was a variable then we found the last variable
-		if (variable) {
-			locs.add(indexStart);
-			locf.add(index);
+		} else {
+			locs.add(0);
+			locf.add(s.length());
 		}
 		int[][] array = new int[locs.size()][2];
 		for (int i = 0; i < locs.size(); i++) {

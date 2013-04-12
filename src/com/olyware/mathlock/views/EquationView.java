@@ -53,6 +53,7 @@ public class EquationView extends AutoResizeTextView {
 
 		if (equation) {
 			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color);
+			layout.setDefaultSize(30);
 		} else {
 			layout = null;
 		}
@@ -74,7 +75,10 @@ public class EquationView extends AutoResizeTextView {
 		if (layout == null)
 			super.onDraw(canvas);
 		else {
+			canvas.save();
+			canvas.translate(getTextAreaWidth() / 2, getTextAreaHeight() / 2);
 			layout.draw(canvas);
+			canvas.restore();
 			canvas.save();
 		}
 	}
@@ -88,4 +92,8 @@ public class EquationView extends AutoResizeTextView {
 		invalidate();
 	}
 
+	public void setDefaultSize(int size) {
+		layout.setDefaultSize(size);
+		invalidate();
+	}
 }

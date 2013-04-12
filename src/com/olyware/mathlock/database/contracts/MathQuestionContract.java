@@ -42,7 +42,7 @@ public final class MathQuestionContract extends QuestionContract {
 	 */
 	public static final String PRECISION = "precision";
 	/**
-	 * Type: INT 1-MAX_SQL_INT
+	 * Type: TEXT
 	 */
 	public static final String PRIORITY = "priority";
 
