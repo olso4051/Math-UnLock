@@ -384,14 +384,7 @@ public class MainActivity extends Activity {
 		List<RunningTaskInfo> recentTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
 		if (recentTasks.get(1).baseActivity.toShortString().indexOf(getPackageName()) > -1) {
 			// TODO test on multiple devices I think this is when Home or Notification is pressed, can't stop from executing exit code
-			Log.d("test", "starting activity");
-			// Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
-			Intent i = new Intent(this, MainActivity.class);
-			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			i.putExtra("locked", true);
-			startActivity(i);
+			Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
 			return true;
 		}
 		return false;

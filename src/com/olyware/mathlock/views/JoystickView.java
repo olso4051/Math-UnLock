@@ -40,7 +40,7 @@ public class JoystickView extends View {
 
 	private TextPaint circleTextPaint[] = new TextPaint[NumAnswers];
 	private TextPaint answerTextPaint[] = new TextPaint[NumAnswers];
-	private TextPaint textPaintWhite, textPaintBlack;
+	private TextPaint optionPaintWhite, textPaintWhite, textPaintBlack;
 	private Path optionPath;
 	private Paint circlePaint[] = new Paint[NumAnswers];
 	private Paint settingsPaint, optPaint, unlockPaint;
@@ -138,6 +138,10 @@ public class JoystickView extends View {
 		textPaintWhite.setTextAlign(Paint.Align.CENTER);
 		textPaintWhite.setColor(Color.WHITE);
 		textPaintWhite.setTextSize(textSizePix);
+		optionPaintWhite = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		optionPaintWhite.setTextAlign(Paint.Align.CENTER);
+		optionPaintWhite.setColor(Color.WHITE);
+		optionPaintWhite.setTextSize(textSizePix);
 		textPaintBlack = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		textPaintBlack.setTextAlign(Paint.Align.CENTER);
 		textPaintBlack.setColor(Color.BLACK);
@@ -269,6 +273,7 @@ public class JoystickView extends View {
 				layoutE[i].setTypeface(font);
 		}
 		textPaintWhite.setTypeface(font);
+		optionPaintWhite.setTypeface(font);
 		textPaintBlack.setTypeface(font);
 	}
 
@@ -528,11 +533,11 @@ public class JoystickView extends View {
 		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
 			canvas.drawRect(dstRectForOpt, optPaint);
-			canvas.drawTextOnPath(res.getString(R.string.swipe_here), optionPath, 0, 0, textPaintWhite);
+			canvas.drawTextOnPath(res.getString(R.string.swipe_here), optionPath, 0, 0, optionPaintWhite);
 			for (int i = 0; i < selectOptions.length; i++) {
 				if (selectOptions[i]) {
 					int id = res.getIdentifier("option" + i, "string", ctx.getPackageName());
-					canvas.drawTextOnPath(res.getString(id), optionPath, 0, -textPaintWhite.getTextSize(), textPaintWhite);
+					canvas.drawTextOnPath(res.getString(id), optionPath, 0, -optionPaintWhite.getTextSize(), optionPaintWhite);
 				}
 			}
 		}
@@ -589,7 +594,7 @@ public class JoystickView extends View {
 					flashText();
 					if (listener != null)
 						listener.OnSelect(-1);		// send a vibrate signal
-				} else if (startY >= TextHeight - textSizePix) {	// SettingsBar selected
+				} else if (startY >= TextHeight - textSizePix * 2) {	// SettingsBar selected
 					animateHandler.removeCallbacks(startAnimate);
 					animateHandler.removeCallbacks(finishAnimate);
 					// settingsPaint.setAlpha(255);
@@ -1090,11 +1095,11 @@ public class JoystickView extends View {
 
 	private void setSidePaths(int side) {
 		TextHeight = side;
-		dstRectForOpt.set(0, TextHeight - textSizePix, Width, optionY - swipeLengthOption * 2);
+		dstRectForOpt.set(0, TextHeight - textSizePix, Width, optionY - swipeLengthOption * 3);
 		dstRectForSet.set(0, TextHeight - textSizePix, Width, TextHeight - textSizePix + dstHeight);
 		settingsPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, TextHeight - textSizePix + dstHeight, Color.WHITE,
 				Color.TRANSPARENT, TileMode.MIRROR));
-		optPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, optionY - swipeLengthOption * 2, Color.BLACK,
+		optPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, optionY - swipeLengthOption * 3, Color.BLACK,
 				Color.TRANSPARENT, TileMode.MIRROR));
 		int temp = side + rBig * 2 + pad;
 		dstRectForS.set(selectLeft[4], temp - rBig - rSmall, selectRight[4], temp - rBig + rSmall);
