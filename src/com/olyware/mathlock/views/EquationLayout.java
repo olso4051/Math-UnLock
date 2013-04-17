@@ -505,6 +505,7 @@ public class EquationLayout {
 	}
 
 	private void findKeywords() {
+		equationText = equationText.replaceAll("Infinity", "∞");
 		equationText = equationText.replaceAll("Phi", "ϕ");
 		equationText = equationText.replaceAll("Theta", "θ");
 		equationText = equationText.replaceAll("Pi", "π");

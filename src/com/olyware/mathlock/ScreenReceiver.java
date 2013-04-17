@@ -36,6 +36,7 @@ public class ScreenReceiver extends BroadcastReceiver {
 				i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				i.putExtra("locked", true);
 				// i.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
 				context.startActivity(i);
 			}

@@ -28,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -84,7 +85,7 @@ public class MainActivity extends Activity {
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
-	private boolean UnlockedPackages = false;
+	private boolean locked, UnlockedPackages = false;
 	private boolean dialogOn = false;
 	private boolean dontShow = false;
 	final private long MONTH = 2592000000l;
@@ -131,6 +132,9 @@ public class MainActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		locked = this.getIntent().getBooleanExtra("locked", false);
+		Log.d("test", "locked = " + locked);
 
 		layout = (LinearLayout) findViewById(R.id.layout);
 
@@ -348,25 +352,9 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (Money.getMoney() + Money.getMoneyPaid() < questionWorthMax) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.not_enough_coins_title)).setCancelable(false);
-			builder.setMessage(questionWorthMax + " " + getString(R.string.not_enough_coins_message));
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// nothing to do
-				}
-			});
-			builder.setNegativeButton(R.string.go_negative, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
-					finish();
-				}
-			});
-			AlertDialog alert = builder.create();
-			alert.show();
+		if (locked) {
+			return;
 		} else {
-			Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
 			super.onBackPressed();
 		}
 	}
@@ -374,16 +362,39 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onUserLeaveHint() {
 		super.onUserLeaveHint();
-		homeTest();
+		if (locked)
+			homeTest();
 	}
 
-	private void homeTest() {
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (locked) {
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+				return true;
+			}
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+				return true;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	private boolean homeTest() {
 		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningTaskInfo> recentTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
 		if (recentTasks.get(1).baseActivity.toShortString().indexOf(getPackageName()) > -1) {
 			// TODO test on multiple devices I think this is when Home or Notification is pressed, can't stop from executing exit code
-			Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
+			Log.d("test", "starting activity");
+			// Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
+			Intent i = new Intent(this, MainActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			i.putExtra("locked", true);
+			startActivity(i);
+			return true;
 		}
+		return false;
 	}
 
 	private void launchHomeScreen(int delay) {
