@@ -95,14 +95,18 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildVocabQuestions(cursor, sum, number);
 	}
 
-	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, String fromLanguage, String toLanguage) {
+	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage) {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
-		String where = "difficulty <= " + String.valueOf(difficulty.getValue());
+		String where = "difficulty = " + String.valueOf(difficulty.getValue());
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
-		return DatabaseModelFactory.buildAllLanguageQuestions(cursor, fromLanguage, toLanguage);
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
+				+ LanguageQuestionContract.TABLE_NAME + " WHERE " + where, null);
+		cursor2.moveToFirst();
+		int sum = cursor2.getInt(0);
+		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, String fromLanguage,

@@ -410,6 +410,14 @@ public class EquationLayout {
 		return bracketGroups.get(0).getHeight();
 	}
 
+	public int getTextSizeSP() {
+		return textSizeSP;
+	}
+
+	public float getTextSizePix() {
+		return textSizePix;
+	}
+
 	public void setBounds(int maxWidth, int maxHeight) {
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -464,6 +472,12 @@ public class EquationLayout {
 		setSize();
 	}
 
+	public void setTextSize(int SP, float Pix) {
+		textSizeSP = SP;
+		textSizePix = Pix;
+		setSize();
+	}
+
 	private void parseEquation() {
 		attributes.clear();
 		opened.clear();
@@ -505,6 +519,12 @@ public class EquationLayout {
 	}
 
 	private void findKeywords() {
+		equationText = equationText.replaceAll("Alpha", "α");
+		equationText = equationText.replaceAll("Beta", "β");
+		equationText = equationText.replaceAll("Gamma", "ɣ");
+		equationText = equationText.replaceAll("Rho", "ρ");
+		equationText = equationText.replaceAll("Omega", "ω");
+		equationText = equationText.replaceAll("Mu", "μ");
 		equationText = equationText.replaceAll("Infinity", "∞");
 		equationText = equationText.replaceAll("Phi", "ϕ");
 		equationText = equationText.replaceAll("Theta", "θ");
@@ -518,6 +538,7 @@ public class EquationLayout {
 		equationText = equationText.replaceAll("->", "→");
 		equationText = equationText.replaceAll("<-", "←");
 		equationText = equationText.replaceAll("<->", "↔");
+		equationText = equationText.replaceAll("\\+-", "±");
 	}
 
 	private void findBrackets(String s) {
@@ -900,6 +921,7 @@ public class EquationLayout {
 		// store paths for square roots
 		for (int i = 0; i < bracketGroups.size(); i++) {
 			if (bracketGroups.get(i).getModifier().equals(Att.SquareRoot)) {
+				bracketGroups.get(i).getPath().reset();
 				bracketGroups.get(i).getPath()
 						.moveTo(bracketGroups.get(i).getLeft(), bracketGroups.get(i).getBottom() - bracketGroups.get(i).getSizePix() / 2);
 				bracketGroups.get(i).getPath().lineTo(bracketGroups.get(i).getLeft() + extraPadding / 3, bracketGroups.get(i).getBottom());

@@ -134,13 +134,15 @@ public class EngineerQuestion extends Question {
 					} else
 						number = false;
 					// if not a number then if next is math symbol and variable is true then we found a variable
-				} else if (((nextC == '+') || (nextC == '-') || (nextC == '*') || (nextC == '/') || (nextC == '(') || (nextC == ')') || (nextC == '^'))
-						&& (variable)) {
-					locs.add(indexStart);
-					locf.add(index);
-					number = false;
-					variable = false;
-					// if next is a number then we may have found a variable
+				} else if ((nextC == '+') || (nextC == '-') || (nextC == '*') || (nextC == '/') || (nextC == '(') || (nextC == ')')
+						|| (nextC == '^') || (nextC == '\\') || (nextC == '=')) {
+					if (variable) {
+						locs.add(indexStart);
+						locf.add(index);
+						number = false;
+						variable = false;
+						// if next is a number then we may have found a variable
+					}
 				} else if (Character.isDigit(next) || (nextC == '.')) {
 					number = true;
 					variable = true;

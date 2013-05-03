@@ -357,12 +357,12 @@ public class JoystickView extends View {
 
 	public void setCorrectAnswer(int location) {
 		this.correctAnswer = location;
-		setLayouts();
+		// setLayouts();
 	}
 
 	public void setIncorrectGuess(int location) {
 		this.wrongAnswer = location;
-		setLayouts();
+		// setLayouts();
 	}
 
 	public void resetGuess() {
@@ -960,7 +960,9 @@ public class JoystickView extends View {
 					touchY = startY;
 					diffx = startX - (RectForUnlock.right + RectForUnlock.left) / 2;
 					diffy = startY - (RectForUnlock.top + RectForUnlock.bottom) / 2;
-					if (Math.sqrt(diffx * diffx + diffy * diffy) < rUnlock) {
+					if (Math.sqrt(diffx * diffx + diffy * diffy) < rUnlock * 1.5) {
+						startX = (RectForUnlock.right + RectForUnlock.left) / 2;
+						startY = (RectForUnlock.top + RectForUnlock.bottom) / 2;
 						RectForUnlockPulse.set((int) touchX - rUnlock + strokeWidth / 2, (int) touchY - rUnlock + strokeWidth / 2,
 								(int) touchX + rUnlock - strokeWidth / 2, (int) touchY + rUnlock - strokeWidth / 2);
 						RectForUnlock.set((int) touchX - rUnlock, (int) touchY - rUnlock, (int) touchX + rUnlock, (int) touchY + rUnlock);
@@ -1151,6 +1153,13 @@ public class JoystickView extends View {
 					setDimensions();
 					return;
 				}
+			} else {
+				if (layoutE[i].getTextSizePix() < answerSizePix) {
+					changeAnswerSize(layoutE[i].getTextSizeSP(), layoutE[i].getTextSizePix());
+					setDimensions();
+				} else if (layoutE[i].getTextSizePix() > answerSizePix) {
+					layoutE[i].setTextSize(answerSizeSP, answerSizePix);
+				}
 			}
 		}
 		setHintDimensions();
@@ -1220,6 +1229,14 @@ public class JoystickView extends View {
 	private void decreaseAnswerSize() {
 		answerSizeSP = Math.max(answerSizeSP - 2, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, getResources().getDisplayMetrics());
+		for (int i = 0; i < NumAnswers; i++) {
+			answerTextPaint[i].setTextSize(answerSizePix);
+		}
+	}
+
+	private void changeAnswerSize(int SP, float Pix) {
+		answerSizeSP = SP;
+		answerSizePix = Pix;
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}

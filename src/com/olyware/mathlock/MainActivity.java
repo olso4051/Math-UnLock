@@ -48,6 +48,8 @@ import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.IabHelper;
+import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.AnswerReadyListener;
@@ -110,6 +112,8 @@ public class MainActivity extends Activity {
 
 	private Typefaces typefaces;
 
+	private IabHelper mHelper;
+
 	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -135,6 +139,18 @@ public class MainActivity extends Activity {
 
 		locked = this.getIntent().getBooleanExtra("locked", false);
 		Log.d("test", "locked = " + locked);
+
+		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
+		mHelper = new IabHelper(this, base64EncodedPublicKey);
+		mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+			public void onIabSetupFinished(IabResult result) {
+				if (!result.isSuccess()) {
+					// Oh noes, there was a problem.
+					Log.d("test", "Problem setting up In-app Billing: " + result);
+				}
+				Log.d("test", "Hooray, IAB is fully set up!");
+			}
+		});
 
 		layout = (LinearLayout) findViewById(R.id.layout);
 
@@ -267,6 +283,9 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 		if (m_timeChangedReceiver != null)
 			this.unregisterReceiver(m_timeChangedReceiver);
+		if (mHelper != null)
+			mHelper.dispose();
+		mHelper = null;
 	}
 
 	@Override
@@ -676,8 +695,11 @@ public class MainActivity extends Activity {
 			else if (LanguageValues[i].equals(toLanguage))
 				toLanguageLocal = LanguageEntries[i];
 		}
-		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(minDifficulty),
-				Difficulty.fromValue(maxDifficulty), answers.length, fromLanguage, toLanguage);
+		int diff = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
+		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diff), answers.length, fromLanguage,
+				toLanguage);
+		// List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(minDifficulty),
+		// Difficulty.fromValue(maxDifficulty), answers.length, fromLanguage, toLanguage);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked

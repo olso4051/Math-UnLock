@@ -12,6 +12,7 @@
     <string name="difficulty_max">Max Difficulty</string>
     <string name="difficulty_min">Min Difficulty</string>
     <string name="difficulty_summary">Very Easy</string>
+    <string name="egg_found">Easter Egg Found Worth </string>
     <string name="egg_message">Egg worth = </string>
     <string name="egg_title">Easter Egg Found!</string>
     <string name="enable">Enable</string>
