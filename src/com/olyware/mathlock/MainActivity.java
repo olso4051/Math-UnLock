@@ -1,7 +1,6 @@
 package com.olyware.mathlock;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -561,104 +560,24 @@ public class MainActivity extends Activity {
 	}
 
 	private void setMathProblem(int minDifficulty, int maxDifficulty) {
-		int operator = 0;
-		int first = 1;
-		int second = 1;
-
-		if (minDifficulty == 0)
-			difficultyMax = rand.nextInt(maxDifficulty + 1);
-		else
-			difficultyMax = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
-		currentTableName = null;
 		fromLanguage = null;
 		toLanguage = null;
-		ID = 0;
-		switch (difficultyMax) {
-		case 0:				// Elementary
-			// add and subtract options
-			operator = rand.nextInt(2);
-			first = rand.nextInt(11);					// 0 through 10
-			second = rand.nextInt(11);					// 0 through 10
-			break;
-		case 1:				// Middle School
-			// add, subtract, multiply options
-			operator = rand.nextInt(3);
-			first = rand.nextInt(41) - 20;				// -20 through 20
-			second = rand.nextInt(41) - 20;				// -20 through 20
-			break;
-		case 2:				// High School (basic)
-			// add, subtract, multiply, and divide options
-			operator = rand.nextInt(4);
-			first = rand.nextInt(201) - 100;			// -100 through 100
-			second = rand.nextInt(201) - 100;			// -100 through 100
-			if (operator == 3) {
-				// check that answer will be an integer and not divide by zero
-				while (second == 0) {
-					second = rand.nextInt(201) - 100;
-				}
-				while (first % second != 0) {
-					first = rand.nextInt(201) - 100;	// new numbers
-					second = rand.nextInt(201) - 100;
-					while (second == 0) {
-						second = rand.nextInt(201) - 100;
-					}
-				}
-			}
-			break;
-		case 3:				// High School (advanced)
-		case 4:				// College (basic)
-		case 5:				// College (advanced)
-			currentTableName = getString(R.string.math_table);
-			fromLanguage = null;
-			toLanguage = null;
-			MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
-			ID = question.getID();
-			question.setVariables();
-			// Set the new difficulty based on what question was picked
-			difficultyMax = question.getDifficulty().getValue();
+		currentTableName = getString(R.string.math_table);
+		MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
+		ID = question.getID();
+		question.setVariables();
 
-			if (!question.getImage().equals("none")) {
-				int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
-				imageLeft = getResources().getDrawable(id);
-				setImage();
-			}
-			problem.setText(question.getQuestionText());
-			answers = question.getAnswers();
-			return;
-		}
+		// Set the new difficulty based on what question was picked
+		difficultyMax = question.getDifficulty().getValue();
 
-		switch (operator) {
-		case 0:			// add
-			answers[0] = String.valueOf(first + second);
-			problem.setText(String.valueOf(first) + " + " + String.valueOf(second) + " = ?");
-			break;
-		case 1:			// subtract
-			answers[0] = String.valueOf(first - second);
-			problem.setText(String.valueOf(first) + " - " + String.valueOf(second) + " = ?");
-			break;
-		case 2:			// multiply
-			answers[0] = String.valueOf(first * second);
-			problem.setText(String.valueOf(first) + " * " + String.valueOf(second) + " = ?");
-			break;
-		case 3:			// divide
-			answers[0] = String.valueOf(first / second);
-			problem.setText(String.valueOf(first) + " / " + String.valueOf(second) + " = ?");
-			break;
+		if (!question.getImage().equals("none")) {
+			int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
+			imageLeft = getResources().getDrawable(id);
+			setImage();
 		}
-
-		// generate 3 random numbers to add to correct answer, not equal to zero or themselves
-		List<Integer> generated = new ArrayList<Integer>();
-		for (int i = 0; i < 3; i++) {
-			while (true) {
-				int offset = rand.nextInt(21) - 10;
-				if (!generated.contains(offset) && offset != 0) {
-					// Done for this iteration
-					generated.add(offset);
-					answers[i + 1] = String.valueOf(offset + Integer.parseInt(answers[0]));
-					break;
-				}
-			}
-		}
+		answers = question.getAnswers();
+		problem.setText(question.getQuestionText());
+		return;
 	}
 
 	// TODO: Pass in a Difficulty enum instead of an integer
