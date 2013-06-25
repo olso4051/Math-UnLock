@@ -198,13 +198,22 @@ public class MathQuestion extends Question {
 				first = index + 1;
 			} else if ((next == ')') && (needs == 1)) {
 				subEq = range.substring(first, index + 1);
-				if (range.charAt(index + 1) == ':') {	// min or step
+				if (index + 1 == range.length()) {
+					max = math.evaluate(subEq);
+					if (variablePrecision[count] >= 0)
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, variablePrecision[count]) * step
+								+ min;
+					else
+						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, answerPrecision) * step + min;
+					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
+					count++;
+				} else if (range.charAt(index + 1) == ':') {	// min or step
 					if (first == 0) {
-						min = Double.parseDouble(subEq);
+						min = math.evaluate(subEq);
 					} else if (range.charAt(first - 1) == ':') {
-						step = Double.parseDouble(subEq);
+						step = math.evaluate(subEq);
 					} else {
-						min = Double.parseDouble(subEq);
+						min = math.evaluate(subEq);
 					}
 				} else {										// max
 					max = math.evaluate(subEq);
