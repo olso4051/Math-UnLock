@@ -1,5 +1,8 @@
 package com.olyware.mathlock;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import android.app.Activity;
@@ -10,6 +13,7 @@ import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -18,12 +22,17 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.IabHelper;
+import com.olyware.mathlock.utils.IabResult;
+import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
+import com.olyware.mathlock.utils.Purchase;
 
 public class ShowStoreActivity extends Activity {
-	final private int CostAll = 10000;
-	final private int CostSmall = 1000;
-	final private int CostLarge = 5000;
+	final private int CostAll = 10000, CostSmall = 1000, CostLarge = 5000;
+	final private String SKUcoins1000 = "coins1000", SKUcoins5000 = "coins5000", SKUcoins10000 = "coins10000";
+	private int[] Cost;
+	private String[] SKU;
 	private TextView moneyText, packsTitle, extrasTitle, testPrepTitle;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button[] buy;
@@ -36,10 +45,85 @@ public class ShowStoreActivity extends Activity {
 	private SharedPreferences.Editor editorPrefsMoney;
 	private Coins Money = new Coins(0, 0);
 
+	private IabHelper mHelper;
+	private IabHelper.QueryInventoryFinishedListener mQueryFinishedListener;
+	private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener;
+	private IabHelper.OnConsumeFinishedListener mConsumeFinishedListener;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
+
+		Cost = MainActivity.getCost();
+		SKU = MainActivity.getSKU();
+
+		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
+		mHelper = new IabHelper(this, base64EncodedPublicKey);
+		mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+			public void onIabSetupFinished(IabResult result) {
+				if (!result.isSuccess()) {
+					// Log.d("test", "Problem setting up In-app Billing: " + result);
+				}
+				// Log.d("test", "Hooray, IAB is fully set up!");
+			}
+		});
+		// this listener checks the google play server for prices and consumable products purchased but not yet
+		// provisioned to the user
+		mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
+			public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+				if (result.isFailure()) {
+					// handle error
+				} else {
+					String smallPrice = inventory.getSkuDetails(SKUcoins1000).getPrice();
+					String medPrice = inventory.getSkuDetails(SKUcoins5000).getPrice();
+					String largePrice = inventory.getSkuDetails(SKUcoins10000).getPrice();
+					// update UI
+					buttonCoins1.setText(buttonCoins1.getText() + smallPrice);
+					buttonCoins2.setText(buttonCoins2.getText() + medPrice);
+					buttonCoins3.setText(buttonCoins3.getText() + largePrice);
+					// check for non-consumed purchases
+					if (inventory.hasPurchase(SKUcoins1000)) {
+						mHelper.consumeAsync(inventory.getPurchase(SKUcoins1000), mConsumeFinishedListener);
+					} else if (inventory.hasPurchase(SKUcoins5000)) {
+						mHelper.consumeAsync(inventory.getPurchase(SKUcoins5000), mConsumeFinishedListener);
+					} else if (inventory.hasPurchase(SKUcoins10000)) {
+						mHelper.consumeAsync(inventory.getPurchase(SKUcoins10000), mConsumeFinishedListener);
+					}
+				}
+			}
+		};
+		// this listener checks if a product has been purchased then tries to consume it
+		mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+			public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+				if (result.isFailure()) {
+					Log.d("purchasing", "Error purchasing: " + result);
+					return;
+				} else if (purchase.getSku().equals(SKUcoins1000)) {
+					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+				} else if (purchase.getSku().equals(SKUcoins5000)) {
+					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+				} else if (purchase.getSku().equals(SKUcoins10000)) {
+					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+				}
+			}
+		};
+		// this listener checks for products that have been consumed and provisions them to the user
+		mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() {
+			public void onConsumeFinished(Purchase purchase, IabResult result) {
+				if (result.isSuccess()) {
+					if (purchase.getSku().equals(SKUcoins1000)) {
+						updateMoney(CostSmall);
+					} else if (purchase.getSku().equals(SKUcoins5000)) {
+						updateMoney(CostLarge);
+					} else if (purchase.getSku().equals(SKUcoins10000)) {
+						updateMoney(CostAll);
+					}
+				} else {
+					// handle error
+				}
+			}
+		};
 
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
@@ -57,21 +141,27 @@ public class ShowStoreActivity extends Activity {
 		buttonCoins1.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// TODO make user pay for more coins from google play
-				updateMoney(CostSmall);
+				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKUcoins1000, 10001, mPurchaseFinishedListener,
+						"bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+				// updateMoney(CostSmall);
 			}
 		});
 		buttonCoins2 = (Button) findViewById(R.id.extra_coins2);
 		buttonCoins2.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// TODO make user pay for more coins from google play
-				updateMoney(CostLarge);
+				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKUcoins5000, 50001, mPurchaseFinishedListener,
+						"bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+				// updateMoney(CostLarge);
 			}
 		});
 		buttonCoins3 = (Button) findViewById(R.id.extra_coins3);
 		buttonCoins3.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// TODO make user pay for more coins from google play
-				updateMoney(CostAll);
+				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKUcoins10000, 100001, mPurchaseFinishedListener,
+						"bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+				// updateMoney(CostAll);
 			}
 		});
 
@@ -105,6 +195,12 @@ public class ShowStoreActivity extends Activity {
 
 		testPrepTitle = ((TextView) findViewById(R.id.test_prep));
 		testPrepTitle.setPaintFlags(testPrepTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+		List<String> additionalSkuList = new ArrayList<String>();
+		additionalSkuList.add(SKUcoins1000);
+		additionalSkuList.add(SKUcoins5000);
+		additionalSkuList.add(SKUcoins10000);
+		mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 	}
 
 	@Override
@@ -114,6 +210,15 @@ public class ShowStoreActivity extends Activity {
 		setCost();
 		if (isPackageUnlocked())
 			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]));
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		if (mHelper != null)
+			mHelper.dispose();
+		mHelper = null;
 	}
 
 	@Override

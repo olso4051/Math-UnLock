@@ -19,7 +19,6 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -166,7 +165,6 @@ public class JoystickView extends View {
 			answerTextPaint[i].setTextSize(answerSizePix);
 			answerTextPaint[i].setTypeface(font);
 			bounds[i] = new Rect();
-			Log.d("test", "answer = " + answers[i]);
 			equation[i] = false;
 			if (answers[i].charAt(0) == '$')
 				if (answers[i].length() > 1)
