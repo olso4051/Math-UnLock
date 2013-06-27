@@ -4,6 +4,9 @@
     <string name="cash_it">Cash In!</string>
     <string name="clock">10:15pm</string>
     <string name="coins">Coins</string>
+    <string name="cost_small">$1</string>
+    <string name="cost_large">$2</string>
+    <string name="cost_all">$3</string>
     <string name="custom">Custom Pack</string>
     <string name="date">Monday\nJanuary 1</string>
     <string name="default_money">0</string>
@@ -30,9 +33,9 @@
     <string name="enable_vibration_summary">Vibrate on key presses</string>
     <string name="enable_vocab_summary">Vocab questions</string>
     <string name="extras">Extras</string>
-    <string name="extra_coins1">1000 Coins</string>
-    <string name="extra_coins2">5000 Coins</string>
-    <string name="extra_coins3">10000 Coins</string>
+    <string name="extra_coins1"> 1,000 Coins</string>
+    <string name="extra_coins2"> 5,000 Coins</string>
+    <string name="extra_coins3">10,000 Coins</string>
     <string name="get_pack_first">Unlock a Question Pack first so you can use your extras</string>
     <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
@@ -49,7 +52,7 @@
 		-Check out what else we have to offer in the Store\n\n
 		-Show this help in the info tab
 	</string>
-    <string name="info_message_first">We gave you 1000 coins to start! Go to the store and unlock your first question pack</string>
+    <string name="info_message_first">Your first question pack is on us! Go to the store and unlock your first question pack</string>
     <string name="language_from">Translate from</string>
     <string name="language_to">Translate to</string>
     <string name="language_from_default">english</string>

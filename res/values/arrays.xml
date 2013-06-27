@@ -144,8 +144,8 @@
     <integer-array name="unlock_cost">
         <item>10000</item>
         <item>1000</item>
-        <item>1000</item>
-        <item>1000</item>
+        <item>3000</item>
+        <item>3000</item>
         <!--
         <item>5000</item>
 		<item>5000</item>

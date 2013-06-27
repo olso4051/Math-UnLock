@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
@@ -61,7 +62,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 5, decreaseRate = 1000, startingPmoney = 1000;
+	final private int multiplier = 5, decreaseRate = 1000, startingPmoney = 0;
 	final private Coins Money = new Coins(0, 0);
 	final private static int CostAll = 10000, CostSmall = 1000, CostLarge = 5000;
 	final private static String SKUcoins1000 = "coins1000", SKUcoins5000 = "coins5000", SKUcoins10000 = "coins10000";
@@ -157,9 +158,15 @@ public class MainActivity extends Activity {
 		mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
 			public void onIabSetupFinished(IabResult result) {
 				if (!result.isSuccess()) {
-					// Log.d("test", "Problem setting up In-app Billing: " + result);
+					Log.d("test", "Problem setting up In-app Billing: " + result);
+				} else {
+					Log.d("test", "Hooray, IAB is fully set up!");
+					List<String> additionalSkuList = new ArrayList<String>();
+					additionalSkuList.add(SKUcoins1000);
+					additionalSkuList.add(SKUcoins5000);
+					additionalSkuList.add(SKUcoins10000);
+					mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 				}
-				// Log.d("test", "Hooray, IAB is fully set up!");
 			}
 		});
 		// this listener checks the google play server for prices and consumable products purchased but not yet
@@ -284,12 +291,6 @@ public class MainActivity extends Activity {
 		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
-
-		List<String> additionalSkuList = new ArrayList<String>();
-		additionalSkuList.add(SKUcoins1000);
-		additionalSkuList.add(SKUcoins5000);
-		additionalSkuList.add(SKUcoins10000);
-		mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 	}
 
 	@Override

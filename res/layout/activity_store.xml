@@ -25,27 +25,69 @@
 	    	android:textStyle="bold"
 	    	android:text="@string/store"/>
 	</LinearLayout>
-	<Button
-	    android:id="@+id/extra_coins1" 
-	    android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:text="@string/extra_coins1"
-		android:textSize="20sp"
-		android:textStyle="bold"/>
-	<Button
-	    android:id="@+id/extra_coins2" 
-	    android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:text="@string/extra_coins2"
-		android:textSize="20sp"
-		android:textStyle="bold"/>
-	<Button
-	    android:id="@+id/extra_coins3" 
-	    android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:text="@string/extra_coins3"
-		android:textSize="20sp"
-		android:textStyle="bold"/>
+	<LinearLayout
+	   	android:layout_width="match_parent"
+       	android:layout_height="wrap_content"
+       	android:orientation="horizontal" >
+		<Button
+		    android:id="@+id/extra_coins1" 
+		    android:layout_height="wrap_content"
+			android:layout_width="0dp"
+			android:layout_weight="5"
+			android:text="@string/extra_coins1"
+			android:textSize="20sp"
+			android:textStyle="bold"/>
+		<TextView
+	    	android:id="@+id/cost_small"
+	    	android:gravity="center_vertical|right"
+	    	android:layout_width="0dp"
+	    	android:layout_weight="1"
+	    	android:layout_height="fill_parent"
+	    	android:textSize="20sp"
+	    	android:text="@string/cost_small"/>
+	</LinearLayout>
+	<LinearLayout
+	   	android:layout_width="match_parent"
+       	android:layout_height="wrap_content"
+       	android:orientation="horizontal" >
+		<Button
+		    android:id="@+id/extra_coins2" 
+		    android:layout_height="wrap_content"
+			android:layout_width="0dp"
+			android:layout_weight="5"
+			android:text="@string/extra_coins2"
+			android:textSize="20sp"
+			android:textStyle="bold"/>
+		<TextView
+	    	android:id="@+id/cost_large"
+	    	android:gravity="center_vertical|right"
+	    	android:layout_width="0dp"
+	    	android:layout_weight="1"
+	    	android:layout_height="fill_parent"
+	    	android:textSize="20sp"
+	    	android:text="@string/cost_large"/>
+	</LinearLayout>
+	<LinearLayout
+	   	android:layout_width="match_parent"
+       	android:layout_height="wrap_content"
+       	android:orientation="horizontal" >
+		<Button
+		    android:id="@+id/extra_coins3" 
+		    android:layout_height="wrap_content"
+			android:layout_width="0dp"
+			android:layout_weight="5"
+			android:text="@string/extra_coins3"
+			android:textSize="20sp"
+			android:textStyle="bold"/>
+		<TextView
+	    	android:id="@+id/cost_all"
+	    	android:gravity="center_vertical|right"
+	    	android:layout_width="0dp"
+	    	android:layout_weight="1"
+	    	android:layout_height="fill_parent"
+	    	android:textSize="20sp"
+	    	android:text="@string/cost_all"/>
+	</LinearLayout>
 	<ScrollView
 	    android:layout_width="match_parent"
 		android:layout_height="wrap_content" >
