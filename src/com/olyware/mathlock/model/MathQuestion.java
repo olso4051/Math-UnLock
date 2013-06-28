@@ -140,21 +140,22 @@ public class MathQuestion extends Question {
 		for (int i = 0; i < questionVariables.length; i++) {
 			math.setVariable(String.valueOf(questionVariables[i]), questionVariableValues[i]);
 		}
-		while (index < equation.length() - 1) {
-			next = equation.charAt(index + 1);
+		while ((index < equation.length() - 1) && (index >= 0)) {
+			index += 1;
+			next = equation.charAt(index);
 			if ((next == close) && (needs == 1)) {
-				subEq = equation.substring(first, index + 2);
+				subEq = equation.substring(first + 1, index);
 				subEq = subEq.replace('{', '(');
 				subEq = subEq.replace('}', ')');
 				subEq = subEq.replace('[', '(');
 				subEq = subEq.replace(']', ')');
 				subEq = getStringPrecisionNumber(math.evaluate(subEq), precision);
-				if (first > 0)
-					equation = equation.substring(0, first) + subEq + equation.substring(index + 2);
-				else
-					equation = subEq + equation.substring(index + 2);
-				index = -1;
-				needs -= 1;
+
+				equation = equation.substring(0, first + 1) + subEq + equation.substring(index);
+
+				index = equation.indexOf(open, first + 1);
+				first = index;
+				needs = 1;
 			} else if ((next == close) && (needs > 1))
 				needs -= 1;
 			else if ((next == open) && (needs == 0)) {
@@ -162,7 +163,6 @@ public class MathQuestion extends Question {
 				first = index + 1;
 			} else if (next == open)
 				needs += 1;
-			index += 1;
 		}
 		return equation;
 	}
