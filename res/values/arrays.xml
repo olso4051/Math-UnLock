@@ -116,13 +116,13 @@
 	<string name="vocab_table">t_vocab_question</string>
     <string name="language_table">t_language_question</string>
     <string name="engineer_table">t_engineer_question</string>
-    <string name="highq_trivia_table">t_highq_trivia_question</string>
+    <string name="hiqh_trivia_table">t_hiqh_trivia_question</string>
     <string-array name="table_names">
         <item name="math">@string/math_table</item>
         <item name="vocab">@string/vocab_table</item>
         <item name="language">@string/language_table</item>
         <item name="engineer">@string/engineer_table</item>
-        <item name="engineer">@string/highq_trivia_table</item>
+        <item name="engineer">@string/hiqh_trivia_table</item>
     </string-array>
     
     <string-array name="unlock_package_keys">
@@ -136,7 +136,7 @@
 		<item>unlock_toddler</item>
 		-->
 		<item>unlock_engineer</item>
-		<item>unlock_highq_trivia</item>
+		<item>unlock_hiqh_trivia</item>
     </string-array>
     <string-array name="unlock_extra_keys">
         <item>unlock_harder</item>
@@ -167,7 +167,7 @@
 		<item>enable_toddler</item>
 		-->
 		<item>enable_engineer</item>
-		<item>enable_highq_trivia</item>
+		<item>enable_hiqh_trivia</item>
     </string-array>
 
     <string name="all">All</string>
@@ -178,7 +178,7 @@
 	<string name="gre">GRE</string>
 	<string name="toddler">Toddler</string>
 	<string name="engineer">Engineer</string>
-	<string name="highq_trivia">HighQ Trivia</string>
+	<string name="hiqh_trivia">HiQH Trivia</string>
     <string-array name="display_packages">
         <item>@string/all</item>
         <item>@string/math</item>
@@ -190,7 +190,7 @@
 		<item>@string/toddler</item>
 		-->
 		<item>@string/engineer</item>
-		<item>@string/highq_trivia</item>
+		<item>@string/hiqh_trivia</item>
     </string-array>
     <string-array name="settings_keys">
         <item>settings_math</item>
@@ -202,21 +202,21 @@
 		<item>settings_toddler</item>
 		-->
 		<item>settings_engineer</item>
-		<item>settings_highq_trivia</item>
+		<item>settings_hiqh_trivia</item>
 		<item>type</item>
     </string-array>
     <string-array name="package_info">
         <item>Unlocks all current and future question packs</item>
         <item>Math questions from elementary to college difficulty</item>
         <item>English vocabulary questions from elementary to college difficulty</item>
-        <item>Learn a new language by translating the 1000 most used words in 17 different languages</item>
+        <item>Learn a new language by translating the thousands of words and sentences in 17 different languages</item>
         <!--
         <item>ACT &amp; SAT vocab and math prep</item>
 		<item>GRE vocab and math prep</item>
 		<item>Help your young ones learn ABC\'s, shapes, colors all the way to simple math</item>
 		-->
-		<item>Complete math and science related equations to keep fresh</item>
-		<item>Fun trivia questions about the HighQ organization</item>
+		<item>Complete science and engineering related equations to keep fresh</item>
+		<item>Fun trivia questions</item>
 		<item>More Unlock types to challenge your brain in a different way</item>
 		<item>Create your own questions, study for a test, It\'s up to you!</item>
     </string-array>
@@ -230,6 +230,8 @@
         <item>store</item>
         <item>progress</item>
         <item>type</item>
+        <item>share</item>
+        <item>rate</item>
     </string-array>
     <integer-array name="egg_max_values">
         <item>1000</item>
@@ -240,6 +242,8 @@
         <item>1000</item>
         <item>1000</item>
         <item>1000</item>
+        <item>5000</item>
+        <item>5000</item>
     </integer-array>
     
     <string-array name="answer_titles">

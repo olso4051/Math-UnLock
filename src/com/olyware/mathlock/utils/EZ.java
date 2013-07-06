@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.olyware.mathlock.views.AnswerView;
+import com.olyware.mathlock.views.GraphView;
 import com.olyware.mathlock.views.JoystickView;
 
 public class EZ {
@@ -65,6 +66,8 @@ public class EZ {
 				((JoystickView) mChild).setTypeface(font);
 			} else if (mChild instanceof AnswerView) {
 				((AnswerView) mChild).setTypeface(font);
+			} else if (mChild instanceof GraphView) {
+				((GraphView) mChild).setTypeface(font);
 			} else if (mChild instanceof ViewGroup) {
 				// Recursively attempt another ViewGroup.
 				setFont((ViewGroup) mChild, font);

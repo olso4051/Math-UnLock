@@ -16,24 +16,32 @@ import android.text.Html;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Coins;
+import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
+	private LinearLayout layout;
+	private Typefaces typefaces;
 	private Coins Money = new Coins(0, 0);
 	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
+	private ImageButton back;
 	private TextView clock;
-	final private float clockSize = 45, dateSize = 15;
+	final private float clockSize = 40, dateSize = 20;
 	private float currentClockSize;
 	private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
@@ -65,6 +73,10 @@ public class ShowProgressActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_progress);
 
+		layout = (LinearLayout) findViewById(R.id.layout);
+		typefaces = Typefaces.getInstance(this);
+		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
+
 		dbManager = new DatabaseManager(getApplicationContext());
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
@@ -72,6 +84,13 @@ public class ShowProgressActivity extends Activity {
 		times = getResources().getStringArray(R.array.times);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+
+		back = (ImageButton) findViewById(R.id.back);
+		back.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				finish();
+			}
+		});
 
 		clock = (TextView) findViewById(R.id.clock);
 		clock.setOnClickListener(new OnClickListener() {
@@ -138,9 +157,45 @@ public class ShowProgressActivity extends Activity {
 		for (int i = 1; i < difficulties.length; i++) {
 			difficulties[i] = Difficulty.fromValueString(i - 1);
 		}
-		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times);
-		ArrayAdapter<String> adapterPackages = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, packages);
-		ArrayAdapter<String> adapterDifficulties = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficulties);
+		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times) {
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				((TextView) v).setTypeface(typefaces.robotoLight);
+				return v;
+			}
+
+			public View getDropDownView(int position, View convertView, ViewGroup parent) {
+				View v = super.getDropDownView(position, convertView, parent);
+				((TextView) v).setTypeface(typefaces.robotoLight);
+				return v;
+			}
+		};
+		ArrayAdapter<String> adapterPackages = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, packages) {
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				((TextView) v).setTypeface(typefaces.robotoLight);
+				return v;
+			}
+
+			public View getDropDownView(int position, View convertView, ViewGroup parent) {
+				View v = super.getDropDownView(position, convertView, parent);
+				((TextView) v).setTypeface(typefaces.robotoLight);
+				return v;
+			}
+		};
+		ArrayAdapter<String> adapterDifficulties = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficulties) {
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				((TextView) v).setTypeface(typefaces.robotoLight);
+				return v;
+			}
+
+			public View getDropDownView(int position, View convertView, ViewGroup parent) {
+				View v = super.getDropDownView(position, convertView, parent);
+				((TextView) v).setTypeface(typefaces.robotoLight);
+				return v;
+			}
+		};
 		adapterTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		adapterPackages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		adapterDifficulties.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -224,6 +279,7 @@ public class ShowProgressActivity extends Activity {
 	}
 
 	private void toggleClockDate() {
+		Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[4], EggMaxValues[4]));
 		if (currentClockSize == dateSize) {
 			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
 			currentClockSize = clockSize;

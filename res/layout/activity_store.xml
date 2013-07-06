@@ -8,6 +8,14 @@
 	   	android:layout_width="match_parent"
        	android:layout_height="wrap_content"
        	android:orientation="horizontal" >
+       	<ImageButton
+		    android:id="@+id/back"
+		    android:contentDescription="@string/back"
+		    android:enabled="true"
+		    android:layout_gravity="center_vertical"
+		    android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:background="@drawable/back"/>
     	<TextView
 	    	android:id="@+id/money"
 	    	android:gravity="center_vertical"
@@ -30,7 +38,8 @@
        	android:layout_height="wrap_content"
        	android:orientation="horizontal" >
 		<Button
-		    android:id="@+id/extra_coins1" 
+		    android:id="@+id/extra_coins1"
+		    android:enabled="false"
 		    android:layout_height="wrap_content"
 			android:layout_width="0dp"
 			android:layout_weight="5"
@@ -51,7 +60,8 @@
        	android:layout_height="wrap_content"
        	android:orientation="horizontal" >
 		<Button
-		    android:id="@+id/extra_coins2" 
+		    android:id="@+id/extra_coins2"
+		    android:enabled="false" 
 		    android:layout_height="wrap_content"
 			android:layout_width="0dp"
 			android:layout_weight="5"
@@ -72,7 +82,8 @@
        	android:layout_height="wrap_content"
        	android:orientation="horizontal" >
 		<Button
-		    android:id="@+id/extra_coins3" 
+		    android:id="@+id/extra_coins3"
+		    android:enabled="false" 
 		    android:layout_height="wrap_content"
 			android:layout_width="0dp"
 			android:layout_weight="5"
@@ -285,15 +296,15 @@
 		       	android:layout_height="wrap_content"
 		       	android:orientation="horizontal" >
 				<Button
-				    android:id="@+id/unlock_highq_trivia" 
+				    android:id="@+id/unlock_hiqh_trivia" 
 				    android:layout_height="wrap_content"
 					android:layout_width="0dp"
 					android:layout_weight="4"
-					android:text="@string/unlock_highq_trivia"
+					android:text="@string/unlock_hiqh_trivia"
 					android:textSize="20sp"
 					android:textStyle="bold"/>
 				<TextView
-			    	android:id="@+id/highq_trivia_cost"
+			    	android:id="@+id/hiqh_trivia_cost"
 			    	android:gravity="center_vertical|right"
 			    	android:layout_width="0dp"
 			    	android:layout_weight="3"

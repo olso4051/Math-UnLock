@@ -569,6 +569,14 @@ public class MathEval extends Object {
 		return ofs;
 	}
 
+	public static int factorial(int n) {
+		int fact = 1; // this will be the result
+		for (int i = 1; i <= n; i++) {
+			fact *= i;
+		}
+		return fact;
+	}
+
 	private static double GCD(double a, double b) {
 		while (b > 0) {
 			double temp = b;
@@ -777,6 +785,8 @@ public class MathEval extends Object {
 				return lft + rgt;                                                              // add/unary-positive
 			case '-':
 				return lft - rgt;                                                              // subtract/unary-negative
+			case '!':
+				return factorial((int) lft);                                                   // factorial
 			default:
 				throw new UnsupportedOperationException("MathEval internal operator setup is incorrect - internal operator \"" + opr
 						+ "\" not handled");
@@ -828,6 +838,9 @@ public class MathEval extends Object {
 			case 'f': {
 				if (fncnam.equalsIgnoreCase("floor")) {
 					return Math.floor(fncargs.next());
+				}
+				if (fncnam.equalsIgnoreCase("fac")) {
+					return factorial((int) fncargs.next());
 				}
 			}
 				break;
@@ -942,6 +955,7 @@ public class MathEval extends Object {
 		static private final Operator OPR_MOD = new Operator('%', 40, DefaultImpl.INSTANCE); // remainder
 		static private final Operator OPR_ADD = new Operator('+', 20, DefaultImpl.INSTANCE); // add/unary-positive
 		static private final Operator OPR_SUB = new Operator('-', 20, DefaultImpl.INSTANCE); // subtract/unary-negative
+		static private final Operator OPR_FAC = new Operator('!', 20, DefaultImpl.INSTANCE); // factorial
 
 		// To add/remove operators change evaluateOperator() and registerOperators
 		static void registerOperators(MathEval tgt) {
@@ -953,6 +967,7 @@ public class MathEval extends Object {
 			tgt.setOperator(OPR_MOD);
 			tgt.setOperator(OPR_ADD);
 			tgt.setOperator(OPR_SUB);
+			tgt.setOperator(OPR_FAC);
 		}
 
 		// To add/remove functions change evaluateFunction() and registerFunctions
@@ -967,6 +982,7 @@ public class MathEval extends Object {
 			tgt.setFunctionHandler("cosh", INSTANCE);
 			tgt.setFunctionHandler("exp", INSTANCE);
 			tgt.setFunctionHandler("expm1", INSTANCE);
+			tgt.setFunctionHandler("fac", INSTANCE);
 			tgt.setFunctionHandler("floor", INSTANCE);
 			tgt.setFunctionHandler("gcd", INSTANCE);
 			// tgt.setFunctionHandler("getExponent", INSTANCE); // min API 9

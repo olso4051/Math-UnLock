@@ -28,20 +28,11 @@ public class EggHelper {
 			amount = getAmount(max);
 			final int a = amount;
 
-			/*AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-			builder.setTitle(ctx.getString(R.string.egg_title));
-			builder.setMessage(ctx.getString(R.string.egg_message) + amount).setCancelable(false);
-			builder.setIcon(R.drawable.egg);
-			builder.setPositiveButton(R.string.cash_it, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {*/
 			editorPrefsEggs = sharedPrefsEggs.edit();
 			editorPrefsEggs.putBoolean(Egg, true).commit();
 			MoneyHelper.setMoney(ctx, coins, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));// setMoney();
-			/*}
-			});
-			AlertDialog alert = builder.create();
-			alert.show();*/
-			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + amount, Toast.LENGTH_SHORT).show();
+
+			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else
 			amount = 0;
 		return amount;
@@ -57,20 +48,11 @@ public class EggHelper {
 			amount = getAmount(max);
 			final int a = amount;
 
-			/*AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-			builder.setTitle(ctx.getString(R.string.egg_title));
-			builder.setMessage(ctx.getString(R.string.egg_message) + amount).setCancelable(false);
-			builder.setIcon(R.drawable.egg);
-			builder.setPositiveButton(R.string.cash_it, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {*/
 			editorPrefsEggs = sharedPrefsEggs.edit();
 			editorPrefsEggs.putBoolean(Egg, true).commit();
 			MoneyHelper.setMoney(ctx, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));
-			/*}
-			});
-			AlertDialog alert = builder.create();
-			alert.show();*/
-			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + amount, Toast.LENGTH_SHORT).show();
+
+			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else
 			amount = 0;
 		return amount;

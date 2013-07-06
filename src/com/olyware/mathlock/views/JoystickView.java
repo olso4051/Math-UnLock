@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.ui.Typefaces;
@@ -158,6 +159,7 @@ public class JoystickView extends View {
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, getResources().getDisplayMetrics());
 		Typefaces typefaces = Typefaces.getInstance(ctx);
 		font = typefaces.robotoLight;
+
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i] = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 			answerTextPaint[i].setTextAlign(Paint.Align.CENTER);
@@ -626,8 +628,7 @@ public class JoystickView extends View {
 					invalidate();
 					break;
 				}
-			}
-			if (actionType == MotionEvent.ACTION_MOVE) {
+			} else if (actionType == MotionEvent.ACTION_MOVE) {
 				touchX = event.getX();
 				touchY = event.getY();
 				checkSelection(false, false);
@@ -898,6 +899,8 @@ public class JoystickView extends View {
 				for (int i = 0; i < selectOptions.length; i++)
 					selectOptions[i] = false;
 				listener.OnSelect(s);
+			} else if (send) {
+				Toast.makeText(ctx, "Swipe option to select", Toast.LENGTH_SHORT).show();
 			}
 		} else
 			switch (type) {

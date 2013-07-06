@@ -1,10 +1,10 @@
 package com.olyware.mathlock.model;
 
-public class HighQTriviaQuestion extends Question {
+public class HiQHTriviaQuestion extends Question {
 
 	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
 
-	public HighQTriviaQuestion(int id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
+	public HiQHTriviaQuestion(int id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
 			String incorrectAnswer3, Difficulty difficulty, int priority) {
 		super(id, text, correctAnswer, difficulty, priority);// not the right correct answer at this point
 		this.incorrectAnswer1 = incorrectAnswer1;
@@ -34,7 +34,7 @@ public class HighQTriviaQuestion extends Question {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HighQTriviaQuestion other = (HighQTriviaQuestion) obj;
+		HiQHTriviaQuestion other = (HiQHTriviaQuestion) obj;
 		if (incorrectAnswer1 == null) {
 			if (other.incorrectAnswer1 != null)
 				return false;
@@ -55,7 +55,7 @@ public class HighQTriviaQuestion extends Question {
 
 	@Override
 	public String toString() {
-		return "HighQTriviaQuestion [incorrect1=" + incorrectAnswer1 + "|incorrect2=" + incorrectAnswer2 + "|incorrect3="
-				+ incorrectAnswer3 + "]";
+		return "HiQHTriviaQuestion [incorrect1=" + incorrectAnswer1 + "|incorrect2=" + incorrectAnswer2 + "|incorrect3=" + incorrectAnswer3
+				+ "]";
 	}
 }

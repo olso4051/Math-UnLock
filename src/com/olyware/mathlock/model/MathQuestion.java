@@ -94,7 +94,7 @@ public class MathQuestion extends Question {
 				postParse[i] = "$" + getStringPrecisionNumber(math.evaluate(preParse[i]), answerPrecision) + "$";
 				break;
 			case PARENTHESIS_ONLY:
-				postParse[i] = "$" + removeParentheses(preParse[i], '(', ')', answerPrecision) + "$";
+				postParse[i] = "$" + removeParentheses(preParse[i], '{', '}', answerPrecision) + "$";
 				break;
 			case NOTHING:
 				postParse[i] = "$" + preParse[i] + "$";

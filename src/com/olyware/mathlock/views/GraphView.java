@@ -9,10 +9,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.olyware.mathlock.ui.Typefaces;
 
 public class GraphView extends View {
 	private ArrayList<Integer> percent = new ArrayList<Integer>();
@@ -23,6 +26,7 @@ public class GraphView extends View {
 	private float padVert, padHorz, padScrollPix;
 	private float textLabelSizePix, textStatsSizePix;
 	private float left, top, right, bottom;
+	private Typeface font;
 
 	private String Stats[] = { "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak", "Current Streak", "Total Study Time",
 			"Fastest Time", "Average Time", "coins/hr (cph)", "Eggs Found" };
@@ -33,36 +37,43 @@ public class GraphView extends View {
 	private Path Xlabel;
 	private Path percentPath;
 
+	private Context ctx;
+
 	// =========================================
 	// Constructors
 	// =========================================
 
 	public GraphView(Context context) {
 		super(context);
-		initGraphView();
+		initGraphView(context);
 	}
 
 	public GraphView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		initGraphView();
+		initGraphView(context);
 	}
 
 	public GraphView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		initGraphView();
+		initGraphView(context);
 	}
 
 	// =========================================
 	// Initialization
 	// =========================================
 
-	private void initGraphView() {
+	private void initGraphView(Context ctx) {
+		this.ctx = ctx;
+		Typefaces typefaces = Typefaces.getInstance(this.ctx);
+		font = typefaces.robotoLight;
+
 		textLabelSizeSP = 40; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
 		TextLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextLabelPaint.setColor(Color.WHITE);
 		TextLabelPaint.setTextAlign(Paint.Align.CENTER);
 		TextLabelPaint.setTextSize(textLabelSizePix);
+		TextLabelPaint.setTypeface(font);
 
 		textStatsSizeSP = 20;
 		textStatsSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textStatsSizeSP, getResources().getDisplayMetrics());
@@ -70,14 +81,17 @@ public class GraphView extends View {
 		TextStatsPaintL.setColor(Color.WHITE);
 		TextStatsPaintL.setTextAlign(Paint.Align.LEFT);
 		TextStatsPaintL.setTextSize(textStatsSizePix);
+		TextStatsPaintL.setTypeface(font);
 		TextStatsPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextStatsPaintR.setColor(Color.WHITE);
 		TextStatsPaintR.setTextAlign(Paint.Align.RIGHT);
 		TextStatsPaintR.setTextSize(textStatsSizePix);
+		TextStatsPaintR.setTypeface(font);
 		TextStatsPaintC = new Paint(Paint.ANTI_ALIAS_FLAG);
 		TextStatsPaintC.setColor(Color.WHITE);
 		TextStatsPaintC.setTextAlign(Paint.Align.CENTER);
 		TextStatsPaintC.setTextSize(textStatsSizePix);
+		TextStatsPaintC.setTypeface(font);
 
 		movingAverage = 20;
 		setStats(0, 0, 0, 0, 0, 0, 0, 0, "0 / 0");
@@ -102,6 +116,14 @@ public class GraphView extends View {
 	// =========================================
 	// Public Methods
 	// =========================================
+
+	public void setTypeface(Typeface font) {
+		this.font = font;
+		TextLabelPaint.setTypeface(font);
+		TextStatsPaintL.setTypeface(font);
+		TextStatsPaintR.setTypeface(font);
+		TextStatsPaintC.setTypeface(font);
+	}
 
 	public void setMovingAverage(int movingAverage) {
 		this.movingAverage = movingAverage;

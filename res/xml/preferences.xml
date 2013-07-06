@@ -159,12 +159,12 @@
 	        android:defaultValue="false"/>
 	</PreferenceCategory>
 	<PreferenceCategory
-        android:title="@string/settings_highq_trivia_title"
-        android:key="settings_highq_trivia">
+        android:title="@string/settings_hiqh_trivia_title"
+        android:key="settings_hiqh_trivia">
         <CheckBoxPreference
-	        android:key="enable_highq_trivia"
+	        android:key="enable_hiqh_trivia"
 	        android:title="@string/enable"
-	        android:summary="@string/enable_highq_trivia_summary"
+	        android:summary="@string/enable_hiqh_trivia_summary"
 	        android:defaultValue="false"/>
 	</PreferenceCategory>
 </PreferenceScreen>

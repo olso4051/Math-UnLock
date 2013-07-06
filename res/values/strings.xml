@@ -1,6 +1,8 @@
 <resources>
 
-    <string name="app_name">HighQ</string>
+    <string name="app_name">HiQH</string>
+    
+    <string name="back">Back</string>
     <string name="cash_it">Cash In!</string>
     <string name="clock">10:15pm</string>
     <string name="coins">Coins</string>
@@ -25,7 +27,7 @@
     <string name="enable_engineer_summary">Engineering Questions</string>
     <string name="enable_gre_math_summary">GRE Math Questions</string>
     <string name="enable_gre_vocab_summary">GRE Vocab Questions</string>
-    <string name="enable_highq_trivia_summary">HighQ Trivia Questions</string>
+    <string name="enable_hiqh_trivia_summary">HiQH Trivia Questions</string>
     <string name="enable_language_summary">Language questions</string>
     <string name="enable_math_summary">Math questions</string>
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
@@ -41,11 +43,11 @@
     <string name="goto_store">Goto Store</string>
     <string name="harder">Unlock Types</string>
     <string name="info_title">Help and Info</string>
-    <string name="info_title_first">Thanks for trying HighQ!</string>
-    <string name="info_message">-HighQ is trying hard to increase your IQ. Because of that we wont show you ads. We hope you like our product and rate and comment it in the Play Store!\n\n
+    <string name="info_title_first">Thanks for trying HiQH!</string>
+    <string name="info_message">-HiQH is trying hard to increase your IQ. Because of that we wont show you ads. We hope you like our product and rate and comment it in the Play Store!\n\n
         -Answer Questions to earn coins, and increase that IQ\n\n
 		-Use Coins to buy question packs and extras\n\n
-		-Buy coins in the store or find them lying around (HINT: Share HighQ to find some more coins)\n\n
+		-Buy coins in the store or find them lying around (HINT: Share HiQH to find some more coins)\n\n
 		-Choose question types and difficulty in Settings tab\n\n
 		-Try Quiz-mode for an endless supply of questions\n\n
 		-Check out your progress and achievements in the Stats tab\n\n
@@ -81,22 +83,22 @@
     <string name="prompt_package">Package</string>
     <string name="prompt_difficulty">Difficulty</string>
     <string name="purchase_package_message">Are you sure you want to unlock this package?</string>
-    <string name="purchased">Purchased</string>
+    <string name="purchased">Unlocked</string>
     <string name="quiz_mode">Quiz Mode?</string>
-    <string name="rate">Rate HighQ</string>
-    <string name="rate_title">Rate, Comment, or Share HighQ!</string>
+    <string name="rate">Rate HiQH</string>
+    <string name="rate_title">Rate, Comment, or Share HiQH!</string>
     <string name="security_title">Security</string>
     <string name="settings">Settings</string>
     <string name="settings_questions">Question Packs</string>
     <string name="settings_act_sat_title">ACT &amp; SAT Questions</string>
     <string name="settings_engineer_title">Engineering Questions</string>
     <string name="settings_gre_title">GRE Questions</string>
-    <string name="settings_highq_trivia_title">HighQ Trivia Questions</string>
+    <string name="settings_hiqh_trivia_title">HiQH Trivia Questions</string>
     <string name="settings_language_title">Language Questions</string>
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_toddler_title">Toddler Questions</string>
     <string name="settings_vocab_title">Vocabulary Questions</string>
-    <string name="share_message">HighQ is increasing my IQ</string>
+    <string name="share_message">HiQH is increasing my IQ</string>
     <string name="share_subject">@string/app_name</string>
     <string name="share_with">Share with…</string>
     <string name="side_bar">Settings and Info</string>
@@ -120,7 +122,7 @@
     <string name="unlock_all">All Packs</string>
     <string name="unlock_engineer">Engineering Pack</string>
     <string name="unlock_gre">GRE Pack</string>
-    <string name="unlock_highq_trivia">HighQ Trivia Pack</string>
+    <string name="unlock_hiqh_trivia">HiQH Trivia Pack</string>
     <string name="unlock_language">Language Pack</string>
     <string name="unlock_math">Math Pack</string>
     <string name="unlock_toddler">Toddler Pack</string>

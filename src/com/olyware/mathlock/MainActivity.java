@@ -39,7 +39,7 @@ import android.widget.TextView;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HighQTriviaQuestion;
+import com.olyware.mathlock.model.HiQHTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -62,12 +62,12 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 5, decreaseRate = 1000, startingPmoney = 0;
+	final private int multiplier = 3, decreaseRate = 500, startingPmoney = 0;
 	final private Coins Money = new Coins(0, 0);
-	final private static int CostAll = 10000, CostSmall = 1000, CostLarge = 5000;
-	final private static String SKUcoins1000 = "coins1000", SKUcoins5000 = "coins5000", SKUcoins10000 = "coins10000";
+	final private static int[] Cost = { 1000, 5000, 10000 };
+	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
 	private int dMoney;// change in money after a question is answered
-	private int difficultyMax = 0, difficultyMin = 0;
+	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
 	private boolean fromSettings = false;
 
@@ -137,11 +137,11 @@ public class MainActivity extends Activity {
 	}
 
 	public static int[] getCost() {
-		return new int[] { CostSmall, CostLarge, CostAll };
+		return Cost;
 	}
 
 	public static String[] getSKU() {
-		return new String[] { SKUcoins1000, SKUcoins5000, SKUcoins10000 };
+		return SKU;
 	}
 
 	@Override
@@ -158,13 +158,13 @@ public class MainActivity extends Activity {
 		mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
 			public void onIabSetupFinished(IabResult result) {
 				if (!result.isSuccess()) {
-					Log.d("test", "Problem setting up In-app Billing: " + result);
+					// handle error
 				} else {
-					Log.d("test", "Hooray, IAB is fully set up!");
+					// in app billing is set up. check for non-consumed purchases
 					List<String> additionalSkuList = new ArrayList<String>();
-					additionalSkuList.add(SKUcoins1000);
-					additionalSkuList.add(SKUcoins5000);
-					additionalSkuList.add(SKUcoins10000);
+					additionalSkuList.add(SKU[0]);
+					additionalSkuList.add(SKU[1]);
+					additionalSkuList.add(SKU[2]);
 					mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 				}
 			}
@@ -177,12 +177,12 @@ public class MainActivity extends Activity {
 					// handle error
 				} else {
 					// check for non-consumed purchases
-					if (inventory.hasPurchase(SKUcoins1000)) {
-						mHelper.consumeAsync(inventory.getPurchase(SKUcoins1000), mConsumeFinishedListener);
-					} else if (inventory.hasPurchase(SKUcoins5000)) {
-						mHelper.consumeAsync(inventory.getPurchase(SKUcoins5000), mConsumeFinishedListener);
-					} else if (inventory.hasPurchase(SKUcoins10000)) {
-						mHelper.consumeAsync(inventory.getPurchase(SKUcoins10000), mConsumeFinishedListener);
+					if (inventory.hasPurchase(SKU[0])) {
+						mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+					} else if (inventory.hasPurchase(SKU[1])) {
+						mHelper.consumeAsync(inventory.getPurchase(SKU[1]), mConsumeFinishedListener);
+					} else if (inventory.hasPurchase(SKU[2])) {
+						mHelper.consumeAsync(inventory.getPurchase(SKU[2]), mConsumeFinishedListener);
 					}
 				}
 			}
@@ -191,12 +191,12 @@ public class MainActivity extends Activity {
 		mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() {
 			public void onConsumeFinished(Purchase purchase, IabResult result) {
 				if (result.isSuccess()) {
-					if (purchase.getSku().equals(SKUcoins1000)) {
-						updateMoney(CostSmall);
-					} else if (purchase.getSku().equals(SKUcoins5000)) {
-						updateMoney(CostLarge);
-					} else if (purchase.getSku().equals(SKUcoins10000)) {
-						updateMoney(CostAll);
+					if (purchase.getSku().equals(SKU[0])) {
+						updateMoney(Cost[0]);
+					} else if (purchase.getSku().equals(SKU[1])) {
+						updateMoney(Cost[1]);
+					} else if (purchase.getSku().equals(SKU[2])) {
+						updateMoney(Cost[2]);
 					}
 				} else {
 					// handle error
@@ -205,7 +205,6 @@ public class MainActivity extends Activity {
 		};
 
 		layout = (LinearLayout) findViewById(R.id.layout);
-
 		typefaces = Typefaces.getInstance(this);
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
@@ -249,6 +248,7 @@ public class MainActivity extends Activity {
 				JoystickSelected(s);
 			}
 		});
+		quizMode = joystick.setQuizMode(!locked);
 
 		timerHandler = new Handler();
 		reduceWorth = new Runnable() {
@@ -276,7 +276,7 @@ public class MainActivity extends Activity {
 		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
 
 		if (savedInstanceState != null) {
-			quizMode = joystick.setQuizMode(savedInstanceState.getBoolean("Quiz"));
+			// quizMode = joystick.setQuizMode(!locked && savedInstanceState.getBoolean("Quiz"));
 			currentClockSize = savedInstanceState.getFloat("ClockSize");
 		}
 
@@ -291,6 +291,7 @@ public class MainActivity extends Activity {
 		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
+		Log.d("test", "locked=" + locked + "|onCreate()");
 	}
 
 	@Override
@@ -343,6 +344,9 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (locked && quizMode)
+			quizMode = joystick.setQuizMode(false);
+
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
@@ -441,13 +445,19 @@ public class MainActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (locked) {
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-				return true;
+				return true;	// doesn't execute code to change the volume when the screen is locked
 			}
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-				return true;
+				return true;	// doesn't execute code to change the volume when the screen is locked
 			}
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		locked = intent.getBooleanExtra("locked", false);
 	}
 
 	private boolean homeTest() {
@@ -527,6 +537,7 @@ public class MainActivity extends Activity {
 					// get the difficulty
 					difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
 					difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
+					difficulty = difficultyMax;
 					switch (location[randPack]) {
 					case 0:			// math question
 						currentPack = getString(R.string.math);
@@ -560,9 +571,9 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.engineer);
 						setEngineerProblem(difficultyMin, difficultyMax);
 						break;
-					case 4:			// HighQ Trivia question
-						currentPack = getString(R.string.highq_trivia);
-						setHighQTriviaProblem(difficultyMin, difficultyMax);
+					case 4:			// HiQH Trivia question
+						currentPack = getString(R.string.hiqh_trivia);
+						setHiQHTriviaProblem(difficultyMin, difficultyMax);
 						break;
 					default:
 						break;
@@ -605,7 +616,7 @@ public class MainActivity extends Activity {
 
 	private void resetTimes() {
 		startTime = System.currentTimeMillis();
-		questionWorth = (difficultyMax + 1) * multiplier;
+		questionWorth = difficulty * multiplier + 5;
 		questionWorthMax = questionWorth;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
@@ -613,15 +624,13 @@ public class MainActivity extends Activity {
 	}
 
 	private void setMathProblem(int minDifficulty, int maxDifficulty) {
-		fromLanguage = null;
-		toLanguage = null;
 		currentTableName = getString(R.string.math_table);
 		MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
 		ID = question.getID();
 		question.setVariables();
 
 		// Set the new difficulty based on what question was picked
-		difficultyMax = question.getDifficulty().getValue();
+		difficulty = question.getDifficulty().getValue();
 
 		if (!question.getImage().equals("none")) {
 			int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
@@ -636,15 +645,13 @@ public class MainActivity extends Activity {
 	// TODO: Pass in a Difficulty enum instead of an integer
 	private void setVocabProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.vocab_table);
-		fromLanguage = null;
-		toLanguage = null;
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(minDifficulty),
 				Difficulty.fromValue(maxDifficulty), answers.length);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
-		difficultyMax = questions.get(0).getDifficulty().getValue();
+		difficulty = questions.get(0).getDifficulty().getValue();
 
 		// Display the vocab question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -675,7 +682,7 @@ public class MainActivity extends Activity {
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
-		difficultyMax = questions.get(0).getDifficulty().getValue();
+		difficulty = questions.get(0).getDifficulty().getValue();
 
 		// Display the vocab question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -732,29 +739,25 @@ public class MainActivity extends Activity {
 
 	private void setEngineerProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.engineer_table);
-		fromLanguage = null;
-		toLanguage = null;
 		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
-		difficultyMax = question.getDifficulty().getValue();
+		difficulty = question.getDifficulty().getValue();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
 		return;
 	}
 
-	private void setHighQTriviaProblem(int minDifficulty, int maxDifficulty) {
-		currentTableName = getString(R.string.highq_trivia_table);
-		fromLanguage = null;
-		toLanguage = null;
-		HighQTriviaQuestion question = dbManager.getHighQTriviaQuestion(Difficulty.fromValue(minDifficulty),
+	private void setHiQHTriviaProblem(int minDifficulty, int maxDifficulty) {
+		currentTableName = getString(R.string.hiqh_trivia_table);
+		HiQHTriviaQuestion question = dbManager.getHiQHTriviaQuestion(Difficulty.fromValue(minDifficulty),
 				Difficulty.fromValue(maxDifficulty));
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
-		difficultyMax = question.getDifficulty().getValue();
+		difficulty = question.getDifficulty().getValue();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -765,6 +768,11 @@ public class MainActivity extends Activity {
 		int count = 0;
 		boolean changed = false;
 		boolean EnabledPacksBefore[] = new boolean[EnabledPacks.length];
+		int difficultyMaxBefore = difficultyMax;
+		int difficultyMinBefore = difficultyMin;
+		String fromLanguageBefore = fromLanguage;
+		String toLanguageBefore = toLanguage;
+
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacksBefore[i] = EnabledPacks[i];
 
@@ -783,6 +791,16 @@ public class MainActivity extends Activity {
 				changed = true;
 		}
 		EnabledPackages = count;
+
+		difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
+		difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
+		difficulty = difficultyMax;
+		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
+		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+		if ((difficultyMaxBefore != difficultyMax) || (difficultyMinBefore != difficultyMin) || (fromLanguageBefore != fromLanguage)
+				|| (toLanguageBefore != toLanguage))
+			changed = true;
+
 		return changed;
 	}
 
@@ -796,9 +814,9 @@ public class MainActivity extends Activity {
 				joystick.setCorrectAnswer(correctLoc);
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficultyMax), System
+				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficulty), System
 						.currentTimeMillis()));
-				dbManager.decreasePriority(currentTableName, fromLanguage, fromLanguage, ID);
+				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
 				answerView.setCorrectAnswer(correctLoc);
 				joystick.setCorrectAnswer(correctLoc);
@@ -806,9 +824,9 @@ public class MainActivity extends Activity {
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
 				dMoney = Money.decreaseMoneyNoDebt(questionWorth);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficultyMax), System
+				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficulty), System
 						.currentTimeMillis()));
-				dbManager.increasePriority(currentTableName, fromLanguage, fromLanguage, ID);
+				dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			}
 			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 			// problem.setText(description + problem.getText());
@@ -866,7 +884,7 @@ public class MainActivity extends Activity {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				updateStats(true);
 				joystick.pauseSelection();
-				launchHomeScreen(100);
+				launchHomeScreen(10);
 			} else {
 				displayCorrectOrNot(answerLoc, s, "Wrong\n", false, false);
 				updateStats(false);
@@ -975,7 +993,7 @@ public class MainActivity extends Activity {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
 				builder.setTitle(R.string.info_title_first);
-				builder.setMessage(getString(R.string.info_message_first) + "\n\n" + getString(R.string.info_message)).setCancelable(false);
+				builder.setMessage(getString(R.string.info_message_first)).setCancelable(false);
 				builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
@@ -1002,6 +1020,7 @@ public class MainActivity extends Activity {
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
 						startActivity(intent);
+						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[9], EggMaxValues[9]));
 					}
 				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
@@ -1010,6 +1029,7 @@ public class MainActivity extends Activity {
 						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
+						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 					}
 				});
 			}
