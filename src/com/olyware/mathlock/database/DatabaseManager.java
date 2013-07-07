@@ -32,7 +32,6 @@ public class DatabaseManager {
 
 	public DatabaseManager(Context context) {
 		dbHelper = DatabaseOpenHelper.getInstance(context);
-		dbHelper.initializeDataBase();
 		db = dbHelper.getWritableDatabase();
 	}
 

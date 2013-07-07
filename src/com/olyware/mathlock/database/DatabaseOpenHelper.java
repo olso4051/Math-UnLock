@@ -24,71 +24,52 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	private final Loggy log = new Loggy(this.getClass());
 
-	private static final String DATABASE_PATH = "/data/data/com.olyware.mathlock/databases/";
 	private static final String DATABASE_NAME = "mathunlock.db";
-	private static final String DATABASE_FULL_PATH = DATABASE_PATH + DATABASE_NAME;
-	private static final String DATABASE_OLD_FULL_PATH = DATABASE_PATH + "old_" + DATABASE_NAME;
 	private static final int DATABASE_VERSION = 1;
+	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
 
 	private Context context;
 	private static DatabaseOpenHelper instance = null;
 
-	// private boolean createDatabase = false;
-	private boolean upgradeDatabase = false;
-
 	private DatabaseOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.context = context;
-		Log.d("test", "DatabaseOpenHelper");
-		// copyDatabase();
+		DATABASE_FULL_PATH = context.getDatabasePath(DATABASE_NAME).getAbsolutePath();
+		DATABASE_PATH = DATABASE_FULL_PATH.substring(0, DATABASE_FULL_PATH.indexOf(DATABASE_NAME));
+		DATABASE_OLD_FULL_PATH = DATABASE_PATH + "old_" + DATABASE_NAME;
+		int databaseState = dbState();
+		if (databaseState == 0)
+			copyDatabase();
+		else if (databaseState == 2)
+			upgradeDatabase();
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		// Do nothing
-		// createDatabase = true;
-		Log.d("test", "onCreate");
-	}
-
-	public void initializeDataBase() {
-		Log.d("test", "InitializeDatabase");
-		// getWritableDatabase();
-		if (upgradeDatabase) {
-			Log.d("test", "upgrading database");
-			upgradeDatabase();
-		} else {
-			Log.d("test", "creating database");
-			copyDatabase();
-		}
 	}
 
 	private void copyDatabase() {
-		if (!dbExists()) {
-			Log.d("test", "copying database");
-			try {
-				// close();
-				InputStream is = context.getAssets().open(DATABASE_NAME);
-				File dest = new File(DATABASE_FULL_PATH);
-				FileUtils.copyInputStreamToFile(is, dest);
-				// getWritableDatabase().close();
-			} catch (IOException e) {
-				log.e("Unable to populate database", e);
-				return;
-			}
+		Log.d("test", "copying database");
+		try {
+			InputStream is = context.getAssets().open(DATABASE_NAME);
+			File dest = new File(DATABASE_FULL_PATH);
+			FileUtils.copyInputStreamToFile(is, dest);
+		} catch (IOException e) {
+			log.e("Unable to populate database", e);
+			return;
 		}
 	}
 
 	private void upgradeDatabase() {
-
+		Log.d("test", "upgrading database");
 		File oldDest = new File(DATABASE_OLD_FULL_PATH);
 		File dest = new File(DATABASE_FULL_PATH);
 		try {
 			InputStream is = context.getAssets().open(DATABASE_NAME);
 			FileUtils.copyFile(dest, oldDest);
 			try {
-				// close();
 				FileUtils.copyInputStreamToFile(is, dest);
-				// getWritableDatabase().close();
 			} catch (IOException e) {
 				log.e("Unable to populate database", e);
 			}
@@ -116,26 +97,30 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		context.deleteDatabase(DATABASE_OLD_FULL_PATH);
 	}
 
-	private boolean dbExists() {
+	private int dbState() {
+		// 0=doesn't exist, 1=exists, 2=needs upgrade
 		try {
 			SQLiteDatabase database = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READONLY);
-
 			if (database != null) {
-				Log.d("test", "database exists");
-				Log.d("test", "database needs upgrade=" + database.needUpgrade(DATABASE_VERSION));
-				database.close();
+				if (database.needUpgrade(DATABASE_VERSION)) {
+					Log.d("test", "database needs update");
+					database.close();
+					return 2;
+				} else {
+					Log.d("test", "database exists");
+					database.close();
+					return 1;
+				}
 			}
-			return database != null;
+			return 0;
 		} catch (SQLiteException e) {
-			return false;
+			return 0;
 		}
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// Nothing to do here until our database schema changes
-		upgradeDatabase = true;
-		Log.d("test", "onUpgrade");
+		// upgrade is handled in upgradeDatabase()
 	}
 
 	public static DatabaseOpenHelper getInstance(Context context) {
