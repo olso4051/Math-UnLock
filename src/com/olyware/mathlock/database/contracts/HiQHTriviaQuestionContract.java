@@ -4,11 +4,15 @@ public final class HiQHTriviaQuestionContract extends QuestionContract {
 
 	public static final String TABLE_NAME = "t_hiqh_trivia_question";
 	public static final String[] ALL_COLUMNS;
+	public static final String[] ID_AND_PRIORITY;
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, QuestionContract.ANSWER_CORRECT,
 				HiQHTriviaQuestionContract.ANSWER_INCORRECT1, HiQHTriviaQuestionContract.ANSWER_INCORRECT2,
 				HiQHTriviaQuestionContract.ANSWER_INCORRECT3, QuestionContract.DIFFICULTY, QuestionContract.PRIORITY };
+	}
+	static {
+		ID_AND_PRIORITY = new String[] { BaseContract._ID, HiQHTriviaQuestionContract.PRIORITY };
 	}
 
 	// COLUMN DEFS

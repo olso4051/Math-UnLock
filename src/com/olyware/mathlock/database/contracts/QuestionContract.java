@@ -29,7 +29,7 @@ public abstract class QuestionContract implements BaseContract {
 	 */
 	public static final String PRIORITY = "priority";
 	/**
-	 * Type : INTEGER default = 10
+	 * Type : INTEGER default = 100
 	 */
 	public static final int DEFAULT_PRIORITY = 100;
 }

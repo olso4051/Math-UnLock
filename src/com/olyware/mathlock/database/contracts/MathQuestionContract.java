@@ -4,6 +4,7 @@ public final class MathQuestionContract extends QuestionContract {
 
 	public static final String TABLE_NAME = "t_math_question";
 	public static final String[] ALL_COLUMNS;
+	public static final String[] ID_AND_PRIORITY;
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, MathQuestionContract.QUESTION_IMAGE,
@@ -11,7 +12,9 @@ public final class MathQuestionContract extends QuestionContract {
 				MathQuestionContract.ANSWER_INCORRECT3, QuestionContract.DIFFICULTY, MathQuestionContract.PARSE_MODE,
 				MathQuestionContract.RANGE, MathQuestionContract.PRECISION, MathQuestionContract.PRIORITY };
 	}
-
+	static {
+		ID_AND_PRIORITY = new String[] { BaseContract._ID, MathQuestionContract.PRIORITY };
+	}
 	// COLUMN DEFS
 	/**
 	 * Type: TEXT

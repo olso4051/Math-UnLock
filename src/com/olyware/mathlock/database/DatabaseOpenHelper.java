@@ -14,7 +14,14 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.olyware.mathlock.database.contracts.BaseContract;
+import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
+import com.olyware.mathlock.database.contracts.HiQHTriviaQuestionContract;
+import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
+import com.olyware.mathlock.database.contracts.MathQuestionContract;
+import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
+import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.utils.Loggy;
 
 /**
@@ -38,6 +45,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		DATABASE_PATH = DATABASE_FULL_PATH.substring(0, DATABASE_FULL_PATH.indexOf(DATABASE_NAME));
 		DATABASE_OLD_FULL_PATH = DATABASE_PATH + "old_" + DATABASE_NAME;
 		int databaseState = dbState();
+		Log.d("test", "state=" + databaseState);
 		if (databaseState == 0)
 			copyDatabase();
 		else if (databaseState == 2)
@@ -80,9 +88,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		}
 		SQLiteDatabase oldDB = SQLiteDatabase.openDatabase(DATABASE_OLD_FULL_PATH, null, SQLiteDatabase.OPEN_READWRITE);
 		SQLiteDatabase newDB = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READWRITE);
+		// insert stats into new database
 		Cursor cursor = oldDB.rawQuery("SELECT * FROM " + StatisticContract.TABLE_NAME, null);
 		cursor.moveToFirst();
-		Log.d("test", "stats=" + cursor.getCount());
 		ContentValues values = new ContentValues();
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
@@ -93,6 +101,75 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			newDB.insert(StatisticContract.TABLE_NAME, null, values);
 			cursor.moveToNext();
 			values.clear();
+		}
+		// update priorities that have changed in the math table
+		String where = MathQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
+		cursor = oldDB.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor.moveToFirst();
+		Log.d("test", "math entries = " + cursor.getCount());
+		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			newDB.execSQL("UPDATE " + MathQuestionContract.TABLE_NAME + " SET " + MathQuestionContract.PRIORITY + "="
+					+ cursorHelper.getInteger(MathQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
+					+ cursorHelper.getInteger(MathQuestionContract._ID));
+			cursor.moveToNext();
+		}
+		// update priorities that have changed in the vocab table
+		where = VocabQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
+		cursor = oldDB.query(VocabQuestionContract.TABLE_NAME, VocabQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor.moveToFirst();
+		Log.d("test", "vocab entries = " + cursor.getCount());
+		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			newDB.execSQL("UPDATE " + VocabQuestionContract.TABLE_NAME + " SET " + VocabQuestionContract.PRIORITY + "="
+					+ cursorHelper.getInteger(VocabQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
+					+ cursorHelper.getInteger(VocabQuestionContract._ID));
+			cursor.moveToNext();
+		}
+		// update priorities that have changed in the language table
+		String[] priorities = LanguageQuestionContract.LANGUAGE_PRIORITIES;
+		where = priorities[0] + " != " + QuestionContract.DEFAULT_PRIORITY;
+		for (int a = 1; a < priorities.length; a++) {
+			where = where + " OR " + priorities[a] + " != " + QuestionContract.DEFAULT_PRIORITY;
+		}
+		cursor = oldDB.query(LanguageQuestionContract.TABLE_NAME, LanguageQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor.moveToFirst();
+		Log.d("test", "Language entries = " + cursor.getCount());
+		String set;
+		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			set = priorities[0] + "=" + cursorHelper.getInteger(priorities[0]);
+			for (int a = 1; a < priorities.length; a++) {
+				set = set + ", " + priorities[a] + " = " + cursorHelper.getInteger(priorities[a]);
+			}
+			newDB.execSQL("UPDATE " + LanguageQuestionContract.TABLE_NAME + " SET " + set + " WHERE " + BaseContract._ID + "="
+					+ cursorHelper.getInteger(LanguageQuestionContract._ID));
+			cursor.moveToNext();
+		}
+		// update priorities that have changed in the engineering table
+		where = EngineerQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
+		cursor = oldDB.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor.moveToFirst();
+		Log.d("test", "Engineer entries = " + cursor.getCount());
+		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			newDB.execSQL("UPDATE " + EngineerQuestionContract.TABLE_NAME + " SET " + EngineerQuestionContract.PRIORITY + "="
+					+ cursorHelper.getInteger(EngineerQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
+					+ cursorHelper.getInteger(EngineerQuestionContract._ID));
+			cursor.moveToNext();
+		}
+		// update priorities that have changed in the engineering table
+		where = HiQHTriviaQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
+		cursor = oldDB.query(HiQHTriviaQuestionContract.TABLE_NAME, HiQHTriviaQuestionContract.ID_AND_PRIORITY, where, null, null, null,
+				null);
+		cursor.moveToFirst();
+		Log.d("test", "HiQHTrivia entries = " + cursor.getCount());
+		while (!cursor.isAfterLast()) {
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			newDB.execSQL("UPDATE " + HiQHTriviaQuestionContract.TABLE_NAME + " SET " + HiQHTriviaQuestionContract.PRIORITY + "="
+					+ cursorHelper.getInteger(HiQHTriviaQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
+					+ cursorHelper.getInteger(HiQHTriviaQuestionContract._ID));
+			cursor.moveToNext();
 		}
 		context.deleteDatabase(DATABASE_OLD_FULL_PATH);
 	}
