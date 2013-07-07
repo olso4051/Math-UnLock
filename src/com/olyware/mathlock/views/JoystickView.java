@@ -81,7 +81,7 @@ public class JoystickView extends View {
 	private boolean selectAnswers[] = new boolean[NumAnswers];
 	private boolean selectOptions[] = new boolean[5];
 	private boolean selectUnlock;
-	private boolean options = true, selectSideBar = false;
+	private boolean options = false, selectSideBar = false;
 	private boolean problem = true, wrong = false, paused = false;
 	private boolean measured = false;
 	private int selectLeft[] = new int[5];
@@ -153,7 +153,7 @@ public class JoystickView extends View {
 		optPaint.setStyle(Paint.Style.FILL);
 
 		optionPath = new Path();
-		options = true;
+		options = false;
 
 		answerSizeSP = answerSizeSPDefault;
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, getResources().getDisplayMetrics());
@@ -309,7 +309,6 @@ public class JoystickView extends View {
 		invalidate();
 		animateHandler.removeCallbacks(startAnimate);
 		animateHandler.removeCallbacks(finishAnimate);
-
 		for (int i = 0; i < startFrames; i++) {
 			animateHandler.postDelayed(startAnimate, i * startFrameTime + delay);
 		}
@@ -389,6 +388,12 @@ public class JoystickView extends View {
 		}
 	}
 
+	public void removeCallbacks() {
+		animateHandler.removeCallbacksAndMessages(null);
+		textHandler.removeCallbacksAndMessages(null);
+		answerHandler.removeCallbacksAndMessages(null);
+	}
+
 	// =========================================
 	// Drawing Functionality
 	// =========================================
@@ -429,13 +434,12 @@ public class JoystickView extends View {
 		dstHeight = rBig * 2 + textSizePix;
 
 		if (options)
-			setSidePaths(Height - rBig * 2 - pad);// - dstHeight + textSizePix - pad);
+			setSidePaths(Height - rBig * 2 - pad);
 		else
 			setSidePaths(Height - pad);
 
 		setMeasuredDimension(Width, Height);
 		initRunnables();
-		showStartAnimation(0, 3000);
 		measured = true;
 	}
 
@@ -1025,10 +1029,11 @@ public class JoystickView extends View {
 			public void run() {
 				options = false;
 				// settingsPaint.setAlpha(settingsPaint.getAlpha() + startInterval);
-				if (TextHeight + slideInterval > Height - pad)
+				if (TextHeight + slideInterval > Height - pad) {
 					setSidePaths(Height - pad);
-				else
+				} else {
 					setSidePaths(TextHeight + slideInterval);
+				}
 				invalidate();
 			}
 		};

@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
@@ -291,7 +290,6 @@ public class MainActivity extends Activity {
 		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
-		Log.d("test", "locked=" + locked + "|onCreate()");
 	}
 
 	@Override
@@ -339,6 +337,7 @@ public class MainActivity extends Activity {
 		if (mHelper != null)
 			mHelper.dispose();
 		mHelper = null;
+		joystick.removeCallbacks();
 	}
 
 	@Override
@@ -400,7 +399,8 @@ public class MainActivity extends Activity {
 			resetTimes();
 
 		// show the settings bar and slide it down after 3 seconds
-		joystick.showStartAnimation(0, 3000);
+		// joystick.showStartAnimation(0, 3000);
+
 		// save money into shared preferences
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 		// set image if it was set when the screen was off
@@ -879,7 +879,7 @@ public class MainActivity extends Activity {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				updateStats(true);
 				joystick.pauseSelection();
-				setProblemAndAnswer(1000);
+				setProblemAndAnswer(500);
 			} else if ((answerLoc == s) && !quizMode) {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				updateStats(true);

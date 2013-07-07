@@ -145,15 +145,15 @@
         <item>10000</item>
         <item>1000</item>
         <item>3000</item>
-        <item>3000</item>
+        <item>5000</item>
         <!--
         <item>5000</item>
 		<item>5000</item>
 		<item>1000</item>
 		-->
-		<item>1000</item>
-		<item>1000</item>
-        <item>500</item>
+		<item>1500</item>
+		<item>1500</item>
+        <item>1000</item>
     </integer-array>
     <string-array name="enable_package_keys">
         <item>enable_math</item>
