@@ -534,6 +534,7 @@ public class JoystickView extends View {
 		}
 
 		// Draw the option bar
+		// canvas.drawRect(0, 0, Width, Height, unlockPaint);
 		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
 			canvas.drawRect(dstRectForOpt, optPaint);

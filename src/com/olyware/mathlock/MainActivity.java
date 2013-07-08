@@ -229,7 +229,7 @@ public class MainActivity extends Activity {
 		coins = (TextView) findViewById(R.id.money);
 		worth = (TextView) findViewById(R.id.worth);
 		problem = (EquationView) findViewById(R.id.problem);
-		problem.setOffset(-worth.getHeight() / 2);
+
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
 		answerView = (AnswerView) findViewById(R.id.answers2);
@@ -239,6 +239,8 @@ public class MainActivity extends Activity {
 			public void Ready() {
 				answerView.setAnswers(answersRandom);
 				setImage();
+				if (answerView.getHeight() > 5)
+					problem.setOffset(-worth.getHeight() / 2);
 			}
 		});
 		joystick = (JoystickView) findViewById(R.id.joystick);

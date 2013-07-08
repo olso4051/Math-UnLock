@@ -54,7 +54,7 @@ public class EquationView extends AutoResizeTextView {
 
 		if (equation) {
 			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight() - offset * 2, getTypeface(), color);
-			layout.setDefaultSize(30);
+			layout.setDefaultSize(40);
 		} else {
 			layout = null;
 		}
@@ -77,6 +77,7 @@ public class EquationView extends AutoResizeTextView {
 			super.onDraw(canvas);
 		else {
 			canvas.save();
+			// canvas.drawRect(0, 0, getWidth(), getHeight(), getPaint());
 			canvas.translate(getTextAreaWidth() / 2, getTextAreaHeight() / 2 + offset);
 			layout.draw(canvas);
 			canvas.restore();

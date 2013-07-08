@@ -50,7 +50,7 @@
             android:layout_height="fill_parent"
             android:gravity="center"
             android:text="@string/problem"
-            android:textSize="30sp" />
+            android:textSize="40sp" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
