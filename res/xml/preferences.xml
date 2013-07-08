@@ -31,11 +31,12 @@
 	        android:defaultValue="@string/max_tries_default" />
         <ListPreference
       		android:key="type"
+      		android:enabled="false"
       		android:title="@string/type_title"
       		android:summary="@string/type_default"
       		android:dialogTitle="@string/type_title"
-	        android:entries="@array/type_entries"
-	        android:entryValues="@array/type_values"
+	        android:entries="@array/type_entries012"
+	        android:entryValues="@array/type_values012"
 	        android:defaultValue="@string/type_default" />
         <CheckBoxPreference
 	        android:key="vibration"
@@ -44,7 +45,8 @@
 	        android:defaultValue="true"/>
 	</PreferenceCategory>
     <PreferenceCategory
-        android:title="@string/settings_questions"
+        android:title="@string/settings_math_title"
+        android:enabled="false"
         android:key="settings_math">
         <CheckBoxPreference
 	        android:key="enable_math"
@@ -54,6 +56,7 @@
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_vocab_title"
+        android:enabled="false"
         android:key="settings_vocab">
         <CheckBoxPreference
 	        android:key="enable_vocab"
@@ -63,6 +66,7 @@
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_language_title"
+        android:enabled="false"
         android:key="settings_language">
         <CheckBoxPreference
 	        android:key="enable_language"
@@ -151,6 +155,7 @@
 	-->
 	<PreferenceCategory
         android:title="@string/settings_engineer_title"
+        android:enabled="false"
         android:key="settings_engineer">
         <CheckBoxPreference
 	        android:key="enable_engineer"
@@ -160,6 +165,7 @@
 	</PreferenceCategory>
 	<PreferenceCategory
         android:title="@string/settings_hiqh_trivia_title"
+        android:enabled="false"
         android:key="settings_hiqh_trivia">
         <CheckBoxPreference
 	        android:key="enable_hiqh_trivia"

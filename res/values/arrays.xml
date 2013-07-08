@@ -43,17 +43,32 @@
         <item name="4">4</item>
     </string-array>
     
-    <string-array name="type_entries">
+    <string-array name="type_entries012">
         <item name="sSlide">Static Slide</item>
         <item name="rSlide">Rotating Slide</item>
         <item name="dSlide">Dynamic Slide</item>
     </string-array>
-    <string-array name="type_values">
+    <string-array name="type_values012">
         <item name="sSlide">0</item>
         <item name="rSlide">1</item>
         <item name="dSlide">2</item>
     </string-array>
-    
+    <string-array name="type_entries01">
+        <item name="sSlide">Static Slide</item>
+        <item name="rSlide">Rotating Slide</item>
+    </string-array>
+    <string-array name="type_values01">
+        <item name="sSlide">0</item>
+        <item name="rSlide">1</item>
+    </string-array>
+    <string-array name="type_entries02">
+        <item name="sSlide">Static Slide</item>
+        <item name="dSlide">Dynamic Slide</item>
+    </string-array>
+    <string-array name="type_values02">
+        <item name="sSlide">0</item>
+        <item name="rSlide">2</item>
+    </string-array>
     <string-array name="language_entries">
         <item name="bengali">Bengali</item>
         <item name="chinese">Chinese (Simplified)</item>
@@ -139,7 +154,8 @@
 		<item>unlock_hiqh_trivia</item>
     </string-array>
     <string-array name="unlock_extra_keys">
-        <item>unlock_harder</item>
+        <item>unlock_rotating_slide</item>
+        <item>unlock_dynamic_slide</item>
     </string-array>
     <integer-array name="unlock_cost">
         <item>10000</item>
@@ -153,6 +169,7 @@
 		-->
 		<item>1500</item>
 		<item>1500</item>
+        <item>1000</item>
         <item>1000</item>
     </integer-array>
     <string-array name="enable_package_keys">
@@ -204,6 +221,7 @@
 		<item>settings_engineer</item>
 		<item>settings_hiqh_trivia</item>
 		<item>type</item>
+		<item>type</item>
     </string-array>
     <string-array name="package_info">
         <item>Unlocks all current and future question packs</item>
@@ -217,7 +235,8 @@
 		-->
 		<item>Complete science and engineering related equations to keep fresh</item>
 		<item>Fun trivia questions</item>
-		<item>More Unlock types to challenge your brain in a different way</item>
+		<item>Answers rotate faster as you answer question correctly</item>
+		<item>Totally different way of swiping to answer the questions</item>
 		<item>Create your own questions, study for a test, It\'s up to you!</item>
     </string-array>
     
@@ -232,6 +251,9 @@
         <item>type</item>
         <item>share</item>
         <item>rate</item>
+        <item>purchase1</item>
+        <item>purchase2</item>
+        <item>purchase3</item>
     </string-array>
     <integer-array name="egg_max_values">
         <item>1000</item>
@@ -244,6 +266,9 @@
         <item>1000</item>
         <item>5000</item>
         <item>5000</item>
+        <item>1000</item>
+        <item>5000</item>
+        <item>10000</item>
     </integer-array>
     
     <string-array name="answer_titles">

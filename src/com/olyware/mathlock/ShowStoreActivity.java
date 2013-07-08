@@ -72,7 +72,7 @@ public class ShowStoreActivity extends Activity {
 					buttonCoins2.setEnabled(false);
 					buttonCoins3.setEnabled(false);
 				} else {
-					// in app billing is set up. check for non-consumed purchases
+					// in app billing is set up. check for non-consumed purchases and enable the buttons
 					buttonCoins1.setEnabled(true);
 					buttonCoins2.setEnabled(true);
 					buttonCoins3.setEnabled(true);
@@ -127,10 +127,13 @@ public class ShowStoreActivity extends Activity {
 				if (result.isSuccess()) {
 					if (purchase.getSku().equals(SKU[0])) {
 						updateMoney(Cost[0]);
+						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[10], EggMaxValues[10]));
 					} else if (purchase.getSku().equals(SKU[1])) {
 						updateMoney(Cost[1]);
+						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[11], EggMaxValues[11]));
 					} else if (purchase.getSku().equals(SKU[2])) {
 						updateMoney(Cost[2]);
+						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[12], EggMaxValues[12]));
 					}
 				} else {
 					// handle error
@@ -326,23 +329,25 @@ public class ShowStoreActivity extends Activity {
 		Money.decreaseMoneyAndPaidWithDebt(amount);
 		editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
 		editorPrefsMoney.putInt("money", Money.getMoney());
-		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);
+		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);		// unlocks the product
 		editorPrefsMoney.commit();
+		// enables all the question packs
 		if (product == 0)												// 0 is unlock_all
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
+		// enables the question pack that was unlocked
 		else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
-		/*else if (product <= 3)											// before test prep
-			editorPrefs.putBoolean(PackageKeys[product - 1], true);
-		else if (product == 4) {										// need to unlock act_sat math and vocab
-			editorPrefs.putBoolean(PackageKeys[product - 1], true);
-			editorPrefs.putBoolean(PackageKeys[product], true);
-		} else if (product == 5) {										// need to unlock gre math and vocab
-			editorPrefs.putBoolean(PackageKeys[product], true);
-			editorPrefs.putBoolean(PackageKeys[product + 1], true);
-		} else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
-			editorPrefs.putBoolean(PackageKeys[product + 1], true);*/
+		// enables the rotating slide extra
+		else if (product == 6) {
+			editorPrefs.putString("type", "1");
+			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
+		}
+		// enables the dynamic slide extra
+		else if (product == 7) {
+			editorPrefs.putString("type", "2");
+			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
+		}
 		editorPrefs.commit();
 		setCost();
 	}

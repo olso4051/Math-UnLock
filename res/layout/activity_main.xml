@@ -35,6 +35,15 @@
                 android:textColor="#FFF"
                 android:textSize="40sp" />
         </LinearLayout>
+        <TextView
+            android:id="@+id/worth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			android:layout_gravity="right"
+            android:drawableLeft="@drawable/coin"
+            android:gravity="center_vertical|right"
+            android:text="@string/default_money"
+            android:textSize="25sp" />
         <com.olyware.mathlock.views.EquationView
             android:id="@+id/problem"
             android:layout_width="match_parent"
@@ -43,48 +52,18 @@
             android:text="@string/problem"
             android:textSize="30sp" />
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="10dp"
         android:layout_weight="7"
         android:orientation="vertical" >
-
         <com.olyware.mathlock.views.AnswerView
             android:id="@+id/answers2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:gravity="center_vertical|right"
-                android:maxLines="2"
-                android:text="@string/worth"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/worth"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:drawableLeft="@drawable/coin"
-                android:gravity="center_vertical|left"
-                android:text="@string/default_money"
-                android:textSize="25sp" />
-        </LinearLayout>
-
         <com.olyware.mathlock.views.JoystickView
             android:id="@+id/joystick"
             android:layout_width="match_parent"
             android:layout_height="fill_parent" />
     </LinearLayout>
-
 </LinearLayout>

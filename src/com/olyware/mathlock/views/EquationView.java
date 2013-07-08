@@ -9,6 +9,7 @@ public class EquationView extends AutoResizeTextView {
 
 	private EquationLayout layout;
 	private int color = Color.WHITE;
+	private int offset = 0;
 
 	// =========================================
 	// Constructors
@@ -52,7 +53,7 @@ public class EquationView extends AutoResizeTextView {
 					text = text.subSequence(1, text.length());
 
 		if (equation) {
-			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color);
+			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight() - offset * 2, getTypeface(), color);
 			layout.setDefaultSize(30);
 		} else {
 			layout = null;
@@ -76,7 +77,7 @@ public class EquationView extends AutoResizeTextView {
 			super.onDraw(canvas);
 		else {
 			canvas.save();
-			canvas.translate(getTextAreaWidth() / 2, getTextAreaHeight() / 2);
+			canvas.translate(getTextAreaWidth() / 2, getTextAreaHeight() / 2 + offset);
 			layout.draw(canvas);
 			canvas.restore();
 			canvas.save();
@@ -95,5 +96,9 @@ public class EquationView extends AutoResizeTextView {
 	public void setDefaultSize(int size) {
 		layout.setDefaultSize(size);
 		invalidate();
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
 	}
 }

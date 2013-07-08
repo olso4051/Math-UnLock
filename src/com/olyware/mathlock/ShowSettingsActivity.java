@@ -4,11 +4,11 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.olyware.mathlock.utils.EggHelper;
@@ -46,24 +46,43 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 
 		// Set summary to be the user-description for the selected value
 		Preference Pref_max_tries = findPreference("max_tries");
-		Preference Pref_type = findPreference("type");
 		String summary = ((sharedPrefs.getString("max_tries", "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString("max_tries", "1")));
 		Pref_max_tries.setSummary(summary);
-		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "2")));
+
+		// Set the available entries and values in the "type" setting
+		ListPreference Pref_type = (ListPreference) findPreference("type");
+		if (sharedPrefsMoney.getBoolean("unlock_rotating_slide", false))
+			if (sharedPrefsMoney.getBoolean("unlock_dynamic_slide", false)) {
+				Pref_type.setEntries(getResources().getStringArray(R.array.type_entries012));
+				Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values012));
+			} else {
+				Pref_type.setEntries(getResources().getStringArray(R.array.type_entries01));
+				Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values01));
+			}
+		else if (sharedPrefsMoney.getBoolean("unlock_dynamic_slide", false)) {
+			Pref_type.setEntries(getResources().getStringArray(R.array.type_entries02));
+			Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values02));
+		} else {
+			Pref_type.setEntries(getResources().getStringArray(R.array.type_entries012));
+			Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values012));
+		}
+		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "0")));
 
 		// enable settings for unlocked packages
 		if (sharedPrefsMoney.getBoolean("unlock_all", false))
-			for (int i = 0; i < settingsPackageKeys.length; i++) {
+			for (int i = 0; i < unlockPackageKeys.length - 1; i++) {
 				Preference Pref_Packages = findPreference(settingsPackageKeys[i]);
 				Pref_Packages.setEnabled(true);
 			}
 		else {
 			for (int i = 1; i < unlockAllKeys.length; i++) {
 				Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
+				Log.d("test", "settings key=" + settingsPackageKeys[i - 1] + "|unlock key=" + unlockAllKeys[i] + "|unlocked="
+						+ sharedPrefsMoney.getBoolean(unlockAllKeys[i], false));
 				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
 					Pref_Packages.setEnabled(true);
 				else
-					Pref_Packages.setEnabled(false);
+					Pref_Packages.setEnabled(Pref_Packages.isEnabled());
 			}
 
 		}
@@ -126,8 +145,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		} catch (NumberFormatException nfe) {
 			System.out.println("Could not parse " + nfe);
 		}
-		Resources res = getResources();
-		String[] s = res.getStringArray(R.array.type_entries);
+		String[] s = getResources().getStringArray(R.array.type_entries012);
 		return s[diffNum];
 	}
 
