@@ -410,6 +410,10 @@ public class EquationLayout {
 		return bracketGroups.get(0).getHeight();
 	}
 
+	public int getWidth() {
+		return bracketGroups.get(0).getWidth();
+	}
+
 	public int getTextSizeSP() {
 		return textSizeSP;
 	}
@@ -469,6 +473,13 @@ public class EquationLayout {
 				.getResources().getDisplayMetrics());
 		textSizeSP = textSizeSPDefault;
 		textSizePix = textSizePixDefault;
+		setSize();
+	}
+
+	public void setTextSize(int SP) {
+		textSizeSP = SP;
+		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, MainActivity.getContext().getResources()
+				.getDisplayMetrics());
 		setSize();
 	}
 
@@ -536,7 +547,7 @@ public class EquationLayout {
 		equationText = equationText.replaceAll("Abs", "|");
 		equationText = equationText.replaceAll("Limit", "≐");
 		equationText = equationText.replaceAll("->", "→");
-		equationText = equationText.replaceAll("<-", "←");
+		// equationText = equationText.replaceAll("<-", "←");
 		equationText = equationText.replaceAll("<->", "↔");
 		equationText = equationText.replaceAll("\\+-", "±");
 	}
