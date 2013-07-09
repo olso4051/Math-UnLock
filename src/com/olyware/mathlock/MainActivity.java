@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -26,7 +27,9 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -239,10 +242,18 @@ public class MainActivity extends Activity {
 			public void Ready() {
 				answerView.setAnswers(answersRandom);
 				setImage();
-				if (answerView.getHeight() > 5)
+				if (answerView.getHeight() > 0)
 					problem.setOffset(-worth.getHeight() / 2);
+				else
+					problem.setOffset(0);
 			}
 		});
+
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		answerView.setParentHeight(size.y);
+
 		joystick = (JoystickView) findViewById(R.id.joystick);
 		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 			@Override
@@ -314,10 +325,11 @@ public class MainActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// at this point the activity has been measured and we can get the height
 		// now we can set a max height for answerView since it is dynamic
+		Log.d("test", "focus changed layout height=" + layout.getBottom() + "|hasfocus=" + hasFocus);
 		setImage();
 		if (hasFocus) {
 			showWallpaper();
-			answerView.setParentHeight(layout.getBottom());
+			// answerView.setParentHeight(layout.getBottom());
 			// set the unlock type
 			joystick.setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 			answerView.setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));

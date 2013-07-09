@@ -10,6 +10,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -144,6 +145,9 @@ public class AnswerView extends View {
 
 	public void setTypeface(Typeface font) {
 		this.font = font;
+		if (equations)
+			for (int i = 0; i < answers.length; i++)
+				layoutsE[i].setTypeface(font);
 		TextLabelPaintR.setTypeface(font);
 		TextAnswerPaintL.setTypeface(font);
 		correctAnswerPaint.setTypeface(font);
@@ -206,6 +210,8 @@ public class AnswerView extends View {
 
 	public void setParentHeight(int h) {
 		this.maxHeight = h / 4;
+		if (measured)
+			setDimensions(false);
 	}
 
 	// =========================================
@@ -296,147 +302,156 @@ public class AnswerView extends View {
 	// =========================================
 
 	private void setDimensions(boolean fromOnMeasure) {
-		switch (type) {
-		case 0:
-		case 1:
+		Log.d("test", "starting Height=" + Height);
+		if (maxHeight > 0) {
+			switch (type) {
+			case 0:
+			case 1:
+				Height = 0;
+				Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+				setMeasuredDimension(Width, Height);
+				setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+				break;
+			case 2:
+				setLayouts();
+				float maxH = textLabelSizePix;
+				for (int i = 0; i < answers.length; i++)
+					maxH = Math.max(labelBounds[i].height(), maxH);
+
+				float minH = Math.min(maxH, textLabelSizePix);
+				for (int i = 0; i < answers.length; i++)
+					minH = Math.min(labelBounds[i].height(), minH);
+
+				if (equations) {
+					float maxWlabel = 0;
+					float layoutHeight = maxHeight / answers.length;
+					int minSP = Math.min(layoutsE[0].getTextSizeSP(), layoutsE[1].getTextSizeSP());
+					for (int i = 2; i < answers.length; i++)
+						minSP = Math.min(minSP, layoutsE[i].getTextSizeSP());
+
+					centersY[0] = layoutHeight / 2 + minH / 3;
+
+					for (int i = 0; i < answers.length; i++) {
+						if (minSP < layoutsE[i].getTextSizeSP())
+							layoutsE[i].setTextSize(minSP);
+						if (labelBoundsWidth[i] > maxWlabel)
+							maxWlabel = labelBoundsWidth[i];
+						if (i > 0) {
+							centersY[i] = centersY[i - 1] + layoutHeight;
+						}
+					}
+					for (int i = 0; i < answers.length; i++) {
+						centersX[i] = maxWlabel;
+					}
+					Height = maxHeight;
+					layout = 5;
+					Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+					setMeasuredDimension(Width, Height);
+					setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+				} else if (maxW < Width / answers.length) {
+					Height = (int) maxH;
+					padHorz = (Width - totalWidth) / (answers.length + 1);
+					layout = 1;
+					Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+					if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+						decreaseTextSize();
+						setDimensions(false);
+						return;
+					}
+					setMeasuredDimension(Width, Height);
+					setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+					centersX[0] = labelBoundsWidth[0] + padHorz;
+					centersX[1] = centersX[0] + answerBoundsWidth[0] + padHorz + labelBoundsWidth[0];
+					centersX[2] = centersX[1] + answerBoundsWidth[1] + padHorz + labelBoundsWidth[1];
+					centersX[3] = centersX[2] + answerBoundsWidth[2] + padHorz + labelBoundsWidth[2];
+					// centersX[4] = centersX[3] + answerBoundsWidth[3] + padHorz + labelBoundsWidth[3];
+					centersY[0] = minH;
+					centersY[1] = minH;
+					centersY[2] = minH;
+					centersY[3] = minH;
+					// centersY[4] = minH;
+				} else if ((answers.length == 5) && (maxW < Width / 3)) {
+					Height = (int) (maxH * 2 + padVert);
+					totalWidth = 3 * maxW;
+					padHorz = (Width - totalWidth) / 4;
+					layout = 2;
+					Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+					if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+						decreaseTextSize();
+						setDimensions(false);
+						return;
+					}
+					setMeasuredDimension(Width, Height);
+					setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+					centersX[0] = labelBounds[0].width() + padHorz;
+					centersX[1] = centersX[0] + maxW + padHorz;
+					centersX[2] = centersX[1] + maxW + padHorz;
+					centersX[3] = centersX[0];
+					// centersX[4] = centersX[1];
+					centersY[0] = minH;
+					centersY[1] = minH;
+					centersY[2] = minH;
+					centersY[3] = minH * 2 + padVert;
+					// centersY[4] = minH * 2 + padVert;
+				} else if (maxW < Width / 2) {
+					int lines = Math.round((float) answers.length / 2);
+					Height = (int) (maxH * lines + padVert * (lines - 1));
+					totalWidth = 2 * maxW;
+					padHorz = (Width - totalWidth) / 3;
+					layout = 2;
+					Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+					if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+						decreaseTextSize();
+						setDimensions(false);
+						return;
+					}
+					setMeasuredDimension(Width, Height);
+					setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+					centersX[0] = labelBoundsWidth[0] + padHorz;
+					centersX[1] = centersX[0] + maxW + padHorz;
+					centersX[2] = centersX[0];
+					centersX[3] = centersX[1];
+					// centersX[4] = centersX[0];
+					centersY[0] = minH;
+					centersY[1] = minH;
+					centersY[2] = minH * 2 + padVert;
+					centersY[3] = minH * 2 + padVert;
+					// centersY[4] = minH * 3 + padVert;
+
+				} else {
+					float maxWlabel = 0;
+					centersY[0] = minH;
+					for (int i = 0; i < answers.length; i++) {
+						if (labelBoundsWidth[i] > maxWlabel)
+							maxWlabel = labelBoundsWidth[i];
+						if (i > 0) {
+							centersY[i] = centersY[i - 1] - answerBounds[i - 1].height() + layouts[i - 1].getHeight() + padVert + minH;
+						}
+					}
+					for (int i = 0; i < answers.length; i++) {
+						centersX[i] = maxWlabel;
+					}
+					Height = (int) (centersY[answers.length - 1] - textAnswerSizePix + padVert * (answers.length - 1))
+							+ layouts[answers.length - 1].getHeight();
+					layout = 4;
+					Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
+					if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
+						decreaseTextSize();
+						setDimensions(false);
+						return;
+					}
+					setMeasuredDimension(Width, Height);
+					setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
+				}
+				Log.d("test", "Height=" + Height);
+				invalidate();
+				break;
+			}
+		} else {
 			Height = 0;
 			Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
 			setMeasuredDimension(Width, Height);
 			setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-			break;
-		case 2:
-			setLayouts();
-			float maxH = textLabelSizePix;
-			for (int i = 0; i < answers.length; i++)
-				maxH = Math.max(labelBounds[i].height(), maxH);
-
-			float minH = Math.min(maxH, textLabelSizePix);
-			for (int i = 0; i < answers.length; i++)
-				minH = Math.min(labelBounds[i].height(), minH);
-
-			if (equations) {
-				float maxWlabel = 0;
-				float layoutHeight = maxHeight / answers.length;
-				int minSP = Math.min(layoutsE[0].getTextSizeSP(), layoutsE[1].getTextSizeSP());
-				for (int i = 2; i < answers.length; i++)
-					minSP = Math.min(minSP, layoutsE[i].getTextSizeSP());
-
-				centersY[0] = layoutHeight / 2 + minH / 3;
-
-				for (int i = 0; i < answers.length; i++) {
-					if (minSP < layoutsE[i].getTextSizeSP())
-						layoutsE[i].setTextSize(minSP);
-					if (labelBoundsWidth[i] > maxWlabel)
-						maxWlabel = labelBoundsWidth[i];
-					if (i > 0) {
-						centersY[i] = centersY[i - 1] + layoutHeight;
-					}
-				}
-				for (int i = 0; i < answers.length; i++) {
-					centersX[i] = maxWlabel;
-				}
-				Height = maxHeight;
-				layout = 5;
-				Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-				setMeasuredDimension(Width, Height);
-				setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-			} else if (maxW < Width / answers.length) {
-				Height = (int) maxH;
-				padHorz = (Width - totalWidth) / (answers.length + 1);
-				layout = 1;
-				Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-				if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
-					decreaseTextSize();
-					setDimensions(false);
-					return;
-				}
-				setMeasuredDimension(Width, Height);
-				setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-				centersX[0] = labelBoundsWidth[0] + padHorz;
-				centersX[1] = centersX[0] + answerBoundsWidth[0] + padHorz + labelBoundsWidth[0];
-				centersX[2] = centersX[1] + answerBoundsWidth[1] + padHorz + labelBoundsWidth[1];
-				centersX[3] = centersX[2] + answerBoundsWidth[2] + padHorz + labelBoundsWidth[2];
-				// centersX[4] = centersX[3] + answerBoundsWidth[3] + padHorz + labelBoundsWidth[3];
-				centersY[0] = minH;
-				centersY[1] = minH;
-				centersY[2] = minH;
-				centersY[3] = minH;
-				// centersY[4] = minH;
-			} else if ((answers.length == 5) && (maxW < Width / 3)) {
-				Height = (int) (maxH * 2 + padVert);
-				totalWidth = 3 * maxW;
-				padHorz = (Width - totalWidth) / 4;
-				layout = 2;
-				Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-				if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
-					decreaseTextSize();
-					setDimensions(false);
-					return;
-				}
-				setMeasuredDimension(Width, Height);
-				setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-				centersX[0] = labelBounds[0].width() + padHorz;
-				centersX[1] = centersX[0] + maxW + padHorz;
-				centersX[2] = centersX[1] + maxW + padHorz;
-				centersX[3] = centersX[0];
-				// centersX[4] = centersX[1];
-				centersY[0] = minH;
-				centersY[1] = minH;
-				centersY[2] = minH;
-				centersY[3] = minH * 2 + padVert;
-				// centersY[4] = minH * 2 + padVert;
-			} else if (maxW < Width / 2) {
-				int lines = Math.round((float) answers.length / 2);
-				Height = (int) (maxH * lines + padVert * (lines - 1));
-				totalWidth = 2 * maxW;
-				padHorz = (Width - totalWidth) / 3;
-				layout = 2;
-				Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-				if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
-					decreaseTextSize();
-					setDimensions(false);
-					return;
-				}
-				setMeasuredDimension(Width, Height);
-				setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-				centersX[0] = labelBoundsWidth[0] + padHorz;
-				centersX[1] = centersX[0] + maxW + padHorz;
-				centersX[2] = centersX[0];
-				centersX[3] = centersX[1];
-				// centersX[4] = centersX[0];
-				centersY[0] = minH;
-				centersY[1] = minH;
-				centersY[2] = minH * 2 + padVert;
-				centersY[3] = minH * 2 + padVert;
-				// centersY[4] = minH * 3 + padVert;
-
-			} else {
-				float maxWlabel = 0;
-				centersY[0] = minH;
-				for (int i = 0; i < answers.length; i++) {
-					if (labelBoundsWidth[i] > maxWlabel)
-						maxWlabel = labelBoundsWidth[i];
-					if (i > 0) {
-						centersY[i] = centersY[i - 1] - answerBounds[i - 1].height() + layouts[i - 1].getHeight() + padVert + minH;
-					}
-				}
-				for (int i = 0; i < answers.length; i++) {
-					centersX[i] = maxWlabel;
-				}
-				Height = (int) (centersY[answers.length - 1] - textAnswerSizePix + padVert * (answers.length - 1))
-						+ layouts[answers.length - 1].getHeight();
-				layout = 4;
-				Height = MeasureSpec.makeMeasureSpec(Height, MeasureSpec.UNSPECIFIED);
-				if ((Height > maxHeight) && (maxHeight > 0) && !fromOnMeasure) {
-					decreaseTextSize();
-					setDimensions(false);
-					return;
-				}
-				setMeasuredDimension(Width, Height);
-				setLayoutParams(new LinearLayout.LayoutParams(Width, Height));
-			}
-			invalidate();
-			break;
 		}
 	}
 

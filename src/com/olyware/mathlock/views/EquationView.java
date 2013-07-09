@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 public class EquationView extends AutoResizeTextView {
 
 	private EquationLayout layout;
+	private boolean equation;
 	private int color = Color.WHITE;
 	private int offset = 0;
 
@@ -35,7 +36,9 @@ public class EquationView extends AutoResizeTextView {
 	// =========================================
 
 	private void initView() {
-		// TODO
+		equation = false;
+		color = Color.WHITE;
+		offset = 0;
 	}
 
 	// =========================================
@@ -44,16 +47,16 @@ public class EquationView extends AutoResizeTextView {
 
 	@Override
 	public void setText(CharSequence text, BufferType type) {
-		boolean equation = false;
+		equation = false;
 		if (text.charAt(0) == '$')
 			if (text.length() > 1)
 				if (text.charAt(1) != '$')
 					equation = true;
 				else
 					text = text.subSequence(1, text.length());
-
 		if (equation) {
-			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight() - offset * 2, getTypeface(), color);
+			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight() - Math.abs(offset) * 2,
+					getTypeface(), color);
 			layout.setDefaultSize(40);
 		} else {
 			layout = null;
@@ -101,5 +104,6 @@ public class EquationView extends AutoResizeTextView {
 
 	public void setOffset(int offset) {
 		this.offset = offset;
+		setText(getText());
 	}
 }
