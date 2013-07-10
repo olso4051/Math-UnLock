@@ -27,7 +27,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -146,6 +145,7 @@ public class MainActivity extends Activity {
 		return SKU;
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -242,17 +242,18 @@ public class MainActivity extends Activity {
 			public void Ready() {
 				answerView.setAnswers(answersRandom);
 				setImage();
-				if (answerView.getHeight() > 0)
-					problem.setOffset(-worth.getHeight() / 2);
-				else
-					problem.setOffset(0);
 			}
 		});
-
 		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		answerView.setParentHeight(size.y);
+		int sizeY;
+		if (android.os.Build.VERSION.SDK_INT < 13)
+			sizeY = display.getHeight();
+		else {
+			Point size = new Point();
+			display.getSize(size);
+			sizeY = size.y;
+		}
+		answerView.setParentHeight(sizeY);
 
 		joystick = (JoystickView) findViewById(R.id.joystick);
 		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
@@ -301,6 +302,7 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacks[i] = false;
 
+		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
@@ -319,22 +321,6 @@ public class MainActivity extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		// at this point the activity has been measured and we can get the height
-		// now we can set a max height for answerView since it is dynamic
-		Log.d("test", "focus changed layout height=" + layout.getBottom() + "|hasfocus=" + hasFocus);
-		setImage();
-		if (hasFocus) {
-			showWallpaper();
-			// answerView.setParentHeight(layout.getBottom());
-			// set the unlock type
-			joystick.setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
-			answerView.setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
-		}
-		super.onWindowFocusChanged(hasFocus);
 	}
 
 	@Override
@@ -382,8 +368,7 @@ public class MainActivity extends Activity {
 		setTime();
 
 		// set the unlock type
-		joystick.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
-		answerView.setUnlockType((Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))));
+		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 
 		// get the localized language entries
 		LanguageEntries = getResources().getStringArray(R.array.language_entries);
@@ -413,13 +398,12 @@ public class MainActivity extends Activity {
 		else
 			resetTimes();
 
-		// show the settings bar and slide it down after 3 seconds
-		// joystick.showStartAnimation(0, 3000);
-
 		// save money into shared preferences
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+
 		// set image if it was set when the screen was off
 		setImage();
+
 		if (fromSettings) {
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[0], EggMaxValues[0]));
 			fromSettings = false;
@@ -497,13 +481,18 @@ public class MainActivity extends Activity {
 		}, delay); // launch home screen after delay time [ms]
 	}
 
+	public void setUnlockType(int type) {
+		if (type == 2) {
+			problem.setOffset(-worth.getCompoundDrawables()[0].getIntrinsicHeight() / 2);
+		} else
+			problem.setOffset(0);
+		joystick.setUnlockType(type);
+		answerView.setUnlockType(type);
+	}
+
 	private void showWallpaper() {
-		// if (sharedPrefs.getBoolean("enable_wallpaper", true)) {
 		// dims the wallpaper so app has more contrast
 		layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
-		// } else
-		// puts a black image over the wallpaper so we don't have to recreate the activity with a different theme
-		// layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
 	}
 
 	private void setImage() {

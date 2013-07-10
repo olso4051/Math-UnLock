@@ -69,7 +69,7 @@ public class EquationView extends AutoResizeTextView {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 		if (layout != null) {
-			layout.setBounds(getTextAreaWidth(), getTextAreaHeight());
+			layout.setBounds(getTextAreaWidth(), getTextAreaHeight() - Math.abs(offset) * 2);
 			invalidate();
 		}
 	}

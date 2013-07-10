@@ -1,6 +1,5 @@
 package com.olyware.mathlock.views;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -58,7 +57,7 @@ public class JoystickView extends View {
 	private final float degreeStepInitial = 1;
 	private float degrees = 0, radians = 0, degreeStep = degreeStepInitial;
 	private int diffX1, diffY1, diffX, diffY;
-	private int spacing, rUnlock, rBig, rSmall, swipeLengthOption, swipeLength1;
+	private int spacing, rUnlock, rUnlockChange, rBig, rSmall, swipeLengthOption, swipeLength1;
 	private int TextHeight;
 
 	private int type = 0;
@@ -122,6 +121,7 @@ public class JoystickView extends View {
 	private void initView(Context ctx) {
 		this.ctx = ctx;
 		setFocusable(true);
+		type = 0;
 		Width = getMeasuredWidth();
 		Height = getMeasuredHeight();
 
@@ -195,6 +195,7 @@ public class JoystickView extends View {
 
 		rBig = Math.max(bmpQ.getWidth(), bmpQ.getHeight()) / 2;
 		rUnlock = rBig;
+		rUnlockChange = rUnlock / 5;
 		swipeLengthOption = rBig * 4;
 		swipeLength1 = rUnlock * 2;
 		rSmall = Math.max(bmpS.getWidth(), bmpS.getHeight()) / 2;
@@ -283,20 +284,24 @@ public class JoystickView extends View {
 	}
 
 	public void setUnlockType(int type) {
-		this.type = type;
-		switch (type) {
-		case 0:
-			break;
-		case 1:
-			animateHandler.removeCallbacks(spin);
-			if (degreeStep == 0) {
-				degrees = 0;
-				radians = 0;
-			} else
-				animateHandler.postDelayed(spin, spinFrameTime);
-			break;
-		case 2:
-			break;
+		if (this.type != type) {
+			this.type = type;
+			if (measured) {
+				switch (type) {
+				case 0:
+					break;
+				case 1:
+					animateHandler.removeCallbacks(spin);
+					if (degreeStep == 0) {
+						degrees = 0;
+						radians = 0;
+					} else
+						animateHandler.postDelayed(spin, spinFrameTime);
+					break;
+				case 2:
+					break;
+				}
+			}
 		}
 	}
 
@@ -441,6 +446,7 @@ public class JoystickView extends View {
 		setMeasuredDimension(Width, Height);
 		initRunnables();
 		measured = true;
+		setUnlockType(type);
 	}
 
 	private int measure(int measureSpec) {
@@ -1017,13 +1023,12 @@ public class JoystickView extends View {
 		textHandler.postDelayed(finishText, textFrames * textFrameTime);
 	}
 
-	@SuppressLint("NewApi")
 	private void initRunnables() {
 		// final int answerInterval = 255 / answerFrames;
 		final int textInterval = 255 / textFrames;
 		// final int startInterval = -255 / startFrames;
 		final int slideInterval = (dstHeight - pad) / startFrames;
-		final int pulseMaxChange = rUnlock / 5;
+		final int pulseMaxChange = rUnlockChange;
 
 		startAnimate = new Runnable() {
 			@Override
@@ -1203,7 +1208,7 @@ public class JoystickView extends View {
 		}
 		answerTextPaint[NumAnswers - 1].getTextBounds(answers[NumAnswers - 1], 0, answers[NumAnswers - 1].length(), bounds[NumAnswers - 1]);
 		layout[NumAnswers - 1] = new StaticLayout(answers[NumAnswers - 1], answerTextPaint[NumAnswers - 1], Width / 2 - outlineWidth * 2
-				- pad * 2 - rUnlock, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+				- pad * 2 - (rUnlock + rUnlockChange) * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		invalidate();
 	}
 

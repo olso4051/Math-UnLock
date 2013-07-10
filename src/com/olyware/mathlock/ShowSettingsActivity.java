@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.olyware.mathlock.utils.EggHelper;
@@ -77,8 +76,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		else {
 			for (int i = 1; i < unlockAllKeys.length; i++) {
 				Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
-				Log.d("test", "settings key=" + settingsPackageKeys[i - 1] + "|unlock key=" + unlockAllKeys[i] + "|unlocked="
-						+ sharedPrefsMoney.getBoolean(unlockAllKeys[i], false));
 				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
 					Pref_Packages.setEnabled(true);
 				else

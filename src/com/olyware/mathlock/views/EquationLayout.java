@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -29,7 +28,7 @@ public class EquationLayout {
 	private List<Bracket> closed = new ArrayList<Bracket>();
 	private List<TextAttributes> textAttributes = new ArrayList<TextAttributes>();
 
-	private Paint testPaintWhite, testPaintBlue;
+	private Paint testPaintWhite;
 
 	private class Bracket {
 		private int Location;
@@ -357,11 +356,6 @@ public class EquationLayout {
 		testPaintWhite.setStyle(Paint.Style.STROKE);
 		testPaintWhite.setStrokeWidth(3);
 
-		testPaintBlue = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-		testPaintBlue.setColor(Color.BLUE);
-		testPaintBlue.setStyle(Paint.Style.STROKE);
-		testPaintBlue.setStrokeWidth(2);
-
 		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
 				.getResources().getDisplayMetrics());
 		textSizeSP = textSizeSPDefault;
@@ -383,11 +377,6 @@ public class EquationLayout {
 		testPaintWhite.setStyle(Paint.Style.STROKE);
 		testPaintWhite.setStrokeWidth(3);
 
-		testPaintBlue = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-		testPaintBlue.setColor(Color.BLUE);
-		testPaintBlue.setStyle(Paint.Style.STROKE);
-		testPaintBlue.setStrokeWidth(2);
-
 		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
 				.getResources().getDisplayMetrics());
 		textSizeSP = textSizeSPDefault;
@@ -404,6 +393,10 @@ public class EquationLayout {
 
 	public Typeface getTypeface() {
 		return font;
+	}
+
+	public Paint getPaint() {
+		return testPaintWhite;
 	}
 
 	public int getHeight() {
@@ -425,6 +418,10 @@ public class EquationLayout {
 	public void setBounds(int maxWidth, int maxHeight) {
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
+		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
+				.getResources().getDisplayMetrics());
+		textSizeSP = textSizeSPDefault;
+		textSizePix = textSizePixDefault;
 		setSize();
 	}
 
@@ -917,7 +914,7 @@ public class EquationLayout {
 
 		// check equation fits within bounds
 		if ((maxWidth > 0) && (maxHeight > 0)) {
-			if ((bracketGroups.get(0).getWidth() > maxWidth) || (bracketGroups.get(0).getHeight() > maxHeight)) {
+			if (((bracketGroups.get(0).getWidth() > maxWidth) || (bracketGroups.get(0).getHeight() > maxHeight)) && textSizeSP > 5) {
 				textSizeSP -= 5;
 				textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, MainActivity.getContext().getResources()
 						.getDisplayMetrics());
