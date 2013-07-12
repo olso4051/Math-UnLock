@@ -91,8 +91,10 @@ public class JoystickView extends View {
 	private Runnable finishAnswer[] = new Runnable[NumAnswers];
 	private Handler answerHandler, textHandler, animateHandler;
 	private final int textFrames = 10, textFrameTime = 50, answerFrames = 5, answerFrameTime = 10, startFrames = 30, startFrameTime = 50,
-			pulseFrames = 20, pulseFrameTime = 50, spinFrameTime = 25;
+			pulseFrames = 25, pulseFrameTime = 40, spinFrameTime = 25;
 
+	private int pulseFrame = 0;
+	private double[] sin = new double[pulseFrames];
 	private Context ctx;
 
 	// =========================================
@@ -242,6 +244,9 @@ public class JoystickView extends View {
 		RectForAnswers[5] = new RectF();
 		selectUnlock = false;
 
+		for (int i = 0; i < pulseFrames; i++) {
+			sin[i] = Math.sin(Math.PI * 2 * i / pulseFrames);
+		}
 		listener = new JoystickSelectListener() {
 			@Override
 			public void OnSelect(int s) {
@@ -1028,7 +1033,7 @@ public class JoystickView extends View {
 		final int textInterval = 255 / textFrames;
 		// final int startInterval = -255 / startFrames;
 		final int slideInterval = (dstHeight - pad) / startFrames;
-		final int pulseMaxChange = rUnlockChange;
+		// final int pulseMaxChange = rUnlockChange;
 
 		startAnimate = new Runnable() {
 			@Override
@@ -1084,9 +1089,8 @@ public class JoystickView extends View {
 				// circlePaint[0].setAlpha(255);
 				if (!selectUnlock) {
 					int size = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
-					int change = ((int) (pulseMaxChange * Math.sin(Math.PI * 2 * System.currentTimeMillis()
-							/ (pulseFrames * pulseFrameTime))) + rUnlock)
-							- size;
+					pulseFrame = (int) (System.currentTimeMillis() % (pulseFrameTime * pulseFrames) / pulseFrameTime);
+					int change = (int) (rUnlockChange * sin[pulseFrame] + rUnlock - size);
 					RectForUnlockPulse.set(RectForUnlockPulse.left - change + strokeWidth / 2, RectForUnlockPulse.top - change
 							+ strokeWidth / 2, RectForUnlockPulse.right + change - strokeWidth / 2, RectForUnlockPulse.bottom + change
 							- strokeWidth / 2);
