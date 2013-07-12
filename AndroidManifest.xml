@@ -31,6 +31,9 @@
         android:label="@string/app_name"
         android:theme="@style/AppThemeWall"
         android:backupAgent="com.olyware.mathlock.utils.AppBackupAgent" >
+        <provider 
+            android:name="com.olyware.mathlock.utils.ContentProviderHelper"
+        	android:authorities="com.olyware.mathlock"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

@@ -16,7 +16,7 @@ public class ShareHelper {
 		}
 		if (fileName != null) {
 			// TODO make this work
-			Uri uri = Uri.parse(fileName);// .fromFile(new File(fileName));
+			Uri uri = Uri.parse(fileName);
 			i.putExtra(Intent.EXTRA_STREAM, uri);
 		}
 		if (message != null) {

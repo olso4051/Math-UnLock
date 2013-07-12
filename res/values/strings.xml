@@ -44,15 +44,15 @@
     <string name="goto_store">Goto Store</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying HiQH!</string>
-    <string name="info_message">-HiQH is trying hard to increase your IQ. Because of that we wont show you ads. We hope you like our product and rate and comment it in the Play Store!\n\n
+    <string name="info_message">-HiQH is trying hard to increase your IQ. Because of that we won\'t show you ads. We hope you like our product, after you try it we hope you rate and comment it in the Play Store!\n\n
         -Answer Questions to earn coins, and increase that IQ\n\n
 		-Use Coins to buy question packs and extras\n\n
 		-Buy coins in the store or find them lying around (HINT: Share HiQH to find some more coins)\n\n
 		-Choose question types and difficulty in Settings tab\n\n
 		-Try Quiz-mode for an endless supply of questions\n\n
-		-Check out your progress and achievements in the Stats tab\n\n
+		-Check out your stats and achievements in the Progress tab\n\n
 		-Check out what else we have to offer in the Store\n\n
-		-Show this help in the info tab
+		-Show this help in the Info tab
 	</string>
     <string name="info_message_first">Your first question pack is on us! Go to the store and unlock your first question pack</string>
     <string name="language_from">Translate from</string>
@@ -60,9 +60,9 @@
     <string name="language_from_default">english</string>
     <string name="language_to_default">spanish</string>
     <string name="later">Not Now</string>
-    <string name="max_tries_default">1</string>
+    <string name="max_tries_default">4</string>
     <string name="max_tries_title">Maximum Attempts</string>
-    <string name="max_tries_summary">1</string>
+    <string name="max_tries_summary">Unlimited</string>
     <string name="menu_settings">Settings</string>
     <string name="no">No</string>
     <string name="none_enabled">Go to Settings and enable your question pack</string>
@@ -99,7 +99,7 @@
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_toddler_title">Toddler Questions</string>
     <string name="settings_vocab_title">Vocabulary Questions</string>
-    <string name="share_message">HiQH is increasing my IQ</string>
+    <string name="share_message">Try HiQH today</string>
     <string name="share_subject">@string/app_name</string>
     <string name="share_with">Share with…</string>
     <string name="side_bar">Settings and Info</string>
