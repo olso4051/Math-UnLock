@@ -285,6 +285,12 @@ public class MathQuestion extends Question {
 		}
 	}
 
+	public String simplify(String equation, int precision) {
+		String eq = equation;
+
+		return eq;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

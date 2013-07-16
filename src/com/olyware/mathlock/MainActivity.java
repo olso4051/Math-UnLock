@@ -63,7 +63,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 3, lowestAmount = 5, decreaseRate = 500, startingPmoney = 0;
+	final private int multiplier = 2, lowestAmount = 4, decreaseRate = 500, startingPmoney = 0;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
