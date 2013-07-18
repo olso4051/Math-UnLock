@@ -99,6 +99,8 @@ public class DatabaseManager {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		String where = "difficulty = " + String.valueOf(difficulty.getValue());
+		if (difficulty.equals(Difficulty.INSANE))
+			where = where + " AND " + fromLanguage + "!=" + toLanguage;
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
@@ -115,6 +117,8 @@ public class DatabaseManager {
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue());
+		if (maxDifficulty.equals(Difficulty.INSANE))
+			where = where + " AND " + fromLanguage + "!=" + toLanguage;
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
 		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);

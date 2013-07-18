@@ -51,7 +51,7 @@ public class MathEval extends Object {
 	private final SortedMap<String, Double> constants;                                                  // external constants
 	private final SortedMap<String, Double> variables;                                                  // external variables
 	private final SortedMap<String, FunctionHandler> pureFunctions;                                      // external pureFunctions
-	private final SortedMap<String, FunctionHandler> impureFunctions;                                    // external pureFunctions
+	private final SortedMap<String, FunctionHandler> impureFunctions;                                    // external impureFunctions
 	private boolean relaxed;                                                    // allow variables to be undefined
 	private String separators;                                                 // cache of the operators, used for separators for getVariablesWithin()
 
@@ -280,6 +280,10 @@ public class MathEval extends Object {
 	 * Evaluate this expression.
 	 */
 	public double evaluate(String exp) throws NumberFormatException, ArithmeticException {
+		exp = exp.replace("{", "(");
+		exp = exp.replace("}", ")");
+		exp = exp.replace("[", "(");
+		exp = exp.replace("]", ")");
 		expression = exp;
 		isConstant = true;
 		offset = 0;
@@ -588,8 +592,9 @@ public class MathEval extends Object {
 
 	private static double GCD(double[] input) {
 		double result = input[0];
-		for (int i = 1; i < input.length; i++)
+		for (int i = 1; i < input.length; i++) {
 			result = GCD(result, input[i]);
+		}
 		return result;
 	}
 
@@ -665,7 +670,7 @@ public class MathEval extends Object {
 			int i = index;
 			int count = 1;
 			while (expression.charAt(i) != ')') {
-				if (expression.charAt(index) == ',') {
+				if (expression.charAt(i) == ',') {
 					count++;
 				}
 				i++;
@@ -846,6 +851,7 @@ public class MathEval extends Object {
 				break;
 			case 'g': {
 				if (fncnam.equalsIgnoreCase("gcd")) {
+
 					int numOfArgs = fncargs.size();
 					double args[] = new double[numOfArgs];
 					for (int i = 0; i < numOfArgs; i++)
@@ -955,7 +961,7 @@ public class MathEval extends Object {
 		static private final Operator OPR_MOD = new Operator('%', 40, DefaultImpl.INSTANCE); // remainder
 		static private final Operator OPR_ADD = new Operator('+', 20, DefaultImpl.INSTANCE); // add/unary-positive
 		static private final Operator OPR_SUB = new Operator('-', 20, DefaultImpl.INSTANCE); // subtract/unary-negative
-		static private final Operator OPR_FAC = new Operator('!', 20, DefaultImpl.INSTANCE); // factorial
+		static private final Operator OPR_FAC = new Operator('!', 20, 20, LEFT_SIDE, false, DefaultImpl.INSTANCE); // factorial
 
 		// To add/remove operators change evaluateOperator() and registerOperators
 		static void registerOperators(MathEval tgt) {

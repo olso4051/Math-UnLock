@@ -1083,6 +1083,7 @@ public class MainActivity extends Activity {
 					// thumbnail(ic_launcher.png)
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
+					Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 				}
 			});
 			builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {

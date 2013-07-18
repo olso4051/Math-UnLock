@@ -10,14 +10,13 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.text.TextPaint;
-import android.util.Log;
 import android.util.TypedValue;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.MathEval;
 
 public class EquationLayout {
-	private final int extraPadding = 20;
+	private int extraPadding = 20;
 	private int textSizeSPDefault = 40;
 	private int maxWidth, maxHeight;
 	private int textSizeSP;
@@ -25,7 +24,6 @@ public class EquationLayout {
 	private String equationText;
 	private Typeface font;
 	private int color;
-	private boolean simplify = false;
 	private List<BracketGroup> bracketGroups = new ArrayList<BracketGroup>();
 	private List<Attributes> attributes = new ArrayList<Attributes>();
 	private List<Bracket> opened = new ArrayList<Bracket>();
@@ -182,6 +180,7 @@ public class EquationLayout {
 		}
 
 		public void setWidthAndHeight() {
+			padHorz = (int) (SizePix / 8);
 			setTopBottom();
 			paint.getTextBounds(text, 0, text.length(), bounds);
 			Width = bounds.width() + padHorz;
@@ -367,11 +366,6 @@ public class EquationLayout {
 
 	public EquationLayout(String equation, int maxWidth, int maxHeight, TextPaint textPaint) {
 		this.equationText = equation;
-		if (equationText.contains("Simplify")) {
-			equationText.replace("Simplify", "");
-			simplify = true;
-		} else
-			simplify = false;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
 		this.font = textPaint.getTypeface();
@@ -393,11 +387,6 @@ public class EquationLayout {
 
 	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color) {
 		this.equationText = equation;
-		if (equationText.contains("Simplify")) {
-			equationText.replace("Simplify", "");
-			simplify = true;
-		} else
-			simplify = false;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
 		this.font = font;
@@ -731,7 +720,7 @@ public class EquationLayout {
 		}
 		bracketGroups.get(0).setParent(0);
 
-		// TODO Simplify groups that want simplifying
+		// Simplify groups that want simplifying
 		for (int a = 0; a < closed.size(); a++) {
 			BracketGroup self = bracketGroups.get(closed.get(a).getBracketSet());
 			if (self.getModifier().equals(Att.Simplify)) {
@@ -748,10 +737,8 @@ public class EquationLayout {
 					subEqNew = subEqNew.replace('}', ')');
 					subEqNew = subEqNew.replace('[', '(');
 					subEqNew = subEqNew.replace(']', ')');
-					Log.d("test", "simplify text = " + subEqNew);
 					subEqNew = simplify(subEqNew, subEq);
 					equationText = equationText.substring(0, child.getStart()) + subEqNew + equationText.substring(child.getEnd() + 1);
-					Log.d("test", "simplified equation = " + equationText);
 					int locChange = subEqNew.length() - subEq.length();
 					int initLoc = closed.get(child.getClosedBracket()).getLocation();
 					for (int b = child.getClosedBracket(); b < closed.size(); b++) {
@@ -767,11 +754,6 @@ public class EquationLayout {
 				findBrackets();
 				return;
 			}
-		}
-		for (int a = 0; a < closed.size(); a++) {
-			int locC = closed.get(a).getLocation();
-			int locO = opened.get(closed.get(a).getBracketSet()).getLocation();
-			Log.d("test", "bracketSet=" + closed.get(a).getBracketSet() + "|closed=" + locC + "|opened=" + locO);
 		}
 	}
 
@@ -929,7 +911,7 @@ public class EquationLayout {
 				if (att.equals(Att.Subscript)) {
 					self.setY(self.getY() + (int) (parent.getBottom() - self.getBottom()));
 				} else if (att.equals(Att.Superscript)) {
-					self.setY(self.getY() + (int) (parent.getTop() - self.getTop()));
+					self.setY(self.getY() + (int) (parent.getTop() - self.getBottom()));
 				}
 			}
 		}
@@ -944,7 +926,7 @@ public class EquationLayout {
 				if (att.equals(Att.Subscript)) {
 					moveGroup(self, 0, (int) (parent.getBottom() - self.getBottom()));
 				} else if (att.equals(Att.Superscript)) {
-					moveGroup(self, 0, (int) (parent.getTop() - self.getTop()));
+					moveGroup(self, 0, (int) (parent.getTop() - self.getBottom()));
 				}
 			}
 		}
@@ -1253,7 +1235,6 @@ public class EquationLayout {
 		MathEval math = new MathEval();
 		double valueD = math.evaluate(eq);
 		double test = Double.parseDouble(df.format(valueD));
-		Log.d("test", "valueD=" + valueD + "|test=" + test);
 		if (valueD == test) {
 			return "(" + df.format(valueD) + ")";
 		} else {

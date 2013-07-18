@@ -251,14 +251,26 @@ public class MathQuestion extends Question {
 
 	private int[] getVariablePrecisionFromQuestion() {
 		String preParse = super.getQuestionText();
-		int index;
+		int index, start;
+		boolean done;
 		int p[] = new int[questionVariables.length];
 		for (int i = 0; i < questionVariables.length; i++) {
-			index = preParse.indexOf(questionVariables[i]);
-			if (index != -1)
-				p[i] = Integer.parseInt(preParse.substring(index + 1, index + 2));
-			else
-				p[i] = -1;
+			start = 0;
+			done = false;
+			while (!done) {
+				index = preParse.indexOf(questionVariables[i], start);
+				if (index != -1)
+					if (preParse.substring(index + 1, index + 2).equals(" "))
+						start = index + 1;
+					else {
+						p[i] = Integer.parseInt(preParse.substring(index + 1, index + 2));
+						done = true;
+					}
+				else {
+					p[i] = -1;
+					done = true;
+				}
+			}
 		}
 		return p;
 	}
