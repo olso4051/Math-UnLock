@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import android.util.Log;
+
 import com.olyware.mathlock.MathEval;
 
 public class MathQuestion extends Question {
@@ -190,9 +192,9 @@ public class MathQuestion extends Question {
 				subEq = range.substring(first, index);
 				max = Double.parseDouble(subEq);
 				if (variablePrecision[count] >= 0)
-					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, variablePrecision[count]) * step + min;
+					Values[count] = getDoublePrecisionNumber(max, min, step, variablePrecision[count]);
 				else
-					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, answerPrecision) * step + min;
+					Values[count] = getDoublePrecisionNumber(max, min, step, answerPrecision);
 				math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 				count++;
 				first = index + 1;
@@ -201,10 +203,9 @@ public class MathQuestion extends Question {
 				if (index + 1 == range.length()) {
 					max = math.evaluate(subEq);
 					if (variablePrecision[count] >= 0)
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, variablePrecision[count]) * step
-								+ min;
+						Values[count] = getDoublePrecisionNumber(max, min, step, variablePrecision[count]);
 					else
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, answerPrecision) * step + min;
+						Values[count] = getDoublePrecisionNumber(max, min, step, answerPrecision);
 					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 					count++;
 				} else if (range.charAt(index + 1) == ':') {	// min or step
@@ -218,10 +219,9 @@ public class MathQuestion extends Question {
 				} else {										// max
 					max = math.evaluate(subEq);
 					if (variablePrecision[count] >= 0)
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, variablePrecision[count]) * step
-								+ min;
+						Values[count] = getDoublePrecisionNumber(max, min, step, variablePrecision[count]);
 					else
-						Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, answerPrecision) * step + min;
+						Values[count] = getDoublePrecisionNumber(max, min, step, answerPrecision);
 					math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 					count++;
 				}
@@ -232,9 +232,9 @@ public class MathQuestion extends Question {
 				subEq = range.substring(first, index + 1);
 				max = math.evaluate(subEq);
 				if (variablePrecision[count] >= 0)
-					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, variablePrecision[count]) * step + min;
+					Values[count] = getDoublePrecisionNumber(max, min, step, variablePrecision[count]);
 				else
-					Values[count] = getDoublePrecisionNumber(rand.nextDouble() * (max - min) / step, answerPrecision) * step + min;
+					Values[count] = getDoublePrecisionNumber(max, min, step, answerPrecision);
 				math.setVariable(String.valueOf(questionVariables[count]), Values[count]);
 				count++;
 			} else if ((next == ')') && (needs > 1)) {
@@ -275,13 +275,16 @@ public class MathQuestion extends Question {
 		return p;
 	}
 
-	private double getDoublePrecisionNumber(double num, int decimalPrecision) {
+	private double getDoublePrecisionNumber(double max, double min, double step, int decimalPrecision) {
+		int bins = (int) Math.floor((max - min) / step + 1);
+		double num = step * Math.floor(rand.nextDouble() * bins) + min;
 		if (decimalPrecision == -1)
 			return num;
 		else if (decimalPrecision == 0)
 			return Math.round(num);
 		else {
 			double factor = Math.pow(10, decimalPrecision);
+			Log.d("test", "num=" + num + "factor=" + factor + "result=" + Math.round(num * factor) / factor);
 			return Math.round(num * factor) / factor;
 		}
 	}
