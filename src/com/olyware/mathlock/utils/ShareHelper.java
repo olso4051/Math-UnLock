@@ -10,7 +10,7 @@ public class ShareHelper {
 
 	public static void share(Context context, String subject, String fileName, String message, String link) {
 		Intent i = new Intent(Intent.ACTION_SEND);
-		i.setType("*/*");
+		i.setType("text/plain");
 		if (subject != null) {
 			i.putExtra(Intent.EXTRA_SUBJECT, subject);
 		}
@@ -24,6 +24,9 @@ public class ShareHelper {
 				i.putExtra(Intent.EXTRA_TEXT, message + "\n\n" + link);
 			else
 				i.putExtra(Intent.EXTRA_TEXT, message);
+		} else {
+			if (link != null)
+				i.putExtra(Intent.EXTRA_TEXT, link);
 		}
 		// TODO maybe make this return a result if they actually shared the app
 		context.startActivity(Intent.createChooser(i, context.getString(R.string.share_with)));

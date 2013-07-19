@@ -1041,8 +1041,8 @@ public class MainActivity extends Activity {
 						dialogOn = false;
 						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
-						String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
-						ShareHelper.share(ctx, getString(R.string.share_subject), fileName, getString(R.string.share_message),
+						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
+						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 					}
