@@ -260,7 +260,7 @@ public class MathQuestion extends Question {
 			while (!done) {
 				index = preParse.indexOf(questionVariables[i], start);
 				if (index != -1)
-					if (preParse.substring(index + 1, index + 2).equals(" "))
+					if (!Character.isDigit(preParse.charAt(index + 1)))
 						start = index + 1;
 					else {
 						p[i] = Integer.parseInt(preParse.substring(index + 1, index + 2));

@@ -63,12 +63,12 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 2, lowestAmount = 4, decreaseRate = 500, startingPmoney = 0;
+	final private int multiplier = 2, lowestAmount = 4, decreaseRate = 500, startingPmoney = 0, initialStreakToIncreaseDifficulty = 20;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
 	private int dMoney;// change in money after a question is answered
-	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
+	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0, streakToIncreaseDifficulty = initialStreakToIncreaseDifficulty;
 	private long startTime = 0;
 	private boolean fromSettings = false;
 
@@ -426,7 +426,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (locked) {
+		if (locked) {				// if locked then don't allow back button to exit app
 			return;
 		} else {
 			super.onBackPressed();
@@ -945,6 +945,8 @@ public class MainActivity extends Activity {
 	private void updateStats(boolean right) {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		editorPrefsStats = sharedPrefsStats.edit();
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
 		long ms = System.currentTimeMillis() - startTime;
 		int correct = sharedPrefsStats.getInt("correct", 0);
 		int wrong = sharedPrefsStats.getInt("wrong", 0);
@@ -964,9 +966,15 @@ public class MainActivity extends Activity {
 				editorPrefsStats.putInt("currentStreak", currentStreak + 1);
 			else
 				editorPrefsStats.putInt("currentStreak", 1);
+			if (currentStreak >= streakToIncreaseDifficulty) {
+				int max = Math.min(5, Integer.parseInt(sharedPrefs.getString("difficulty_max", "0")) + 1);
+				streakToIncreaseDifficulty = currentStreak + initialStreakToIncreaseDifficulty;
+				editorPrefs.putString("difficulty_max", String.valueOf(max)).commit();
+			}
 			if (answerTimeFast > ms)
 				editorPrefsStats.putLong("answerTimeFast", ms);
 		} else {
+			streakToIncreaseDifficulty = initialStreakToIncreaseDifficulty;
 			editorPrefsStats.putInt("wrong", wrong + 1);
 			editorPrefsStats.putInt("coins", coins + dMoney);
 			if (currentStreak >= 0)
