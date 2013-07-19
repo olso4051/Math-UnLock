@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
 	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
-	private int ID;
+	private int ID = 0;
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
@@ -629,7 +629,7 @@ public class MainActivity extends Activity {
 
 	private void setMathProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.math_table);
-		MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
+		MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty), ID);
 		ID = question.getID();
 		question.setVariables();
 
@@ -651,7 +651,7 @@ public class MainActivity extends Activity {
 		currentTableName = getString(R.string.vocab_table);
 		// TODO: don't query the DB every time we display a question. Needs a cache.
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(minDifficulty),
-				Difficulty.fromValue(maxDifficulty), answers.length);
+				Difficulty.fromValue(maxDifficulty), answers.length, ID);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
@@ -680,7 +680,7 @@ public class MainActivity extends Activity {
 		}
 		int diff = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
 		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diff), answers.length, fromLanguage,
-				toLanguage);
+				toLanguage, ID);
 		// List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(minDifficulty),
 		// Difficulty.fromValue(maxDifficulty), answers.length, fromLanguage, toLanguage);
 		ID = questions.get(0).getID();
@@ -743,7 +743,8 @@ public class MainActivity extends Activity {
 
 	private void setEngineerProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.engineer_table);
-		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty));
+		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty),
+				ID);
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
@@ -757,7 +758,7 @@ public class MainActivity extends Activity {
 	private void setHiQHTriviaProblem(int minDifficulty, int maxDifficulty) {
 		currentTableName = getString(R.string.hiqh_trivia_table);
 		HiQHTriviaQuestion question = dbManager.getHiQHTriviaQuestion(Difficulty.fromValue(minDifficulty),
-				Difficulty.fromValue(maxDifficulty));
+				Difficulty.fromValue(maxDifficulty), ID);
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked

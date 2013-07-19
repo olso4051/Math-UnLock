@@ -91,7 +91,7 @@ public class EquationLayout {
 	}
 
 	private enum Att {
-		Normal, Subscript, Superscript, Numerator, Denominator, Bracket, BracketSub, BracketSuper, SquareRoot, Abs, Limit, Simplify, CantSimplify;
+		Normal, Subscript, Superscript, Numerator, Denominator, Bracket, BracketSub, BracketSuper, SquareRoot, Abs, Limit, Simplify, CantSimplify, Reduce;
 	}
 
 	private class TextAttributes {
@@ -563,6 +563,7 @@ public class EquationLayout {
 		equationText = equationText.replaceAll("<->", "↔");
 		equationText = equationText.replaceAll("\\+-", "±");
 		equationText = equationText.replaceAll("Simplify", "∀");
+		equationText = equationText.replaceAll("Reduce", "⊦");
 	}
 
 	private void findBrackets() {
@@ -605,7 +606,7 @@ public class EquationLayout {
 					currentSet = bSet.get(bSet.size() - 1);
 				}
 			} else if ((currentChar == '∫') || (currentChar == '∑') || (currentChar == '∏') || (currentChar == '√') || (currentChar == '|')
-					|| (currentChar == '≐') || (currentChar == '∀')) {
+					|| (currentChar == '≐') || (currentChar == '∀') || (currentChar == '⊦')) {
 				attributes.get(i).setAtt(Att.Bracket);
 				bracketGroups.add(new BracketGroup());
 				switch (currentChar) {
@@ -623,6 +624,10 @@ public class EquationLayout {
 				case '∀':
 					attributes.get(i).setShown(false);
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.Simplify);
+					break;
+				case '⊦':
+					attributes.get(i).setShown(false);
+					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.Reduce);
 					break;
 				default:
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.CantSimplify);
@@ -750,6 +755,44 @@ public class EquationLayout {
 						bracketGroups.get(closed.get(b).getBracketSet()).changeEnd(locChange);
 					}
 				}
+				findKeywords();
+				findBrackets();
+				return;
+			}
+		}
+
+		// Reduce groups that want to be reduced (only works for numeric values)
+		for (int a = 0; a < closed.size(); a++) {
+			BracketGroup self = bracketGroups.get(closed.get(a).getBracketSet());
+			if (self.getModifier().equals(Att.Reduce)) {
+				BracketGroup denominator = bracketGroups.get(attributes.get(self.getEnd() - 1).getBracketGroup());
+				String numerator = equationText.substring(self.getStart() + 2, denominator.getStart() - 1);
+				String denom = equationText.substring(denominator.getStart(), denominator.getEnd() + 1);
+				numerator = numerator.replace("{", "");
+				numerator = numerator.replace("}", "");
+				numerator = numerator.replace("(", "");
+				numerator = numerator.replace(")", "");
+				numerator = numerator.replace("[", "");
+				numerator = numerator.replace("]", "");
+				denom = denom.replace("{", "");
+				denom = denom.replace("}", "");
+				denom = denom.replace("(", "");
+				denom = denom.replace(")", "");
+				denom = denom.replace("[", "");
+				denom = denom.replace("]", "");
+				int num = Integer.parseInt(numerator);
+				int den = Integer.parseInt(denom);
+				int reducer = (int) MathEval.GCD(new double[] { num, den });
+				num = num / reducer;
+				den = den / reducer;
+				String fraction = "";
+				if (den == 1)
+					fraction = String.valueOf(num);
+				else if (num == den)
+					fraction = "1";
+				else
+					fraction = "(" + num + ")/(" + den + ")";
+				equationText = equationText.substring(0, self.getStart()) + fraction + equationText.substring(self.getEnd() + 1);
 				findKeywords();
 				findBrackets();
 				return;

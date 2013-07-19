@@ -391,6 +391,9 @@ public class MathEval extends Object {
 					if (ch0 == '+') {
 						continue;
 					}                                              // unary '+': no-op; i.e. +(-1) == -1
+					if (ch0 == '-') {
+						nxt = getOperator('±');
+					}
 				}
 
 				if (beg == ofs && (cur.unary == LEFT_SIDE || nxt.unary == RIGHT_SIDE)) {
@@ -590,7 +593,7 @@ public class MathEval extends Object {
 		return a;
 	}
 
-	private static double GCD(double[] input) {
+	public static double GCD(double[] input) {
 		double result = input[0];
 		for (int i = 1; i < input.length; i++) {
 			result = GCD(result, input[i]);
@@ -778,6 +781,8 @@ public class MathEval extends Object {
 				return rgt;                                                                  // final assignment
 			case '^':
 				return Math.pow(lft, rgt);                                                    // power
+			case '±':
+				return -rgt;
 			case '*':
 				return lft * rgt;                                                              // multiply (classical)
 			case '(':
@@ -954,6 +959,7 @@ public class MathEval extends Object {
 																													// operation, must be
 																													// maximum precedence
 		static private final Operator OPR_PWR = new Operator('^', 80, 81, NO_SIDE, false, DefaultImpl.INSTANCE); // power
+		static private final Operator OPR_NEG = new Operator('±', 60, 60, RIGHT_SIDE, true, DefaultImpl.INSTANCE); // unary negation
 		static private final Operator OPR_MLT1 = new Operator('*', 40, DefaultImpl.INSTANCE); // multiply (classical)
 		static private final Operator OPR_BKT = new Operator('(', 40, DefaultImpl.INSTANCE); // multiply (implicit due to brackets, e.g
 																								// "(a)(b)")
@@ -967,6 +973,7 @@ public class MathEval extends Object {
 		static void registerOperators(MathEval tgt) {
 			tgt.setOperator(OPR_EQU);
 			tgt.setOperator(OPR_PWR);
+			tgt.setOperator(OPR_NEG);
 			tgt.setOperator(OPR_MLT1);
 			tgt.setOperator(OPR_BKT);
 			tgt.setOperator(OPR_DIV1);

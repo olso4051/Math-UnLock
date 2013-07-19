@@ -32,7 +32,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private final Loggy log = new Loggy(this.getClass());
 
 	private static final String DATABASE_NAME = "mathunlock.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 1;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
 
 	private Context context;
