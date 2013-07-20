@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
@@ -70,7 +71,7 @@ public class MainActivity extends Activity {
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0, streakToIncreaseDifficulty = initialStreakToIncreaseDifficulty;
 	private long startTime = 0;
-	private boolean fromSettings = false;
+	private boolean fromSettings = false, fromPlay = false, fromShare = false;
 
 	private LinearLayout layout;
 	private TextView clock;
@@ -407,6 +408,14 @@ public class MainActivity extends Activity {
 		if (fromSettings) {
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[0], EggMaxValues[0]));
 			fromSettings = false;
+		}
+		if (fromPlay) {
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[9], EggMaxValues[9]));
+			fromPlay = false;
+		}
+		if (fromShare) {
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[8], EggMaxValues[8]));
+			fromShare = false;
 		}
 	}
 
@@ -967,9 +976,13 @@ public class MainActivity extends Activity {
 			else
 				editorPrefsStats.putInt("currentStreak", 1);
 			if (currentStreak >= streakToIncreaseDifficulty) {
-				int max = Math.min(5, Integer.parseInt(sharedPrefs.getString("difficulty_max", "0")) + 1);
-				streakToIncreaseDifficulty = currentStreak + initialStreakToIncreaseDifficulty;
-				editorPrefs.putString("difficulty_max", String.valueOf(max)).commit();
+				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
+				if (currentMax < 5) {
+					int max = Math.min(5, currentMax + 1);
+					streakToIncreaseDifficulty = currentStreak + initialStreakToIncreaseDifficulty;
+					editorPrefs.putString("difficulty_max", String.valueOf(max)).commit();
+					Toast.makeText(this, getString(R.string.difficulty_increased), Toast.LENGTH_SHORT).show();
+				}
 			}
 			if (answerTimeFast > ms)
 				editorPrefsStats.putLong("answerTimeFast", ms);
@@ -1033,7 +1046,8 @@ public class MainActivity extends Activity {
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
 						startActivity(intent);
-						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[9], EggMaxValues[9]));
+						fromPlay = true;
+						// Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[9], EggMaxValues[9]));
 					}
 				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
@@ -1044,7 +1058,8 @@ public class MainActivity extends Activity {
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
-						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
+						fromShare = true;
+						// Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 					}
 				});
 			}
@@ -1080,6 +1095,7 @@ public class MainActivity extends Activity {
 					Intent intent = new Intent(Intent.ACTION_VIEW);
 					intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
 					startActivity(intent);
+					fromPlay = true;
 				}
 			});
 			builder.setNeutralButton(R.string.share_with, new DialogInterface.OnClickListener() {
@@ -1092,7 +1108,8 @@ public class MainActivity extends Activity {
 					// thumbnail(ic_launcher.png)
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
-					Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
+					fromShare = true;
+					// Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 				}
 			});
 			builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {

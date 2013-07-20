@@ -14,6 +14,7 @@
     <string name="default_money">0</string>
     <string name="difficulty">Max Difficulty</string>
     <string name="difficulty_default">0</string>
+    <string name="difficulty_increased">Difficulty Increased!</string>
     <string name="difficulty_max">Max Difficulty</string>
     <string name="difficulty_min">Min Difficulty</string>
     <string name="difficulty_summary">Very Easy</string>
