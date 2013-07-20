@@ -554,15 +554,15 @@ public class MainActivity extends Activity {
 					switch (location[randPack]) {
 					case 0:			// math question
 						currentPack = getString(R.string.math);
-						setMathProblem(difficultyMin, difficultyMax);
+						setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 1:			// vocabulary question
 						currentPack = getString(R.string.vocab);
-						setVocabProblem(difficultyMin, difficultyMax);
+						setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 2:			// language question
 						currentPack = getString(R.string.language);
-						setLanguageProblem(difficultyMin, difficultyMax);
+						setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					/*case 3:			// enabled vocab act/sat question
 					case 4:			// enabled math act/sat question
@@ -582,11 +582,11 @@ public class MainActivity extends Activity {
 						break;*/
 					case 3:			// engineer question
 						currentPack = getString(R.string.engineer);
-						setEngineerProblem(difficultyMin, difficultyMax);
+						setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 4:			// HiQH Trivia question
 						currentPack = getString(R.string.hiqh_trivia);
-						setHiQHTriviaProblem(difficultyMin, difficultyMax);
+						setHiQHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					default:
 						break;
@@ -636,9 +636,9 @@ public class MainActivity extends Activity {
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
 
-	private void setMathProblem(int minDifficulty, int maxDifficulty) {
+	private void setMathProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.math_table);
-		MathQuestion question = dbManager.getMathQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty), ID);
+		MathQuestion question = dbManager.getMathQuestion(min, max, ID);
 		ID = question.getID();
 		question.setVariables();
 
@@ -655,31 +655,25 @@ public class MainActivity extends Activity {
 		return;
 	}
 
-	// TODO: Pass in a Difficulty enum instead of an integer
-	private void setVocabProblem(int minDifficulty, int maxDifficulty) {
+	private void setVocabProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.vocab_table);
-		// TODO: don't query the DB every time we display a question. Needs a cache.
-		List<VocabQuestion> questions = dbManager.getVocabQuestions(Difficulty.fromValue(minDifficulty),
-				Difficulty.fromValue(maxDifficulty), answers.length, ID);
+		List<VocabQuestion> questions = dbManager.getVocabQuestions(min, max, answers.length, ID);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
 
-		// Display the vocab question and answers
+		// Display the vocabulary question and answers
 		for (int i = 0; i < answers.length; i++) {
 			answers[i] = questions.get(i).getCorrectAnswer();
 		}
 		problem.setText("Define: " + questions.get(0).getQuestionText());
 	}
 
-	private void setLanguageProblem(int minDifficulty, int maxDifficulty) {
-		// TODO: don't query the DB every time we display a question. Needs a cache.
+	private void setLanguageProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.language_table);
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
-		// String fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
-		// String toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 		String fromLanguageLocal = fromLanguage, toLanguageLocal = toLanguage;
 		for (int i = 0; i < LanguageValues.length; i++) {
 			if (LanguageValues[i].equals(fromLanguage))
@@ -687,17 +681,15 @@ public class MainActivity extends Activity {
 			else if (LanguageValues[i].equals(toLanguage))
 				toLanguageLocal = LanguageEntries[i];
 		}
-		int diff = rand.nextInt(maxDifficulty - minDifficulty + 1) + minDifficulty;
+		int diff = rand.nextInt(max.getValue() - min.getValue() + 1) + min.getValue();
 		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diff), answers.length, fromLanguage,
 				toLanguage, ID);
-		// List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(minDifficulty),
-		// Difficulty.fromValue(maxDifficulty), answers.length, fromLanguage, toLanguage);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
 
-		// Display the vocab question and answers
+		// Display the language question and answers
 		for (int i = 0; i < answers.length; i++) {
 			answers[i] = questions.get(i).getCorrectAnswer();
 		}
@@ -750,10 +742,9 @@ public class MainActivity extends Activity {
 		}
 	}*/
 
-	private void setEngineerProblem(int minDifficulty, int maxDifficulty) {
+	private void setEngineerProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.engineer_table);
-		EngineerQuestion question = dbManager.getEngineerQuestion(Difficulty.fromValue(minDifficulty), Difficulty.fromValue(maxDifficulty),
-				ID);
+		EngineerQuestion question = dbManager.getEngineerQuestion(min, max, ID);
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
@@ -764,10 +755,9 @@ public class MainActivity extends Activity {
 		return;
 	}
 
-	private void setHiQHTriviaProblem(int minDifficulty, int maxDifficulty) {
+	private void setHiQHTriviaProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.hiqh_trivia_table);
-		HiQHTriviaQuestion question = dbManager.getHiQHTriviaQuestion(Difficulty.fromValue(minDifficulty),
-				Difficulty.fromValue(maxDifficulty), ID);
+		HiQHTriviaQuestion question = dbManager.getHiQHTriviaQuestion(min, max, ID);
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
@@ -1047,7 +1037,6 @@ public class MainActivity extends Activity {
 						intent.setData(Uri.parse("market://details?id=com.olyware.mathlock"));
 						startActivity(intent);
 						fromPlay = true;
-						// Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[9], EggMaxValues[9]));
 					}
 				});
 				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
@@ -1059,7 +1048,6 @@ public class MainActivity extends Activity {
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 						fromShare = true;
-						// Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 					}
 				});
 			}
@@ -1104,12 +1092,10 @@ public class MainActivity extends Activity {
 					editorPrefsMoney = sharedPrefsMoney.edit();
 					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
 					dialogOn = false;
-					// TODO make this work for images, currently null is passed as the image, would like to pass app
-					// thumbnail(ic_launcher.png)
+					// TODO make this work for images, currently null is passed as the image
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
 					fromShare = true;
-					// Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 				}
 			});
 			builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {
