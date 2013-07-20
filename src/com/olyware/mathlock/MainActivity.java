@@ -693,7 +693,7 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < answers.length; i++) {
 			answers[i] = questions.get(i).getCorrectAnswer();
 		}
-		problem.setText(fromLanguageLocal + " -> " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
+		problem.setText(fromLanguageLocal + " → " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
 	}
 
 	/*private void setACT_SATProblem(int diffNum, boolean vocab, boolean math) {
