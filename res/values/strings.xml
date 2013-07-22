@@ -23,7 +23,7 @@
     <string name="egg_message">Egg worth = </string>
     <string name="egg_title">Easter Egg Found!</string>
     <string name="enable">Enable</string>
-    <string name="enable_vibration">Vibration On/Off</string>
+    
     <string name="enable_act_sat_math_summary">ACT &amp; SAT Math Questions</string>
     <string name="enable_act_sat_vocab_summary">ACT &amp; SAT Vocab Questions</string>
     <string name="enable_engineer_summary">Engineering Questions</string>
@@ -31,9 +31,12 @@
     <string name="enable_gre_vocab_summary">GRE Vocab Questions</string>
     <string name="enable_hiqh_trivia_summary">HiQH Trivia Questions</string>
     <string name="enable_language_summary">Language questions</string>
+    <string name="enable_lockscreen">Lockscreen On/Off</string>
+    <string name="enable_lockscreen_summary">Use app as a lockscreen</string>
     <string name="enable_math_summary">Math questions</string>
     <string name="enable_security_summary">Bring up standard lock screen after correct answer</string>
     <string name="enable_toddler_summary">Answer toddler questions</string>
+    <string name="enable_vibration">Vibration On/Off</string>
     <string name="enable_vibration_summary">Vibrate on key presses</string>
     <string name="enable_vocab_summary">Vocab questions</string>
     <string name="extras">Extras</string>
@@ -43,6 +46,7 @@
     <string name="get_pack_first">Unlock a Question Pack first so you can use your extras</string>
     <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
+    <string name="hint_title">Helpful Hint</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying HiQH!</string>
     <string name="info_message">-HiQH is trying hard to increase your IQ. Because of that we won\'t show you ads. We hope you like our product, after you try it we hope you rate and comment it in the Play Store!\n\n

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -29,13 +30,14 @@ import com.olyware.mathlock.ui.Typefaces;
 public class JoystickView extends View {
 	private final int NumAnswers = 5;
 
-	private Bitmap bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock;
+	private Bitmap bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock, bmpHand, bmpArrow;
 	private Bitmap[] bmpBack = new Bitmap[3];
 	private RectF RectForAnswers[] = new RectF[NumAnswers + 1];
 	private RectF dstRectForSet, dstRectForOpt, RectForUnlock, RectForUnlockPulse;
 	private Rect dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI;
 	private Rect srcRectForBack, srcRectForUnlock, srcRectForBig, srcRectForSmall;
 	private Rect bounds[] = new Rect[NumAnswers];
+	private Matrix rotateHand, rotateArrow;
 
 	private TextPaint circleTextPaint[] = new TextPaint[NumAnswers];
 	private TextPaint answerTextPaint[] = new TextPaint[NumAnswers];
@@ -80,7 +82,7 @@ public class JoystickView extends View {
 	private boolean selectAnswers[] = new boolean[NumAnswers];
 	private boolean selectOptions[] = new boolean[5];
 	private boolean selectUnlock;
-	private boolean options = false, selectSideBar = false;
+	private boolean options = false, selectSideBar = false, showHint = false;
 	private boolean problem = true, wrong = false, paused = false;
 	private boolean measured = false;
 	private int selectLeft[] = new int[5];
@@ -188,6 +190,8 @@ public class JoystickView extends View {
 		bmpStore = BitmapFactory.decodeResource(getResources(), R.drawable.select_store2);
 		bmpI = BitmapFactory.decodeResource(getResources(), R.drawable.select_i2);
 		bmpUnlock = BitmapFactory.decodeResource(getResources(), R.drawable.unlock);
+		bmpHand = BitmapFactory.decodeResource(getResources(), R.drawable.swipe_hand);
+		bmpArrow = BitmapFactory.decodeResource(getResources(), R.drawable.swipe_arrow);
 		bmpBack[0] = BitmapFactory.decodeResource(getResources(), R.drawable.gradient_background_blue);
 		bmpBack[1] = BitmapFactory.decodeResource(getResources(), R.drawable.gradient_background_green);
 		bmpBack[2] = BitmapFactory.decodeResource(getResources(), R.drawable.gradient_background_red);
@@ -218,6 +222,9 @@ public class JoystickView extends View {
 		dstRectForI = new Rect();
 		RectForUnlockPulse = new RectF();
 		RectForUnlock = new RectF();
+
+		rotateHand = new Matrix();
+		rotateArrow = new Matrix();
 
 		strokeWidth = rUnlock / 10;
 		unlockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -308,6 +315,66 @@ public class JoystickView extends View {
 				}
 			}
 		}
+	}
+
+	public void showHint(int hint) {
+		showHint = true;
+		int centerVert = 0, centerHorz = 0, handRotation = 0, arrowRotation = 0;
+		switch (hint) {
+		case 0:
+			centerVert = (int) ((RectForUnlock.bottom + RectForUnlock.top) / 2);
+			centerHorz = (int) ((RectForUnlock.left + RectForUnlock.right) / 2);
+			handRotation = 0;
+			arrowRotation = 225;
+			break;
+		case 1:
+		case 2:
+			setSidePaths(Height - rBig * 2 - pad);
+			centerVert = (int) ((dstRectForS.bottom + dstRectForS.top) / 2);
+			centerHorz = (int) ((dstRectForS.left + dstRectForS.right) / 2);
+			handRotation = 270;
+			arrowRotation = 0;
+			break;
+		case 3:
+			setSidePaths(Height - rBig * 2 - pad);
+			centerVert = (int) ((dstRectForQ.bottom + dstRectForQ.top) / 2);
+			centerHorz = (int) ((dstRectForQ.left + dstRectForQ.right) / 2);
+			handRotation = 270;
+			arrowRotation = 0;
+			break;
+		case 4:
+			setSidePaths(Height - rBig * 2 - pad);
+			centerVert = (int) ((dstRectForP.bottom + dstRectForP.top) / 2);
+			centerHorz = (int) ((dstRectForP.left + dstRectForP.right) / 2);
+			handRotation = 270;
+			arrowRotation = 0;
+			break;
+		case 5:
+			setSidePaths(Height - rBig * 2 - pad);
+			centerVert = (int) ((dstRectForE.bottom + dstRectForE.top) / 2);
+			centerHorz = (int) ((dstRectForE.left + dstRectForE.right) / 2);
+			handRotation = 270;
+			arrowRotation = 0;
+			break;
+		case 6:
+			setSidePaths(Height - rBig * 2 - pad);
+			centerVert = (int) ((dstRectForI.bottom + dstRectForI.top) / 2);
+			centerHorz = (int) ((dstRectForI.left + dstRectForI.right) / 2);
+			handRotation = 270;
+			arrowRotation = 0;
+			break;
+		default:
+			setSidePaths(Height - pad);
+			showHint = false;
+			break;
+		}
+		rotateHand.reset();
+		rotateHand.setTranslate(centerHorz, centerVert);
+		rotateHand.postRotate(handRotation, centerHorz, centerVert);
+
+		rotateArrow.reset();
+		rotateArrow.setTranslate(centerHorz - bmpArrow.getWidth() / 2, centerVert - bmpArrow.getHeight());
+		rotateArrow.postRotate(arrowRotation, centerHorz, centerVert);
 	}
 
 	public void showStartAnimation(int start, int delay) {
@@ -566,6 +633,12 @@ public class JoystickView extends View {
 		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, settingsPaint);
 		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, settingsPaint);
 		canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, settingsPaint);
+
+		// Draw hints
+		if (showHint) {
+			canvas.drawBitmap(bmpArrow, rotateArrow, settingsPaint);
+			canvas.drawBitmap(bmpHand, rotateHand, settingsPaint);
+		}
 		canvas.save();
 	}
 

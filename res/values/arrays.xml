@@ -279,4 +279,15 @@
         <item>\?</item>
     </string-array>
     
+    <string-array name="hints">
+        <item>Answer questions by sliding the lock to the correct answer</item>
+	    <!-- <item>Slide settings bar up or select menu to open up the menu</item> -->
+	    <item>Slide icons out of settings bar to select</item>
+	    <item>You can disable the lockscreen feature in settings</item>
+	    <item>Use quiz mode to keep the questions coming</item>
+	    <item>See your progress and stats</item>
+	    <item>Goto the store and unlock more stuff</item>
+	    <item>See help and info</item>
+    </string-array>
+    
 </resources>

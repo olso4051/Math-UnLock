@@ -27,9 +27,11 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -86,7 +88,7 @@ public class MainActivity extends Activity {
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys;
+	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
 	private int ID = 0;
@@ -220,6 +222,7 @@ public class MainActivity extends Activity {
 		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+		hints = getResources().getStringArray(R.array.hints);
 		EnabledPacks = new boolean[PackageKeys.length];
 
 		clock = (TextView) findViewById(R.id.clock);
@@ -382,7 +385,7 @@ public class MainActivity extends Activity {
 
 		// start background service to wait for screen to turn off
 		Intent sIntent = new Intent(this, ScreenService.class);
-		if (EnabledPackages > 0) {
+		if ((EnabledPackages > 0) && (sharedPrefs.getBoolean("lockscreen", true))) {
 			this.startService(sIntent);
 		} else {
 			this.stopService(sIntent);
@@ -391,11 +394,15 @@ public class MainActivity extends Activity {
 		// setup the question and answers
 		if (changed)
 			setProblemAndAnswer(0);
-		else if (!UnlockedPackages)
+
+		Log.d("test", "hints=" + sharedPrefs.getBoolean("hints", true));
+		if (!UnlockedPackages)
 			displayInfo(true);
 		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 				&& (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH))
 			displayRateShare();
+		else if (sharedPrefs.getBoolean("hints", true))
+			displayHints(0);
 		else
 			resetTimes();
 
@@ -466,6 +473,12 @@ public class MainActivity extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		locked = intent.getBooleanExtra("locked", false);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		joystick.showStartAnimation(0, 3000);
+		return false;
 	}
 
 	private boolean homeTest() {
@@ -1105,6 +1118,27 @@ public class MainActivity extends Activity {
 			});
 			AlertDialog alert = builder.create();
 			dialogOn = true;
+			alert.show();
+		}
+	}
+
+	private void displayHints(int hint) {
+		final int h = hint;
+		joystick.showHint(h);
+		if (h < hints.length) {
+			if (h == 0) {
+				SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+				editorPrefs.putBoolean("hints", false).commit();
+			}
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(R.string.hint_title).setCancelable(false);
+			builder.setMessage(hints[hint]).setCancelable(false);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					displayHints(h + 1);
+				}
+			});
+			AlertDialog alert = builder.create();
 			alert.show();
 		}
 	}
