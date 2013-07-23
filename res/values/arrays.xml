@@ -235,7 +235,7 @@
 		-->
 		<item>Complete science and engineering related equations to keep fresh</item>
 		<item>Fun trivia questions</item>
-		<item>Answers rotate faster as you answer question correctly</item>
+		<item>Answers rotate faster as you answer questions correctly</item>
 		<item>Totally different way of swiping to answer the questions</item>
 		<item>Create your own questions, study for a test, It\'s up to you!</item>
     </string-array>
@@ -281,10 +281,9 @@
     
     <string-array name="hints">
         <item>Answer questions by sliding the lock to the correct answer</item>
-	    <!-- <item>Slide settings bar up or select menu to open up the menu</item> -->
-	    <item>Slide icons out of settings bar to select</item>
+	    <item>Slide icons out of settings bar to select\n\n
+	        This one is Quiz Mode, use it to keep the questions rolling</item>
 	    <item>Enable and adjust features in settings</item>
-	    <item>Use quiz mode to keep the questions coming</item>
 	    <item>See your progress and stats</item>
 	    <item>unlock more stuff in the store</item>
 	    <item>See help and info</item>

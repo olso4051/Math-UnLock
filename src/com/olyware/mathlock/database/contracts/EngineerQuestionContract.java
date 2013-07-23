@@ -8,7 +8,7 @@ public final class EngineerQuestionContract extends QuestionContract {
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, EngineerQuestionContract.VARIABLES,
-				QuestionContract.DIFFICULTY, EngineerQuestionContract.PARSE_MODE, QuestionContract.PRIORITY };
+				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY };
 	}
 	static {
 		ID_AND_PRIORITY = new String[] { BaseContract._ID, EngineerQuestionContract.PRIORITY };
@@ -19,10 +19,6 @@ public final class EngineerQuestionContract extends QuestionContract {
 	 * Type: TEXT
 	 */
 	public static final String VARIABLES = "variables";
-	/**
-	 * Type: TEXT
-	 */
-	public static final String PARSE_MODE = "parse_mode";
 
 	// Prevent instantiation of this class
 	private EngineerQuestionContract() {

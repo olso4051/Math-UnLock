@@ -30,8 +30,6 @@ import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.Purchase;
 
 public class ShowStoreActivity extends Activity {
-	// final private int CostAll = 10000, CostSmall = 1000, CostLarge = 5000;
-	// final private String SKUcoins1000 = "coins1000", SKUcoins5000 = "coins5000", SKUcoins10000 = "coins10000";
 	private int[] Cost;
 	private String[] SKU;
 	private ImageButton back;
@@ -275,28 +273,38 @@ public class ShowStoreActivity extends Activity {
 
 	private void buyProduct(String title, final int product, final int amount, final Intent i) {
 		firstPack = !isPackageUnlocked();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(title);
 		if (((product >= unlockPackageKeys.length) || (product == 0)) && (firstPack)) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(title);
 			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first)).setCancelable(false);
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
 				}
 			});
-			AlertDialog alert = builder.create();
-			alert.show();
 		} else if ((Money.getMoney() + Money.getMoneyPaid() >= amount) || (firstPack)) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(title);
 			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message)).setCancelable(false);
 			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					if (i != null)
 						startActivity(i);
-					else if (firstPack)
+					else if (firstPack) {
 						purchase(product, 0);
-					else
+						AlertDialog.Builder builder2 = new AlertDialog.Builder(ShowStoreActivity.this);
+						builder2.setTitle(R.string.info_title_first_pack).setCancelable(false);
+						builder2.setMessage(R.string.info_message_first_pack).setCancelable(false);
+						builder2.setPositiveButton(R.string.info_message_first_pack_buy, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// do nothing
+							}
+						});
+						builder2.setNegativeButton(R.string.info_message_first_pack_play, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								finish();
+							}
+						});
+						builder2.create().show();
+					} else
 						purchase(product, amount);
 				}
 			});
@@ -305,20 +313,15 @@ public class ShowStoreActivity extends Activity {
 					dialog.cancel();
 				}
 			});
-			AlertDialog alert = builder.create();
-			alert.show();
 		} else {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(title);
 			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.not_enough_coins)).setCancelable(false);
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
 				}
 			});
-			AlertDialog alert = builder.create();
-			alert.show();
 		}
+		builder.create().show();
 	}
 
 	private void purchase(int product, int amount) {

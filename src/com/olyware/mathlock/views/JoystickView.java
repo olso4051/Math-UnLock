@@ -319,49 +319,45 @@ public class JoystickView extends View {
 
 	public void showHint(int hint) {
 		showHint = true;
+		boolean mirror = false;
 		int centerVert = 0, centerHorz = 0, handRotation = 0, arrowRotation = 0;
 		switch (hint) {
 		case 0:
 			centerVert = (int) ((RectForUnlock.bottom + RectForUnlock.top) / 2);
 			centerHorz = (int) ((RectForUnlock.left + RectForUnlock.right) / 2);
-			handRotation = 0;
 			arrowRotation = 225;
 			break;
 		case 1:
+			setSidePaths(Height - rBig * 2 - pad);
+			centerVert = (int) ((dstRectForQ.bottom + dstRectForQ.top) / 2);
+			centerHorz = (int) ((dstRectForQ.left + dstRectForQ.right) / 2);
+			handRotation = 270;
+			break;
 		case 2:
 			setSidePaths(Height - rBig * 2 - pad);
 			centerVert = (int) ((dstRectForS.bottom + dstRectForS.top) / 2);
 			centerHorz = (int) ((dstRectForS.left + dstRectForS.right) / 2);
 			handRotation = 270;
-			arrowRotation = 0;
 			break;
 		case 3:
-			setSidePaths(Height - rBig * 2 - pad);
-			centerVert = (int) ((dstRectForQ.bottom + dstRectForQ.top) / 2);
-			centerHorz = (int) ((dstRectForQ.left + dstRectForQ.right) / 2);
-			handRotation = 270;
-			arrowRotation = 0;
-			break;
-		case 4:
 			setSidePaths(Height - rBig * 2 - pad);
 			centerVert = (int) ((dstRectForP.bottom + dstRectForP.top) / 2);
 			centerHorz = (int) ((dstRectForP.left + dstRectForP.right) / 2);
 			handRotation = 270;
-			arrowRotation = 0;
 			break;
-		case 5:
+		case 4:
+			mirror = true;
 			setSidePaths(Height - rBig * 2 - pad);
 			centerVert = (int) ((dstRectForE.bottom + dstRectForE.top) / 2);
 			centerHorz = (int) ((dstRectForE.left + dstRectForE.right) / 2);
-			handRotation = 270;
-			arrowRotation = 0;
+			handRotation = 90;
 			break;
-		case 6:
+		case 5:
+			mirror = true;
 			setSidePaths(Height - rBig * 2 - pad);
 			centerVert = (int) ((dstRectForI.bottom + dstRectForI.top) / 2);
 			centerHorz = (int) ((dstRectForI.left + dstRectForI.right) / 2);
-			handRotation = 270;
-			arrowRotation = 0;
+			handRotation = 90;
 			break;
 		default:
 			setSidePaths(Height - pad);
@@ -369,12 +365,16 @@ public class JoystickView extends View {
 			break;
 		}
 		rotateHand.reset();
-		rotateHand.setTranslate(centerHorz, centerVert);
+		if (mirror)
+			rotateHand.preScale(-1, 1);
+		rotateHand.postTranslate(centerHorz, centerVert);
 		rotateHand.postRotate(handRotation, centerHorz, centerVert);
 
 		rotateArrow.reset();
 		rotateArrow.setTranslate(centerHorz - bmpArrow.getWidth() / 2, centerVert - bmpArrow.getHeight());
 		rotateArrow.postRotate(arrowRotation, centerHorz, centerVert);
+
+		invalidate();
 	}
 
 	public void showStartAnimation(int start, int delay) {

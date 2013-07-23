@@ -1029,11 +1029,6 @@ public class MainActivity extends Activity {
 						startActivity(new Intent(getApplicationContext(), ShowStoreActivity.class));
 					}
 				});
-				builder.setNegativeButton(R.string.later, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialogOn = false;
-					}
-				});
 			} else {
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
@@ -1138,8 +1133,13 @@ public class MainActivity extends Activity {
 					displayHints(h + 1);
 				}
 			});
-			AlertDialog alert = builder.create();
-			alert.show();
+			if (h > 0)
+				builder.setNegativeButton(R.string.no_more_hints, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						joystick.showHint(-1);
+					}
+				});
+			builder.create().show();
 		}
 	}
 

@@ -180,10 +180,11 @@ public class EquationLayout {
 		}
 
 		public void setWidthAndHeight() {
-			padHorz = (int) (SizePix / 8);
+			padHorz = (int) (SizePix / 16);
 			setTopBottom();
 			paint.getTextBounds(text, 0, text.length(), bounds);
-			Width = bounds.width() + padHorz;
+			paint.measureText(text);
+			Width = Math.max(paint.measureText(text), bounds.width()) + padHorz;
 			Height = bounds.height();
 		}
 
@@ -454,7 +455,7 @@ public class EquationLayout {
 				if ((equationText.charAt(i) == '/') && ((equationText.charAt(i - 1) != '/') && (equationText.charAt(i + 1) != '/'))) {
 					c.drawLine(textAttributes.get(i).getLeft(), textAttributes.get(i).getY(), textAttributes.get(i).getRight(),
 							textAttributes.get(i).getY(), testPaintWhite);
-				} else {
+				} else if (equationText.charAt(i) != '¶') {
 					c.drawText(textAttributes.get(i).getText(), textAttributes.get(i).getX(), textAttributes.get(i).getY(), textAttributes
 							.get(i).getTextPaint());
 				}
@@ -527,9 +528,9 @@ public class EquationLayout {
 					att = Att.Subscript;
 				else if (charBefore == '^')
 					att = Att.Superscript;
-				else if ((charBefore == '/') && (equationText.charAt(locO - 2) != '/'))
+				else if (((charBefore == '/') && (equationText.charAt(locO - 2) != '/')) || (charBefore == '¶'))
 					att = Att.Denominator;
-				else if ((charAfter == '/') && (equationText.charAt(locC + 2) != '/'))
+				else if (((charAfter == '/') && (equationText.charAt(locC + 2) != '/')) || (charAfter == '¶'))
 					att = Att.Numerator;
 				else if (charBefore == ',')
 					if (bracketGroups.get(attributes.get(locO - 2).getBracketGroup()).getAtt().equals(Att.BracketSub))
@@ -564,6 +565,8 @@ public class EquationLayout {
 		equationText = equationText.replaceAll("\\+-", "±");
 		equationText = equationText.replaceAll("Simplify", "∀");
 		equationText = equationText.replaceAll("Reduce", "⊦");
+		equationText = equationText.replaceAll("NewLine", "¶");
+		equationText = equationText.replaceAll("\\*", "·");
 	}
 
 	private void findBrackets() {
@@ -1055,7 +1058,8 @@ public class EquationLayout {
 			int Width = 0;
 			for (int b = locO; b <= locC; b++) {
 				if (attributes.get(b).getShown()) {
-					if ((equationText.charAt(b) == '/') && (!((equationText.charAt(b - 1) == '/') || (equationText.charAt(b + 1) == '/')))) {
+					if (((equationText.charAt(b) == '/') || (equationText.charAt(b) == '¶'))
+							&& (!((equationText.charAt(b - 1) == '/') || (equationText.charAt(b + 1) == '/')))) {
 						int widthBefore = 0, widthAfter = 0;
 						if (attributes.get(b - 1).getBracketGroup() != attributes.get(b).getBracketGroup())
 							widthBefore = bracketGroups.get(attributes.get(b - 1).getBracketGroup()).getWidth();
@@ -1116,7 +1120,8 @@ public class EquationLayout {
 						b = bracketGroups.get(attributes.get(b).getBracketGroup()).getEnd();
 					}
 				} else if (attributes.get(b).getShown()) {
-					if ((equationText.charAt(b) == '/') && (!((equationText.charAt(b - 1) == '/') || (equationText.charAt(b + 1) == '/')))) {
+					if (((equationText.charAt(b) == '/') || (equationText.charAt(b) == '¶'))
+							&& (!((equationText.charAt(b - 1) == '/') || (equationText.charAt(b + 1) == '/')))) {
 						int widthBefore = 0, widthAfter = 0;
 						boolean bracketBefore = (attributes.get(b - 1).getBracketGroup() != attributes.get(b).getBracketGroup());
 						boolean bracketAfter = (attributes.get(b + 1).getBracketGroup() != attributes.get(b).getBracketGroup());
@@ -1257,7 +1262,8 @@ public class EquationLayout {
 			if (attributes.get(i).getShown()) {
 				textAttributes.get(i).setY(textAttributes.get(i).getY() + diffY);
 				textAttributes.get(i).setX(textAttributes.get(i).getX() + diffX);
-				if (!((equationText.charAt(i) == '/') && ((equationText.charAt(i - 1) != '/') && (equationText.charAt(i + 1) != '/'))))
+				if (!(((equationText.charAt(i) == '/') || (equationText.charAt(i) == '¶')) && ((equationText.charAt(i - 1) != '/') && (equationText
+						.charAt(i + 1) != '/'))))
 					textAttributes.get(i).setWidthAndHeight();
 			}
 		}
