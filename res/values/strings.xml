@@ -46,9 +46,11 @@
     <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
     <string name="hint_title">Helpful Hint</string>
+    <string name="info_coins_title">Thanks for your interest in buying coins!</string>
+    <string name="info_coins_message">Unlock your first question pack before buying coins though. It\'s Free!</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying HiQH!</string>
-    <string name="info_title_first_pack">First Pack Unlocked!</string>
+    <string name="info_title_first_pack">First Pack is Unlocked!</string>
     <string name="info_message">-HiQH is trying hard to increase your IQ. Because of that we won\'t show you ads. We hope you like our product, after you try it we hope you rate and comment it in the Play Store!\n\n
         -Answer Questions to earn coins, and increase that IQ\n\n
 		-Use Coins to buy question packs and extras\n\n
@@ -121,8 +123,8 @@
     <string name="swipe_new">Tap for new Question</string>
     <string name="swipe_option">Swipe Option to Select</string>
     <string name="swipe_screen">Swipe Here to Answer</string>
-    <string name="swipe_unlock">Swipe Lock to Answer</string>
-    <string name="test_prep">Test Prep\nComing Soon!</string>
+    <string name="swipe_unlock">Touch Lock and Slide to Answer</string>
+    <string name="test_prep">Custom Packs\nComing Soon!</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="type_default">0</string>
     <string name="type_summary">Static Slide</string>

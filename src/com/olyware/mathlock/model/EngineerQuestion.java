@@ -63,7 +63,7 @@ public class EngineerQuestion extends Question {
 		List<String> wrongAnswers = new ArrayList<String>();
 		while (index < variables.length()) {
 			nextC = variables.charAt(index);
-			if ((nextC == ',') && (variable)) {
+			if ((nextC == ';') && (variable)) {
 				wrongAnswers.add(variables.substring(indexStart, index));
 				variable = false;
 			} else if (!variable) {

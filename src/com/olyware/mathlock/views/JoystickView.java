@@ -1061,7 +1061,8 @@ public class JoystickView extends View {
 						animateHandler.removeCallbacks(pulseLock);
 						if (listener != null)
 							listener.OnSelect(-1);		// send a vibrate signal
-					}
+					} else if (firstTouch)
+						listener.OnSelect(10);		// send a missed the lock signal
 				}
 				break;
 			case 2:

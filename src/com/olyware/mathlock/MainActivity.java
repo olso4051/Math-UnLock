@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
 	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
-	private int ID = 0;
+	private int ID = 20;
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
@@ -402,7 +402,7 @@ public class MainActivity extends Activity {
 				&& (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH))
 			displayRateShare();
 		else if (sharedPrefs.getBoolean("hints", true))
-			displayHints(0);
+			displayHints(0, false);
 		else
 			resetTimes();
 
@@ -442,7 +442,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (locked) {				// if locked then don't allow back button to exit app
+		if (locked && UnlockedPackages) {		// if locked then don't allow back button to exit app
 			return;
 		} else {
 			super.onBackPressed();
@@ -642,6 +642,7 @@ public class MainActivity extends Activity {
 
 	private void resetTimes() {
 		startTime = System.currentTimeMillis();
+		Log.d("test", "difficulty =" + difficulty);
 		questionWorth = difficulty * multiplier + lowestAmount;
 		questionWorthMax = questionWorth;
 		worth.setText(String.valueOf(questionWorth));
@@ -757,11 +758,12 @@ public class MainActivity extends Activity {
 
 	private void setEngineerProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.engineer_table);
-		EngineerQuestion question = dbManager.getEngineerQuestion(min, max, ID);
+		EngineerQuestion question = dbManager.getEngineerQuestion(min, max, ID + 1);
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
+		Log.d("test", "difficulty=" + difficulty);
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -811,7 +813,6 @@ public class MainActivity extends Activity {
 
 		difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
 		difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
-		difficulty = difficultyMax;
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 		if ((difficultyMaxBefore != difficultyMax) || (difficultyMinBefore != difficultyMin) || (fromLanguageBefore != fromLanguage)
@@ -875,7 +876,7 @@ public class MainActivity extends Activity {
 
 	private void JoystickSelected(int s) {
 		dialogOn = false;
-		if (sharedPrefs.getBoolean("vibration", true)
+		if ((sharedPrefs.getBoolean("vibration", true) && (s != 10))
 				&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
 			vib.vibrate(50);	// vibrate for 50ms
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
@@ -919,7 +920,7 @@ public class MainActivity extends Activity {
 				});
 			}
 			break;
-		case 4:	// unknown was selected
+		case 4:	// question mark(tell me the answer) was selected
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[1], EggMaxValues[1]));
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
@@ -951,6 +952,11 @@ public class MainActivity extends Activity {
 			fromSettings = true;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
+		case 10:	// missed the lock button
+			if (getSharedPreferences("Stats", 0).getLong("totalTime", 0) == 0) {
+				displayHints(0, true);
+				// dialogOn = true;
+			}
 		}
 	}
 
@@ -1117,29 +1123,37 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void displayHints(int hint) {
-		final int h = hint;
-		joystick.showHint(h);
-		if (h < hints.length) {
-			if (h == 0) {
-				SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
-				editorPrefs.putBoolean("hints", false).commit();
-			}
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.hint_title).setCancelable(false);
-			builder.setMessage(hints[hint]).setCancelable(false);
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					displayHints(h + 1);
+	private void displayHints(int hint, final boolean noMore) {
+		if (!dialogOn) {
+			final int h = hint;
+			joystick.showHint(h);
+			if (h < hints.length) {
+				if (h == 0) {
+					SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+					editorPrefs.putBoolean("hints", false).commit();
 				}
-			});
-			if (h > 0)
-				builder.setNegativeButton(R.string.no_more_hints, new DialogInterface.OnClickListener() {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.hint_title).setCancelable(false);
+				builder.setMessage(hints[hint]).setCancelable(false);
+				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						joystick.showHint(-1);
+						dialogOn = false;
+						if (noMore)
+							joystick.showHint(-1);
+						else
+							displayHints(h + 1, false);
 					}
 				});
-			builder.create().show();
+				if ((h > 0) && (!noMore))
+					builder.setNegativeButton(R.string.no_more_hints, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialogOn = false;
+							joystick.showHint(-1);
+						}
+					});
+				builder.create().show();
+				dialogOn = true;
+			}
 		}
 	}
 

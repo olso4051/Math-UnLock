@@ -8,6 +8,6 @@ public class LanguageQuestion extends Question {
 
 	@Override
 	public String toString() {
-		return "LanguageQuestion [fromLanguage=" + text + ",toLanguage=" + correctAnswer + ",difficulty=" + difficulty + "]";
+		return "LanguageQuestion [fromLanguage=" + text + ",toLanguage=" + correctAnswer + "]";
 	}
 }

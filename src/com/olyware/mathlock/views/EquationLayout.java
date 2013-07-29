@@ -545,28 +545,42 @@ public class EquationLayout {
 	private void findKeywords() {
 		equationText = equationText.replaceAll("Alpha", "α");
 		equationText = equationText.replaceAll("Beta", "β");
+		equationText = equationText.replaceAll("Delta", "Δ");
+		equationText = equationText.replaceAll("Del", "▽");
+		equationText = equationText.replaceAll("Epsilon", "ε");
 		equationText = equationText.replaceAll("Gamma", "ɣ");
-		equationText = equationText.replaceAll("Rho", "ρ");
-		equationText = equationText.replaceAll("Omega", "ω");
-		equationText = equationText.replaceAll("Mu", "μ");
+		equationText = equationText.replaceAll("hbar", "ħ");
 		equationText = equationText.replaceAll("Infinity", "∞");
+		equationText = equationText.replaceAll("Lambda", "λ");
+		equationText = equationText.replaceAll("Laplacian", "Δ");
+		equationText = equationText.replaceAll("Mu", "μ");
+		equationText = equationText.replaceAll("Nu", "ν");
+		equationText = equationText.replaceAll("Omega", "ω");
+		equationText = equationText.replaceAll("Partial", "∂");
 		equationText = equationText.replaceAll("Phi", "ϕ");
-		equationText = equationText.replaceAll("Theta", "θ");
 		equationText = equationText.replaceAll("Pi", "π");
+		equationText = equationText.replaceAll("Psi", "Ψ");
+		equationText = equationText.replaceAll("Rho", "ρ");
+		equationText = equationText.replaceAll("Sigma", "σ");
+		equationText = equationText.replaceAll("Tau", "τ");
+		equationText = equationText.replaceAll("Theta", "θ");
+
 		equationText = equationText.replaceAll("Integrate", "∫");
 		equationText = equationText.replaceAll("Sum", "∑");
 		equationText = equationText.replaceAll("Product", "∏");
 		equationText = equationText.replaceAll("Sqrt", "√");
 		equationText = equationText.replaceAll("Abs", "|");
 		equationText = equationText.replaceAll("Limit", "≐");
+
 		equationText = equationText.replaceAll("->", "→");
 		// equationText = equationText.replaceAll("<-", "←");
 		equationText = equationText.replaceAll("<->", "↔");
 		equationText = equationText.replaceAll("\\+-", "±");
+		equationText = equationText.replaceAll("\\*", "·");
+
 		equationText = equationText.replaceAll("Simplify", "∀");
 		equationText = equationText.replaceAll("Reduce", "⊦");
 		equationText = equationText.replaceAll("NewLine", "¶");
-		equationText = equationText.replaceAll("\\*", "·");
 	}
 
 	private void findBrackets() {

@@ -4,14 +4,14 @@ public final class EngineerQuestionContract extends QuestionContract {
 
 	public static final String TABLE_NAME = "t_engineer_question";
 	public static final String[] ALL_COLUMNS;
-	public static final String[] ID_AND_PRIORITY;
+	public static final String[] QUESTION_AND_PRIORITY;
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, EngineerQuestionContract.VARIABLES,
 				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY };
 	}
 	static {
-		ID_AND_PRIORITY = new String[] { BaseContract._ID, EngineerQuestionContract.PRIORITY };
+		QUESTION_AND_PRIORITY = new String[] { QuestionContract.QUESTION_TEXT, EngineerQuestionContract.PRIORITY };
 	}
 
 	// COLUMN DEFS

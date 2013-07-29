@@ -32,7 +32,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private final Loggy log = new Loggy(this.getClass());
 
 	private static final String DATABASE_NAME = "mathunlock.db";
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 2;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
 
 	private Context context;
@@ -104,26 +104,26 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		}
 		// update priorities that have changed in the math table
 		String where = MathQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
-		cursor = oldDB.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor = oldDB.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
 		Log.d("test", "math entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			newDB.execSQL("UPDATE " + MathQuestionContract.TABLE_NAME + " SET " + MathQuestionContract.PRIORITY + "="
-					+ cursorHelper.getInteger(MathQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
-					+ cursorHelper.getInteger(MathQuestionContract._ID));
+					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
+					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
 			cursor.moveToNext();
 		}
 		// update priorities that have changed in the vocab table
 		where = VocabQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
-		cursor = oldDB.query(VocabQuestionContract.TABLE_NAME, VocabQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor = oldDB.query(VocabQuestionContract.TABLE_NAME, VocabQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
 		Log.d("test", "vocab entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			newDB.execSQL("UPDATE " + VocabQuestionContract.TABLE_NAME + " SET " + VocabQuestionContract.PRIORITY + "="
-					+ cursorHelper.getInteger(VocabQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
-					+ cursorHelper.getInteger(VocabQuestionContract._ID));
+					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
+					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
 			cursor.moveToNext();
 		}
 		// update priorities that have changed in the language table
@@ -143,32 +143,33 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 				set = set + ", " + priorities[a] + " = " + cursorHelper.getInteger(priorities[a]);
 			}
 			newDB.execSQL("UPDATE " + LanguageQuestionContract.TABLE_NAME + " SET " + set + " WHERE " + BaseContract._ID + "="
-					+ cursorHelper.getInteger(LanguageQuestionContract._ID));
+					+ cursorHelper.getInteger(BaseContract._ID));
 			cursor.moveToNext();
 		}
 		// update priorities that have changed in the engineering table
 		where = EngineerQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
-		cursor = oldDB.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
+		cursor = oldDB.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null,
+				null);
 		cursor.moveToFirst();
 		Log.d("test", "Engineer entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			newDB.execSQL("UPDATE " + EngineerQuestionContract.TABLE_NAME + " SET " + EngineerQuestionContract.PRIORITY + "="
-					+ cursorHelper.getInteger(EngineerQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
-					+ cursorHelper.getInteger(EngineerQuestionContract._ID));
+					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
+					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
 			cursor.moveToNext();
 		}
-		// update priorities that have changed in the engineering table
+		// update priorities that have changed in the trivia table
 		where = HiQHTriviaQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
-		cursor = oldDB.query(HiQHTriviaQuestionContract.TABLE_NAME, HiQHTriviaQuestionContract.ID_AND_PRIORITY, where, null, null, null,
-				null);
+		cursor = oldDB.query(HiQHTriviaQuestionContract.TABLE_NAME, HiQHTriviaQuestionContract.QUESTION_AND_PRIORITY, where, null, null,
+				null, null);
 		cursor.moveToFirst();
 		Log.d("test", "HiQHTrivia entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			newDB.execSQL("UPDATE " + HiQHTriviaQuestionContract.TABLE_NAME + " SET " + HiQHTriviaQuestionContract.PRIORITY + "="
-					+ cursorHelper.getInteger(HiQHTriviaQuestionContract.PRIORITY) + " WHERE " + BaseContract._ID + "="
-					+ cursorHelper.getInteger(HiQHTriviaQuestionContract._ID));
+					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
+					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
 			cursor.moveToNext();
 		}
 		context.deleteDatabase(DATABASE_OLD_FULL_PATH);

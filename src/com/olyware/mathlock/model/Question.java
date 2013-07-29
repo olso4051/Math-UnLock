@@ -4,7 +4,7 @@ public abstract class Question {
 
 	String text;
 	String correctAnswer;
-	Difficulty difficulty;
+	private Difficulty difficulty;
 	int id, priority;
 
 	public Question(int id, String text, String correctAnswer, Difficulty difficulty, int priority) {

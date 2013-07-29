@@ -37,7 +37,7 @@ public class ShowStoreActivity extends Activity {
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button[] buy;
 	private TextView[] cost;
-	private Button custom;
+	// private Button custom;
 	private String[] unlockPackageKeys, unlockAllKeys, PackageKeys, packageInfo, EggKeys;
 	private int[] unlockCost, EggMaxValues;
 	private boolean firstPack;
@@ -164,6 +164,8 @@ public class ShowStoreActivity extends Activity {
 		buttonCoins1 = (Button) findViewById(R.id.extra_coins1);
 		buttonCoins1.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
+						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
@@ -171,15 +173,19 @@ public class ShowStoreActivity extends Activity {
 		buttonCoins2 = (Button) findViewById(R.id.extra_coins2);
 		buttonCoins2.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[1], Cost[1] + 1, mPurchaseFinishedListener,
+				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[1], Cost[1] + 1,
+				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
 		});
 		buttonCoins3 = (Button) findViewById(R.id.extra_coins3);
 		buttonCoins3.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[2], Cost[2] + 1, mPurchaseFinishedListener,
+				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[2], Cost[2] + 1,
+				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
 		});
 
@@ -202,14 +208,14 @@ public class ShowStoreActivity extends Activity {
 		extrasTitle = ((TextView) findViewById(R.id.extras));
 		extrasTitle.setPaintFlags(extrasTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
-		custom = (Button) findViewById(R.id.custom);
+		/*custom = (Button) findViewById(R.id.custom);
 		final Intent i = new Intent(this, ShowProgressActivity.class);
 		custom.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				buyProduct(String.valueOf(custom.getText()), packageInfo.length - 1, 0, i);
 				// TODO start build question pack activity
 			}
-		});
+		});*/
 
 		testPrepTitle = ((TextView) findViewById(R.id.test_prep));
 		testPrepTitle.setPaintFlags(testPrepTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -271,28 +277,45 @@ public class ShowStoreActivity extends Activity {
 		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
 	}
 
+	private void purchaseCoins(Activity act, String SKU, int id, IabHelper.OnIabPurchaseFinishedListener listener, String key) {
+		firstPack = !isPackageUnlocked();
+		if (firstPack) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.info_coins_title)).setCancelable(false);
+			builder.setMessage(getString(R.string.info_coins_message));
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.cancel();
+				}
+			});
+			builder.create().show();
+		} else
+			mHelper.launchPurchaseFlow(act, SKU, id, listener, key);
+	}
+
 	private void buyProduct(String title, final int product, final int amount, final Intent i) {
 		firstPack = !isPackageUnlocked();
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(title);
+		builder.setTitle(title).setCancelable(false);
 		if (((product >= unlockPackageKeys.length) || (product == 0)) && (firstPack)) {
-			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first)).setCancelable(false);
+			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first));
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
 				}
 			});
 		} else if ((Money.getMoney() + Money.getMoneyPaid() >= amount) || (firstPack)) {
-			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message)).setCancelable(false);
+			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message));
 			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					if (i != null)
 						startActivity(i);
 					else if (firstPack) {
 						purchase(product, 0);
-						AlertDialog.Builder builder2 = new AlertDialog.Builder(ShowStoreActivity.this);
+						finish();
+						/*AlertDialog.Builder builder2 = new AlertDialog.Builder(ShowStoreActivity.this);
 						builder2.setTitle(R.string.info_title_first_pack).setCancelable(false);
-						builder2.setMessage(R.string.info_message_first_pack).setCancelable(false);
+						builder2.setMessage(R.string.info_message_first_pack);
 						builder2.setPositiveButton(R.string.info_message_first_pack_buy, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								// do nothing
@@ -303,7 +326,7 @@ public class ShowStoreActivity extends Activity {
 								finish();
 							}
 						});
-						builder2.create().show();
+						builder2.create().show();*/
 					} else
 						purchase(product, amount);
 				}
@@ -314,7 +337,7 @@ public class ShowStoreActivity extends Activity {
 				}
 			});
 		} else {
-			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.not_enough_coins)).setCancelable(false);
+			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.not_enough_coins));
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
@@ -373,7 +396,7 @@ public class ShowStoreActivity extends Activity {
 			} else
 				cost[i].setText(String.valueOf(unlockCost[i]));
 		}
-		((TextView) findViewById(R.id.custom_cost)).setText("FREE");
+		// ((TextView) findViewById(R.id.custom_cost)).setText("FREE");
 
 		firstPack = !isPackageUnlocked();
 		if (firstPack) {
