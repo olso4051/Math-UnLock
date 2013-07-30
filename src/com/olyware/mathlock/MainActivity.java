@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 	final private float clockSize = 40, dateSize = 20;
 	private float currentClockSize;
 	private TextView coins, worth;
-	private int questionWorth, questionWorthMax;
+	private int questionWorth;
 	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
 	private AnswerView answerView;
@@ -470,25 +470,6 @@ public class MainActivity extends Activity {
 		return false;
 	}
 
-	/*@Override
-	protected void onUserLeaveHint() {
-		Log.d("test", "onUserLeaveHint()");
-		super.onUserLeaveHint();
-		if (locked)
-			homeTest();
-	}
-
-	private boolean homeTest() {
-		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningTaskInfo> recentTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
-		if (recentTasks.get(1).baseActivity.toShortString().indexOf(getPackageName()) > -1) {
-			// TODO test on multiple devices I think this is when Home or Notification is pressed, can't stop from executing exit code
-			Money.decreaseMoneyAndPaidWithDebt(questionWorthMax);
-			return true;
-		}
-		return false;
-	}*/
-
 	private void launchHomeScreen(int delay) {
 		mHandler.removeCallbacksAndMessages(null);
 		timerHandler.removeCallbacks(reduceWorth);
@@ -640,7 +621,6 @@ public class MainActivity extends Activity {
 	private void resetTimes() {
 		startTime = System.currentTimeMillis();
 		questionWorth = difficulty * multiplier + lowestAmount;
-		questionWorthMax = questionWorth;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
