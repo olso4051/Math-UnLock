@@ -8,8 +8,6 @@ import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,7 +25,6 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -66,7 +63,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 2, lowestAmount = 4, decreaseRate = 500, startingPmoney = 0, initialStreakToIncrease = 20;
+	final private int multiplier = 3, lowestAmount = 5, decreaseRate = 500, startingPmoney = 0, initialStreakToIncrease = 50;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -91,7 +88,7 @@ public class MainActivity extends Activity {
 	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
-	private int ID = 20;
+	private int ID = 0;
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
@@ -330,7 +327,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onStop() {
 		if (attached)
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		super.onStop();
 	}
 
@@ -395,7 +392,6 @@ public class MainActivity extends Activity {
 		if (changed)
 			setProblemAndAnswer(0);
 
-		Log.d("test", "hints=" + sharedPrefs.getBoolean("hints", true));
 		if (!UnlockedPackages)
 			displayInfo(true);
 		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
@@ -450,13 +446,6 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	protected void onUserLeaveHint() {
-		super.onUserLeaveHint();
-		if (locked)
-			homeTest();
-	}
-
-	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (locked) {
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
@@ -481,6 +470,14 @@ public class MainActivity extends Activity {
 		return false;
 	}
 
+	/*@Override
+	protected void onUserLeaveHint() {
+		Log.d("test", "onUserLeaveHint()");
+		super.onUserLeaveHint();
+		if (locked)
+			homeTest();
+	}
+
 	private boolean homeTest() {
 		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningTaskInfo> recentTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
@@ -490,7 +487,7 @@ public class MainActivity extends Activity {
 			return true;
 		}
 		return false;
-	}
+	}*/
 
 	private void launchHomeScreen(int delay) {
 		mHandler.removeCallbacksAndMessages(null);
@@ -642,7 +639,6 @@ public class MainActivity extends Activity {
 
 	private void resetTimes() {
 		startTime = System.currentTimeMillis();
-		Log.d("test", "difficulty =" + difficulty);
 		questionWorth = difficulty * multiplier + lowestAmount;
 		questionWorthMax = questionWorth;
 		worth.setText(String.valueOf(questionWorth));
@@ -763,7 +759,6 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
-		Log.d("test", "difficulty=" + difficulty);
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();

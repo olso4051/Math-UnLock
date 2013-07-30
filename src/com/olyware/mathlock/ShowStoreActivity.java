@@ -166,14 +166,14 @@ public class ShowStoreActivity extends Activity {
 			public void onClick(View v) {
 				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
-						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[0], Cost[0] + 1,
+				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
 		});
 		buttonCoins2 = (Button) findViewById(R.id.extra_coins2);
 		buttonCoins2.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
+				purchaseCoins(ShowStoreActivity.this, SKU[1], Cost[1] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[1], Cost[1] + 1,
 				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
@@ -182,7 +182,7 @@ public class ShowStoreActivity extends Activity {
 		buttonCoins3 = (Button) findViewById(R.id.extra_coins3);
 		buttonCoins3.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
+				purchaseCoins(ShowStoreActivity.this, SKU[2], Cost[2] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[2], Cost[2] + 1,
 				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");

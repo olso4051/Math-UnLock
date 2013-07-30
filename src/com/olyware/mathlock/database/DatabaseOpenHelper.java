@@ -32,7 +32,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private final Loggy log = new Loggy(this.getClass());
 
 	private static final String DATABASE_NAME = "mathunlock.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 1;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
 
 	private Context context;
@@ -109,9 +109,10 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		Log.d("test", "math entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
+			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + MathQuestionContract.TABLE_NAME + " SET " + MathQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
-					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
+					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
 		// update priorities that have changed in the vocab table
@@ -121,9 +122,10 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		Log.d("test", "vocab entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
+			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + VocabQuestionContract.TABLE_NAME + " SET " + VocabQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
-					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
+					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
 		// update priorities that have changed in the language table
@@ -154,9 +156,10 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		Log.d("test", "Engineer entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
+			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + EngineerQuestionContract.TABLE_NAME + " SET " + EngineerQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
-					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
+					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
 		// update priorities that have changed in the trivia table
@@ -167,9 +170,10 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		Log.d("test", "HiQHTrivia entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			CursorHelper cursorHelper = new CursorHelper(cursor);
+			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + HiQHTriviaQuestionContract.TABLE_NAME + " SET " + HiQHTriviaQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
-					+ cursorHelper.getString(QuestionContract.QUESTION_TEXT) + "'");
+					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
 		context.deleteDatabase(DATABASE_OLD_FULL_PATH);

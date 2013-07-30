@@ -557,12 +557,12 @@ public class EquationLayout {
 		equationText = equationText.replaceAll("Nu", "ν");
 		equationText = equationText.replaceAll("Omega", "ω");
 		equationText = equationText.replaceAll("Partial", "∂");
-		equationText = equationText.replaceAll("Phi", "ϕ");
+		equationText = equationText.replaceAll("Phi", "ɸ");
 		equationText = equationText.replaceAll("Pi", "π");
 		equationText = equationText.replaceAll("Psi", "Ψ");
 		equationText = equationText.replaceAll("Rho", "ρ");
 		equationText = equationText.replaceAll("Sigma", "σ");
-		equationText = equationText.replaceAll("Tau", "τ");
+		equationText = equationText.replaceAll("Tau", "Τ");
 		equationText = equationText.replaceAll("Theta", "θ");
 
 		equationText = equationText.replaceAll("Integrate", "∫");
