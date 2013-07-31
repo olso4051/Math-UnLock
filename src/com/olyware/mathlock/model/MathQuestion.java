@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import android.util.Log;
-
 import com.olyware.mathlock.MathEval;
 
 public class MathQuestion extends Question {
@@ -84,7 +82,6 @@ public class MathQuestion extends Question {
 	}
 
 	public String[] getAnswers() {
-		Log.d("test", "getting answers");
 		String preParse[] = new String[] { correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
 		String postParse[] = preParse;
 		MathEval math = new MathEval();

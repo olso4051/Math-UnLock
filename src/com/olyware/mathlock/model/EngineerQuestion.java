@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import android.util.Log;
-
 public class EngineerQuestion extends Question {
 
 	private String variables;
@@ -15,7 +13,7 @@ public class EngineerQuestion extends Question {
 	public EngineerQuestion(int id, String text, String variables, Difficulty difficulty, int priority) {
 		super(id, text, variables.substring(0, 1), difficulty, priority);// not the right correct answer at this point
 		this.variables = variables;
-		Log.d("test", "question id=" + id + "question=" + text);
+		// Log.d("test", "question id=" + id + "question=" + text);
 		setVariables();
 	}
 
