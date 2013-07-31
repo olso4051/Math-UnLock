@@ -396,6 +396,7 @@ public class ShowStoreActivity extends Activity {
 			for (int a = 1; a < unlockPackageKeys.length; a++) {
 				cost[a].setCompoundDrawables(null, null, price, null);
 				cost[a].setCompoundDrawablePadding(-price.getIntrinsicWidth());
+				cost[a].setText("");
 			}
 		} else {
 			price = getResources().getDrawable(R.drawable.coin);

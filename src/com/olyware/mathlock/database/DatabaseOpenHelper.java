@@ -12,7 +12,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
@@ -45,7 +44,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		DATABASE_PATH = DATABASE_FULL_PATH.substring(0, DATABASE_FULL_PATH.indexOf(DATABASE_NAME));
 		DATABASE_OLD_FULL_PATH = DATABASE_PATH + "old_" + DATABASE_NAME;
 		int databaseState = dbState();
-		Log.d("test", "state=" + databaseState);
 		if (databaseState == 0)
 			copyDatabase();
 		else if (databaseState == 2)
@@ -58,7 +56,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	}
 
 	private void copyDatabase() {
-		Log.d("test", "copying database");
 		try {
 			InputStream is = context.getAssets().open(DATABASE_NAME);
 			File dest = new File(DATABASE_FULL_PATH);
@@ -70,7 +67,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	}
 
 	private void upgradeDatabase() {
-		Log.d("test", "upgrading database");
 		File oldDest = new File(DATABASE_OLD_FULL_PATH);
 		File dest = new File(DATABASE_FULL_PATH);
 		try {
@@ -108,7 +104,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		String where = MathQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
 		cursor = oldDB.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
-		Log.d("test", "math entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
@@ -122,7 +117,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		where = VocabQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
 		cursor = oldDB.query(VocabQuestionContract.TABLE_NAME, VocabQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
-		Log.d("test", "vocab entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
@@ -140,7 +134,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		}
 		cursor = oldDB.query(LanguageQuestionContract.TABLE_NAME, LanguageQuestionContract.ID_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
-		Log.d("test", "Language entries = " + cursor.getCount());
 		String set;
 		while (!cursor.isAfterLast()) {
 			// CursorHelper cursorHelper = new CursorHelper(cursor);
@@ -158,7 +151,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor = oldDB.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null,
 				null);
 		cursor.moveToFirst();
-		Log.d("test", "Engineer entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
@@ -173,7 +165,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor = oldDB.query(HiqHTriviaQuestionContract.TABLE_NAME, HiqHTriviaQuestionContract.QUESTION_AND_PRIORITY, where, null, null,
 				null, null);
 		cursor.moveToFirst();
-		Log.d("test", "HiqHTrivia entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
 			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
@@ -196,11 +187,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			SQLiteDatabase database = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READONLY);
 			if (database != null) {
 				if (database.needUpgrade(DATABASE_VERSION)) {
-					Log.d("test", "database needs update");
 					database.close();
 					return 2;
 				} else {
-					Log.d("test", "database exists");
 					database.close();
 					return 1;
 				}
