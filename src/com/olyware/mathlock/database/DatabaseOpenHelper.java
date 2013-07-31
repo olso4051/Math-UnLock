@@ -91,9 +91,11 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		// insert stats into new database
 		Cursor cursor = oldDB.rawQuery("SELECT * FROM " + StatisticContract.TABLE_NAME, null);
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		ContentValues values = new ContentValues();
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			values.put(StatisticContract.PACKAGE, cursorHelper.getString(StatisticContract.PACKAGE));
 			values.put(StatisticContract.CORRECT, cursorHelper.getString(StatisticContract.CORRECT));
 			values.put(StatisticContract.DIFFICULTY, cursorHelper.getInteger(StatisticContract.DIFFICULTY));
@@ -108,7 +110,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		Log.d("test", "math entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + MathQuestionContract.TABLE_NAME + " SET " + MathQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
@@ -121,7 +124,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		Log.d("test", "vocab entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + VocabQuestionContract.TABLE_NAME + " SET " + VocabQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
@@ -139,7 +143,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		Log.d("test", "Language entries = " + cursor.getCount());
 		String set;
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			set = priorities[0] + "=" + cursorHelper.getInteger(priorities[0]);
 			for (int a = 1; a < priorities.length; a++) {
 				set = set + ", " + priorities[a] + " = " + cursorHelper.getInteger(priorities[a]);
@@ -155,7 +160,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		Log.d("test", "Engineer entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + EngineerQuestionContract.TABLE_NAME + " SET " + EngineerQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
@@ -169,13 +175,18 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		Log.d("test", "HiQHTrivia entries = " + cursor.getCount());
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + HiQHTriviaQuestionContract.TABLE_NAME + " SET " + HiQHTriviaQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
 					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
+		cursor.close();
+		cursorHelper.destroy();
+		oldDB.close();
+		newDB.close();
 		context.deleteDatabase(DATABASE_OLD_FULL_PATH);
 	}
 

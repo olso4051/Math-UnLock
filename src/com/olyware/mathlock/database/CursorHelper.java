@@ -10,6 +10,10 @@ public class CursorHelper {
 		this.cursor = cursor;
 	}
 
+	public void setCursor(Cursor cursor) {
+		this.cursor = cursor;
+	}
+
 	public String getString(String columnName) {
 		return cursor.getString(cursor.getColumnIndexOrThrow(columnName));
 	}
@@ -20,5 +24,9 @@ public class CursorHelper {
 
 	public int getInteger(String columnName) {
 		return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
+	}
+
+	public void destroy() {
+		cursor.close();
 	}
 }

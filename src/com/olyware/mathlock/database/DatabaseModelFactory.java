@@ -33,6 +33,7 @@ public class DatabaseModelFactory {
 				stats.add(0);
 			cursor.moveToNext();
 		}
+		cursor.close();
 		return stats;
 	}
 
@@ -41,15 +42,18 @@ public class DatabaseModelFactory {
 		int selection = rand.nextInt(weightSum) + 1;
 		int cumulativeWeight = 0;
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		while (!cursor.isLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
 			if (cumulativeWeight >= selection) {
 				break;
 			}
 			cursor.moveToNext();
 		}
-		CursorHelper cursorHelper = new CursorHelper(cursor);
+		// CursorHelper cursorHelper = new CursorHelper(cursor);
+		cursorHelper.setCursor(cursor);
 		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String questionImage = cursorHelper.getString(MathQuestionContract.QUESTION_IMAGE);
@@ -62,6 +66,8 @@ public class DatabaseModelFactory {
 		String range = cursorHelper.getString(MathQuestionContract.RANGE);
 		int precision = cursorHelper.getInteger(MathQuestionContract.PRECISION);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		cursor.close();
+		cursorHelper.destroy();
 		return new MathQuestion(id, questionText, questionImage, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3,
 				difficulty, parseMode, range, precision, priority);
 	}
@@ -69,8 +75,10 @@ public class DatabaseModelFactory {
 	public static List<VocabQuestion> buildAllVocabQuestions(Cursor cursor) {
 		List<VocabQuestion> questions = EZ.list();
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			int id = cursorHelper.getInteger(QuestionContract._ID);
 			String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -82,6 +90,8 @@ public class DatabaseModelFactory {
 
 			cursor.moveToNext();
 		}
+		cursor.close();
+		cursorHelper.destroy();
 		return questions;
 	}
 
@@ -91,16 +101,19 @@ public class DatabaseModelFactory {
 		int cumulativeWeight = 0;
 		List<VocabQuestion> questions = EZ.list();
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		// get weighted random vocab question
 		while (!cursor.isLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
 			if (cumulativeWeight >= selection) {
 				break;
 			}
 			cursor.moveToNext();
 		}
-		CursorHelper cursorHelper = new CursorHelper(cursor);
+		// CursorHelper cursorHelper = new CursorHelper(cursor);
+		cursorHelper.setCursor(cursor);
 		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -113,7 +126,7 @@ public class DatabaseModelFactory {
 		for (int i = 0; i < numOfWrongs; i++) {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
-				cursorHelper = new CursorHelper(cursor);
+				cursorHelper.setCursor(cursor);
 				id = cursorHelper.getInteger(QuestionContract._ID);
 				correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -127,6 +140,8 @@ public class DatabaseModelFactory {
 				}
 			}
 		}
+		cursor.close();
+		cursorHelper.destroy();
 		return questions;
 	}
 
@@ -138,6 +153,8 @@ public class DatabaseModelFactory {
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		cursor.close();
+		cursorHelper.destroy();
 		return new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
 	}
 
@@ -146,8 +163,10 @@ public class DatabaseModelFactory {
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		List<LanguageQuestion> questions = EZ.list();
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		while (!cursor.isAfterLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			int id = cursorHelper.getInteger(QuestionContract._ID);
 			String correctAnswer = cursorHelper.getString(toLanguage);
 			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -158,6 +177,8 @@ public class DatabaseModelFactory {
 
 			cursor.moveToNext();
 		}
+		cursor.close();
+		cursorHelper.destroy();
 		return questions;
 	}
 
@@ -177,14 +198,16 @@ public class DatabaseModelFactory {
 			int cumulativeWeight = 0;
 			cursor.moveToFirst();
 			while (!cursor.isLast()) {
-				cursorHelper = new CursorHelper(cursor);
+				// cursorHelper = new CursorHelper(cursor);
+				cursorHelper.setCursor(cursor);
 				cumulativeWeight += cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
 				if (cumulativeWeight >= selection) {
 					break;
 				}
 				cursor.moveToNext();
 			}
-			cursorHelper = new CursorHelper(cursor);
+			// cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			correctAnswer = cursorHelper.getString(toLanguage);
 			questionText = cursorHelper.getString(fromLanguage);
 		} while ((correctAnswer == null) || (questionText == null));
@@ -200,7 +223,8 @@ public class DatabaseModelFactory {
 		for (int i = 0; i < numOfWrongs; i++) {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
-				cursorHelper = new CursorHelper(cursor);
+				// cursorHelper = new CursorHelper(cursor);
+				cursorHelper.setCursor(cursor);
 				id = cursorHelper.getInteger(QuestionContract._ID);
 				correctAnswer = cursorHelper.getString(toLanguage);
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -214,6 +238,8 @@ public class DatabaseModelFactory {
 				}
 			}
 		}
+		cursor.close();
+		cursorHelper.destroy();
 		return questions;
 	}
 
@@ -222,20 +248,25 @@ public class DatabaseModelFactory {
 		int selection = rand.nextInt(weightSum) + 1;
 		int cumulativeWeight = 0;
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		while (!cursor.isLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
 			if (cumulativeWeight >= selection) {
 				break;
 			}
 			cursor.moveToNext();
 		}
-		CursorHelper cursorHelper = new CursorHelper(cursor);
+		// CursorHelper cursorHelper = new CursorHelper(cursor);
+		cursorHelper.setCursor(cursor);
 		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String variables = cursorHelper.getString(EngineerQuestionContract.VARIABLES);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		cursor.close();
+		cursorHelper.destroy();
 		return new EngineerQuestion(id, questionText, variables, difficulty, priority);
 	}
 
@@ -244,15 +275,18 @@ public class DatabaseModelFactory {
 		int selection = rand.nextInt(weightSum) + 1;
 		int cumulativeWeight = 0;
 		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
 		while (!cursor.isLast()) {
-			CursorHelper cursorHelper = new CursorHelper(cursor);
+			// CursorHelper cursorHelper = new CursorHelper(cursor);
+			cursorHelper.setCursor(cursor);
 			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
 			if (cumulativeWeight >= selection) {
 				break;
 			}
 			cursor.moveToNext();
 		}
-		CursorHelper cursorHelper = new CursorHelper(cursor);
+		// CursorHelper cursorHelper = new CursorHelper(cursor);
+		cursorHelper.setCursor(cursor);
 		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
@@ -261,6 +295,8 @@ public class DatabaseModelFactory {
 		String incorrectAnswer3 = cursorHelper.getString(HiQHTriviaQuestionContract.ANSWER_INCORRECT3);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		cursor.close();
+		cursorHelper.destroy();
 		return new HiQHTriviaQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
 				priority);
 	}

@@ -241,15 +241,6 @@ public class ShowStoreActivity extends Activity {
 	}
 
 	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-		if (mHelper != null)
-			mHelper.dispose();
-		mHelper = null;
-	}
-
-	@Override
 	public void onAttachedToWindow() {
 		// don't show when locked to bring up screen lock mechanism
 		// dismiss keyguard though so if there is no security then the activity is shown

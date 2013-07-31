@@ -989,7 +989,7 @@ public class JoystickView extends View {
 					selectOptions[i] = false;
 				listener.OnSelect(s);
 			} else if (send) {
-				Toast.makeText(ctx, "Swipe option to select", Toast.LENGTH_SHORT).show();
+				Toast.makeText(ctx, res.getString(R.string.swipe_option), Toast.LENGTH_SHORT).show();
 			}
 		} else
 			switch (type) {

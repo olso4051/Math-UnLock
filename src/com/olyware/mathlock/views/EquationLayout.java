@@ -1304,4 +1304,6 @@ public class EquationLayout {
 			return "(" + original + ")";
 		}
 	}
+	// TODO make an isEqual public function that takes in text, width and height. use it to compare if the layout is already computed so we
+	// don't have to do it again
 }

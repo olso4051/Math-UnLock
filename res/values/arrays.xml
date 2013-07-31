@@ -256,13 +256,13 @@
         <item>purchase3</item>
     </string-array>
     <integer-array name="egg_max_values">
-        <item>1000</item>
         <item>500</item>
         <item>500</item>
+        <item>500</item>
+        <item>500</item>
+        <item>100</item>
         <item>1000</item>
         <item>500</item>
-        <item>1000</item>
-        <item>1000</item>
         <item>1000</item>
         <item>2500</item>
         <item>2500</item>

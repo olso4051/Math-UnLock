@@ -29,10 +29,17 @@ public class DatabaseManager {
 
 	DatabaseOpenHelper dbHelper;
 	SQLiteDatabase db;
+	Cursor cursor;
 
 	public DatabaseManager(Context context) {
 		dbHelper = DatabaseOpenHelper.getInstance(context);
 		db = dbHelper.getWritableDatabase();
+	}
+
+	public void destroy() {
+		db.close();
+		cursor.close();
+		dbHelper.close();
 	}
 
 	public long addStat(Statistic stat) {
@@ -50,19 +57,20 @@ public class DatabaseManager {
 			where = where + " AND " + StatisticContract.PACKAGE + " = '" + Pack + "'";
 		if (!difficulty.equals(MainActivity.getContext().getResources().getString(R.string.all)))
 			where = where + " AND " + StatisticContract.DIFFICULTY + " = " + String.valueOf(Difficulty.fromValue(difficulty).getValue());
-		Cursor cursor = db.query(StatisticContract.TABLE_NAME, StatisticContract.ALL_COLUMNS, where, null, null, null, null);
+		cursor = db.query(StatisticContract.TABLE_NAME, StatisticContract.ALL_COLUMNS, where, null, null, null, null);
 		return DatabaseModelFactory.buildStats(cursor);
 	}
 
 	public MathQuestion getMathQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-		Cursor cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+		cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + MathQuestionContract.TABLE_NAME + " WHERE "
 				+ where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
+		cursor2.close();
 		return DatabaseModelFactory.buildMathQuestion(cursor, sum);
 	}
 
@@ -76,7 +84,7 @@ public class DatabaseManager {
 	}
 
 	public List<VocabQuestion> getAllVocabQuestions() {
-		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, null, null, null, null, null);
+		cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, null, null, null, null, null);
 		return DatabaseModelFactory.buildAllVocabQuestions(cursor);
 	}
 
@@ -84,12 +92,13 @@ public class DatabaseManager {
 		// String order = "RANDOM()";// LIMIT " + number;
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-		Cursor cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, null, null, null, null);
+		cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + VocabQuestionContract.TABLE_NAME + " WHERE "
 				+ where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
+		cursor2.close();
 		return DatabaseModelFactory.buildVocabQuestions(cursor, sum, number);
 	}
 
@@ -100,11 +109,12 @@ public class DatabaseManager {
 				+ BaseContract._ID + " != " + notID;
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
-		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
+		cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
 				+ LanguageQuestionContract.TABLE_NAME + " WHERE " + where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
+		cursor2.close();
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 
@@ -117,37 +127,39 @@ public class DatabaseManager {
 				+ " != " + notID;
 		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 				QuestionContract._ID };
-		Cursor cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
+		cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
 				+ LanguageQuestionContract.TABLE_NAME + " WHERE " + where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
+		cursor2.close();
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 
 	public EngineerQuestion getEngineerQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-		Cursor cursor = db.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+		cursor = db.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + EngineerQuestionContract.TABLE_NAME
 				+ " WHERE " + where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
+		cursor2.close();
 		return DatabaseModelFactory.buildEngineerQuestion(cursor, sum);
 	}
 
 	public HiQHTriviaQuestion getHiQHTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-		Cursor cursor = db.query(HiQHTriviaQuestionContract.TABLE_NAME, HiQHTriviaQuestionContract.ALL_COLUMNS, where, null, null, null,
-				null);
+		cursor = db.query(HiQHTriviaQuestionContract.TABLE_NAME, HiQHTriviaQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
 		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + HiQHTriviaQuestionContract.TABLE_NAME
 				+ " WHERE " + where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
+		cursor2.close();
 		return DatabaseModelFactory.buildHiQHTriviaQuestion(cursor, sum);
 	}
 
@@ -197,17 +209,17 @@ public class DatabaseManager {
 		// String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
 		int priority[] = { 0, 0 };
 		if (tableName.equals(MainActivity.getContext().getResources().getString(R.string.language_table))) {
-			Cursor cursor = db.rawQuery("SELECT " + priority1 + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
+			cursor = db.rawQuery("SELECT " + priority1 + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
 			cursor.moveToFirst();
 			priority[0] = cursor.getInt(0);
 			cursor = db.rawQuery("SELECT " + priority2 + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
 			cursor.moveToFirst();
 			priority[1] = cursor.getInt(0);
 		} else {
-			Cursor cursor1 = db.rawQuery("SELECT " + QuestionContract.PRIORITY + " FROM " + tableName + " WHERE " + QuestionContract._ID
-					+ "=" + ID, null);
-			cursor1.moveToFirst();
-			priority[0] = cursor1.getInt(0);
+			cursor = db.rawQuery(
+					"SELECT " + QuestionContract.PRIORITY + " FROM " + tableName + " WHERE " + QuestionContract._ID + "=" + ID, null);
+			cursor.moveToFirst();
+			priority[0] = cursor.getInt(0);
 		}
 		return priority;
 	}
