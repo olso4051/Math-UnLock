@@ -84,6 +84,7 @@ public class MathQuestion extends Question {
 	}
 
 	public String[] getAnswers() {
+		Log.d("test", "getting answers");
 		String preParse[] = new String[] { correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
 		String postParse[] = preParse;
 		MathEval math = new MathEval();
@@ -284,7 +285,6 @@ public class MathQuestion extends Question {
 			return Math.round(num);
 		else {
 			double factor = Math.pow(10, decimalPrecision);
-			Log.d("test", "num=" + num + "factor=" + factor + "result=" + Math.round(num * factor) / factor);
 			return Math.round(num * factor) / factor;
 		}
 	}
