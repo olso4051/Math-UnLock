@@ -11,7 +11,7 @@ import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
-import com.olyware.mathlock.database.contracts.HiQHTriviaQuestionContract;
+import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -19,7 +19,7 @@ import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HiQHTriviaQuestion;
+import com.olyware.mathlock.model.HiqHTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -150,17 +150,17 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildEngineerQuestion(cursor, sum);
 	}
 
-	public HiQHTriviaQuestion getHiQHTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
+	public HiqHTriviaQuestion getHiqHTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-		cursor = db.query(HiQHTriviaQuestionContract.TABLE_NAME, HiQHTriviaQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+		cursor = db.query(HiqHTriviaQuestionContract.TABLE_NAME, HiqHTriviaQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
-		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + HiQHTriviaQuestionContract.TABLE_NAME
+		Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + HiqHTriviaQuestionContract.TABLE_NAME
 				+ " WHERE " + where, null);
 		cursor2.moveToFirst();
 		int sum = cursor2.getInt(0);
 		cursor2.close();
-		return DatabaseModelFactory.buildHiQHTriviaQuestion(cursor, sum);
+		return DatabaseModelFactory.buildHiqHTriviaQuestion(cursor, sum);
 	}
 
 	public void increasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {

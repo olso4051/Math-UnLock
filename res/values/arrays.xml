@@ -195,7 +195,7 @@
 	<string name="gre">GRE</string>
 	<string name="toddler">Toddler</string>
 	<string name="engineer">Engineer</string>
-	<string name="hiqh_trivia">HiQH Trivia</string>
+	<string name="hiqh_trivia">HiqH Trivia</string>
     <string-array name="display_packages">
         <item>@string/all</item>
         <item>@string/math</item>

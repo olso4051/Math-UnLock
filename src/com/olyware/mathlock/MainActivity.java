@@ -40,7 +40,7 @@ import android.widget.Toast;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HiQHTriviaQuestion;
+import com.olyware.mathlock.model.HiqHTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -577,9 +577,9 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.engineer);
 						setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
-					case 4:			// HiQH Trivia question
+					case 4:			// HiqH Trivia question
 						currentPack = getString(R.string.hiqh_trivia);
-						setHiQHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					default:
 						break;
@@ -747,9 +747,9 @@ public class MainActivity extends Activity {
 		return;
 	}
 
-	private void setHiQHTriviaProblem(Difficulty min, Difficulty max) {
+	private void setHiqHTriviaProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.hiqh_trivia_table);
-		HiQHTriviaQuestion question = dbManager.getHiQHTriviaQuestion(min, max, ID);
+		HiqHTriviaQuestion question = dbManager.getHiqHTriviaQuestion(min, max, ID);
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked

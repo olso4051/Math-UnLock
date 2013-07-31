@@ -6,14 +6,14 @@ import java.util.Random;
 import android.database.Cursor;
 
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
-import com.olyware.mathlock.database.contracts.HiQHTriviaQuestionContract;
+import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HiQHTriviaQuestion;
+import com.olyware.mathlock.model.HiqHTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.MathQuestion.ParseMode;
@@ -270,7 +270,7 @@ public class DatabaseModelFactory {
 		return new EngineerQuestion(id, questionText, variables, difficulty, priority);
 	}
 
-	public static HiQHTriviaQuestion buildHiQHTriviaQuestion(Cursor cursor, int weightSum) {
+	public static HiqHTriviaQuestion buildHiqHTriviaQuestion(Cursor cursor, int weightSum) {
 		Random rand = new Random();
 		int selection = rand.nextInt(weightSum) + 1;
 		int cumulativeWeight = 0;
@@ -290,14 +290,14 @@ public class DatabaseModelFactory {
 		int id = cursorHelper.getInteger(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
-		String incorrectAnswer1 = cursorHelper.getString(HiQHTriviaQuestionContract.ANSWER_INCORRECT1);
-		String incorrectAnswer2 = cursorHelper.getString(HiQHTriviaQuestionContract.ANSWER_INCORRECT2);
-		String incorrectAnswer3 = cursorHelper.getString(HiQHTriviaQuestionContract.ANSWER_INCORRECT3);
+		String incorrectAnswer1 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT1);
+		String incorrectAnswer2 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT2);
+		String incorrectAnswer3 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT3);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
 		cursor.close();
 		cursorHelper.destroy();
-		return new HiQHTriviaQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
+		return new HiqHTriviaQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
 				priority);
 	}
 }
