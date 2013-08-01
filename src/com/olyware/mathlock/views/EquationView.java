@@ -96,11 +96,6 @@ public class EquationView extends AutoResizeTextView {
 		invalidate();
 	}
 
-	public void setDefaultSize(int size) {
-		layout.setDefaultSize(size);
-		invalidate();
-	}
-
 	public void setOffset(int offset) {
 		this.offset = offset;
 		setText(getText());

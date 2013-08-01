@@ -495,15 +495,6 @@ public class EquationLayout {
 		}
 	}
 
-	public void setDefaultSize(int size) {
-		textSizeSPDefault = size;
-		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
-				.getResources().getDisplayMetrics());
-		textSizeSP = textSizeSPDefault;
-		textSizePix = textSizePixDefault;
-		setSize();
-	}
-
 	public void setTextSize(int SP) {
 		textSizeSP = SP;
 		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, MainActivity.getContext().getResources()

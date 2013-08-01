@@ -176,11 +176,9 @@ public class JoystickView extends View {
 				if (answers[i].length() > 1)
 					if (answers[i].charAt(1) != '$')
 						equation[i] = true;
-			// if (equation[i])
-			layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i], answerSizeSPDefault);
-			// else
-			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 
+			layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i], answerSizeSPDefault);
+			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
 
 		bmpS = BitmapFactory.decodeResource(getResources(), R.drawable.select_s2);
