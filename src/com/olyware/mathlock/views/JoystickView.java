@@ -29,6 +29,7 @@ import com.olyware.mathlock.ui.Typefaces;
 
 public class JoystickView extends View {
 	private final int NumAnswers = 5;
+	private final long tapLength = 250;
 
 	private Bitmap bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock, bmpHand, bmpArrow;
 	private Bitmap[] bmpBack = new Bitmap[3];
@@ -61,12 +62,13 @@ public class JoystickView extends View {
 	private int diffX1, diffY1, diffX, diffY;
 	private int spacing, rUnlock, rUnlockChange, rBig, rSmall, swipeLengthOption, swipeLength1;
 	private int TextHeight;
+	private long tapTimer;
 
 	private int type = 0;
 	// direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
 	private int state = 0;
 
-	private int correctAnswer, wrongAnswer;
+	private int correctLoc, correctGuess, wrongGuess;
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A", "?" };
 	private String answerTitles[];
 
@@ -78,7 +80,7 @@ public class JoystickView extends View {
 	private JoystickSelectListener listener;
 	private JoystickTouchListener listenerTouch;
 
-	private boolean quizMode;
+	private boolean quizMode, quickUnlock;
 	private boolean selectAnswers[] = new boolean[NumAnswers];
 	private boolean selectOptions[] = new boolean[5];
 	private boolean selectUnlock;
@@ -257,6 +259,9 @@ public class JoystickView extends View {
 			public void OnSelect(int s) {
 			}
 		};
+		tapTimer = 0;
+		correctLoc = 0;
+		quickUnlock = false;
 	}
 
 	// =========================================
@@ -429,23 +434,25 @@ public class JoystickView extends View {
 		this.paused = false;
 	}
 
-	public void setCorrectAnswer(int location) {
-		this.correctAnswer = location;
+	public void setCorrectGuess(int location) {
+		this.correctGuess = location;
 		// setLayouts();
 	}
 
 	public void setIncorrectGuess(int location) {
-		this.wrongAnswer = location;
+		this.wrongGuess = location;
 		// setLayouts();
 	}
 
 	public void resetGuess() {
-		this.correctAnswer = -1;
-		this.wrongAnswer = -1;
+		this.correctGuess = -1;
+		this.wrongGuess = -1;
 	}
 
-	public void setAnswers(String answers[]) {
+	public void setAnswers(String answers[], int correctLoc) {
 		this.answers = new String[] { answers[0], answers[1], answers[2], answers[3], "?" };
+		this.correctLoc = correctLoc;
+		this.quickUnlock = false;
 		if (measured) {
 			animateHandler.removeCallbacks(pulseLock);
 			animateHandler.removeCallbacks(spin);
@@ -557,27 +564,32 @@ public class JoystickView extends View {
 			canvas.rotate(-degrees, Width / 2, (TextHeight - textSizePix) / 2);	// intentional fall through
 		case 0:
 			for (int i = 0; i <= NumAnswers; i++) {
-				if (selectAnswers[Math.min(i, NumAnswers - 1)])
-					canvas.drawBitmap(bmpBack[0], srcRectForBack, RectForAnswers[i], unlockPaint);
-				else if (i == correctAnswer)
-					canvas.drawBitmap(bmpBack[1], srcRectForBack, RectForAnswers[i], unlockPaint);
-				else if (i == wrongAnswer)
-					canvas.drawBitmap(bmpBack[2], srcRectForBack, RectForAnswers[i], unlockPaint);
+				if (!quickUnlock || (i == correctLoc)) {
+					if (selectAnswers[Math.min(i, NumAnswers - 1)])
+						canvas.drawBitmap(bmpBack[0], srcRectForBack, RectForAnswers[i], unlockPaint);
+					else if (i == correctGuess)
+						canvas.drawBitmap(bmpBack[1], srcRectForBack, RectForAnswers[i], unlockPaint);
+					else if (i == wrongGuess)
+						canvas.drawBitmap(bmpBack[2], srcRectForBack, RectForAnswers[i], unlockPaint);
+				}
 			}
 			for (int i = 0; i <= NumAnswers; i++) {
-				canvas.save();
-				if (equation[Math.min(i, NumAnswers - 1)]) {
-					// position the text then draw the layout
-					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
-							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
-					layoutE[Math.min(i, NumAnswers - 1)].draw(canvas);
-				} else {
-					// position the text then draw the layout
-					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
-							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[Math.min(i, NumAnswers - 1)].getHeight() / 2);
-					layout[Math.min(i, NumAnswers - 1)].draw(canvas);
+				if (!quickUnlock || (i == correctLoc)) {
+					canvas.save();
+					if (equation[Math.min(i, NumAnswers - 1)]) {
+						// position the text then draw the layout
+						canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+								(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
+						layoutE[Math.min(i, NumAnswers - 1)].draw(canvas);
+					} else {
+						// position the text then draw the layout
+						canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+								(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[Math.min(i, NumAnswers - 1)].getHeight()
+										/ 2);
+						layout[Math.min(i, NumAnswers - 1)].draw(canvas);
+					}
+					canvas.restore();
 				}
-				canvas.restore();
 			}
 			if (type == 1)
 				canvas.rotate(degrees, Width / 2, (TextHeight - textSizePix) / 2);
@@ -587,15 +599,17 @@ public class JoystickView extends View {
 			break;
 		case 2:
 			for (int i = 0; i < X.length; i++) {
-				RectForAnswers[i].set((int) X[i] - rUnlock + strokeWidth / 2, (int) Y[i] - rUnlock + strokeWidth / 2, (int) X[i] + rUnlock
-						- strokeWidth / 2, (int) Y[i] + rUnlock - strokeWidth / 2);
+				if (!quickUnlock || (i == correctLoc)) {
+					RectForAnswers[i].set((int) X[i] - rUnlock + strokeWidth / 2, (int) Y[i] - rUnlock + strokeWidth / 2, (int) X[i]
+							+ rUnlock - strokeWidth / 2, (int) Y[i] + rUnlock - strokeWidth / 2);
 
-				canvas.drawRoundRect(RectForAnswers[i], rUnlock, rUnlock, circlePaint[i]);
-				canvas.save();
-				canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2, (RectForAnswers[i].top + RectForAnswers[i].bottom)
-						/ 2 - layoutAnswers[i].getHeight() / 2); // position the text
-				layoutAnswers[i].draw(canvas);
-				canvas.restore();
+					canvas.drawRoundRect(RectForAnswers[i], rUnlock, rUnlock, circlePaint[i]);
+					canvas.save();
+					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layoutAnswers[i].getHeight() / 2); // position the text
+					layoutAnswers[i].draw(canvas);
+					canvas.restore();
+				}
 			}
 			if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4]))
 				canvas.drawText(res.getString(R.string.swipe_option), Width / 2, (Height - rBig * 2) / 2, textPaintWhite);
@@ -690,7 +704,7 @@ public class JoystickView extends View {
 				} else if (!problem) {				// if there is no problem set
 					if (listener != null)
 						listener.OnSelect(0);		// select A on any touch event
-				} else {			// select answers
+				} else {							// touch was in the main control window
 					switch (type) {
 					case 0:
 						checkSelection(false, true);
@@ -699,6 +713,10 @@ public class JoystickView extends View {
 						checkSelection(false, true);
 						break;
 					case 2:
+						if ((tapTimer + tapLength) > System.currentTimeMillis()) {
+							quickUnlock = true;
+							listener.OnSelect(11);		// send a quickUnlock mode activated signal back to mainActivity
+						}
 						setAnswerLocations();
 						revealAnswers();
 						if (listener != null)
@@ -721,6 +739,7 @@ public class JoystickView extends View {
 				checkSelection(false, false);
 				invalidate();
 			} else if (actionType == MotionEvent.ACTION_UP) {
+				tapTimer = System.currentTimeMillis();
 				checkSelection(true, false);
 				returnToDefault();
 				flashText();
@@ -1002,15 +1021,12 @@ public class JoystickView extends View {
 				if (selectUnlock) {
 					diffx = touchX - startX;
 					diffy = touchY - startY;
-					double newX, newY;
+					double newX = touchX, newY = touchY;
 					if (type == 1) {
 						double oldX = touchX - Width / 2;
 						double oldY = (TextHeight - textSizePix) / 2 - touchY;
 						newX = (oldX * Math.cos(-radians) - oldY * Math.sin(-radians)) + Width / 2;
 						newY = (TextHeight - textSizePix) / 2 - (oldX * Math.sin(-radians) + oldY * Math.cos(-radians));
-					} else {
-						newX = touchX;
-						newY = touchY;
 					}
 					RectForUnlockPulse.set((int) touchX - rUnlock + strokeWidth / 2, (int) touchY - rUnlock + strokeWidth / 2, (int) touchX
 							+ rUnlock - strokeWidth / 2, (int) touchY + rUnlock - strokeWidth / 2);
@@ -1035,7 +1051,7 @@ public class JoystickView extends View {
 						}
 
 						if (select >= 0)
-							if (send)
+							if (send && (!quickUnlock || select == correctLoc))
 								listener.OnSelect(select);
 							else {
 								circlePaint[select].setColor(Color.BLUE);
@@ -1049,6 +1065,10 @@ public class JoystickView extends View {
 					diffx = startX - (RectForUnlock.right + RectForUnlock.left) / 2;
 					diffy = startY - (RectForUnlock.top + RectForUnlock.bottom) / 2;
 					if (Math.sqrt(diffx * diffx + diffy * diffy) < rUnlock * 1.5) {
+						if ((tapTimer + tapLength) > System.currentTimeMillis()) {
+							quickUnlock = true;
+							listener.OnSelect(11);		// send a quickUnlock mode activated signal back to mainActivity
+						}
 						startX = (RectForUnlock.right + RectForUnlock.left) / 2;
 						startY = (RectForUnlock.top + RectForUnlock.bottom) / 2;
 						RectForUnlockPulse.set((int) touchX - rUnlock + strokeWidth / 2, (int) touchY - rUnlock + strokeWidth / 2,

@@ -68,20 +68,17 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "0")));
 
 		// enable settings for unlocked packages
-		if (sharedPrefsMoney.getBoolean("unlock_all", false))
-			for (int i = 0; i < unlockPackageKeys.length - 1; i++) {
-				Preference Pref_Packages = findPreference(settingsPackageKeys[i]);
-				Pref_Packages.setEnabled(true);
-			}
-		else {
-			for (int i = 1; i < unlockAllKeys.length; i++) {
-				Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
-				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
+		for (int i = 1; i < unlockAllKeys.length; i++) {
+			Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
+			if (i < unlockPackageKeys.length)
+				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
 					Pref_Packages.setEnabled(true);
 				else
 					Pref_Packages.setEnabled(Pref_Packages.isEnabled());
-			}
-
+			else if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
+				Pref_Packages.setEnabled(true);
+			else
+				Pref_Packages.setEnabled(Pref_Packages.isEnabled());
 		}
 	}
 

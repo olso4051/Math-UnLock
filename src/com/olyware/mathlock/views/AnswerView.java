@@ -26,7 +26,7 @@ public class AnswerView extends View {
 	private final int textConstLabelSizeSP = 30, textConstAnswerSizeSP = 25;
 	private int type = 0;
 	private int textLabelSizeSP, textAnswerSizeSP;
-	private int correctAnswer, wrongAnswer;
+	private int correctLoc, correctGuess, wrongGuess;
 	final private int maxAnswers = 4;
 	private float padVert, padHorz;
 	private float textLabelSizePix, textAnswerSizePix;
@@ -37,7 +37,7 @@ public class AnswerView extends View {
 	private float centersX[] = new float[maxAnswers], centersY[] = new float[maxAnswers];
 	private String answers[] = { "N/A", "N/A", "N/A", "N/A" };
 	final private String labels[] = { "A) ", "B) ", "C) ", "D) ", "E) " };
-	private boolean equations = false;
+	private boolean equations = false, quickUnlock = false;
 
 	private Context ctx;
 	private Typeface font;
@@ -119,6 +119,8 @@ public class AnswerView extends View {
 		for (int i = 0; i < answerBounds.length; i++) {
 			answerBounds[i] = new Rect();
 			labelBounds[i] = new Rect();
+			layoutsE[i] = new EquationLayout(answers[i], 500, 500, TextAnswerPaintL, textAnswerSizeSP);
+			layouts[i] = new StaticLayout(answers[i], TextAnswerPaintL, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
 		layout = 1;
 		equations = false;
@@ -128,9 +130,11 @@ public class AnswerView extends View {
 			}
 		};
 
-		correctAnswer = maxAnswers;
-		wrongAnswer = maxAnswers;
+		correctGuess = maxAnswers;
+		wrongGuess = maxAnswers;
 		maxHeight = 0;
+		correctLoc = 0;
+		quickUnlock = false;
 	}
 
 	// =========================================
@@ -178,35 +182,37 @@ public class AnswerView extends View {
 		}
 	}
 
-	public void setCorrectAnswer(int location) {
+	public void setCorrectGuess(int location) {
 		if (type == 2) {
-			this.correctAnswer = location;
+			this.correctGuess = location;
 			if (equations)
-				layoutsE[correctAnswer].setColor(correctAnswerPaint.getColor());
+				layoutsE[correctGuess].setColor(correctAnswerPaint.getColor());
 			else
-				layouts[correctAnswer].getPaint().setColor(correctAnswerPaint.getColor());
+				layouts[correctGuess].getPaint().setColor(correctAnswerPaint.getColor());
 			invalidate();
 		}
 	}
 
 	public void setIncorrectGuess(int location) {
 		if (type == 2) {
-			this.wrongAnswer = location;
+			this.wrongGuess = location;
 			if (equations)
-				layoutsE[wrongAnswer].setColor(wrongAnswerPaint.getColor());
+				layoutsE[wrongGuess].setColor(wrongAnswerPaint.getColor());
 			else
-				layouts[wrongAnswer].getPaint().setColor(wrongAnswerPaint.getColor());
+				layouts[wrongGuess].getPaint().setColor(wrongAnswerPaint.getColor());
 			invalidate();
 		}
 	}
 
 	public void resetGuess() {
-		this.correctAnswer = maxAnswers;
-		this.wrongAnswer = maxAnswers;
+		this.correctGuess = maxAnswers;
+		this.wrongGuess = maxAnswers;
 	}
 
-	public void setAnswers(String answers[]) {
+	public void setAnswers(String answers[], int correctLoc) {
 		this.answers = answers;
+		this.correctLoc = correctLoc;
+		this.quickUnlock = false;
 		equations = false;
 		if (answers[0].charAt(0) == '$')
 			if (answers[0].length() > 1)
@@ -215,6 +221,11 @@ public class AnswerView extends View {
 		resetTextSize();
 		if (measured)
 			setDimensions(false);
+	}
+
+	public void setQuickUnlock(boolean quickUnlock) {
+		this.quickUnlock = quickUnlock;
+		invalidate();
 	}
 
 	public String[] getAnswers() {
@@ -275,36 +286,44 @@ public class AnswerView extends View {
 		case 2:
 			if (equations) {
 				for (int i = 0; i < answers.length; i++) {
-					canvas.save();
-					// position the equation
-					canvas.translate(centersX[i] + layoutsE[i].getWidth() / 2, centersY[i] - textLabelSizePix / 4);
-					layoutsE[i].draw(canvas);
-					canvas.restore();
+					if (!quickUnlock || (i == correctLoc)) {
+						canvas.save();
+						// position the equation
+						canvas.translate(centersX[i] + layoutsE[i].getWidth() / 2, centersY[i] - textLabelSizePix / 4);
+						layoutsE[i].draw(canvas);
+						canvas.restore();
+					}
 				}
 			} else if (layout == 3) {
 				for (int i = 0; i < answers.length; i++) {
-					canvas.save();
-					canvas.translate(centersX[i], centersY[i] - textAnswerSizePix); // position the text
-					layouts[i].draw(canvas);
-					canvas.restore();
+					if (!quickUnlock || (i == correctLoc)) {
+						canvas.save();
+						canvas.translate(centersX[i], centersY[i] - textAnswerSizePix); // position the text
+						layouts[i].draw(canvas);
+						canvas.restore();
+					}
 				}
 			} else {
 				for (int i = 0; i < answers.length; i++) {
-					if (i == correctAnswer)
-						canvas.drawText(answers[i], centersX[i], centersY[i], correctAnswerPaint);
-					else if (i == wrongAnswer)
-						canvas.drawText(answers[i], centersX[i], centersY[i], wrongAnswerPaint);
-					else
-						canvas.drawText(answers[i], centersX[i], centersY[i], TextAnswerPaintL);
+					if (!quickUnlock || (i == correctLoc)) {
+						if (i == correctGuess)
+							canvas.drawText(answers[i], centersX[i], centersY[i], correctAnswerPaint);
+						else if (i == wrongGuess)
+							canvas.drawText(answers[i], centersX[i], centersY[i], wrongAnswerPaint);
+						else
+							canvas.drawText(answers[i], centersX[i], centersY[i], TextAnswerPaintL);
+					}
 				}
 			}
 			for (int i = 0; i < answers.length; i++) {
-				if (i == correctAnswer)
-					canvas.drawText(labels[i], centersX[i], centersY[i], correctLabelPaint);
-				else if (i == wrongAnswer)
-					canvas.drawText(labels[i], centersX[i], centersY[i], wrongLabelPaint);
-				else
-					canvas.drawText(labels[i], centersX[i], centersY[i], TextLabelPaintR);
+				if (!quickUnlock || (i == correctLoc)) {
+					if (i == correctGuess)
+						canvas.drawText(labels[i], centersX[i], centersY[i], correctLabelPaint);
+					else if (i == wrongGuess)
+						canvas.drawText(labels[i], centersX[i], centersY[i], wrongLabelPaint);
+					else
+						canvas.drawText(labels[i], centersX[i], centersY[i], TextLabelPaintR);
+				}
 			}
 			break;
 		}
@@ -469,12 +488,15 @@ public class AnswerView extends View {
 				int width = Width / 2 - (int) (maxLabelW);
 				int height = maxHeight / 2 - (int) (padVert);
 				for (int i = 0; i < answers.length; i++) {
-					if (i == correctAnswer)
-						layoutsE[i] = new EquationLayout(answers[i], width, height, correctAnswerPaint, textAnswerSizeSP);
-					else if (i == wrongAnswer)
-						layoutsE[i] = new EquationLayout(answers[i], width, height, wrongAnswerPaint, textAnswerSizeSP);
-					else
+					if (!layoutsE[i].isComputed(answers[i], width, height)) {
 						layoutsE[i] = new EquationLayout(answers[i], width, height, TextAnswerPaintL, textAnswerSizeSP);
+						if (layoutsE[i].getTextSizePix() < textAnswerSizeSP)
+							changeTextSize(layoutsE[i].getTextSizeSP(), layoutsE[i].getTextSizePix());
+					}
+					if (i == correctGuess)
+						layoutsE[i].setColor(correctAnswerPaint.getColor());
+					else if (i == wrongGuess)
+						layoutsE[i].setColor(wrongAnswerPaint.getColor());
 
 					Widths[i] = layoutsE[i].getWidth() + Math.abs(labelBoundsWidth[i]);
 					totalWidth += Widths[i];
@@ -487,10 +509,10 @@ public class AnswerView extends View {
 					labelBoundsWidth[i] = TextLabelPaintR.measureText(labels[i]);
 					TextAnswerPaintL.getTextBounds(answers[i], 0, answers[i].length(), answerBounds[i]);
 					TextLabelPaintR.getTextBounds(labels[i], 0, labels[i].length(), labelBounds[i]);
-					if (i == correctAnswer)
+					if (i == correctGuess)
 						layouts[i] = new StaticLayout(answers[i], correctAnswerPaint, Width - (int) Math.abs(labelBoundsWidth[i]),
 								Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
-					else if (i == wrongAnswer)
+					else if (i == wrongGuess)
 						layouts[i] = new StaticLayout(answers[i], wrongAnswerPaint, Width - (int) Math.abs(labelBoundsWidth[i]),
 								Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 					else
@@ -531,6 +553,14 @@ public class AnswerView extends View {
 
 		textAnswerSizeSP = textConstAnswerSizeSP;
 		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
+		TextAnswerPaintL.setTextSize(textAnswerSizePix);
+		correctAnswerPaint.setTextSize(textAnswerSizePix);
+		wrongAnswerPaint.setTextSize(textAnswerSizePix);
+	}
+
+	private void changeTextSize(int SP, float Pix) {
+		textAnswerSizeSP = SP;
+		textAnswerSizePix = Pix;
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 		correctAnswerPaint.setTextSize(textAnswerSizePix);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);

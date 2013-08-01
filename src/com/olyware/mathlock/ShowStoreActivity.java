@@ -374,7 +374,7 @@ public class ShowStoreActivity extends Activity {
 		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
 		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
 			cost[0].setText(getString(R.string.purchased));
-			for (int i = 0; i < buy.length; i++) {
+			for (int i = 0; i < unlockPackageKeys.length; i++) {
 				buy[i].setEnabled(false);
 			}
 		} else

@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
 	private boolean dontShow = false;
 	final private long MONTH = 2592000000l;
 
-	private int answerLoc = 1;		// {correct answer location}
+	private int answerLoc = 0;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
 	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
 	private int attempts = 1;
@@ -241,7 +241,7 @@ public class MainActivity extends Activity {
 		answerView.setReadyListener(new AnswerReadyListener() {
 			@Override
 			public void Ready() {
-				answerView.setAnswers(answersRandom);
+				answerView.setAnswers(answersRandom, answerLoc);
 				setImage();
 			}
 		});
@@ -401,8 +401,6 @@ public class MainActivity extends Activity {
 			displayRateShare();
 		else if (sharedPrefs.getBoolean("hints", true))
 			displayHints(0, false);
-		else
-			resetTimes();
 
 		// save money into shared preferences
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
@@ -557,22 +555,6 @@ public class MainActivity extends Activity {
 						currentPack = getString(R.string.language);
 						setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
-					/*case 3:			// enabled vocab act/sat question
-					case 4:			// enabled math act/sat question
-						currentPack = getString(R.string.act_sat);
-						setACT_SATProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[3], false),
-								sharedPrefs.getBoolean(PackageKeys[4], false));
-						break;
-					case 5:			// gre vocab question
-					case 6:			// gre math question
-						currentPack = getString(R.string.gre);
-						setGREProblem(difficulty, sharedPrefs.getBoolean(PackageKeys[5], false),
-								sharedPrefs.getBoolean(PackageKeys[6], false));
-						break;
-					case 7:			// toddler question
-						currentPack = getString(R.string.toddler);
-						setToddlerProblem(difficultyMax);
-						break;*/
 					case 3:			// engineer question
 						currentPack = getString(R.string.engineer);
 						setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
@@ -596,10 +578,10 @@ public class MainActivity extends Activity {
 						}
 					}
 
-					answerView.setAnswers(answersRandom);
-					joystick.setAnswers(answersRandom);
+					answerView.setAnswers(answersRandom, answerLoc);
+					joystick.setAnswers(answersRandom, answerLoc);
 					problem.setTextColor(defaultTextColor);
-					resetTimes();
+					resetQuestionWorth(difficulty * multiplier + lowestAmount);
 				}
 			}, delay); // set new problem after delay time [ms]
 
@@ -614,15 +596,15 @@ public class MainActivity extends Activity {
 			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
 			answersRandom = temp;
 			for (int i = 0; i < 4; i++) {
-				answerView.setAnswers(answersRandom);
-				joystick.setAnswers(answersRandom);
+				answerView.setAnswers(answersRandom, 0);
+				joystick.setAnswers(answersRandom, 0);
 			}
 		}
 	}
 
-	private void resetTimes() {
+	private void resetQuestionWorth(int value) {
 		startTime = System.currentTimeMillis();
-		questionWorth = difficulty * multiplier + lowestAmount;
+		questionWorth = value;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
@@ -687,52 +669,6 @@ public class MainActivity extends Activity {
 		}
 		problem.setText(fromLanguageLocal + " → " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
 	}
-
-	/*private void setACT_SATProblem(int diffNum, boolean vocab, boolean math) {
-		int type;// 0-vocab,1-math
-		if ((vocab) && (math))
-			type = rand.nextInt(2);
-		else if (vocab)
-			type = 0;
-		else
-			type = 1;
-		if (type == 0)
-			setVocabProblem(2, diffNum);
-		else
-			setMathProblem(2, diffNum);
-
-	}
-
-	private void setGREProblem(int diffNum, boolean vocab, boolean math) {
-		int type;// 0-vocab,1-math
-		if ((vocab) && (math))
-			type = rand.nextInt(2);
-		else if (vocab)
-			type = 0;
-		else
-			type = 1;
-		if (type == 0)
-			setVocabProblem(4, diffNum);
-		else
-			setMathProblem(4, diffNum);
-	}
-
-	private void setToddlerProblem(int diffNum) {
-		currentTableName = null;
-		fromLanguage = null;
-		toLanguage = null;
-		ID = 0;
-		switch (diffNum) {
-		case 1:				// Easy question
-			break;
-		case 2:				// Medium question
-			break;
-		case 3:				// Hard question
-			break;
-		default:
-			break;
-		}
-	}*/
 
 	private void setEngineerProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.engineer_table);
@@ -801,20 +737,20 @@ public class MainActivity extends Activity {
 
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
 		if (unknown) {
-			answerView.setCorrectAnswer(correctLoc);
-			joystick.setCorrectAnswer(correctLoc);
+			answerView.setCorrectGuess(correctLoc);
+			joystick.setCorrectGuess(correctLoc);
 		} else {
 			if (correct) {
-				answerView.setCorrectAnswer(correctLoc);
-				joystick.setCorrectAnswer(correctLoc);
+				answerView.setCorrectGuess(correctLoc);
+				joystick.setCorrectGuess(correctLoc);
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
 				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficulty), System
 						.currentTimeMillis()));
 				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
-				answerView.setCorrectAnswer(correctLoc);
-				joystick.setCorrectAnswer(correctLoc);
+				answerView.setCorrectGuess(correctLoc);
+				joystick.setCorrectGuess(correctLoc);
 				answerView.setIncorrectGuess(guessLoc);
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
@@ -934,6 +870,9 @@ public class MainActivity extends Activity {
 				displayHints(0, true);
 				// dialogOn = true;
 			}
+		case 11:	// quickUnlock activated
+			resetQuestionWorth(0);
+			answerView.setQuickUnlock(true);
 		}
 	}
 
