@@ -71,6 +71,10 @@ public class AutoResizeTextView extends TextView {
 		return Height;
 	}
 
+	public int getTextSizeSP() {
+		return textSizeSP;
+	}
+
 	// =========================================
 	// Override Functions
 	// =========================================

@@ -176,10 +176,10 @@ public class JoystickView extends View {
 				if (answers[i].length() > 1)
 					if (answers[i].charAt(1) != '$')
 						equation[i] = true;
-			if (equation[i])
-				layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i]);
-			else
-				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+			// if (equation[i])
+			layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i], answerSizeSPDefault);
+			// else
+			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 
 		}
 
@@ -1244,10 +1244,7 @@ public class JoystickView extends View {
 					return;
 				}
 			} else {
-				if (layoutE[i].getTextSizePix() < answerSizePix) {
-					changeAnswerSize(layoutE[i].getTextSizeSP(), layoutE[i].getTextSizePix());
-					setDimensions();
-				} else if (layoutE[i].getTextSizePix() > answerSizePix) {
+				if (layoutE[i].getTextSizePix() > answerSizePix) {
 					layoutE[i].setTextSize(answerSizeSP, answerSizePix);
 				}
 			}
@@ -1298,10 +1295,15 @@ public class JoystickView extends View {
 					if (answers[i].charAt(1) != '$')
 						equation[i] = true;
 			answerTextPaint[i].getTextBounds(answers[i], 0, answers[i].length(), bounds[i]);
-			if (equation[i])
-				layoutE[i] = new EquationLayout(answers[i], Width / 2 - outlineWidth * 2 - pad * 2, (Height - rBig * 2 - pad - textSizePix)
-						/ 2 - outlineWidth * 3 - pad * 3 - rUnlock, answerTextPaint[i]);
-			else
+			if (equation[i]) {
+				int W = Width / 2 - outlineWidth * 2 - pad * 2;
+				int H = (Height - rBig * 2 - pad - textSizePix) / 2 - outlineWidth * 3 - pad * 3 - rUnlock;
+				if (!layoutE[i].isComputed(answers[i], W, H)) {
+					layoutE[i] = new EquationLayout(answers[i], W, H, answerTextPaint[i], answerSizeSP);
+					if (layoutE[i].getTextSizePix() < answerSizePix)
+						changeAnswerSize(layoutE[i].getTextSizeSP(), layoutE[i].getTextSizePix());
+				}
+			} else
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - outlineWidth * 2 - pad * 2,
 						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}

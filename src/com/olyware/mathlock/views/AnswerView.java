@@ -470,11 +470,11 @@ public class AnswerView extends View {
 				int height = maxHeight / 2 - (int) (padVert);
 				for (int i = 0; i < answers.length; i++) {
 					if (i == correctAnswer)
-						layoutsE[i] = new EquationLayout(answers[i], width, height, correctAnswerPaint);
+						layoutsE[i] = new EquationLayout(answers[i], width, height, correctAnswerPaint, textAnswerSizeSP);
 					else if (i == wrongAnswer)
-						layoutsE[i] = new EquationLayout(answers[i], width, height, wrongAnswerPaint);
+						layoutsE[i] = new EquationLayout(answers[i], width, height, wrongAnswerPaint, textAnswerSizeSP);
 					else
-						layoutsE[i] = new EquationLayout(answers[i], width, height, TextAnswerPaintL);
+						layoutsE[i] = new EquationLayout(answers[i], width, height, TextAnswerPaintL, textAnswerSizeSP);
 
 					Widths[i] = layoutsE[i].getWidth() + Math.abs(labelBoundsWidth[i]);
 					totalWidth += Widths[i];
@@ -519,7 +519,6 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 		correctAnswerPaint.setTextSize(textAnswerSizePix);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 
 	}
 
@@ -535,6 +534,5 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 		correctAnswerPaint.setTextSize(textAnswerSizePix);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		TextAnswerPaintL.setTextSize(textAnswerSizePix);
 	}
 }

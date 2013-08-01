@@ -21,7 +21,7 @@ public class EquationLayout {
 	private int maxWidth, maxHeight;
 	private int textSizeSP;
 	private float textSizePix, textSizePixDefault;
-	private String equationText;
+	private String originalEquation, equationText;
 	private Typeface font;
 	private int color;
 	private List<BracketGroup> bracketGroups = new ArrayList<BracketGroup>();
@@ -365,7 +365,8 @@ public class EquationLayout {
 		}
 	}
 
-	public EquationLayout(String equation, int maxWidth, int maxHeight, TextPaint textPaint) {
+	public EquationLayout(String equation, int maxWidth, int maxHeight, TextPaint textPaint, int maxTextSizeSP) {
+		this.originalEquation = equation;
 		this.equationText = equation;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -377,8 +378,8 @@ public class EquationLayout {
 		testPaintWhite.setStyle(Paint.Style.STROKE);
 		testPaintWhite.setStrokeWidth(3);
 
-		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
-				.getResources().getDisplayMetrics());
+		textSizeSPDefault = maxTextSizeSP;
+		textSizePixDefault = textPaint.getTextSize();
 		textSizeSP = textSizeSPDefault;
 		textSizePix = textSizePixDefault;
 
@@ -386,7 +387,8 @@ public class EquationLayout {
 		setSize();
 	}
 
-	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color) {
+	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color, int maxTextSizeSP) {
+		this.originalEquation = equation;
 		this.equationText = equation;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -398,6 +400,7 @@ public class EquationLayout {
 		testPaintWhite.setStyle(Paint.Style.STROKE);
 		testPaintWhite.setStrokeWidth(3);
 
+		textSizeSPDefault = maxTextSizeSP;
 		textSizePixDefault = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSPDefault, MainActivity.getContext()
 				.getResources().getDisplayMetrics());
 		textSizeSP = textSizeSPDefault;
@@ -405,6 +408,13 @@ public class EquationLayout {
 
 		parseEquation();
 		setSize();
+	}
+
+	public boolean isComputed(String equation, int maxWidth, int maxHeight) {
+		if ((maxWidth == this.maxWidth) && (maxHeight == this.maxHeight) && (equation.equals(originalEquation)))
+			return true;
+		else
+			return false;
 	}
 
 	public void setTypeface(Typeface font) {

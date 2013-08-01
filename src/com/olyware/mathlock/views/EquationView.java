@@ -56,8 +56,7 @@ public class EquationView extends AutoResizeTextView {
 					text = text.subSequence(1, text.length());
 		if (equation) {
 			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight() - Math.abs(offset) * 2,
-					getTypeface(), color);
-			layout.setDefaultSize(40);
+					getTypeface(), color, 40/*getTextSizeSP()*/);
 		} else {
 			layout = null;
 		}
