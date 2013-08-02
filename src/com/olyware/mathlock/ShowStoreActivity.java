@@ -288,7 +288,7 @@ public class ShowStoreActivity extends Activity {
 		firstPack = !isPackageUnlocked();
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(title).setCancelable(false);
-		if (((product >= unlockPackageKeys.length) || (product == 0)) && (firstPack)) {
+		if (((product >= unlockPackageKeys.length - 1) || (product == 0)) && (firstPack)) {
 			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first));
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
@@ -304,20 +304,6 @@ public class ShowStoreActivity extends Activity {
 					else if (firstPack) {
 						purchase(product, 0);
 						finish();
-						/*AlertDialog.Builder builder2 = new AlertDialog.Builder(ShowStoreActivity.this);
-						builder2.setTitle(R.string.info_title_first_pack).setCancelable(false);
-						builder2.setMessage(R.string.info_message_first_pack);
-						builder2.setPositiveButton(R.string.info_message_first_pack_buy, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// do nothing
-							}
-						});
-						builder2.setNegativeButton(R.string.info_message_first_pack_play, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								finish();
-							}
-						});
-						builder2.create().show();*/
 					} else
 						purchase(product, amount);
 				}
@@ -356,12 +342,12 @@ public class ShowStoreActivity extends Activity {
 		else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
 		// enables the rotating slide extra
-		else if (product == 6) {
+		else if (product == 7) {
 			editorPrefs.putString("type", "1");
 			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
 		}
 		// enables the dynamic slide extra
-		else if (product == 7) {
+		else if (product == 8) {
 			editorPrefs.putString("type", "2");
 			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
 		}
@@ -387,13 +373,12 @@ public class ShowStoreActivity extends Activity {
 			} else
 				cost[i].setText(String.valueOf(unlockCost[i]));
 		}
-		// ((TextView) findViewById(R.id.custom_cost)).setText("FREE");
 
 		firstPack = !isPackageUnlocked();
 		if (firstPack) {
 			price = getResources().getDrawable(R.drawable.free);
 			price.setBounds(0, 0, price.getIntrinsicWidth(), price.getIntrinsicHeight());
-			for (int a = 1; a < unlockPackageKeys.length; a++) {
+			for (int a = 1; a < unlockPackageKeys.length - 1; a++) {
 				cost[a].setCompoundDrawables(null, null, price, null);
 				cost[a].setCompoundDrawablePadding(-price.getIntrinsicWidth());
 				cost[a].setText("");

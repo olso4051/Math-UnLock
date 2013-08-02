@@ -59,7 +59,16 @@
             android:theme="@style/AppThemeBlackFull"
             android:label="@string/menu_settings" >
         </activity>
-		
+		<activity
+            android:name="com.olyware.mathlock.ShowCustomEditActivity"
+            android:theme="@style/AppThemeBlackFull"
+            android:label="@string/app_name" >
+            <intent-filter>
+           		<action android:name="com.olyware.mathlock.ShowCustomEditActivity" />
+           		<category android:name="android.intent.category.DEFAULT" />
+       		</intent-filter>
+        </activity>
+        
 		<receiver
 		    android:name=".BootReceiver">
 		    <intent-filter>

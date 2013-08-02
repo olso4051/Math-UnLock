@@ -147,6 +147,7 @@
         <item>unlock_language</item>
 		<item>unlock_engineer</item>
 		<item>unlock_hiqh_trivia</item>
+		<item>unlock_custom</item>
     </string-array>
     <string-array name="unlock_extra_keys">
         <item>unlock_rotating_slide</item>
@@ -159,6 +160,7 @@
         <item>5000</item>
 		<item>1500</item>
 		<item>1500</item>
+		<item>100</item>
         <item>1000</item>
         <item>1000</item>
     </integer-array>
@@ -168,6 +170,7 @@
         <item>enable_language</item>
 		<item>enable_engineer</item>
 		<item>enable_hiqh_trivia</item>
+		<item>enable_custom</item>
     </string-array>
 
     <string name="all">All</string>
@@ -176,6 +179,7 @@
     <string name="language">Language</string>
 	<string name="engineer">Engineer</string>
 	<string name="hiqh_trivia">HiqH Trivia</string>
+	<string name="custom">Custom</string>
     <string-array name="display_packages">
         <item>@string/all</item>
         <item>@string/math</item>
@@ -183,6 +187,7 @@
         <item>@string/language</item>
 		<item>@string/engineer</item>
 		<item>@string/hiqh_trivia</item>
+		<item>@string/custom</item>
     </string-array>
     <string-array name="settings_keys">
         <item>settings_math</item>
@@ -190,6 +195,7 @@
         <item>settings_language</item>
 		<item>settings_engineer</item>
 		<item>settings_hiqh_trivia</item>
+		<item>settings_custom</item>
 		<item>type</item>
 		<item>type</item>
     </string-array>
@@ -200,6 +206,7 @@
         <item>Learn a new language by translating the thousands of words and sentences in 17 different languages</item>
 		<item>Complete science and engineering related equations to keep fresh</item>
 		<item>Fun trivia questions</item>
+		<item>Build your own questions, do whatever you want its up to you!</item>
 		<item>Answers rotate faster as you answer questions correctly</item>
 		<item>Totally different way of swiping to answer the questions</item>
 		<item>Create your own questions, study for a test, It\'s up to you!</item>

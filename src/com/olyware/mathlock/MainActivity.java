@@ -515,7 +515,8 @@ public class MainActivity extends Activity {
 			final int location[] = new int[EnabledPackages];
 			int count = 0;
 
-			for (int i = 0; i < PackageKeys.length; i++) {
+			// TODO remove the minus one so custom packs can be selected
+			for (int i = 0; i < PackageKeys.length - 1; i++) {
 				if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
 					EnabledPackageKeys[count] = PackageKeys[i];
 					location[count] = i;
@@ -536,7 +537,12 @@ public class MainActivity extends Activity {
 					joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
 
 					// pick a random enabled package
-					int randPack = rand.nextInt(EnabledPackageKeys.length);
+					// TODO remove the minus one so custom packs can be selected
+					int randPack;
+					if (sharedPrefs.getBoolean("enable_custom", false))
+						randPack = rand.nextInt(EnabledPackageKeys.length - 1);
+					else
+						randPack = rand.nextInt(EnabledPackageKeys.length);
 
 					// get the difficulty
 					difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));

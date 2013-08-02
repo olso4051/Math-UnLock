@@ -70,15 +70,21 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		// enable settings for unlocked packages
 		for (int i = 1; i < unlockAllKeys.length; i++) {
 			Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
+			Preference Pref_Packages2 = findPreference(settingsPackageKeys[i - 1] + "2");
+			boolean set = false;
 			if (i < unlockPackageKeys.length)
 				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
-					Pref_Packages.setEnabled(true);
+					set = true;
 				else
-					Pref_Packages.setEnabled(Pref_Packages.isEnabled());
+					set = Pref_Packages.isEnabled();
 			else if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
-				Pref_Packages.setEnabled(true);
+				set = true;
 			else
-				Pref_Packages.setEnabled(Pref_Packages.isEnabled());
+				set = Pref_Packages.isEnabled();
+
+			Pref_Packages.setEnabled(set);
+			if (Pref_Packages2 != null)
+				Pref_Packages2.setEnabled(set);
 		}
 	}
 

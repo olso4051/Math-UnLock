@@ -99,6 +99,7 @@
 	    	android:textSize="20sp"
 	    	android:text="@string/cost_all"/>
 	</LinearLayout>
+	
 	<ScrollView
 	    android:layout_width="match_parent"
 		android:layout_height="wrap_content" >
@@ -201,74 +202,6 @@
 			    	android:drawableRight="@drawable/coin"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
-			<!--
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_act_sat" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_act_sat"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/act_sat_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_gre" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_gre"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/gre_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_toddler" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_toddler"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/toddler_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			-->
 			<LinearLayout
 			   	android:layout_width="match_parent"
 		       	android:layout_height="wrap_content"
@@ -313,6 +246,29 @@
 			    	android:drawableRight="@drawable/coin"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
+			<LinearLayout
+			   	android:layout_width="match_parent"
+		       	android:layout_height="wrap_content"
+		       	android:orientation="horizontal" >
+				<Button
+				    android:id="@+id/unlock_custom"
+				    android:layout_height="wrap_content"
+					android:layout_width="0dp"
+					android:layout_weight="4"
+					android:text="@string/unlock_custom"
+					android:textSize="20sp"
+					android:textStyle="bold"/>
+				<TextView
+			    	android:id="@+id/custom_cost"
+			    	android:gravity="center_vertical|right"
+			    	android:layout_width="0dp"
+			    	android:layout_weight="3"
+			    	android:layout_height="fill_parent"
+			    	android:textSize="20sp"
+			    	android:drawableRight="@drawable/coin"
+			    	android:text="@string/purchased"/>
+			</LinearLayout>
+			
 			<TextView
 		    	android:id="@+id/extras"
 		    	android:gravity="center"
@@ -364,29 +320,7 @@
 			    	android:drawableRight="@drawable/coin"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
-			<!--<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/custom"
-				    android:enabled="false"
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/custom"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/custom_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>-->
+
 			<TextView
 		    	android:id="@+id/test_prep"
 		    	android:gravity="center"
