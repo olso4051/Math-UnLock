@@ -1,19 +1,11 @@
 package com.olyware.mathlock;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Html;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -29,6 +21,7 @@ import android.widget.TextView;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
@@ -40,9 +33,7 @@ public class ShowProgressActivity extends Activity {
 	private Coins Money = new Coins(0, 0);
 	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
 	private ImageButton back;
-	private TextView clock;
-	final private float clockSize = 40, dateSize = 20;
-	private float currentClockSize;
+	private Clock clock;
 	private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
 	private GraphView graphView;
@@ -55,18 +46,6 @@ public class ShowProgressActivity extends Activity {
 	private String selectedPackage, selectedDifficulty;
 
 	private DatabaseManager dbManager;
-
-	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			final String action = intent.getAction();
-			boolean timeChange = (action.equals(Intent.ACTION_TIME_TICK) || action.equals(Intent.ACTION_TIME_CHANGED) || action
-					.equals(Intent.ACTION_TIMEZONE_CHANGED));
-			if (timeChange) {
-				setTime();
-			}
-		}
-	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -92,14 +71,8 @@ public class ShowProgressActivity extends Activity {
 			}
 		});
 
-		clock = (TextView) findViewById(R.id.clock);
-		clock.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				toggleClockDate();
-			}
-		});
-		currentClockSize = clockSize;
 		coins = (TextView) findViewById(R.id.money);
+		clock = new Clock(this, (TextView) findViewById(R.id.clock), coins);
 
 		spinTime = (Spinner) findViewById(R.id.spinner_time);
 		spinPackage = (Spinner) findViewById(R.id.spinner_package);
@@ -111,18 +84,14 @@ public class ShowProgressActivity extends Activity {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		Money = new Coins(sharedPrefsMoney.getInt("money", 0), sharedPrefsMoney.getInt("paid_money", 0));
 
-		if (savedInstanceState != null) {
-			currentClockSize = savedInstanceState.getFloat("ClockSize");
-		}
 		initSpinners();
-		setTime();
 		setGraph();
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		savedInstanceState.putFloat("ClockSize", currentClockSize);
+	protected void onDestroy() {
+		clock.destroy();
+		super.onDestroy();
 	}
 
 	@Override
@@ -253,43 +222,6 @@ public class ShowProgressActivity extends Activity {
 			}
 		}
 		return list;
-	}
-
-	@SuppressLint("SimpleDateFormat")
-	private void setTime() {
-		Date curDateTime = new Date(System.currentTimeMillis());
-
-		if (currentClockSize == dateSize) {
-			SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE,\nMMMM d");
-			clock.setText(dateFormatter.format(curDateTime));
-		} else {
-			// hour:minute am/pm newline Day, Month DayOfMonth
-			SimpleDateFormat hourFormatter = new SimpleDateFormat("hh");
-			int hour = Integer.parseInt(hourFormatter.format(curDateTime));
-			int start = 0;
-			if (hour < 10)
-				start = 1;
-			SimpleDateFormat clockFormatter = new SimpleDateFormat("hh:mm");
-			String time = clockFormatter.format(curDateTime);
-			time = time.substring(start);
-			SimpleDateFormat AMPMFormatter = new SimpleDateFormat("a");
-
-			clock.setText(Html.fromHtml(time + "<small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
-		}
-	}
-
-	private void toggleClockDate() {
-		Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[4], EggMaxValues[4]));
-		if (currentClockSize == dateSize) {
-			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
-			currentClockSize = clockSize;
-			setTime();
-		} else {
-			clock.setHeight(clock.getHeight());
-			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, dateSize);	// date
-			currentClockSize = dateSize;
-			setTime();
-		}
 	}
 
 	private void setGraph() {

@@ -1,19 +1,15 @@
 package com.olyware.mathlock;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -24,13 +20,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.text.Html;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -46,6 +38,7 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
@@ -73,9 +66,7 @@ public class MainActivity extends Activity {
 	private boolean fromSettings = false, fromPlay = false, fromShare = false;
 
 	private LinearLayout layout;
-	private TextView clock;
-	final private float clockSize = 40, dateSize = 20;
-	private float currentClockSize;
+	private Clock clock;
 	private TextView coins, worth;
 	private int questionWorth;
 	private EquationView problem;
@@ -120,18 +111,6 @@ public class MainActivity extends Activity {
 	private IabHelper mHelper;
 	private IabHelper.QueryInventoryFinishedListener mQueryFinishedListener;
 	private IabHelper.OnConsumeFinishedListener mConsumeFinishedListener;
-
-	public final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			final String action = intent.getAction();
-			boolean timeChange = (action.equals(Intent.ACTION_TIME_TICK) || action.equals(Intent.ACTION_TIME_CHANGED) || action
-					.equals(Intent.ACTION_TIMEZONE_CHANGED));
-			if (timeChange) {
-				setTime();
-			}
-		}
-	};
 
 	public static Context getContext() {
 		return ctx;
@@ -222,13 +201,7 @@ public class MainActivity extends Activity {
 		hints = getResources().getStringArray(R.array.hints);
 		EnabledPacks = new boolean[PackageKeys.length];
 
-		clock = (TextView) findViewById(R.id.clock);
-		clock.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				toggleClockDate();
-			}
-		});
-		currentClockSize = clockSize;
+		clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
 
 		coins = (TextView) findViewById(R.id.money);
 		worth = (TextView) findViewById(R.id.worth);
@@ -285,16 +258,6 @@ public class MainActivity extends Activity {
 
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
-		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-		c_intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-		this.registerReceiver(m_timeChangedReceiver, c_intentFilter);
-
-		if (savedInstanceState != null) {
-			// quizMode = joystick.setQuizMode(!locked && savedInstanceState.getBoolean("Quiz"));
-			currentClockSize = savedInstanceState.getFloat("ClockSize");
-		}
-
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
@@ -307,13 +270,6 @@ public class MainActivity extends Activity {
 		showWallpaper();
 		getEnabledPackages();
 		setProblemAndAnswer(0);
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		savedInstanceState.putBoolean("Quiz", quizMode);
-		savedInstanceState.putFloat("ClockSize", currentClockSize);
 	}
 
 	@Override
@@ -333,8 +289,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (m_timeChangedReceiver != null)
-			this.unregisterReceiver(m_timeChangedReceiver);
+		clock.destroy();
 		if (mHelper != null)
 			mHelper.dispose();
 		mHelper = null;
@@ -367,9 +322,6 @@ public class MainActivity extends Activity {
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
 
-		// set the clock to the correct time
-		setTime();
-
 		// set the unlock type
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 
@@ -391,6 +343,7 @@ public class MainActivity extends Activity {
 		}
 
 		// setup the question and answers
+		resetQuestionWorth(0);
 		if (changed)
 			setProblemAndAnswer(0);
 
@@ -769,29 +722,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	@SuppressLint("SimpleDateFormat")
-	private void setTime() {
-		Date curDateTime = new Date(System.currentTimeMillis());
-
-		if (currentClockSize == dateSize) {
-			SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE,\nMMMM d");
-			clock.setText(dateFormatter.format(curDateTime));
-		} else {
-			// hour:minute am/pm newline Day, Month DayOfMonth
-			SimpleDateFormat hourFormatter = new SimpleDateFormat("hh");
-			int hour = Integer.parseInt(hourFormatter.format(curDateTime));
-			int start = 0;
-			if (hour < 10)
-				start = 1;
-			SimpleDateFormat clockFormatter = new SimpleDateFormat("hh:mm");
-			String time = clockFormatter.format(curDateTime);
-			time = time.substring(start);
-			SimpleDateFormat AMPMFormatter = new SimpleDateFormat("a");
-
-			clock.setText(Html.fromHtml(time + "<small><small><small>" + AMPMFormatter.format(curDateTime) + "</small></small></small>"));
-		}
-	}
-
 	private void JoystickSelected(int s) {
 		dialogOn = false;
 		if ((sharedPrefs.getBoolean("vibration", true) && (s != 10))
@@ -928,20 +858,6 @@ public class MainActivity extends Activity {
 		editorPrefsStats.putLong("totalTime", totalTime + ms);
 		editorPrefsStats.putLong("answerTimeAve", (totalTime + ms) / (total + 1));
 		editorPrefsStats.commit();
-	}
-
-	private void toggleClockDate() {
-		Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[4], EggMaxValues[4]));
-		if (currentClockSize == dateSize) {
-			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
-			currentClockSize = clockSize;
-			setTime();
-		} else {
-			clock.setHeight(clock.getHeight());
-			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, dateSize);	// date
-			currentClockSize = dateSize;
-			setTime();
-		}
 	}
 
 	private void displayInfo(boolean first) {

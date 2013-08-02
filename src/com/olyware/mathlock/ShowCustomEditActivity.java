@@ -15,7 +15,7 @@ public class ShowCustomEditActivity extends Activity {
 
 	private LinearLayout layout;
 	private Typefaces fonts;
-	private Clock clock2;
+	private Clock clock;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,7 @@ public class ShowCustomEditActivity extends Activity {
 		fonts = Typefaces.getInstance(this);
 		EZ.setFont((ViewGroup) layout, fonts.robotoLight);
 
-		clock2 = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
+		clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class ShowCustomEditActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		clock2.destroy();
+		clock.destroy();
 		super.onDestroy();
 	}
 
