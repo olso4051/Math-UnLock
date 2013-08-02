@@ -402,9 +402,6 @@ public class MainActivity extends Activity {
 		else if (sharedPrefs.getBoolean("hints", true))
 			displayHints(0, false);
 
-		// save money into shared preferences
-		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
-
 		// set image if it was set when the screen was off
 		setImage();
 
@@ -420,6 +417,9 @@ public class MainActivity extends Activity {
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[8], EggMaxValues[8]));
 			fromShare = false;
 		}
+
+		// save money into shared preferences
+		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 	}
 
 	@Override
@@ -766,7 +766,6 @@ public class MainActivity extends Activity {
 				dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			}
 			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
-			// problem.setText(description + problem.getText());
 		}
 	}
 
