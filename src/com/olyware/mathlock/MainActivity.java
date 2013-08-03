@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
 import com.olyware.mathlock.model.HiqHTriviaQuestion;
@@ -468,8 +469,7 @@ public class MainActivity extends Activity {
 			final int location[] = new int[EnabledPackages];
 			int count = 0;
 
-			// TODO remove the minus one so custom packs can be selected
-			for (int i = 0; i < PackageKeys.length - 1; i++) {
+			for (int i = 0; i < PackageKeys.length; i++) {
 				if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
 					EnabledPackageKeys[count] = PackageKeys[i];
 					location[count] = i;
@@ -490,12 +490,7 @@ public class MainActivity extends Activity {
 					joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
 
 					// pick a random enabled package
-					// TODO remove the minus one so custom packs can be selected
-					int randPack;
-					if (sharedPrefs.getBoolean("enable_custom", false))
-						randPack = rand.nextInt(EnabledPackageKeys.length - 1);
-					else
-						randPack = rand.nextInt(EnabledPackageKeys.length);
+					int randPack = rand.nextInt(EnabledPackageKeys.length);
 
 					// get the difficulty
 					difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
@@ -521,6 +516,10 @@ public class MainActivity extends Activity {
 					case 4:			// HiqH Trivia question
 						currentPack = getString(R.string.hiqh_trivia);
 						setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						break;
+					case 5:			// Custom question
+						currentPack = getString(R.string.custom);
+						setCustomProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					default:
 						break;
@@ -614,9 +613,7 @@ public class MainActivity extends Activity {
 			else if (LanguageValues[i].equals(toLanguage))
 				toLanguageLocal = LanguageEntries[i];
 		}
-		int diff = rand.nextInt(max.getValue() - min.getValue() + 1) + min.getValue();
-		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(Difficulty.fromValue(diff), answers.length, fromLanguage,
-				toLanguage, ID);
+		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(min, max, answers.length, fromLanguage, toLanguage, ID);
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
@@ -649,6 +646,19 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
+
+		problem.setText(question.getQuestionText());
+		answers = question.getAnswers();
+		return;
+	}
+
+	private void setCustomProblem(Difficulty min, Difficulty max) {
+		currentTableName = getString(R.string.custom_table);
+		CustomQuestion question = dbManager.getCustomQuestion(min, max, ID);
+		ID = question.getID();
+
+		// Set the new difficulty based on what question was picked
+		difficulty = 0;
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -808,6 +818,7 @@ public class MainActivity extends Activity {
 		case 11:	// quickUnlock activated
 			resetQuestionWorth(0);
 			answerView.setQuickUnlock(true);
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
 		}
 	}
 

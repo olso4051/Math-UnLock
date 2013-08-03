@@ -36,6 +36,8 @@ public enum Difficulty {
 		case 5:
 			difficulty = INSANE;
 			break;
+		default:
+			difficulty = VERY_EASY;
 		}
 
 		return difficulty;

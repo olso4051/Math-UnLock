@@ -5,12 +5,14 @@ import java.util.Random;
 
 import android.database.Cursor;
 
+import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
 import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
+import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
 import com.olyware.mathlock.model.HiqHTriviaQuestion;
@@ -72,29 +74,6 @@ public class DatabaseModelFactory {
 				difficulty, parseMode, range, precision, priority);
 	}
 
-	public static List<VocabQuestion> buildAllVocabQuestions(Cursor cursor) {
-		List<VocabQuestion> questions = EZ.list();
-		cursor.moveToFirst();
-		CursorHelper cursorHelper = new CursorHelper(cursor);
-		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
-			cursorHelper.setCursor(cursor);
-			int id = cursorHelper.getInteger(QuestionContract._ID);
-			String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
-			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
-			String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
-			int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-			// PartOfSpeech partOfSpeech = PartOfSpeech.fromValue(cursorHelper.getString(VocabQuestionContract.PART_OF_SPEECH));
-			VocabQuestion question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
-			questions.add(question);
-
-			cursor.moveToNext();
-		}
-		cursor.close();
-		cursorHelper.destroy();
-		return questions;
-	}
-
 	public static List<VocabQuestion> buildVocabQuestions(Cursor cursor, int weightSum, int numOfWrongs) {
 		Random rand = new Random();
 		int selection = rand.nextInt(weightSum) + 1;
@@ -139,43 +118,6 @@ public class DatabaseModelFactory {
 					break;
 				}
 			}
-		}
-		cursor.close();
-		cursorHelper.destroy();
-		return questions;
-	}
-
-	public static VocabQuestion buildVocabQuestion(Cursor cursor) {
-		cursor.moveToFirst();
-		CursorHelper cursorHelper = new CursorHelper(cursor);
-		int id = cursorHelper.getInteger(QuestionContract._ID);
-		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
-		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
-		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
-		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-		cursor.close();
-		cursorHelper.destroy();
-		return new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
-	}
-
-	public static List<LanguageQuestion> buildAllLanguageQuestions(Cursor cursor, String fromLanguage, String toLanguage) {
-		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
-		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
-		List<LanguageQuestion> questions = EZ.list();
-		cursor.moveToFirst();
-		CursorHelper cursorHelper = new CursorHelper(cursor);
-		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
-			cursorHelper.setCursor(cursor);
-			int id = cursorHelper.getInteger(QuestionContract._ID);
-			String correctAnswer = cursorHelper.getString(toLanguage);
-			Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
-			String questionText = cursorHelper.getString(fromLanguage);
-			int priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-			LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
-			questions.add(question);
-
-			cursor.moveToNext();
 		}
 		cursor.close();
 		cursorHelper.destroy();
@@ -298,6 +240,37 @@ public class DatabaseModelFactory {
 		cursor.close();
 		cursorHelper.destroy();
 		return new HiqHTriviaQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
+				priority);
+	}
+
+	public static CustomQuestion buildCustomQuestion(Cursor cursor, int weightSum) {
+		Random rand = new Random();
+		int selection = 0;
+		if (weightSum > 0)
+			selection = rand.nextInt(weightSum) + 1;
+		int cumulativeWeight = 0;
+		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
+		while (!cursor.isLast()) {
+			cursorHelper.setCursor(cursor);
+			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
+			if (cumulativeWeight >= selection) {
+				break;
+			}
+			cursor.moveToNext();
+		}
+		cursorHelper.setCursor(cursor);
+		int id = cursorHelper.getInteger(QuestionContract._ID);
+		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
+		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
+		String incorrectAnswer1 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT1);
+		String incorrectAnswer2 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT2);
+		String incorrectAnswer3 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT3);
+		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
+		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		cursor.close();
+		cursorHelper.destroy();
+		return new CustomQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
 				priority);
 	}
 }

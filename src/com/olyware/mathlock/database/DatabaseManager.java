@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.database.contracts.BaseContract;
+import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
 import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
@@ -17,6 +18,7 @@ import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.database.contracts.VocabQuestionContract;
+import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
 import com.olyware.mathlock.model.HiqHTriviaQuestion;
@@ -74,20 +76,6 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildMathQuestion(cursor, sum);
 	}
 
-	public long addVocabQuestion(VocabQuestion question) {
-		ContentValues values = new ContentValues();
-		values.put(QuestionContract.ANSWER_CORRECT, question.getCorrectAnswer());
-		values.put(QuestionContract.DIFFICULTY, question.getDifficulty().getValue());
-		values.put(QuestionContract.QUESTION_TEXT, question.getQuestionText());
-		// values.put(VocabQuestionContract.PART_OF_SPEECH, question.getText());
-		return db.insert(VocabQuestionContract.TABLE_NAME, null, values);
-	}
-
-	public List<VocabQuestion> getAllVocabQuestions() {
-		cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, null, null, null, null, null);
-		return DatabaseModelFactory.buildAllVocabQuestions(cursor);
-	}
-
 	public List<VocabQuestion> getVocabQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, int notID) {
 		// String order = "RANDOM()";// LIMIT " + number;
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
@@ -100,22 +88,6 @@ public class DatabaseManager {
 		int sum = cursor2.getInt(0);
 		cursor2.close();
 		return DatabaseModelFactory.buildVocabQuestions(cursor, sum, number);
-	}
-
-	public List<LanguageQuestion> getLanguageQuestions(Difficulty difficulty, int number, String fromLanguage, String toLanguage, int notID) {
-		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
-		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
-		String where = "difficulty = " + String.valueOf(difficulty.getValue()) + " AND " + fromLanguage + "!=" + toLanguage + " AND "
-				+ BaseContract._ID + " != " + notID;
-		String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
-				QuestionContract._ID };
-		cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
-		Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
-				+ LanguageQuestionContract.TABLE_NAME + " WHERE " + where, null);
-		cursor2.moveToFirst();
-		int sum = cursor2.getInt(0);
-		cursor2.close();
-		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, String fromLanguage,
@@ -161,6 +133,25 @@ public class DatabaseManager {
 		int sum = cursor2.getInt(0);
 		cursor2.close();
 		return DatabaseModelFactory.buildHiqHTriviaQuestion(cursor, sum);
+	}
+
+	public CustomQuestion getCustomQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
+		cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+
+		int sum = 0;
+		if (cursor.getCount() > 0) {
+			Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + CustomQuestionContract.TABLE_NAME
+					+ " WHERE " + where, null);
+			cursor2.moveToFirst();
+			sum = cursor2.getInt(0);
+			cursor2.close();
+		} else {
+			where = "difficulty == " + "-1";
+			cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+		}
+		return DatabaseModelFactory.buildCustomQuestion(cursor, sum);
 	}
 
 	public void increasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {

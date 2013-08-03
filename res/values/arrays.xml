@@ -132,12 +132,14 @@
     <string name="language_table">t_language_question</string>
     <string name="engineer_table">t_engineer_question</string>
     <string name="hiqh_trivia_table">t_hiqh_trivia_question</string>
+    <string name="custom_table">t_custom_question</string>
     <string-array name="table_names">
         <item name="math">@string/math_table</item>
         <item name="vocab">@string/vocab_table</item>
         <item name="language">@string/language_table</item>
         <item name="engineer">@string/engineer_table</item>
-        <item name="engineer">@string/hiqh_trivia_table</item>
+        <item name="hiqh_trivia">@string/hiqh_trivia_table</item>
+        <item name="custom_trivia">@string/custom_table</item>
     </string-array>
     
     <string-array name="unlock_package_keys">
@@ -226,6 +228,7 @@
         <item>purchase1</item>
         <item>purchase2</item>
         <item>purchase3</item>
+        <item>double_tap</item>
     </string-array>
     <integer-array name="egg_max_values">
         <item>500</item>
@@ -241,6 +244,7 @@
         <item>1000</item>
         <item>5000</item>
         <item>10000</item>
+        <item>500</item>
     </integer-array>
     
     <string-array name="answer_titles">

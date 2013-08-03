@@ -12,8 +12,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.olyware.mathlock.database.contracts.BaseContract;
+import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
 import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
@@ -31,7 +33,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private final Loggy log = new Loggy(this.getClass());
 
 	private static final String DATABASE_NAME = "mathunlock.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
 
 	private Context context;
@@ -90,7 +92,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		CursorHelper cursorHelper = new CursorHelper(cursor);
 		ContentValues values = new ContentValues();
 		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
 			values.put(StatisticContract.PACKAGE, cursorHelper.getString(StatisticContract.PACKAGE));
 			values.put(StatisticContract.CORRECT, cursorHelper.getString(StatisticContract.CORRECT));
@@ -100,12 +101,12 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			cursor.moveToNext();
 			values.clear();
 		}
+
 		// update priorities that have changed in the math table
 		String where = MathQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
 		cursor = oldDB.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + MathQuestionContract.TABLE_NAME + " SET " + MathQuestionContract.PRIORITY + "="
@@ -113,12 +114,12 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
+
 		// update priorities that have changed in the vocab table
 		where = VocabQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
 		cursor = oldDB.query(VocabQuestionContract.TABLE_NAME, VocabQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + VocabQuestionContract.TABLE_NAME + " SET " + VocabQuestionContract.PRIORITY + "="
@@ -126,6 +127,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
+
 		// update priorities that have changed in the language table
 		String[] priorities = LanguageQuestionContract.LANGUAGE_PRIORITIES;
 		where = priorities[0] + " != " + QuestionContract.DEFAULT_PRIORITY;
@@ -136,7 +138,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		String set;
 		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
 			set = priorities[0] + "=" + cursorHelper.getInteger(priorities[0]);
 			for (int a = 1; a < priorities.length; a++) {
@@ -146,13 +147,13 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 					+ cursorHelper.getInteger(BaseContract._ID));
 			cursor.moveToNext();
 		}
+
 		// update priorities that have changed in the engineering table
 		where = EngineerQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
 		cursor = oldDB.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null,
 				null);
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + EngineerQuestionContract.TABLE_NAME + " SET " + EngineerQuestionContract.PRIORITY + "="
@@ -160,19 +161,37 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
 		}
+
 		// update priorities that have changed in the trivia table
 		where = HiqHTriviaQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
 		cursor = oldDB.query(HiqHTriviaQuestionContract.TABLE_NAME, HiqHTriviaQuestionContract.QUESTION_AND_PRIORITY, where, null, null,
 				null, null);
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
-			// CursorHelper cursorHelper = new CursorHelper(cursor);
 			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 			newDB.execSQL("UPDATE " + HiqHTriviaQuestionContract.TABLE_NAME + " SET " + HiqHTriviaQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
 					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();
+		}
+
+		// add custom question into the new database (if it existed before)
+		Log.d("test", "tableInt = " + DATABASE_VERSION + "table exists = " + (DATABASE_VERSION > 1));
+		if (DATABASE_VERSION > 1) {
+			cursor = oldDB.rawQuery("SELECT * FROM " + CustomQuestionContract.TABLE_NAME, null);
+			cursor.moveToFirst();
+			values.clear();
+			while (!cursor.isAfterLast()) {
+				cursorHelper.setCursor(cursor);
+				values.put(StatisticContract.PACKAGE, cursorHelper.getString(StatisticContract.PACKAGE));
+				values.put(StatisticContract.CORRECT, cursorHelper.getString(StatisticContract.CORRECT));
+				values.put(StatisticContract.DIFFICULTY, cursorHelper.getInteger(StatisticContract.DIFFICULTY));
+				values.put(StatisticContract.TIME, cursorHelper.getLong(StatisticContract.TIME));
+				newDB.insert(StatisticContract.TABLE_NAME, null, values);
+				cursor.moveToNext();
+				values.clear();
+			}
 		}
 		cursor.close();
 		cursorHelper.destroy();
