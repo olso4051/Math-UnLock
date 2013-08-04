@@ -42,7 +42,7 @@ public class MathQuestion extends Question {
 	int answerPrecision;
 	private Random rand = new Random();
 
-	public MathQuestion(int id, String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
+	public MathQuestion(long id, String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
 			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int answerPrecision, int priority) {
 		super(id, text, correctAnswer, difficulty, priority);
 		this.image = image;

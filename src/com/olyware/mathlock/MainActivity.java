@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
 	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
-	private int ID = 0;
+	private long ID = 0;
 
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];

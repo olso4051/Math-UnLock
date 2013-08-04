@@ -10,10 +10,9 @@ public class EngineerQuestion extends Question {
 	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
 	private Random rand = new Random();
 
-	public EngineerQuestion(int id, String text, String variables, Difficulty difficulty, int priority) {
+	public EngineerQuestion(long id, String text, String variables, Difficulty difficulty, int priority) {
 		super(id, text, variables.substring(0, 1), difficulty, priority);// not the right correct answer at this point
 		this.variables = variables;
-		// Log.d("test", "question id=" + id + "question=" + text);
 		setVariables();
 	}
 

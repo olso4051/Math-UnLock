@@ -4,7 +4,7 @@ public class CustomQuestion extends Question {
 
 	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
 
-	public CustomQuestion(int id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
+	public CustomQuestion(long id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
 			String incorrectAnswer3, Difficulty difficulty, int priority) {
 		super(id, text, correctAnswer, difficulty, priority);
 		this.incorrectAnswer1 = incorrectAnswer1;

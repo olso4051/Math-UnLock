@@ -4,7 +4,7 @@ public class HiqHTriviaQuestion extends Question {
 
 	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
 
-	public HiqHTriviaQuestion(int id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
+	public HiqHTriviaQuestion(long id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
 			String incorrectAnswer3, Difficulty difficulty, int priority) {
 		super(id, text, correctAnswer, difficulty, priority);// not the right correct answer at this point
 		this.incorrectAnswer1 = incorrectAnswer1;

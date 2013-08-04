@@ -4,6 +4,7 @@
 
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
+    <string name="add_question">Add Question!</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
     <string name="cash_it">Cash In!</string>
@@ -75,6 +76,8 @@
     <string name="language_from_default">english</string>
     <string name="language_to_default">spanish</string>
     <string name="later">Not Now</string>
+    <string name="max_length">Maximum length per entry is</string>
+    <string name="max_length2">characters</string>
     <string name="max_tries_default">4</string>
     <string name="max_tries_title">Maximum Attempts</string>
     <string name="max_tries_summary">Unlimited</string>
@@ -134,6 +137,7 @@
     <string name="swipe_unlock">Slide Lock to the Answer</string>
     <string name="test_prep">Custom Packs\nComing Soon!</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="too_long">Question Fields are Too Long!</string>
     <string name="type_default">0</string>
     <string name="type_summary">Static Slide</string>
     <string name="type_title">Unlocking Mechanism</string>
@@ -146,6 +150,7 @@
     <string name="unlock_math">Math Pack</string>
     <string name="unlock_vocab">Vocab Pack</string>
     <string name="update">Update</string>
+    <string name="update_question">Update Question!</string>
     <string name="worth">Question Worth </string>
     <string name="yes">Yes</string>
     

@@ -52,7 +52,6 @@ public class DatabaseManager {
 			values.put(StatisticContract.CORRECT, stat.getCorrect());
 			values.put(QuestionContract.DIFFICULTY, stat.getDifficulty().getValue());
 			values.put(StatisticContract.TIME, stat.getTime());
-			Log.d("test", "we're ok");
 			return db.insert(StatisticContract.TABLE_NAME, null, values);
 		} else
 			return -1;
@@ -68,7 +67,7 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildStats(cursor);
 	}
 
-	public MathQuestion getMathQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
+	public MathQuestion getMathQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
 		cursor = db.query(MathQuestionContract.TABLE_NAME, MathQuestionContract.ALL_COLUMNS, where, null, null, null, null);
@@ -81,7 +80,7 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildMathQuestion(cursor, sum);
 	}
 
-	public List<VocabQuestion> getVocabQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, int notID) {
+	public List<VocabQuestion> getVocabQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, long notID) {
 		// String order = "RANDOM()";// LIMIT " + number;
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
@@ -96,7 +95,7 @@ public class DatabaseManager {
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, String fromLanguage,
-			String toLanguage, int notID) {
+			String toLanguage, long notID) {
 		String fromLanguagePriority = fromLanguage + LanguageQuestionContract.PRIORITIES;
 		String toLanguagePriority = toLanguage + LanguageQuestionContract.PRIORITIES;
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
@@ -114,7 +113,7 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildLanguageQuestions(cursor, fromLanguage, toLanguage, sum, number);
 	}
 
-	public EngineerQuestion getEngineerQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
+	public EngineerQuestion getEngineerQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
 		cursor = db.query(EngineerQuestionContract.TABLE_NAME, EngineerQuestionContract.ALL_COLUMNS, where, null, null, null, null);
@@ -127,7 +126,7 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildEngineerQuestion(cursor, sum);
 	}
 
-	public HiqHTriviaQuestion getHiqHTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
+	public HiqHTriviaQuestion getHiqHTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
 		cursor = db.query(HiqHTriviaQuestionContract.TABLE_NAME, HiqHTriviaQuestionContract.ALL_COLUMNS, where, null, null, null, null);
@@ -140,7 +139,7 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildHiqHTriviaQuestion(cursor, sum);
 	}
 
-	public CustomQuestion getCustomQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, int notID) {
+	public CustomQuestion getCustomQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
 		cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
@@ -166,12 +165,37 @@ public class DatabaseManager {
 		return DatabaseModelFactory.buildAllCustomQuestions(cursor);
 	}
 
-	public int removeCustomQuestion(int ID) {
+	public int removeCustomQuestion(long ID) {
 		String where = BaseContract._ID + " = " + ID;
 		return db.delete(CustomQuestionContract.TABLE_NAME, where, null);
 	}
 
-	public boolean increasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
+	public long addCustomQuestion(String[] question, int difficulty) {
+		ContentValues values = new ContentValues();
+		values.put(QuestionContract.QUESTION_TEXT, question[0]);
+		values.put(QuestionContract.ANSWER_CORRECT, question[1]);
+		values.put(CustomQuestionContract.ANSWER_INCORRECT1, question[2]);
+		values.put(CustomQuestionContract.ANSWER_INCORRECT2, question[3]);
+		values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
+		values.put(QuestionContract.DIFFICULTY, difficulty);
+		values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
+		return db.insert(CustomQuestionContract.TABLE_NAME, null, values);
+	}
+
+	public long updateCustomQuestion(long ID, String[] question, int difficulty) {
+		String where = BaseContract._ID + " = " + ID;
+		ContentValues values = new ContentValues();
+		values.put(QuestionContract.QUESTION_TEXT, question[0]);
+		values.put(QuestionContract.ANSWER_CORRECT, question[1]);
+		values.put(CustomQuestionContract.ANSWER_INCORRECT1, question[2]);
+		values.put(CustomQuestionContract.ANSWER_INCORRECT2, question[3]);
+		values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
+		values.put(QuestionContract.DIFFICULTY, difficulty);
+		values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
+		return db.update(CustomQuestionContract.TABLE_NAME, values, where, null);
+	}
+
+	public boolean increasePriority(String tableName, String fromLanguage, String toLanguage, long ID) {
 		if (db.isOpen()) {
 			if (!(tableName == null)) {
 				// String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
@@ -196,7 +220,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public boolean decreasePriority(String tableName, String fromLanguage, String toLanguage, int ID) {
+	public boolean decreasePriority(String tableName, String fromLanguage, String toLanguage, long ID) {
 		if (db.isOpen()) {
 			if (!(tableName == null)) {
 				// String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
@@ -223,7 +247,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	private int[] getPriority(String tableName, String priority1, String priority2, int ID) {
+	private int[] getPriority(String tableName, String priority1, String priority2, long ID) {
 		// String tableNames[] = MainActivity.getContext().getResources().getStringArray(R.array.table_names);
 		int priority[] = { 0, 0 };
 		if (tableName.equals(MainActivity.getContext().getResources().getString(R.string.language_table))) {

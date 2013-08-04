@@ -5,9 +5,10 @@ public abstract class Question {
 	String text;
 	String correctAnswer;
 	private Difficulty difficulty;
-	int id, priority;
+	long id;
+	int priority;
 
-	public Question(int id, String text, String correctAnswer, Difficulty difficulty, int priority) {
+	public Question(long id, String text, String correctAnswer, Difficulty difficulty, int priority) {
 		super();
 		this.id = id;
 		this.text = text;
@@ -16,7 +17,7 @@ public abstract class Question {
 		this.priority = priority;
 	}
 
-	public int getID() {
+	public long getID() {
 		return id;
 	}
 

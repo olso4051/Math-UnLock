@@ -56,7 +56,7 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		cursorHelper.setCursor(cursor);
-		int id = cursorHelper.getInteger(QuestionContract._ID);
+		long id = cursorHelper.getLong(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String questionImage = cursorHelper.getString(MathQuestionContract.QUESTION_IMAGE);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
@@ -91,7 +91,7 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		cursorHelper.setCursor(cursor);
-		int id = cursorHelper.getInteger(QuestionContract._ID);
+		long id = cursorHelper.getLong(QuestionContract._ID);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
@@ -104,7 +104,7 @@ public class DatabaseModelFactory {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
 				cursorHelper.setCursor(cursor);
-				id = cursorHelper.getInteger(QuestionContract._ID);
+				id = cursorHelper.getLong(QuestionContract._ID);
 				correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
@@ -150,7 +150,7 @@ public class DatabaseModelFactory {
 			questionText = cursorHelper.getString(fromLanguage);
 		} while ((correctAnswer == null) || (questionText == null));
 
-		int id = cursorHelper.getInteger(QuestionContract._ID);
+		long id = cursorHelper.getLong(QuestionContract._ID);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
 		LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
@@ -162,7 +162,7 @@ public class DatabaseModelFactory {
 			while (true) {
 				cursor.moveToPosition(rand.nextInt(cursor.getCount()));
 				cursorHelper.setCursor(cursor);
-				id = cursorHelper.getInteger(QuestionContract._ID);
+				id = cursorHelper.getLong(QuestionContract._ID);
 				correctAnswer = cursorHelper.getString(toLanguage);
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				questionText = cursorHelper.getString(fromLanguage);
@@ -195,7 +195,7 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		cursorHelper.setCursor(cursor);
-		int id = cursorHelper.getInteger(QuestionContract._ID);
+		long id = cursorHelper.getLong(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String variables = cursorHelper.getString(EngineerQuestionContract.VARIABLES);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
@@ -220,7 +220,7 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		cursorHelper.setCursor(cursor);
-		int id = cursorHelper.getInteger(QuestionContract._ID);
+		long id = cursorHelper.getLong(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		String incorrectAnswer1 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT1);
@@ -251,7 +251,7 @@ public class DatabaseModelFactory {
 			cursor.moveToNext();
 		}
 		cursorHelper.setCursor(cursor);
-		int id = cursorHelper.getInteger(QuestionContract._ID);
+		long id = cursorHelper.getLong(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		String incorrectAnswer1 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT1);
@@ -270,11 +270,12 @@ public class DatabaseModelFactory {
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			CursorHelper cursorHelper = new CursorHelper(cursor);
-			int id, priority;
+			long id;
+			int priority;
 			String text, answer, wrong1, wrong2, wrong3;
 			while (!cursor.isAfterLast()) {
 				cursorHelper.setCursor(cursor);
-				id = cursorHelper.getInteger(QuestionContract._ID);
+				id = cursorHelper.getLong(QuestionContract._ID);
 				text = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 				answer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 				wrong1 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT1);

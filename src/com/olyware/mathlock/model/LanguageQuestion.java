@@ -2,7 +2,7 @@ package com.olyware.mathlock.model;
 
 public class LanguageQuestion extends Question {
 
-	public LanguageQuestion(int id, String text, String correctAnswer, Difficulty difficulty, int priority) {
+	public LanguageQuestion(long id, String text, String correctAnswer, Difficulty difficulty, int priority) {
 		super(id, text, correctAnswer, difficulty, priority);
 	}
 

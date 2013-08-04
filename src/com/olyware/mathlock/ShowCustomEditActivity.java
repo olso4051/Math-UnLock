@@ -33,6 +33,7 @@ import com.olyware.mathlock.utils.EZ;
 
 public class ShowCustomEditActivity extends Activity {
 
+	private final int MAX_LENGTH = 50;
 	private LinearLayout layout;
 	private Typefaces fonts;
 	private Clock clock;
@@ -90,12 +91,15 @@ public class ShowCustomEditActivity extends Activity {
 
 	private void resetContentView(int layoutResId, String addButtonText, int position) {
 		final String addButtonTextFinal = addButtonText;
+		final int positionFinal = position;
 		if (clock != null)
 			clock.destroy();
 		if (questionData != null)
 			questionData.clear();
 		if (adapter != null)
 			adapter.clear();
+		if (questions != null)
+			questions.clear();
 
 		setContentView(layoutResId);
 
@@ -182,13 +186,13 @@ public class ShowCustomEditActivity extends Activity {
 			inputs[4] = (EditText) findViewById(R.id.custom_wrong3_edit_text);
 			difficulty = (Spinner) findViewById(R.id.spinner_difficulty);
 			difficulty.setAdapter(adapterDifficulties);
-			if ((position >= 0) && (position < questionData.size())) {
-				inputs[0].setText(questionData.get(position).getQuestionText());
-				String[] answers = questionData.get(position).getAnswers();
+			if ((positionFinal >= 0) && (positionFinal < questionData.size())) {
+				inputs[0].setText(questionData.get(positionFinal).getQuestionText());
+				String[] answers = questionData.get(positionFinal).getAnswers();
 				for (int i = 0; i < answers.length; i++) {
 					inputs[i + 1].setText(answers[i]);
 				}
-				difficulty.setSelection(questionData.get(position).getDifficulty().getValue());
+				difficulty.setSelection(questionData.get(positionFinal).getDifficulty().getValue());
 			} else
 				difficulty.setSelection(0);
 			done = (Button) findViewById(R.id.done);
@@ -200,10 +204,9 @@ public class ShowCustomEditActivity extends Activity {
 						addCustomQuestion(inputs[0].getText().toString(), inputs[1].getText().toString(), inputs[2].getText().toString(),
 								inputs[3].getText().toString(), inputs[4].getText().toString(), difficulty.getSelectedItemPosition());
 					else if (addButtonTextFinal.equals(getString(R.string.update)))
-						updateCustomQuestion(inputs[0].getText().toString(), inputs[1].getText().toString(),
-								inputs[2].getText().toString(), inputs[3].getText().toString(), inputs[4].getText().toString(),
-								difficulty.getSelectedItemPosition());
-					resetContentView(R.layout.activity_custom_edit2, null, -1);
+						updateCustomQuestion(positionFinal, inputs[0].getText().toString(), inputs[1].getText().toString(), inputs[2]
+								.getText().toString(), inputs[3].getText().toString(), inputs[4].getText().toString(), difficulty
+								.getSelectedItemPosition());
 				}
 			});
 			cancel = (Button) findViewById(R.id.cancel);
@@ -239,10 +242,87 @@ public class ShowCustomEditActivity extends Activity {
 	}
 
 	private void addCustomQuestion(String q, String a, String w1, String w2, String w3, int d) {
-
+		final String[] question = new String[] { q, a, w1, w2, w3 };
+		boolean tooLong[] = new boolean[] { false, false, false, false, false };
+		for (int i = 0; i < question.length; i++) {
+			if (question[i].length() > MAX_LENGTH)
+				tooLong[i] = true;
+		}
+		if (tooLong[0] || tooLong[1] || tooLong[2] || tooLong[3] || tooLong[4]) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(R.string.too_long);
+			builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// Do nothing
+				}
+			});
+			builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// Do nothing
+				}
+			});
+			builder.create().show();
+		} else {
+			final int difficulty = d;
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(R.string.add_question);
+			builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dbManager.addCustomQuestion(question, difficulty);
+					resetContentView(R.layout.activity_custom_edit2, null, -1);
+				}
+			});
+			builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// Do nothing
+				}
+			});
+			builder.create().show();
+		}
 	}
 
-	private void updateCustomQuestion(String q, String a, String w1, String w2, String w3, int d) {
-
+	private void updateCustomQuestion(int position, String q, String a, String w1, String w2, String w3, int d) {
+		final int posFinal = position;
+		if ((position >= 0) && (position < questionData.size())) {
+			final String[] question = new String[] { q, a, w1, w2, w3 };
+			boolean tooLong[] = new boolean[] { false, false, false, false, false };
+			for (int i = 0; i < question.length; i++) {
+				if (question[i].length() > MAX_LENGTH)
+					tooLong[i] = true;
+			}
+			if (tooLong[0] || tooLong[1] || tooLong[2] || tooLong[3] || tooLong[4]) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.too_long);
+				builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
+				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// Do nothing
+					}
+				});
+				builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// Do nothing
+					}
+				});
+				builder.create().show();
+			} else {
+				final int difficulty = d;
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.update_question);
+				builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dbManager.updateCustomQuestion(questionData.get(posFinal).getID(), question, difficulty);
+						resetContentView(R.layout.activity_custom_edit2, null, -1);
+					}
+				});
+				builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// Do nothing
+					}
+				});
+				builder.create().show();
+			}
+		}
 	}
 }

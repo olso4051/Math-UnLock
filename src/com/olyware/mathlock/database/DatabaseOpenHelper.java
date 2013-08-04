@@ -144,7 +144,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 				set = set + ", " + priorities[a] + " = " + cursorHelper.getInteger(priorities[a]);
 			}
 			newDB.execSQL("UPDATE " + LanguageQuestionContract.TABLE_NAME + " SET " + set + " WHERE " + BaseContract._ID + "="
-					+ cursorHelper.getInteger(BaseContract._ID));
+					+ cursorHelper.getLong(BaseContract._ID));
 			cursor.moveToNext();
 		}
 
