@@ -1,11 +1,15 @@
 <resources>
 
     <string name="app_name">HiqH</string>
-    
+
+    <string name="add">Add</string>
+    <string name="add_new">New Question</string>
     <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
     <string name="cash_it">Cash In!</string>
     <string name="clock">10:15pm</string>
     <string name="coins">Coins</string>
+    <string name="copy">Copy</string>
     <string name="cost_small">$1</string>
     <string name="cost_large">$2</string>
     <string name="cost_all">$3</string>
@@ -15,6 +19,8 @@
     <string name="custom_wrong_text">Incorrect Answer</string>
     <string name="date">Monday\nJanuary 1</string>
     <string name="default_money">0</string>
+    <string name="delete">Delete</string>
+    <string name="delete_question">Delete Question!</string>
     <string name="difficulty">Difficulty</string>
     <string name="difficulty_default">0</string>
     <string name="difficulty_increased">Difficulty Increased!</string>
@@ -22,6 +28,7 @@
     <string name="difficulty_min">Min Difficulty</string>
     <string name="difficulty_summary">Very Easy</string>
     <string name="dynamic_slide">Dynamic Slide</string>
+    <string name="edit">Edit</string>
     <string name="egg_found">Easter Egg Found Worth </string>
     <string name="egg_message">Egg worth = </string>
     <string name="egg_title">Easter Egg Found!</string>
@@ -94,6 +101,7 @@
     <string name="purchase_package_message">Are you sure you want to unlock this package?</string>
     <string name="purchased">Unlocked</string>
     <string name="quiz_mode">Quiz Mode?</string>
+    <string name="question">Question</string>
     <string name="rate">Rate HiqH</string>
     <string name="rate_title">Rate, Comment, or Share HiqH!</string>
     <string name="rotating_slide">Rotating Slide</string>
@@ -117,6 +125,7 @@
     <string name="sound">Sound On</string>
     <string name="store">Store</string>
     <string name="sure">Sure?</string>
+    <string name="sure2">Are you Sure?</string>
     <string name="swipe_exit">Touch Here to Exit</string>
     <string name="swipe_here">Slide to Here</string>
     <string name="swipe_new">Tap for new Question</string>
@@ -136,8 +145,8 @@
     <string name="unlock_language">Language Pack</string>
     <string name="unlock_math">Math Pack</string>
     <string name="unlock_vocab">Vocab Pack</string>
+    <string name="update">Update</string>
     <string name="worth">Question Worth </string>
     <string name="yes">Yes</string>
-    
     
 </resources>

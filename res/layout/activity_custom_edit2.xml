@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <LinearLayout 
+	   	android:layout_width="match_parent"
+       	android:layout_height="wrap_content"
+       	android:orientation="horizontal" >
+       	<ImageButton
+		    android:id="@+id/back"
+		    android:contentDescription="@string/back"
+		    android:enabled="true"
+		    android:layout_gravity="center_vertical"
+		    android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:background="@drawable/back"/>
+    	<TextView
+            android:id="@+id/clock"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:maxLines="2"
+            android:text="@string/clock"
+            android:textColor="#FFF"
+            android:textSize="40sp" />
+        <TextView
+            android:id="@+id/money"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/coins"
+            android:gravity="center_vertical|right"
+            android:text="@string/default_money"
+            android:textColor="#FFF"
+            android:textSize="40sp" />
+	</LinearLayout>
+	<ListView 
+	    android:id="@+id/list1"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:divider="#ff0099cc"
+	    android:dividerHeight="3dp" />
+</LinearLayout>

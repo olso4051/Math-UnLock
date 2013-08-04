@@ -760,7 +760,7 @@ public class MainActivity extends Activity {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
 				updateStats(true);
 				joystick.pauseSelection();
-				launchHomeScreen(10);
+				launchHomeScreen(100);
 			} else {
 				displayCorrectOrNot(answerLoc, s, "Wrong\n", false, false);
 				updateStats(false);

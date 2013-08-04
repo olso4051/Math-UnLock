@@ -12,7 +12,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
@@ -35,6 +34,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "mathunlock.db";
 	private static final int DATABASE_VERSION = 2;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
+	private static int DATABASE_OLD_VERSION;
 
 	private Context context;
 	private static DatabaseOpenHelper instance = null;
@@ -177,18 +177,21 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		}
 
 		// add custom question into the new database (if it existed before)
-		Log.d("test", "tableInt = " + DATABASE_VERSION + "table exists = " + (DATABASE_VERSION > 1));
-		if (DATABASE_VERSION > 1) {
-			cursor = oldDB.rawQuery("SELECT * FROM " + CustomQuestionContract.TABLE_NAME, null);
+		if (DATABASE_OLD_VERSION > 1) {
+			where = QuestionContract.DIFFICULTY + " >= " + 0;
+			cursor = oldDB.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 			cursor.moveToFirst();
 			values.clear();
 			while (!cursor.isAfterLast()) {
 				cursorHelper.setCursor(cursor);
-				values.put(StatisticContract.PACKAGE, cursorHelper.getString(StatisticContract.PACKAGE));
-				values.put(StatisticContract.CORRECT, cursorHelper.getString(StatisticContract.CORRECT));
-				values.put(StatisticContract.DIFFICULTY, cursorHelper.getInteger(StatisticContract.DIFFICULTY));
-				values.put(StatisticContract.TIME, cursorHelper.getLong(StatisticContract.TIME));
-				newDB.insert(StatisticContract.TABLE_NAME, null, values);
+				values.put(QuestionContract.QUESTION_TEXT, cursorHelper.getString(QuestionContract.QUESTION_TEXT));
+				values.put(QuestionContract.ANSWER_CORRECT, cursorHelper.getString(QuestionContract.ANSWER_CORRECT));
+				values.put(CustomQuestionContract.ANSWER_INCORRECT1, cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT1));
+				values.put(CustomQuestionContract.ANSWER_INCORRECT2, cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT2));
+				values.put(CustomQuestionContract.ANSWER_INCORRECT3, cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT3));
+				values.put(QuestionContract.DIFFICULTY, cursorHelper.getInteger(QuestionContract.DIFFICULTY));
+				values.put(QuestionContract.PRIORITY, cursorHelper.getInteger(QuestionContract.PRIORITY));
+				newDB.insert(CustomQuestionContract.TABLE_NAME, null, values);
 				cursor.moveToNext();
 				values.clear();
 			}
@@ -205,6 +208,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		try {
 			SQLiteDatabase database = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READONLY);
 			if (database != null) {
+				DATABASE_OLD_VERSION = database.getVersion();
 				if (database.needUpgrade(DATABASE_VERSION)) {
 					database.close();
 					return 2;
@@ -213,8 +217,10 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 					return 1;
 				}
 			}
+			DATABASE_OLD_VERSION = 0;
 			return 0;
 		} catch (SQLiteException e) {
+			DATABASE_OLD_VERSION = 0;
 			return 0;
 		}
 	}
