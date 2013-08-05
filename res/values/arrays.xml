@@ -162,7 +162,7 @@
         <item>5000</item>
 		<item>1500</item>
 		<item>1500</item>
-		<item>500</item>
+		<item>1000</item>
         <item>1000</item>
         <item>1000</item>
     </integer-array>
@@ -208,10 +208,9 @@
         <item>Learn a new language by translating the thousands of words and sentences in 17 different languages</item>
 		<item>Complete science and engineering related equations to keep fresh</item>
 		<item>Fun trivia questions</item>
-		<item>Build your own questions, do whatever you want its up to you!</item>
+		<item>Build your own questions, study for a test, or whatever you want, it\'s up to you!</item>
 		<item>Answers rotate faster as you answer questions correctly</item>
 		<item>Totally different way of swiping to answer the questions</item>
-		<item>Create your own questions, study for a test, It\'s up to you!</item>
     </string-array>
     
     <string-array name="egg_keys">

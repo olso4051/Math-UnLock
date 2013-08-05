@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +35,7 @@ import com.olyware.mathlock.utils.EZ;
 public class ShowCustomEditActivity extends Activity {
 
 	private final int MAX_LENGTH = 50;
+	private int layoutID;
 	private LinearLayout layout;
 	private Typefaces fonts;
 	private Clock clock;
@@ -89,9 +91,18 @@ public class ShowCustomEditActivity extends Activity {
 		super.onDestroy();
 	}
 
+	@Override
+	public void onBackPressed() {
+		if (layoutID == R.layout.activity_custom_edit2)
+			super.onBackPressed();
+		else
+			resetContentView(R.layout.activity_custom_edit2, null, -1);
+	}
+
 	private void resetContentView(int layoutResId, String addButtonText, int position) {
-		final String addButtonTextFinal = addButtonText;
 		final int positionFinal = position;
+		layoutID = layoutResId;
+		final String addButtonTextFinal = addButtonText;
 		if (clock != null)
 			clock.destroy();
 		if (questionData != null)
@@ -113,7 +124,10 @@ public class ShowCustomEditActivity extends Activity {
 		back = (ImageButton) findViewById(R.id.back);
 		back.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				finish();
+				if (layoutID == R.layout.activity_custom_edit2)
+					finish();
+				else
+					resetContentView(R.layout.activity_custom_edit2, null, -1);
 			}
 		});
 
@@ -184,6 +198,18 @@ public class ShowCustomEditActivity extends Activity {
 			inputs[2] = (EditText) findViewById(R.id.custom_wrong1_edit_text);
 			inputs[3] = (EditText) findViewById(R.id.custom_wrong2_edit_text);
 			inputs[4] = (EditText) findViewById(R.id.custom_wrong3_edit_text);
+			for (int i = 0; i < inputs.length; i++) {
+				final int a = i;
+				inputs[a].setOnFocusChangeListener(new View.OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (inputs[a].getText().toString().length() > MAX_LENGTH)
+							inputs[a].setTextColor(Color.RED);
+						else
+							inputs[a].setTextColor(Color.WHITE);
+					}
+				});
+			}
 			difficulty = (Spinner) findViewById(R.id.spinner_difficulty);
 			difficulty.setAdapter(adapterDifficulties);
 			if ((positionFinal >= 0) && (positionFinal < questionData.size())) {
@@ -243,27 +269,7 @@ public class ShowCustomEditActivity extends Activity {
 
 	private void addCustomQuestion(String q, String a, String w1, String w2, String w3, int d) {
 		final String[] question = new String[] { q, a, w1, w2, w3 };
-		boolean tooLong[] = new boolean[] { false, false, false, false, false };
-		for (int i = 0; i < question.length; i++) {
-			if (question[i].length() > MAX_LENGTH)
-				tooLong[i] = true;
-		}
-		if (tooLong[0] || tooLong[1] || tooLong[2] || tooLong[3] || tooLong[4]) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.too_long);
-			builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// Do nothing
-				}
-			});
-			builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// Do nothing
-				}
-			});
-			builder.create().show();
-		} else {
+		if (testQuestion(question)) {
 			final int difficulty = d;
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.add_question);
@@ -286,27 +292,7 @@ public class ShowCustomEditActivity extends Activity {
 		final int posFinal = position;
 		if ((position >= 0) && (position < questionData.size())) {
 			final String[] question = new String[] { q, a, w1, w2, w3 };
-			boolean tooLong[] = new boolean[] { false, false, false, false, false };
-			for (int i = 0; i < question.length; i++) {
-				if (question[i].length() > MAX_LENGTH)
-					tooLong[i] = true;
-			}
-			if (tooLong[0] || tooLong[1] || tooLong[2] || tooLong[3] || tooLong[4]) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(R.string.too_long);
-				builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
-				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						// Do nothing
-					}
-				});
-				builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						// Do nothing
-					}
-				});
-				builder.create().show();
-			} else {
+			if (testQuestion(question)) {
 				final int difficulty = d;
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.update_question);
@@ -324,5 +310,43 @@ public class ShowCustomEditActivity extends Activity {
 				builder.create().show();
 			}
 		}
+	}
+
+	private boolean testQuestion(String[] question) {
+		boolean tooLongShort[] = new boolean[] { false, false, false, false, false };
+		boolean same = false;
+		List<String> q = new ArrayList<String>();
+		for (int i = 0; i < question.length; i++) {
+			if ((question[i].length() > MAX_LENGTH) || (question[i].length() == 0))
+				tooLongShort[i] = true;
+			if (i > 0)
+				if (q.contains(question[i]))
+					same = true;
+			q.add(question[i]);
+		}
+		if (tooLongShort[0] || tooLongShort[1] || tooLongShort[2] || tooLongShort[3] || tooLongShort[4]) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(R.string.input_error);
+			builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// Do nothing
+				}
+			});
+			builder.create().show();
+			return false;
+		} else if (same) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(R.string.input_error);
+			builder.setMessage(getString(R.string.same_entries));
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// Do nothing
+				}
+			});
+			builder.create().show();
+			return false;
+		}
+		return true;
 	}
 }

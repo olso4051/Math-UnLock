@@ -21,6 +21,23 @@
 	        android:entries="@array/difficulty_entries"
 	        android:entryValues="@array/difficulty_values"
 	        android:defaultValue="@string/difficulty_default" />
+        <ListPreference
+      		android:key="max_tries"
+      		android:title="@string/max_tries_title"
+      		android:summary="@string/max_tries_summary"
+      		android:dialogTitle="@string/max_tries_title"
+	        android:entries="@array/max_tries_entries"
+	        android:entryValues="@array/max_tries_values"
+	        android:defaultValue="@string/max_tries_default" />
+        <ListPreference
+      		android:key="type"
+      		android:enabled="false"
+      		android:title="@string/type_title"
+      		android:summary="@string/type_default"
+      		android:dialogTitle="@string/type_title"
+	        android:entries="@array/type_entries012"
+	        android:entryValues="@array/type_values012"
+	        android:defaultValue="@string/type_default" />
         <PreferenceScreen
 	        android:key="general_settings"
 	        android:title="@string/settings_general"
@@ -30,23 +47,6 @@
 		        android:title="@string/enable_lockscreen"
 		        android:summary="@string/enable_lockscreen_summary"
 		        android:defaultValue="true"/>
-	        <ListPreference
-	      		android:key="max_tries"
-	      		android:title="@string/max_tries_title"
-	      		android:summary="@string/max_tries_summary"
-	      		android:dialogTitle="@string/max_tries_title"
-		        android:entries="@array/max_tries_entries"
-		        android:entryValues="@array/max_tries_values"
-		        android:defaultValue="@string/max_tries_default" />
-	        <ListPreference
-	      		android:key="type"
-	      		android:enabled="false"
-	      		android:title="@string/type_title"
-	      		android:summary="@string/type_default"
-	      		android:dialogTitle="@string/type_title"
-		        android:entries="@array/type_entries012"
-		        android:entryValues="@array/type_values012"
-		        android:defaultValue="@string/type_default" />
 	        <CheckBoxPreference
 		        android:key="vibration"
 		        android:title="@string/enable_vibration"
@@ -136,12 +136,12 @@
 			        android:title="@string/enable"
 			        android:summary="@string/enable_custom_summary"
 			        android:defaultValue="false"/>
+		        <Preference android:title="@string/custom_pack_edit"
+				    android:enabled="false"
+				    android:key="settings_custom2" >
+				    <intent android:action="com.olyware.mathlock.ShowCustomEditActivity"/>
+				</Preference>
 			</PreferenceCategory>
 		</PreferenceScreen>
-		<Preference android:title="@string/custom_pack_edit"
-		    android:enabled="false"
-		    android:key="settings_custom2" >
-		    <intent android:action="com.olyware.mathlock.ShowCustomEditActivity"/>
-		</Preference>
 	</PreferenceCategory>
 </PreferenceScreen>
