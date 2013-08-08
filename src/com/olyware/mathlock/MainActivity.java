@@ -11,6 +11,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -20,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -97,7 +101,7 @@ public class MainActivity extends Activity {
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
-	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats;
+	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats, sharedPrefsApps;
 	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
 
 	private Handler mHandler, timerHandler;
@@ -112,6 +116,8 @@ public class MainActivity extends Activity {
 	private IabHelper mHelper;
 	private IabHelper.QueryInventoryFinishedListener mQueryFinishedListener;
 	private IabHelper.OnConsumeFinishedListener mConsumeFinishedListener;
+
+	private List<ApplicationInfo> apps;
 
 	public static Context getContext() {
 		return ctx;
@@ -233,8 +239,8 @@ public class MainActivity extends Activity {
 		joystick = (JoystickView) findViewById(R.id.joystick);
 		joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 			@Override
-			public void OnSelect(int s) {
-				JoystickSelected(s);
+			public void OnSelect(int s, boolean vibrate, int Extra) {
+				JoystickSelected(s, vibrate, Extra);
 			}
 		});
 		quizMode = joystick.setQuizMode(!locked);
@@ -267,6 +273,7 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacks[i] = false;
 
+		setApps();
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
 		getEnabledPackages();
@@ -422,6 +429,114 @@ public class MainActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		joystick.showStartAnimation(0, 3000);
 		return false;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode == RESULT_OK) {
+			if (requestCode == R.id.REQUEST_PICK_APP) {
+				// sharedPrefsApps = getSharedPreferences("Apps", 0);
+				sharedPrefsApps = getSharedPreferences("Apps", 0);
+				PackageManager pm = getPackageManager();
+				List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+				for (ApplicationInfo pack : packages) {
+					Intent test = pm.getLaunchIntentForPackage(pack.packageName);
+					if (test != null) {
+						if (data.getComponent().equals(test.getComponent())) {
+							// sharedPrefsApps.edit().putString("app" + apps.size(), "" + data.getComponent()).commit();
+							sharedPrefsApps.edit().putInt("size", apps.size() + 1).putString("app" + apps.size(), pack.packageName)
+									.commit();
+							apps.add(pack);
+							joystick.addApp(pack.loadIcon(pm));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*private void setApps() {
+		sharedPrefsApps = getSharedPreferences("Apps", 0);
+		int i = 0;
+		List<String> appComponents = new ArrayList<String>();
+		while (sharedPrefsApps.getString("app" + i, null) != null) {
+			appComponents.add(sharedPrefsApps.getString("app" + i, null));
+			i++;
+		}
+		if (apps != null)
+			apps.clear();
+		else
+			apps = new ArrayList<ApplicationInfo>();
+
+		if (i > 0) {
+			PackageManager pm = getPackageManager();
+			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+			List<Integer> locMemoryPacks = new ArrayList<Integer>();
+			List<Integer> locInstalledPacks = new ArrayList<Integer>();
+			for (int a = 0; a < packages.size(); a++) {
+				ApplicationInfo pack = packages.get(a);
+				Intent test = pm.getLaunchIntentForPackage(pack.packageName);
+				if (test != null) {
+					if (appComponents.contains("" + test.getComponent())) {
+						locMemoryPacks.add(appComponents.indexOf("" + test.getComponent()));
+						locInstalledPacks.add(a);
+						joystick.addApp(pack.loadIcon(pm));
+					}
+				}
+			}
+			for (int a = 0; a < i; a++) {
+				apps.add(packages.get(locInstalledPacks.get(locMemoryPacks.indexOf(a))));
+			}
+		}
+	}*/
+
+	private void setApps() {
+		sharedPrefsApps = getSharedPreferences("Apps", 0);
+		if (apps != null)
+			apps.clear();
+		else
+			apps = new ArrayList<ApplicationInfo>();
+
+		int i = 0;
+		PackageManager pm = getPackageManager();
+		while (sharedPrefsApps.getString("app" + i, null) != null) {
+			try {
+				apps.add(pm.getApplicationInfo(sharedPrefsApps.getString("app" + i, null), PackageManager.GET_META_DATA));
+				joystick.addApp(apps.get(i).loadIcon(pm));
+				i++;
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+				removeAppFromPrefs(i);
+				sharedPrefsApps = getSharedPreferences("Apps", 0);
+			}
+		}
+	}
+
+	private void removeAppFromAll(int loc) {
+		if (apps != null) {
+			if (loc < apps.size()) {
+				apps.remove(loc);
+				// joystick.removeApp(loc);
+				sharedPrefsApps = getSharedPreferences("Apps", 0);
+				SharedPreferences.Editor editorApps = sharedPrefsApps.edit();
+				for (int i = loc; i < apps.size(); i++) {
+					editorApps.putString("app" + i, apps.get(i).packageName);
+				}
+				editorApps.putString("app" + apps.size(), null).commit();
+			}
+		}
+	}
+
+	private void removeAppFromPrefs(int loc) {
+		sharedPrefsApps = getSharedPreferences("Apps", 0);
+		if (sharedPrefsApps.getString("app" + loc, null) != null) {
+			SharedPreferences.Editor editorApps = sharedPrefsApps.edit();
+			while (sharedPrefsApps.getString("app" + loc, null) != null) {
+				editorApps.putString("app" + loc, sharedPrefsApps.getString("app" + (loc + 1), null));
+				loc++;
+			}
+			editorApps.putString("app" + loc, null).commit();
+		}
 	}
 
 	private void launchHomeScreen(int delay) {
@@ -732,9 +847,9 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void JoystickSelected(int s) {
+	private void JoystickSelected(int s, boolean vibrate, int Extra) {
 		dialogOn = false;
-		if ((sharedPrefs.getBoolean("vibration", true) && (s != 10))
+		if ((sharedPrefs.getBoolean("vibration", true) && vibrate)
 				&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
 			vib.vibrate(50);	// vibrate for 50ms
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
@@ -813,12 +928,27 @@ public class MainActivity extends Activity {
 		case 10:	// missed the lock button
 			if (getSharedPreferences("Stats", 0).getLong("totalTime", 0) == 0) {
 				displayHints(0, true);
-				// dialogOn = true;
 			}
+			break;
 		case 11:	// quickUnlock activated
 			resetQuestionWorth(0);
 			answerView.setQuickUnlock(true);
+			joystick.moveCorrect(1);
+			answerLoc = 1;
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
+			break;
+		case 12:	// add app was selected
+			selectApp();
+			break;
+		case 13:	// app was selected
+			// getPackageManager().getActivityIcon(activityName)
+			Log.d("test", "extra = " + Extra);
+			startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
+			// finish();
+			break;
+		case 14:	// remove app was selected
+			removeAppFromAll(Extra);
+			break;
 		}
 	}
 
@@ -1008,5 +1138,17 @@ public class MainActivity extends Activity {
 	private void updateMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+	}
+
+	private void selectApp() {
+		// List<ApplicationInfo> packages = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+		// packages.get(0).loadIcon(pm);//this gets a drawable
+		// packages.get(0).packageName;//this gets the package name
+		// pm.getLaunchIntentForPackage(packages.get(0).packageName);//this gets an intent to start activity
+		Intent mainIntent = new Intent(android.content.Intent.ACTION_MAIN);
+		mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+		Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
+		pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
+		startActivityForResult(pickIntent, R.id.REQUEST_PICK_APP);
 	}
 }
