@@ -273,7 +273,6 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacks[i] = false;
 
-		setApps();
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
 		getEnabledPackages();
@@ -863,22 +862,26 @@ public class MainActivity extends Activity {
 				this.finish();
 			} else if (attempts >= maxAttempts && !(answerLoc == s) && !quizMode && maxAttempts < 4) {
 				displayCorrectOrNot(answerLoc, s, "Too Many Wrong\n", false, false);
-				updateStats(false);
+				if (Extra == 0)
+					updateStats(false);
 				joystick.pauseSelection();
-				launchHomeScreen(3000);
+				launchHomeScreen(1500);
 			} else if ((answerLoc == s) && quizMode) {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
-				updateStats(true);
+				if (Extra == 0)
+					updateStats(true);
 				joystick.pauseSelection();
 				setProblemAndAnswer(500);
 			} else if ((answerLoc == s) && !quizMode) {
 				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
-				updateStats(true);
+				if (Extra == 0)
+					updateStats(true);
 				joystick.pauseSelection();
 				launchHomeScreen(100);
 			} else {
 				displayCorrectOrNot(answerLoc, s, "Wrong\n", false, false);
-				updateStats(false);
+				if (Extra == 0)
+					updateStats(false);
 				if (!quizMode)
 					attempts++;
 				joystick.setWrongGuess();
@@ -931,6 +934,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 11:	// quickUnlock activated
+			setApps();
 			resetQuestionWorth(0);
 			answerView.setQuickUnlock(true);
 			joystick.moveCorrect(1);
@@ -944,7 +948,7 @@ public class MainActivity extends Activity {
 			// getPackageManager().getActivityIcon(activityName)
 			Log.d("test", "extra = " + Extra);
 			startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
-			// finish();
+			finish();
 			break;
 		case 14:	// remove app was selected
 			removeAppFromAll(Extra);

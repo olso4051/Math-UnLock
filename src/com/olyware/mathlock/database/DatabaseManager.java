@@ -40,9 +40,11 @@ public class DatabaseManager {
 	}
 
 	public void destroy() {
-		db.close();
-		cursor.close();
-		dbHelper.close();
+		if (db.isOpen()) {
+			db.close();
+			cursor.close();
+			dbHelper.close();
+		}
 	}
 
 	public long addStat(Statistic stat) {
