@@ -263,6 +263,7 @@ public class MainActivity extends Activity {
 			}
 		};
 
+		apps = new ArrayList<ApplicationInfo>();
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -291,6 +292,7 @@ public class MainActivity extends Activity {
 	protected void onStop() {
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		joystick.removeCallbacks();
 		super.onStop();
 	}
 
@@ -378,6 +380,8 @@ public class MainActivity extends Activity {
 			fromShare = false;
 		}
 
+		joystick.startAnimations();
+
 		// save money into shared preferences
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 	}
@@ -393,6 +397,7 @@ public class MainActivity extends Activity {
 		if (!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 			editorPrefsMoney.putBoolean("dontShowLastTime", dontShow);
 		editorPrefsMoney.commit();
+		joystick.removeCallbacks();
 		super.onPause();
 	}
 
@@ -434,7 +439,6 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK) {
 			if (requestCode == R.id.REQUEST_PICK_APP) {
-				// sharedPrefsApps = getSharedPreferences("Apps", 0);
 				sharedPrefsApps = getSharedPreferences("Apps", 0);
 				PackageManager pm = getPackageManager();
 				List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
@@ -442,7 +446,6 @@ public class MainActivity extends Activity {
 					Intent test = pm.getLaunchIntentForPackage(pack.packageName);
 					if (test != null) {
 						if (data.getComponent().equals(test.getComponent())) {
-							// sharedPrefsApps.edit().putString("app" + apps.size(), "" + data.getComponent()).commit();
 							sharedPrefsApps.edit().putInt("size", apps.size() + 1).putString("app" + apps.size(), pack.packageName)
 									.commit();
 							apps.add(pack);
@@ -454,59 +457,24 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/*private void setApps() {
-		sharedPrefsApps = getSharedPreferences("Apps", 0);
-		int i = 0;
-		List<String> appComponents = new ArrayList<String>();
-		while (sharedPrefsApps.getString("app" + i, null) != null) {
-			appComponents.add(sharedPrefsApps.getString("app" + i, null));
-			i++;
-		}
-		if (apps != null)
-			apps.clear();
-		else
-			apps = new ArrayList<ApplicationInfo>();
-
-		if (i > 0) {
-			PackageManager pm = getPackageManager();
-			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-			List<Integer> locMemoryPacks = new ArrayList<Integer>();
-			List<Integer> locInstalledPacks = new ArrayList<Integer>();
-			for (int a = 0; a < packages.size(); a++) {
-				ApplicationInfo pack = packages.get(a);
-				Intent test = pm.getLaunchIntentForPackage(pack.packageName);
-				if (test != null) {
-					if (appComponents.contains("" + test.getComponent())) {
-						locMemoryPacks.add(appComponents.indexOf("" + test.getComponent()));
-						locInstalledPacks.add(a);
-						joystick.addApp(pack.loadIcon(pm));
-					}
-				}
-			}
-			for (int a = 0; a < i; a++) {
-				apps.add(packages.get(locInstalledPacks.get(locMemoryPacks.indexOf(a))));
-			}
-		}
-	}*/
-
 	private void setApps() {
 		sharedPrefsApps = getSharedPreferences("Apps", 0);
-		if (apps != null)
+		if (sharedPrefsApps.getInt("size", 0) != apps.size()) {
 			apps.clear();
-		else
-			apps = new ArrayList<ApplicationInfo>();
+			joystick.clearApps();
 
-		int i = 0;
-		PackageManager pm = getPackageManager();
-		while (sharedPrefsApps.getString("app" + i, null) != null) {
-			try {
-				apps.add(pm.getApplicationInfo(sharedPrefsApps.getString("app" + i, null), PackageManager.GET_META_DATA));
-				joystick.addApp(apps.get(i).loadIcon(pm));
-				i++;
-			} catch (NameNotFoundException e) {
-				e.printStackTrace();
-				removeAppFromPrefs(i);
-				sharedPrefsApps = getSharedPreferences("Apps", 0);
+			int i = 0;
+			PackageManager pm = getPackageManager();
+			while (sharedPrefsApps.getString("app" + i, null) != null) {
+				try {
+					apps.add(pm.getApplicationInfo(sharedPrefsApps.getString("app" + i, null), PackageManager.GET_META_DATA));
+					joystick.addApp(apps.get(i).loadIcon(pm));
+					i++;
+				} catch (NameNotFoundException e) {
+					e.printStackTrace();
+					removeAppFromPrefs(i);
+					sharedPrefsApps = getSharedPreferences("Apps", 0);
+				}
 			}
 		}
 	}
@@ -515,26 +483,26 @@ public class MainActivity extends Activity {
 		if (apps != null) {
 			if (loc < apps.size()) {
 				apps.remove(loc);
-				// joystick.removeApp(loc);
 				sharedPrefsApps = getSharedPreferences("Apps", 0);
 				SharedPreferences.Editor editorApps = sharedPrefsApps.edit();
 				for (int i = loc; i < apps.size(); i++) {
 					editorApps.putString("app" + i, apps.get(i).packageName);
 				}
-				editorApps.putString("app" + apps.size(), null).commit();
+				editorApps.putString("app" + apps.size(), null).putInt("size", apps.size()).commit();
 			}
 		}
 	}
 
 	private void removeAppFromPrefs(int loc) {
 		sharedPrefsApps = getSharedPreferences("Apps", 0);
+		int newSize = sharedPrefsApps.getInt("size", 0) - 1;
 		if (sharedPrefsApps.getString("app" + loc, null) != null) {
 			SharedPreferences.Editor editorApps = sharedPrefsApps.edit();
 			while (sharedPrefsApps.getString("app" + loc, null) != null) {
 				editorApps.putString("app" + loc, sharedPrefsApps.getString("app" + (loc + 1), null));
 				loc++;
 			}
-			editorApps.putString("app" + loc, null).commit();
+			editorApps.putString("app" + loc, null).putInt("size", newSize).commit();
 		}
 	}
 
