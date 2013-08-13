@@ -210,7 +210,7 @@
 	<string name="vocab">Vocab</string>
     <string name="language">Language</string>
 	<string name="engineer">Engineer</string>
-	<string name="hiqh_trivia">HiqH Trivia</string>
+	<string name="hiqh_trivia">Hiq Trivia</string>
 	<string name="custom">Custom</string>
     <string-array name="display_packages">
         <item>@string/all</item>
