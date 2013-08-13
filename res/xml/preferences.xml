@@ -47,6 +47,15 @@
 		        android:title="@string/enable_lockscreen"
 		        android:summary="@string/enable_lockscreen_summary"
 		        android:defaultValue="true"/>
+	        <ListPreference
+		        android:key="lockscreen2"
+		        android:dependency="lockscreen"
+		        android:title="@string/enable_lockscreen2"
+		        android:summary="@string/enable_lockscreen2_summary"
+		        android:dialogTitle="@string/enable_lockscreen2"
+		        android:entries="@array/lockscreen2_entries"
+		        android:entryValues="@array/lockscreen2_values"
+		        android:defaultValue="@string/default_entry" />
 	        <CheckBoxPreference
 		        android:key="vibration"
 		        android:title="@string/enable_vibration"

@@ -904,9 +904,17 @@ public class MainActivity extends Activity {
 		case 11:	// quickUnlock activated
 			setApps();
 			resetQuestionWorth(0);
-			answerView.setQuickUnlock(true);
-			joystick.moveCorrect(1);
-			answerLoc = 1;
+			switch (Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))) {
+			case 0:
+			case 1:
+				answerLoc = 2;
+				break;
+			case 2:
+				answerLoc = 0;
+				break;
+			}
+			answerView.setQuickUnlock(true, answerLoc);
+			joystick.moveCorrect(answerLoc);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
 			break;
 		case 12:	// add app was selected

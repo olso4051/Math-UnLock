@@ -16,7 +16,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
 	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
-	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff;
+	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff, lockscreen2;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -47,6 +47,10 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Preference Pref_max_tries = findPreference("max_tries");
 		String summary = ((sharedPrefs.getString("max_tries", "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString("max_tries", "1")));
 		Pref_max_tries.setSummary(summary);
+
+		// Set summary of timeout period
+		lockscreen2 = (ListPreference) findPreference("lockscreen2");
+		lockscreen2.setSummary(lockscreen2.getEntry());
 
 		// Set the available entries and values in the "type" setting
 		ListPreference Pref_type = (ListPreference) findPreference("type");
@@ -115,6 +119,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			if (toLanguage.findIndexOfValue(toLanguage.getValue()) == fromOldValueIndex)
 				fromLanguage.setValueIndex(toOldValueIndex);
 			setLanguageSummaries();
+		} else if (key.equals("lockscreen2")) {
+			lockscreen2.setSummary(lockscreen2.getEntry());
 		}
 	}
 

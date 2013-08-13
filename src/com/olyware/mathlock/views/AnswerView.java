@@ -15,8 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.olyware.mathlock.ui.Typefaces;
-
 public class AnswerView extends View {
 
 	private AnswerReadyListener listener;
@@ -40,7 +38,6 @@ public class AnswerView extends View {
 	private boolean equations = false, quickUnlock = false;
 
 	private Context ctx;
-	private Typeface font;
 	private TextPaint TextLabelPaintR, TextAnswerPaintL, correctAnswerPaint, correctLabelPaint, wrongAnswerPaint, wrongLabelPaint;
 
 	private Rect answerBounds[] = new Rect[maxAnswers], labelBounds[] = new Rect[maxAnswers];
@@ -74,8 +71,6 @@ public class AnswerView extends View {
 	private void initAnswerView(Context ctx) {
 		this.ctx = ctx;
 		type = 0;
-		Typefaces typefaces = Typefaces.getInstance(this.ctx);
-		font = typefaces.robotoLight;
 
 		textLabelSizeSP = textConstLabelSizeSP; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());
@@ -83,17 +78,14 @@ public class AnswerView extends View {
 		TextLabelPaintR.setColor(Color.WHITE);
 		TextLabelPaintR.setTextAlign(Paint.Align.RIGHT);
 		TextLabelPaintR.setTextSize(textLabelSizePix);
-		TextLabelPaintR.setTypeface(font);
 		correctLabelPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		correctLabelPaint.setColor(Color.GREEN);
 		correctLabelPaint.setTextAlign(Paint.Align.RIGHT);
 		correctLabelPaint.setTextSize(textLabelSizePix);
-		correctLabelPaint.setTypeface(font);
 		wrongLabelPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		wrongLabelPaint.setColor(Color.RED);
 		wrongLabelPaint.setTextAlign(Paint.Align.RIGHT);
 		wrongLabelPaint.setTextSize(textLabelSizePix);
-		wrongLabelPaint.setTypeface(font);
 
 		textAnswerSizeSP = textConstAnswerSizeSP;
 		textAnswerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textAnswerSizeSP, getResources().getDisplayMetrics());
@@ -101,18 +93,15 @@ public class AnswerView extends View {
 		TextAnswerPaintL.setColor(Color.WHITE);
 		TextAnswerPaintL.setTextAlign(Paint.Align.LEFT);
 		TextAnswerPaintL.setTextSize(textAnswerSizePix);
-		TextAnswerPaintL.setTypeface(font);
 		correctAnswerPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		correctAnswerPaint.setStyle(Paint.Style.STROKE);
 		correctAnswerPaint.setColor(Color.GREEN);
 		correctAnswerPaint.setTextAlign(Paint.Align.LEFT);
 		correctAnswerPaint.setTextSize(textAnswerSizePix);
-		correctAnswerPaint.setTypeface(font);
 		wrongAnswerPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		wrongAnswerPaint.setColor(Color.RED);
 		wrongAnswerPaint.setTextAlign(Paint.Align.LEFT);
 		wrongAnswerPaint.setTextSize(textAnswerSizePix);
-		wrongAnswerPaint.setTypeface(font);
 
 		padVert = 5;
 		padHorz = 0;
@@ -146,7 +135,6 @@ public class AnswerView extends View {
 	}
 
 	public void setTypeface(Typeface font) {
-		this.font = font;
 		if (equations)
 			for (int i = 0; i < answers.length; i++)
 				layoutsE[i].setTypeface(font);
@@ -223,7 +211,15 @@ public class AnswerView extends View {
 			setDimensions(false);
 	}
 
-	public void setQuickUnlock(boolean quickUnlock) {
+	public void setQuickUnlock(boolean quickUnlock, int loc) {
+		if (correctLoc != loc) {
+			String temp = answers[loc];
+			answers[loc] = answers[correctLoc];
+			answers[correctLoc] = temp;
+			correctLoc = loc;
+			if (measured)
+				setDimensions(false);
+		}
 		this.quickUnlock = quickUnlock;
 		invalidate();
 	}

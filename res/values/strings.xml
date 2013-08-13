@@ -19,6 +19,7 @@
     <string name="custom_question_text">Question</string>
     <string name="custom_wrong_text">Incorrect Answer</string>
     <string name="date">Monday\nJanuary 1</string>
+    <string name="default_entry">0</string>
     <string name="default_money">0</string>
     <string name="delete">Delete</string>
     <string name="delete_question">Delete Question!</string>
@@ -40,6 +41,8 @@
     <string name="enable_language_summary">Language questions</string>
     <string name="enable_lockscreen">Lockscreen On/Off</string>
     <string name="enable_lockscreen_summary">Use app as a lockscreen</string>
+    <string name="enable_lockscreen2">Lockscreen Timeout Period</string>
+    <string name="enable_lockscreen2_summary">Immediately</string>
     <string name="enable_math_summary">Math questions</string>
     <string name="enable_vibration">Vibration On/Off</string>
     <string name="enable_vibration_summary">Vibrate on key presses</string>

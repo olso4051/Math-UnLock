@@ -20,6 +20,36 @@
         <item name="very_hard">4</item>
         <item name="insane">5</item>
     </string-array>
+    <string-array name="lockscreen2_entries">
+        <item name="immediate">Immediately</item>
+        <item name="min5">5 minutes</item>
+        <item name="min15">15 minutes</item>
+        <item name="min30">30 minutes</item>
+        <item name="hour1">1 hour</item>
+        <item name="hour4">4 hours</item>
+        <item name="hour8">8 hours</item>
+        <item name="day">1 day</item>
+    </string-array>
+    <string-array name="lockscreen2_values">
+        <item name="immediate">0</item>
+        <item name="min5">1</item>
+        <item name="min15">2</item>
+        <item name="min30">3</item>
+        <item name="hour1">4</item>
+        <item name="hour4">5</item>
+        <item name="hour8">6</item>
+        <item name="day">7</item>
+    </string-array>
+    <string-array name="lockscreen2_times">
+        <item name="immediate">0</item>
+        <item name="min5">300000</item>
+        <item name="min15">900000</item>
+        <item name="min30">1800000</item>
+        <item name="hour1">3600000</item>
+        <item name="hour4">14400000</item>
+        <item name="hour8">28800000</item>
+        <item name="day">86400000</item>
+    </string-array>
     
     <string-array name="times">
         <item>All</item>
