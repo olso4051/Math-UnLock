@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.olyware.mathlock.views.AnswerView;
+import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.GraphView;
 import com.olyware.mathlock.views.JoystickView;
 
@@ -59,6 +60,10 @@ public class EZ {
 		// Loop through all of the children.
 		for (int i = 0; i < mCount; ++i) {
 			final View mChild = container.getChildAt(i);
+			if (mChild instanceof EquationView) {
+				// Set the font if it is a TextView.
+				((EquationView) mChild).setTopRightTypeface(font);
+			}
 			if (mChild instanceof TextView) {
 				// Set the font if it is a TextView.
 				((TextView) mChild).setTypeface(font);

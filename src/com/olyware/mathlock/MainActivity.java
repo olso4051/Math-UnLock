@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 
 	private LinearLayout layout;
 	private Clock clock;
-	private TextView coins, worth;
+	private TextView coins;
 	private int questionWorth;
 	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
@@ -211,9 +211,8 @@ public class MainActivity extends Activity {
 		clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
 
 		coins = (TextView) findViewById(R.id.money);
-		worth = (TextView) findViewById(R.id.worth);
 		problem = (EquationView) findViewById(R.id.problem);
-
+		problem.setTopRightDrawable(getResources().getDrawable(R.drawable.coin));
 		defaultTextColor = problem.getTextColors().getDefaultColor();
 
 		answerView = (AnswerView) findViewById(R.id.answers2);
@@ -259,7 +258,7 @@ public class MainActivity extends Activity {
 					if (attached)
 						getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 				}
-				worth.setText(String.valueOf(questionWorth));
+				problem.setTopRightText(String.valueOf(questionWorth));
 			}
 		};
 
@@ -518,10 +517,6 @@ public class MainActivity extends Activity {
 	}
 
 	public void setUnlockType(int type) {
-		if (type == 2) {
-			problem.setOffset(-worth.getCompoundDrawables()[0].getIntrinsicHeight() / 2);
-		} else
-			problem.setOffset(0);
 		joystick.setUnlockType(type);
 		answerView.setUnlockType(type);
 	}
@@ -645,7 +640,7 @@ public class MainActivity extends Activity {
 	private void resetQuestionWorth(int value) {
 		startTime = System.currentTimeMillis();
 		questionWorth = value;
-		worth.setText(String.valueOf(questionWorth));
+		problem.setTopRightText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
