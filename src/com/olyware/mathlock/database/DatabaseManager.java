@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
@@ -214,7 +213,6 @@ public class DatabaseManager {
 				else
 					priorityUpdate = QuestionContract.PRIORITY + "=" + priority[0];
 				sql = sql + priorityUpdate + where;
-				Log.d("test", "we're ok");
 				db.execSQL(sql);
 				return true;
 			}
@@ -241,7 +239,6 @@ public class DatabaseManager {
 				else
 					priorityUpdate = QuestionContract.PRIORITY + "=" + priority[0];
 				sql = sql + priorityUpdate + where;
-				Log.d("test", "we're ok");
 				db.execSQL(sql);
 				return true;
 			}

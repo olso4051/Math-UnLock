@@ -1,5 +1,8 @@
 package com.olyware.mathlock;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +14,8 @@ public class ScreenReceiver extends BroadcastReceiver {
 	public static boolean wasScreenOn = true;
 	public static boolean PhoneOn = false;
 	private long timeLast = 0;
+	private Timer offTimer;
+	private TimerTask offTimerTask;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -38,18 +43,32 @@ public class ScreenReceiver extends BroadcastReceiver {
 				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 				int timeoutLoc = Integer.parseInt(sharedPrefs.getString("lockscreen2", "0"));
 				long timeoutPeriod = Long.parseLong(ctx.getResources().getStringArray(R.array.lockscreen2_times)[timeoutLoc]);
-				if (timeLast + timeoutPeriod < System.currentTimeMillis()) {
-					timeLast = System.currentTimeMillis();
-					Intent i = new Intent(context, MainActivity.class);
-					i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-					i.putExtra("locked", true);
-					// i.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-					context.startActivity(i);
+				long currentTime = System.currentTimeMillis();
+				if (timeLast + timeoutPeriod < currentTime) {
+					startMainActivity(ctx);
+				} else {
+					offTimer = new Timer();
+					offTimerTask = new TimerTask() {
+						@Override
+						public void run() {
+							startMainActivity(ctx);
+						}
+					};
+					offTimer.schedule(offTimerTask, timeLast + timeoutPeriod - currentTime);
 				}
 			}
 			wasScreenOn = false;
 		}
+	}
+
+	private void startMainActivity(Context ctx) {
+		timeLast = System.currentTimeMillis();
+		Intent i = new Intent(ctx, MainActivity.class);
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		i.putExtra("locked", true);
+		// i.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+		ctx.startActivity(i);
 	}
 }

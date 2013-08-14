@@ -23,7 +23,6 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -957,7 +956,6 @@ public class JoystickView extends View {
 		appAngle = Math.atan2(rApps * 3, Math.min(rAppsY, rAppsX));
 		int oldMaxApps = apps.size();
 		int maxApps = (int) Math.floor((3 * Math.PI / 2) / appAngle);
-		Log.d("test", "old = " + oldMaxApps + "|new = " + maxApps);
 		if (oldMaxApps < maxApps) {
 			apps.clear();
 			for (int i = 0; i < maxApps; i++) {
@@ -1325,11 +1323,13 @@ public class JoystickView extends View {
 					if ((touchX < trashApp.getRight()) && (touchX > trashApp.getLeft()) && (touchY < trashApp.getBottom())
 							&& (touchY > trashApp.getTop())) {
 						if (send) {
-							if (isFirstApp)
+							if (isFirstApp) {
 								listener.OnSelect(14, true, selectAppDrag);
-							else
+								removeApp(selectAppDrag + 1);
+							} else {
 								listener.OnSelect(14, true, selectAppDrag - 1);
-							removeApp(selectAppDrag);
+								removeApp(selectAppDrag);
+							}
 						} else
 							apps.get(trashLoc).setSelect(true);
 					}
