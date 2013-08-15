@@ -37,6 +37,10 @@ public class ScreenReceiver extends BroadcastReceiver {
 			}
 		}
 		if (screenOn) {
+			if (offTimer != null) {
+				offTimer.cancel();
+				offTimer = null;
+			}
 			wasScreenOn = true;
 		} else if (screenOff) {
 			if (!PhoneOn) {

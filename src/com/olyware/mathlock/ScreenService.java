@@ -1,7 +1,6 @@
 package com.olyware.mathlock;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
@@ -9,7 +8,7 @@ import android.telephony.TelephonyManager;
 
 public class ScreenService extends Service {
 
-	private BroadcastReceiver sReceiver = new ScreenReceiver();
+	private ScreenReceiver sReceiver = new ScreenReceiver();
 
 	@Override
 	public IBinder onBind(Intent arg0) {
