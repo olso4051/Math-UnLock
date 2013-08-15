@@ -842,7 +842,6 @@ public class JoystickView extends View {
 			canvas.drawBitmap(bmpArrow, rotateArrow, settingsPaint);
 			canvas.drawBitmap(bmpHand, rotateHand, settingsPaint);
 		}
-		canvas.save();
 	}
 
 	@Override

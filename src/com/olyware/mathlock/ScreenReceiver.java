@@ -25,6 +25,8 @@ public class ScreenReceiver extends BroadcastReceiver {
 		boolean screenOn = action.equals(Intent.ACTION_SCREEN_ON);
 		boolean phoneStateChange = action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 
+		if (timeLast == 0)
+			timeLast = System.currentTimeMillis();
 		if (phoneStateChange) {
 			boolean ringing = intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_RINGING);
 			boolean offHook = intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_OFFHOOK);
