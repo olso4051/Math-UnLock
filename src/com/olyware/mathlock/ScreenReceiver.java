@@ -24,6 +24,10 @@ public class ScreenReceiver extends BroadcastReceiver {
 		boolean screenOff = action.equals(Intent.ACTION_SCREEN_OFF);
 		boolean screenOn = action.equals(Intent.ACTION_SCREEN_ON);
 		boolean phoneStateChange = action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		int timeoutLoc = Integer.parseInt(sharedPrefs.getString("lockscreen2", "0"));
+		long timeoutPeriod = Long.parseLong(ctx.getResources().getStringArray(R.array.lockscreen2_times)[timeoutLoc]);
+		long currentTime = System.currentTimeMillis();
 
 		if (timeLast == 0)
 			timeLast = System.currentTimeMillis();
@@ -43,13 +47,12 @@ public class ScreenReceiver extends BroadcastReceiver {
 				offTimer.cancel();
 				offTimer = null;
 			}
+			if (timeLast + timeoutPeriod < currentTime) {
+				timeLast = currentTime;
+			}
 			wasScreenOn = true;
 		} else if (screenOff) {
 			if (!PhoneOn) {
-				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-				int timeoutLoc = Integer.parseInt(sharedPrefs.getString("lockscreen2", "0"));
-				long timeoutPeriod = Long.parseLong(ctx.getResources().getStringArray(R.array.lockscreen2_times)[timeoutLoc]);
-				long currentTime = System.currentTimeMillis();
 				if (timeLast + timeoutPeriod < currentTime) {
 					startMainActivity(ctx);
 				} else {
