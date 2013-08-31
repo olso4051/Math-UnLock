@@ -1672,7 +1672,7 @@ public class JoystickView extends View {
 	}
 
 	private void decreaseAnswerSize() {
-		answerSizeSP = Math.max(answerSizeSP - 2, 1);
+		answerSizeSP = Math.max(answerSizeSP - 1, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
