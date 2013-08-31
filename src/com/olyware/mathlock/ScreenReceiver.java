@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class ScreenReceiver extends BroadcastReceiver {
 	public static boolean wasScreenOn = true;
@@ -29,8 +30,10 @@ public class ScreenReceiver extends BroadcastReceiver {
 		long timeoutPeriod = Long.parseLong(ctx.getResources().getStringArray(R.array.lockscreen2_times)[timeoutLoc]);
 		long currentTime = System.currentTimeMillis();
 
-		if (timeLast == 0)
+		if (timeLast == 0) {
 			timeLast = System.currentTimeMillis();
+			Log.d("test", "timeLast=0 so set timeLast = " + timeLast);
+		}
 		if (phoneStateChange) {
 			boolean ringing = intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_RINGING);
 			boolean offHook = intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_OFFHOOK);
@@ -46,9 +49,11 @@ public class ScreenReceiver extends BroadcastReceiver {
 			if (offTimer != null) {
 				offTimer.cancel();
 				offTimer = null;
+				Log.d("test", "timer canceled");
 			}
 			if (timeLast + timeoutPeriod < currentTime) {
 				timeLast = currentTime;
+				Log.d("test", "timeLast reset " + timeLast);
 			}
 			wasScreenOn = true;
 		} else if (screenOff) {
@@ -64,6 +69,7 @@ public class ScreenReceiver extends BroadcastReceiver {
 						}
 					};
 					offTimer.schedule(offTimerTask, timeLast + timeoutPeriod - currentTime);
+					Log.d("test", "started timer " + ((timeLast + timeoutPeriod - currentTime) / 60000d) + " minutes");
 				}
 			}
 			wasScreenOn = false;
@@ -79,5 +85,6 @@ public class ScreenReceiver extends BroadcastReceiver {
 		i.putExtra("locked", true);
 		// i.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
 		ctx.startActivity(i);
+		Log.d("test", "started app " + timeLast);
 	}
 }
