@@ -22,7 +22,7 @@
     </string-array>
     <string-array name="lockscreen2_entries">
         <item name="immediate">Immediately</item>
-        <item name="sec30">30 seconds</item>
+        <item name="min1">1 minute</item>
         <item name="min5">5 minutes</item>
         <item name="min15">15 minutes</item>
         <item name="min30">30 minutes</item>
@@ -33,7 +33,7 @@
     </string-array>
     <string-array name="lockscreen2_values">
         <item name="immediate">0</item>
-        <item name="sec30">1</item>
+        <item name="min1">1</item>
         <item name="min5">2</item>
         <item name="min15">3</item>
         <item name="min30">4</item>
@@ -44,7 +44,7 @@
     </string-array>
     <string-array name="lockscreen2_times">
         <item name="immediate">0</item>
-        <item name="sec30">30000</item>
+        <item name="min1">60000</item>
         <item name="min5">300000</item>
         <item name="min15">900000</item>
         <item name="min30">1800000</item>

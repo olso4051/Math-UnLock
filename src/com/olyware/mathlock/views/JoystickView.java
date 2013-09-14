@@ -1286,7 +1286,7 @@ public class JoystickView extends View {
 								double minAngle = appAngle;
 								int selection = -1;
 								for (int i = 0; i < apps.size(); i++) {
-									double angleDiff = Math.abs(/*appAngles[i]*/apps.get(i).getAngle() - angle);
+									double angleDiff = Math.abs(apps.get(i).getAngle() - angle);
 									if ((angleDiff < minAngle) || (Math.abs(angleDiff - Math.PI * 2) < minAngle)) {
 										minAngle = Math.min(angleDiff, Math.abs(angleDiff - Math.PI * 2));
 										selection = i;

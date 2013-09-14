@@ -916,10 +916,11 @@ public class MainActivity extends Activity {
 			selectApp();
 			break;
 		case 13:	// app was selected
-			// getPackageManager().getActivityIcon(activityName)
-			Log.d("test", "extra = " + Extra);
-			startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
-			finish();
+			if (Extra < apps.size()) {
+				Log.d("test", "extra = " + Extra);
+				startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
+				finish();
+			}
 			break;
 		case 14:	// remove app was selected
 			removeAppFromAll(Extra);
