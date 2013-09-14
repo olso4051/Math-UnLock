@@ -61,7 +61,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 2, lowestAmount = 5, decreaseRate = 500, startingPmoney = 0, initialStreakToIncrease = 40;
+	final private int multiplier = 2, lowestAmount = 5, decreaseRate = 500, startingPmoney = 10000, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -134,8 +134,6 @@ public class MainActivity extends Activity {
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
@@ -387,6 +385,8 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefs.edit().putLong("timeout", System.currentTimeMillis()).commit();
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		if (attached)
