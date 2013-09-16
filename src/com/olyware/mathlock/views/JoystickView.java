@@ -53,7 +53,7 @@ public class JoystickView extends View {
 
 	private int TextHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP, answerHintSizeSP, Width, Height, dstHeight, pad = 10,
 			diffX1, diffY1, diffX, diffY, spacing, rUnlock, rUnlockChange, rBig, rSmall, rApps, swipeLengthOption, swipeLength1, type = 0,
-			pulseFrame = 0, correctLoc, correctGuess, wrongGuess, selectAppDrag, numAnswersDisplayed = 0;
+			pulseFrame = 0, correctLoc, correctGuess, wrongGuess, selectAppDrag, numAnswersDisplayed = 0, appCenterVert, appCenterHorz;
 	private int state = 0;// state: direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
 	private long tapTimer, lastTime = 0;
 	private float answerSizePix, answerHintSizePix, optionX, optionY, degrees = 0, radians = 0, degreeStep = degreeStepInitial,
@@ -947,11 +947,11 @@ public class JoystickView extends View {
 	// =========================================
 
 	private void setAppCenters(boolean sel) {
-		int centerVert = (TextHeight - textSizePix + drawBackBlue.getIntrinsicHeight() / 3) / 2;
-		int centerHorz = Width / 2;
+		appCenterVert = (TextHeight - textSizePix + drawBackBlue.getIntrinsicHeight() / 3) / 2;
+		appCenterHorz = Width / 2;
 		int rApps = drawAdd.getIntrinsicHeight() / 2;
-		int rAppsY = centerVert - rApps - drawBackBlue.getIntrinsicHeight() / 3 - pad;
-		int rAppsX = centerHorz - rApps - pad;
+		int rAppsY = appCenterVert - rApps - drawBackBlue.getIntrinsicHeight() / 3 - pad;
+		int rAppsX = appCenterHorz - rApps - pad;
 		appAngle = Math.atan2(rApps * 3, Math.min(rAppsY, rAppsX));
 		int oldMaxApps = apps.size();
 		int maxApps = (int) Math.floor((3 * Math.PI / 2) / appAngle);
@@ -959,14 +959,14 @@ public class JoystickView extends View {
 			apps.clear();
 			for (int i = 0; i < maxApps; i++) {
 				double angle = Math.PI - appAngle / 2 - appAngle * i;
-				apps.add(new App(angle, (float) (centerHorz + Math.cos(angle) * rAppsX), (float) (centerVert - Math.sin(angle) * rAppsY),
-						rApps));
+				apps.add(new App(angle, (float) (appCenterHorz + Math.cos(angle) * rAppsX), (float) (appCenterVert - Math.sin(angle)
+						* rAppsY), rApps));
 			}
 		} else {
 			for (int i = 0; i < apps.size(); i++) {
 				double angle = Math.PI - appAngle / 2 - appAngle * i;
-				apps.get(i).setAll(angle, (float) (centerHorz + Math.cos(angle) * rAppsX), (float) (centerVert - Math.sin(angle) * rAppsY),
-						rApps);
+				apps.get(i).setAll(angle, (float) (appCenterHorz + Math.cos(angle) * rAppsX),
+						(float) (appCenterVert - Math.sin(angle) * rAppsY), rApps);
 				if (!sel) {
 					apps.get(i).setSelect(false);
 					apps.get(i).setSelectDrag(false);
@@ -1280,16 +1280,15 @@ public class JoystickView extends View {
 								if (send)
 									listener.OnSelect(select, true, -1);
 							} else {
-								double angle = Math.atan2((TextHeight - textSizePix) / 2 - newY, newX - Width / 2);
+								double angle = Math.atan2(appCenterVert - newY, newX - appCenterHorz);
 								if (angle < 0)// because atan2 returns from -pi to pi, we want 0 to 2pi
 									angle += 2 * Math.PI;
-								double minAngle = appAngle;
 								int selection = -1;
 								for (int i = 0; i < apps.size(); i++) {
 									double angleDiff = Math.abs(apps.get(i).getAngle() - angle);
-									if ((angleDiff < minAngle) || (Math.abs(angleDiff - Math.PI * 2) < minAngle)) {
-										minAngle = Math.min(angleDiff, Math.abs(angleDiff - Math.PI * 2));
+									if (angleDiff < appAngle / 2) {
 										selection = i;
+										break;
 									}
 								}
 								if (selection >= 0)

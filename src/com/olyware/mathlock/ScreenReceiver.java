@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 public class ScreenReceiver extends BroadcastReceiver {
 	public static boolean wasScreenOn = true;
@@ -48,25 +47,21 @@ public class ScreenReceiver extends BroadcastReceiver {
 			if (offTimer != null) {
 				offTimer.cancel();
 				offTimer = null;
-				Log.d("test", "timer canceled");
 			}
 			wasScreenOn = true;
 		} else if (screenOff) {
 			if (!PhoneOn) {
 				if (timeLast + timeoutPeriod < currentTime) {
 					startMainActivity(ctx);
-					Log.d("test", "started app " + timeLast);
 				} else {
 					offTimer = new Timer();
 					offTimerTask = new TimerTask() {
 						@Override
 						public void run() {
 							startMainActivity(ctx);
-							Log.d("test", "started app " + timeLast);
 						}
 					};
 					offTimer.schedule(offTimerTask, timeLast + timeoutPeriod - currentTime);
-					Log.d("test", "started timer " + ((timeLast + timeoutPeriod - currentTime) / 60000d) + " minutes");
 				}
 			}
 			wasScreenOn = false;

@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -89,8 +88,7 @@ public class MainActivity extends Activity {
 	private int EnabledPackages = 0;
 	private boolean EnabledPacks[];
 	private boolean locked, UnlockedPackages = false;
-	private boolean dialogOn = false;
-	private boolean dontShow = false;
+	private boolean dialogOn = false, dontShow = false, paused = false;
 	final private long MONTH = 2592000000l;
 
 	private int answerLoc = 0;		// {correct answer location}
@@ -134,6 +132,7 @@ public class MainActivity extends Activity {
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		paused = false;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
@@ -246,17 +245,19 @@ public class MainActivity extends Activity {
 		reduceWorth = new Runnable() {
 			@Override
 			public void run() {
-				questionWorth -= 1;
-				if (questionWorth <= 0) {
-					questionWorth = 0;
-					if (attached)
-						getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-				} else {
-					timerHandler.postDelayed(this, decreaseRate);
-					if (attached)
-						getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+				if (!paused) {
+					questionWorth -= 1;
+					if (questionWorth <= 0) {
+						questionWorth = 0;
+						if (attached)
+							getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+					} else {
+						timerHandler.postDelayed(this, decreaseRate);
+						if (attached)
+							getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+					}
+					worth.setText(String.valueOf(questionWorth));
 				}
-				worth.setText(String.valueOf(questionWorth));
 			}
 		};
 
@@ -307,6 +308,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		paused = false;
 		super.onResume();
 		if (locked && quizMode)
 			quizMode = joystick.setQuizMode(false);
@@ -349,7 +351,8 @@ public class MainActivity extends Activity {
 		}
 
 		// setup the question and answers
-		resetQuestionWorth(0);
+		// resetQuestionWorth(0);
+		startCountdown();
 		if (changed)
 			setProblemAndAnswer(0);
 
@@ -385,6 +388,8 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		paused = true;
+
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefs.edit().putLong("timeout", System.currentTimeMillis()).commit();
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
@@ -396,6 +401,7 @@ public class MainActivity extends Activity {
 		if (!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 			editorPrefsMoney.putBoolean("dontShowLastTime", dontShow);
 		editorPrefsMoney.commit();
+
 		joystick.removeCallbacks();
 		super.onPause();
 	}
@@ -641,6 +647,12 @@ public class MainActivity extends Activity {
 		startTime = System.currentTimeMillis();
 		questionWorth = value;
 		worth.setText(String.valueOf(questionWorth));
+		timerHandler.removeCallbacks(reduceWorth);
+		timerHandler.postDelayed(reduceWorth, decreaseRate);
+	}
+
+	private void startCountdown() {
+		startTime = System.currentTimeMillis();
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
@@ -917,7 +929,6 @@ public class MainActivity extends Activity {
 			break;
 		case 13:	// app was selected
 			if (Extra < apps.size()) {
-				Log.d("test", "extra = " + Extra);
 				startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
 				finish();
 			}

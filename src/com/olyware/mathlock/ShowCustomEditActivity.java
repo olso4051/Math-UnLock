@@ -9,7 +9,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -150,7 +149,6 @@ public class ShowCustomEditActivity extends Activity {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 					final int posFinal = pos;
-					Log.d("test", "item selected = " + pos);
 					if (pos == 0)
 						resetContentView(R.layout.activity_custom_edit, getString(R.string.add), posFinal - 1);
 					else {
