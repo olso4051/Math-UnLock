@@ -291,6 +291,7 @@ public class MainActivity extends Activity {
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		joystick.removeCallbacks();
+
 		setProblemAndAnswer(0);
 		super.onStop();
 	}
@@ -567,6 +568,7 @@ public class MainActivity extends Activity {
 				@Override
 				public void run() {
 					questionWorth = 0;
+					boolean success;
 					answerView.resetGuess();
 					joystick.resetGuess();
 					imageLeft = null;
@@ -585,32 +587,34 @@ public class MainActivity extends Activity {
 					switch (location[randPack]) {
 					case 0:			// math question
 						currentPack = getString(R.string.math);
-						setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						success = setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 1:			// vocabulary question
 						currentPack = getString(R.string.vocab);
-						setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						success = setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 2:			// language question
 						currentPack = getString(R.string.language);
-						setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						success = setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 3:			// engineer question
 						currentPack = getString(R.string.engineer);
-						setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						success = setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 4:			// HiqH Trivia question
 						currentPack = getString(R.string.hiqh_trivia);
-						setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					case 5:			// Custom question
 						currentPack = getString(R.string.custom);
-						setCustomProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						success = setCustomProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
 					default:
+						success = false;
 						break;
 					}
-
+					if (!success)
+						return;
 					answerLoc = rand.nextInt(4);			// set a random location for the correct answer
 					int offset = 1;
 					for (int i = 0; i < 4; i++) {
@@ -663,9 +667,11 @@ public class MainActivity extends Activity {
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
 
-	private void setMathProblem(Difficulty min, Difficulty max) {
+	private boolean setMathProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.math_table);
 		MathQuestion question = dbManager.getMathQuestion(min, max, ID);
+		if (question == null)
+			return false;
 		ID = question.getID();
 		question.setVariables();
 
@@ -679,12 +685,14 @@ public class MainActivity extends Activity {
 		}
 		answers = question.getAnswers();
 		problem.setText(question.getQuestionText());
-		return;
+		return true;
 	}
 
-	private void setVocabProblem(Difficulty min, Difficulty max) {
+	private boolean setVocabProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.vocab_table);
 		List<VocabQuestion> questions = dbManager.getVocabQuestions(min, max, answers.length, ID);
+		if (questions == null)
+			return false;
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
@@ -695,9 +703,10 @@ public class MainActivity extends Activity {
 			answers[i] = questions.get(i).getCorrectAnswer();
 		}
 		problem.setText("Define: " + questions.get(0).getQuestionText());
+		return true;
 	}
 
-	private void setLanguageProblem(Difficulty min, Difficulty max) {
+	private boolean setLanguageProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.language_table);
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
@@ -709,6 +718,8 @@ public class MainActivity extends Activity {
 				toLanguageLocal = LanguageEntries[i];
 		}
 		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(min, max, answers.length, fromLanguage, toLanguage, ID);
+		if (questions == null)
+			return false;
 		ID = questions.get(0).getID();
 
 		// Set the new difficulty based on what question was picked
@@ -719,11 +730,14 @@ public class MainActivity extends Activity {
 			answers[i] = questions.get(i).getCorrectAnswer();
 		}
 		problem.setText(fromLanguageLocal + " → " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
+		return true;
 	}
 
-	private void setEngineerProblem(Difficulty min, Difficulty max) {
+	private boolean setEngineerProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.engineer_table);
 		EngineerQuestion question = dbManager.getEngineerQuestion(min, max, ID + 1);
+		if (question == null)
+			return false;
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
@@ -731,12 +745,14 @@ public class MainActivity extends Activity {
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
-		return;
+		return true;
 	}
 
-	private void setHiqHTriviaProblem(Difficulty min, Difficulty max) {
+	private boolean setHiqHTriviaProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.hiqh_trivia_table);
 		HiqHTriviaQuestion question = dbManager.getHiqHTriviaQuestion(min, max, ID);
+		if (question == null)
+			return false;
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
@@ -744,12 +760,14 @@ public class MainActivity extends Activity {
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
-		return;
+		return true;
 	}
 
-	private void setCustomProblem(Difficulty min, Difficulty max) {
+	private boolean setCustomProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.custom_table);
 		CustomQuestion question = dbManager.getCustomQuestion(min, max, ID);
+		if (question == null)
+			return false;
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
@@ -757,7 +775,7 @@ public class MainActivity extends Activity {
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
-		return;
+		return true;
 	}
 
 	private void getEnabledPackages() {
