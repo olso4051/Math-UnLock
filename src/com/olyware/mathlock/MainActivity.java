@@ -60,7 +60,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 2, lowestAmount = 5, decreaseRate = 500, startingPmoney = 10000, initialStreakToIncrease = 40;
+	final private int multiplier = 2, lowestAmount = 5, decreaseRate = 500, startingPmoney = 0, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 	private LinearLayout layout;
 	private Clock clock;
 	private TextView coins, worth;
-	private int questionWorth;
+	private int questionWorthMax, questionWorth;
 	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
 	private AnswerView answerView;
@@ -291,6 +291,7 @@ public class MainActivity extends Activity {
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		joystick.removeCallbacks();
+		setProblemAndAnswer(0);
 		super.onStop();
 	}
 
@@ -340,7 +341,7 @@ public class MainActivity extends Activity {
 		attempts = 1;
 
 		// get unlocked and enabled item changes
-		boolean changed = getEnabledPackages();
+		getEnabledPackages();
 
 		// start background service to wait for screen to turn off
 		Intent sIntent = new Intent(this, ScreenService.class);
@@ -353,8 +354,9 @@ public class MainActivity extends Activity {
 		// setup the question and answers
 		// resetQuestionWorth(0);
 		startCountdown();
-		if (changed)
-			setProblemAndAnswer(0);
+		// resetTimer();
+		// if (changed)
+		// setProblemAndAnswer(0);
 
 		if (!UnlockedPackages)
 			displayInfo(true);
@@ -403,6 +405,7 @@ public class MainActivity extends Activity {
 		editorPrefsMoney.commit();
 
 		joystick.removeCallbacks();
+
 		super.onPause();
 	}
 
@@ -645,7 +648,8 @@ public class MainActivity extends Activity {
 
 	private void resetQuestionWorth(int value) {
 		startTime = System.currentTimeMillis();
-		questionWorth = value;
+		questionWorthMax = value;
+		questionWorth = questionWorthMax;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
@@ -653,6 +657,8 @@ public class MainActivity extends Activity {
 
 	private void startCountdown() {
 		startTime = System.currentTimeMillis();
+		questionWorth = questionWorthMax;
+		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
@@ -754,17 +760,8 @@ public class MainActivity extends Activity {
 		return;
 	}
 
-	private boolean getEnabledPackages() {
+	private void getEnabledPackages() {
 		int count = 0;
-		boolean changed = false;
-		boolean EnabledPacksBefore[] = new boolean[EnabledPacks.length];
-		int difficultyMaxBefore = difficultyMax;
-		int difficultyMinBefore = difficultyMin;
-		String fromLanguageBefore = fromLanguage;
-		String toLanguageBefore = toLanguage;
-
-		for (int i = 0; i < EnabledPacks.length; i++)
-			EnabledPacksBefore[i] = EnabledPacks[i];
 
 		for (int i = 0; i < unlockPackageKeys.length; i++)
 			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
@@ -777,20 +774,8 @@ public class MainActivity extends Activity {
 				count++;
 			} else
 				EnabledPacks[i] = false;
-			if (EnabledPacksBefore[i] != EnabledPacks[i])
-				changed = true;
 		}
 		EnabledPackages = count;
-
-		difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
-		difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
-		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
-		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
-		if ((difficultyMaxBefore != difficultyMax) || (difficultyMinBefore != difficultyMin) || (fromLanguageBefore != fromLanguage)
-				|| (toLanguageBefore != toLanguage))
-			changed = true;
-
-		return changed;
 	}
 
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
