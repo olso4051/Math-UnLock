@@ -46,6 +46,49 @@ public class DatabaseManager {
 		}
 	}
 
+	public double getPriority(int table, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
+		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
+		String tableName, allColumns[];
+		switch (table) {
+		case 0:			// math question
+			tableName = MathQuestionContract.TABLE_NAME;
+			allColumns = MathQuestionContract.ALL_COLUMNS;
+			break;
+		case 1:			// vocabulary question
+			tableName = VocabQuestionContract.TABLE_NAME;
+			allColumns = VocabQuestionContract.ALL_COLUMNS;
+			break;
+		case 2:			// language question
+			tableName = LanguageQuestionContract.TABLE_NAME;
+			allColumns = LanguageQuestionContract.ALL_COLUMNS;
+			break;
+		case 3:			// engineer question
+			tableName = EngineerQuestionContract.TABLE_NAME;
+			allColumns = EngineerQuestionContract.ALL_COLUMNS;
+			break;
+		case 4:			// HiqH Trivia question
+			tableName = HiqHTriviaQuestionContract.TABLE_NAME;
+			allColumns = HiqHTriviaQuestionContract.ALL_COLUMNS;
+			break;
+		case 5:			// Custom question
+			tableName = CustomQuestionContract.TABLE_NAME;
+			allColumns = CustomQuestionContract.ALL_COLUMNS;
+			break;
+		default:
+			tableName = MathQuestionContract.TABLE_NAME;
+			allColumns = MathQuestionContract.ALL_COLUMNS;
+			break;
+		}
+		Cursor cursor2 = db.query(tableName, allColumns, where, null, null, null, null);
+		double count = cursor2.getCount();
+		cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + tableName + " WHERE " + where, null);
+		cursor2.moveToFirst();
+		double sum = cursor2.getInt(0);
+		cursor2.close();
+		return sum / count;
+	}
+
 	public long addStat(Statistic stat) {
 		if (db.isOpen()) {
 			ContentValues values = new ContentValues();
