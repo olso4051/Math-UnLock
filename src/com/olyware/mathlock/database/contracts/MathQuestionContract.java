@@ -10,7 +10,8 @@ public final class MathQuestionContract extends QuestionContract {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, MathQuestionContract.QUESTION_IMAGE,
 				QuestionContract.ANSWER_CORRECT, MathQuestionContract.ANSWER_INCORRECT1, MathQuestionContract.ANSWER_INCORRECT2,
 				MathQuestionContract.ANSWER_INCORRECT3, QuestionContract.DIFFICULTY, MathQuestionContract.PARSE_MODE,
-				MathQuestionContract.RANGE, MathQuestionContract.PRECISION, MathQuestionContract.PRIORITY };
+				MathQuestionContract.RANGE, MathQuestionContract.PRECISION, MathQuestionContract.PRIORITY, QuestionContract.TIME_STEP,
+				QuestionContract.TIME_STEPS };
 	}
 	static {
 		QUESTION_AND_PRIORITY = new String[] { QuestionContract.QUESTION_TEXT, MathQuestionContract.PRIORITY };

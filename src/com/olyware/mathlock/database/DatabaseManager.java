@@ -12,7 +12,7 @@ import com.olyware.mathlock.R;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
-import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
+import com.olyware.mathlock.database.contracts.HiqTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -21,7 +21,7 @@ import com.olyware.mathlock.database.contracts.VocabQuestionContract;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HiqHTriviaQuestion;
+import com.olyware.mathlock.model.HiqTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -68,8 +68,8 @@ public class DatabaseManager {
 			allColumns = EngineerQuestionContract.ALL_COLUMNS;
 			break;
 		case 4:			// HiqH Trivia question
-			tableName = HiqHTriviaQuestionContract.TABLE_NAME;
-			allColumns = HiqHTriviaQuestionContract.ALL_COLUMNS;
+			tableName = HiqTriviaQuestionContract.TABLE_NAME2;
+			allColumns = HiqTriviaQuestionContract.ALL_COLUMNS;
 			break;
 		case 5:			// Custom question
 			tableName = CustomQuestionContract.TABLE_NAME;
@@ -96,6 +96,7 @@ public class DatabaseManager {
 			values.put(StatisticContract.CORRECT, stat.getCorrect());
 			values.put(QuestionContract.DIFFICULTY, stat.getDifficulty().getValue());
 			values.put(StatisticContract.TIME, stat.getTime());
+			values.put(StatisticContract.TIME2SOLVE, stat.getTime2Solve());
 			return db.insert(StatisticContract.TABLE_NAME, null, values);
 		} else
 			return -1;
@@ -186,13 +187,13 @@ public class DatabaseManager {
 			return null;
 	}
 
-	public HiqHTriviaQuestion getHiqHTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
+	public HiqTriviaQuestion getHiqTriviaQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		if (db.isOpen()) {
 			String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 					+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-			cursor = db.query(HiqHTriviaQuestionContract.TABLE_NAME, HiqHTriviaQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+			cursor = db.query(HiqTriviaQuestionContract.TABLE_NAME2, HiqTriviaQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
-			Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + HiqHTriviaQuestionContract.TABLE_NAME
+			Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + HiqTriviaQuestionContract.TABLE_NAME2
 					+ " WHERE " + where, null);
 			cursor2.moveToFirst();
 			int sum = cursor2.getInt(0);

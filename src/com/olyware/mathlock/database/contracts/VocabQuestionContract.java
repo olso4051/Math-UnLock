@@ -8,7 +8,8 @@ public final class VocabQuestionContract extends QuestionContract {
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, QuestionContract.ANSWER_CORRECT,
-				QuestionContract.DIFFICULTY, VocabQuestionContract.PART_OF_SPEECH, VocabQuestionContract.PRIORITY };
+				QuestionContract.DIFFICULTY, VocabQuestionContract.PART_OF_SPEECH, VocabQuestionContract.PRIORITY,
+				QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS };
 	}
 	static {
 		QUESTION_AND_PRIORITY = new String[] { QuestionContract.QUESTION_TEXT, VocabQuestionContract.PRIORITY };

@@ -2,19 +2,20 @@ package com.olyware.mathlock.model;
 
 public abstract class Question {
 
-	String text;
-	String correctAnswer;
+	String text, correctAnswer;
 	private Difficulty difficulty;
 	long id;
-	int priority;
+	int priority, timeStep, timeSteps;
 
-	public Question(long id, String text, String correctAnswer, Difficulty difficulty, int priority) {
+	public Question(long id, String text, String correctAnswer, Difficulty difficulty, int priority, int timeStep, int timeSteps) {
 		super();
 		this.id = id;
 		this.text = text;
 		this.correctAnswer = correctAnswer;
 		this.difficulty = difficulty;
 		this.priority = priority;
+		this.timeStep = timeStep;
+		this.timeSteps = timeSteps;
 	}
 
 	public long getID() {
@@ -35,6 +36,14 @@ public abstract class Question {
 
 	public int getPriority() {
 		return priority;
+	}
+
+	public int getTimeStep() {
+		return timeStep;
+	}
+
+	public int getTimeSteps() {
+		return timeSteps;
 	}
 
 	@Override

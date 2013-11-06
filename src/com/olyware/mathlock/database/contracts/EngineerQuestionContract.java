@@ -8,7 +8,7 @@ public final class EngineerQuestionContract extends QuestionContract {
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, EngineerQuestionContract.VARIABLES,
-				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY };
+				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY, QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS };
 	}
 	static {
 		QUESTION_AND_PRIORITY = new String[] { QuestionContract.QUESTION_TEXT, EngineerQuestionContract.PRIORITY };

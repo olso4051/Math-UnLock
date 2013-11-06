@@ -43,8 +43,9 @@ public class MathQuestion extends Question {
 	private Random rand = new Random();
 
 	public MathQuestion(long id, String text, String image, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
-			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int answerPrecision, int priority) {
-		super(id, text, correctAnswer, difficulty, priority);
+			String incorrectAnswer3, Difficulty difficulty, ParseMode parseMode, String range, int answerPrecision, int priority,
+			int timeStep, int timeSteps) {
+		super(id, text, correctAnswer, difficulty, priority, timeStep, timeSteps);
 		this.image = image;
 		this.incorrectAnswer1 = incorrectAnswer1;
 		this.incorrectAnswer2 = incorrectAnswer2;

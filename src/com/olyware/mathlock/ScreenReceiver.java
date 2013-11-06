@@ -24,6 +24,7 @@ public class ScreenReceiver extends BroadcastReceiver {
 		boolean screenOn = action.equals(Intent.ACTION_SCREEN_ON);
 		boolean phoneStateChange = action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		final boolean lockscreen = sharedPrefs.getBoolean("lockscreen", true);
 		int timeoutLoc = Integer.parseInt(sharedPrefs.getString("lockscreen2", "0"));
 		final long timeLast = sharedPrefs.getLong("timeout", 0);
 		long timeoutPeriod = 0;
@@ -52,13 +53,13 @@ public class ScreenReceiver extends BroadcastReceiver {
 		} else if (screenOff) {
 			if (!PhoneOn) {
 				if (timeLast + timeoutPeriod < currentTime) {
-					startMainActivity(ctx);
+					startMainActivity(ctx, lockscreen);
 				} else {
 					offTimer = new Timer();
 					offTimerTask = new TimerTask() {
 						@Override
 						public void run() {
-							startMainActivity(ctx);
+							startMainActivity(ctx, lockscreen);
 						}
 					};
 					offTimer.schedule(offTimerTask, timeLast + timeoutPeriod - currentTime);
@@ -68,12 +69,14 @@ public class ScreenReceiver extends BroadcastReceiver {
 		}
 	}
 
-	private void startMainActivity(Context ctx) {
-		Intent i = new Intent(ctx, MainActivity.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		i.putExtra("locked", true);
-		ctx.startActivity(i);
+	private void startMainActivity(Context ctx, boolean lockscreen) {
+		if (lockscreen) {
+			Intent i = new Intent(ctx, MainActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			i.putExtra("locked", true);
+			ctx.startActivity(i);
+		}
 	}
 }

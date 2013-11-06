@@ -6,7 +6,7 @@ public abstract class QuestionContract implements BaseContract {
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, QuestionContract.ANSWER_CORRECT,
-				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY };
+				QuestionContract.DIFFICULTY, QuestionContract.PRIORITY, QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS };
 	}
 
 	// COLUMN DEFS
@@ -32,4 +32,12 @@ public abstract class QuestionContract implements BaseContract {
 	 * Type : INTEGER default = 100
 	 */
 	public static final int DEFAULT_PRIORITY = 100;
+	/**
+	 * time in milliseconds Type : INTEGER
+	 */
+	public static final String TIME_STEP = "time_step";
+	/**
+	 * max score for question Type : INTEGER
+	 */
+	public static final String TIME_STEPS = "time_steps";
 }

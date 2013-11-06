@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
-import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
+import com.olyware.mathlock.database.contracts.HiqTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -97,6 +97,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			values.put(StatisticContract.CORRECT, cursorHelper.getString(StatisticContract.CORRECT));
 			values.put(StatisticContract.DIFFICULTY, cursorHelper.getInteger(StatisticContract.DIFFICULTY));
 			values.put(StatisticContract.TIME, cursorHelper.getLong(StatisticContract.TIME));
+			if (DATABASE_OLD_VERSION > 1)
+				values.put(StatisticContract.TIME, cursorHelper.getLong(StatisticContract.TIME2SOLVE));
 			newDB.insert(StatisticContract.TABLE_NAME, null, values);
 			cursor.moveToNext();
 			values.clear();
@@ -163,14 +165,18 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		}
 
 		// update priorities that have changed in the trivia table
-		where = HiqHTriviaQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
-		cursor = oldDB.query(HiqHTriviaQuestionContract.TABLE_NAME, HiqHTriviaQuestionContract.QUESTION_AND_PRIORITY, where, null, null,
-				null, null);
+		where = HiqTriviaQuestionContract.PRIORITY + " != " + QuestionContract.DEFAULT_PRIORITY;
+		String triviaTableNameOld;
+		if (DATABASE_OLD_VERSION == 1)
+			triviaTableNameOld = HiqTriviaQuestionContract.TABLE_NAME1;
+		else
+			triviaTableNameOld = HiqTriviaQuestionContract.TABLE_NAME2;
+		cursor = oldDB.query(triviaTableNameOld, HiqTriviaQuestionContract.QUESTION_AND_PRIORITY, where, null, null, null, null);
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
 			cursorHelper.setCursor(cursor);
 			String question = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
-			newDB.execSQL("UPDATE " + HiqHTriviaQuestionContract.TABLE_NAME + " SET " + HiqHTriviaQuestionContract.PRIORITY + "="
+			newDB.execSQL("UPDATE " + HiqTriviaQuestionContract.TABLE_NAME2 + " SET " + HiqTriviaQuestionContract.PRIORITY + "="
 					+ cursorHelper.getInteger(QuestionContract.PRIORITY) + " WHERE " + QuestionContract.QUESTION_TEXT + "='"
 					+ question.replaceAll("'", "''") + "'");
 			cursor.moveToNext();

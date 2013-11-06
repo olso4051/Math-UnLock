@@ -36,7 +36,7 @@ import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HiqHTriviaQuestion;
+import com.olyware.mathlock.model.HiqTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
@@ -60,7 +60,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int multiplier = 2, lowestAmount = 5, decreaseRate = 500, startingPmoney = 0, initialStreakToIncrease = 40;
+	final private int startingPmoney = 0, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 	private LinearLayout layout;
 	private Clock clock;
 	private TextView coins, worth;
-	private int questionWorthMax, questionWorth;
+	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500;
 	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
 	private AnswerView answerView;
@@ -364,8 +364,10 @@ public class MainActivity extends Activity {
 		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 				&& (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH))
 			displayRateShare();
-		else if (sharedPrefs.getBoolean("hints", true))
+		else if (sharedPrefs.getBoolean("hints", true)) {
+			setProblemAndAnswer();
 			displayHints(0, false);
+		}
 
 		// set image if it was set when the screen was off
 		setImage();
@@ -640,7 +642,7 @@ public class MainActivity extends Activity {
 			answerView.setAnswers(answersRandom, answerLoc);
 			joystick.setAnswers(answersRandom, answerLoc);
 			problem.setTextColor(defaultTextColor);
-			resetQuestionWorth(difficulty * multiplier + lowestAmount);
+			resetQuestionWorth(questionWorthMax);
 
 		} else {
 			answerView.resetGuess();
@@ -661,8 +663,7 @@ public class MainActivity extends Activity {
 
 	private void resetQuestionWorth(int value) {
 		startTime = System.currentTimeMillis();
-		questionWorthMax = value;
-		questionWorth = questionWorthMax;
+		questionWorth = value;
 		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
@@ -686,6 +687,8 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
+		questionWorthMax = question.getTimeSteps();
+		decreaseRate = question.getTimeStep();
 
 		if (!question.getImage().equals("none")) {
 			int id = getResources().getIdentifier(question.getImage(), "drawable", getPackageName());
@@ -706,6 +709,8 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
+		questionWorthMax = questions.get(0).getTimeSteps();
+		decreaseRate = questions.get(0).getTimeStep();
 
 		// Display the vocabulary question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -733,6 +738,8 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = questions.get(0).getDifficulty().getValue();
+		questionWorthMax = questions.get(0).getTimeSteps();
+		decreaseRate = questions.get(0).getTimeStep();
 
 		// Display the language question and answers
 		for (int i = 0; i < answers.length; i++) {
@@ -751,6 +758,8 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
+		questionWorthMax = question.getTimeSteps();
+		decreaseRate = question.getTimeStep();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -759,13 +768,15 @@ public class MainActivity extends Activity {
 
 	private boolean setHiqHTriviaProblem(Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.hiqh_trivia_table);
-		HiqHTriviaQuestion question = dbManager.getHiqHTriviaQuestion(min, max, ID);
+		HiqTriviaQuestion question = dbManager.getHiqTriviaQuestion(min, max, ID);
 		if (question == null)
 			return false;
 		ID = question.getID();
 
 		// Set the new difficulty based on what question was picked
 		difficulty = question.getDifficulty().getValue();
+		questionWorthMax = question.getTimeSteps();
+		decreaseRate = question.getTimeStep();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -781,6 +792,8 @@ public class MainActivity extends Activity {
 
 		// Set the new difficulty based on what question was picked
 		difficulty = 0;
+		questionWorthMax = question.getTimeSteps();
+		decreaseRate = question.getTimeStep();
 
 		problem.setText(question.getQuestionText());
 		answers = question.getAnswers();
@@ -810,23 +823,19 @@ public class MainActivity extends Activity {
 			answerView.setCorrectGuess(correctLoc);
 			joystick.setCorrectGuess(correctLoc);
 		} else {
+			answerView.setCorrectGuess(correctLoc);
+			joystick.setCorrectGuess(correctLoc);
+			dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
+					.currentTimeMillis(), startTime - System.currentTimeMillis()));
 			if (correct) {
-				answerView.setCorrectGuess(correctLoc);
-				joystick.setCorrectGuess(correctLoc);
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(true), Difficulty.fromValue(difficulty), System
-						.currentTimeMillis()));
 				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
-				answerView.setCorrectGuess(correctLoc);
-				joystick.setCorrectGuess(correctLoc);
 				answerView.setIncorrectGuess(guessLoc);
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
 				dMoney = Money.decreaseMoneyNoDebt(questionWorth);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(false), Difficulty.fromValue(difficulty), System
-						.currentTimeMillis()));
 				dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			}
 			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());

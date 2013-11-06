@@ -7,7 +7,7 @@ import android.database.Cursor;
 
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
-import com.olyware.mathlock.database.contracts.HiqHTriviaQuestionContract;
+import com.olyware.mathlock.database.contracts.HiqTriviaQuestionContract;
 import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -15,7 +15,7 @@ import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
-import com.olyware.mathlock.model.HiqHTriviaQuestion;
+import com.olyware.mathlock.model.HiqTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.MathQuestion.ParseMode;
@@ -68,10 +68,12 @@ public class DatabaseModelFactory {
 		String range = cursorHelper.getString(MathQuestionContract.RANGE);
 		int precision = cursorHelper.getInteger(MathQuestionContract.PRECISION);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
 		cursor.close();
 		cursorHelper.destroy();
 		return new MathQuestion(id, questionText, questionImage, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3,
-				difficulty, parseMode, range, precision, priority);
+				difficulty, parseMode, range, precision, priority, timeStep, timeSteps);
 	}
 
 	public static List<VocabQuestion> buildVocabQuestions(Cursor cursor, int weightSum, int numOfWrongs) {
@@ -96,8 +98,10 @@ public class DatabaseModelFactory {
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
 		// PartOfSpeech partOfSpeech = PartOfSpeech.fromValue(cursorHelper.getString(VocabQuestionContract.PART_OF_SPEECH));
-		VocabQuestion question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
+		VocabQuestion question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority, timeStep, timeSteps);
 		questions.add(question);
 		// get three more random question for the wrong answers
 		for (int i = 0; i < numOfWrongs; i++) {
@@ -109,8 +113,10 @@ public class DatabaseModelFactory {
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 				priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+				timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+				timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
 				// PartOfSpeech partOfSpeech = PartOfSpeech.fromValue(cursorHelper.getString(VocabQuestionContract.PART_OF_SPEECH));
-				question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority);
+				question = new VocabQuestion(id, questionText, correctAnswer, difficulty, null, priority, timeStep, timeSteps);
 				if (!questions.contains(question)) {
 					questions.add(question);	// add question then done for this iteration
 					break;
@@ -153,7 +159,9 @@ public class DatabaseModelFactory {
 		long id = cursorHelper.getLong(QuestionContract._ID);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-		LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
+		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
+		LanguageQuestion question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority, timeStep, timeSteps);
 		answers.add(correctAnswer);
 		questions.add(question);
 
@@ -167,7 +175,9 @@ public class DatabaseModelFactory {
 				difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				questionText = cursorHelper.getString(fromLanguage);
 				priority = cursorHelper.getInteger(fromLanguagePriority) + cursorHelper.getInteger(toLanguagePriority);
-				question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority);
+				timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+				timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
+				question = new LanguageQuestion(id, questionText, correctAnswer, difficulty, priority, timeStep, timeSteps);
 				if (!questions.contains(question) && !answers.contains(correctAnswer) && correctAnswer != null) {
 					answers.add(correctAnswer);
 					questions.add(question);	// add question then done for this iteration
@@ -200,12 +210,14 @@ public class DatabaseModelFactory {
 		String variables = cursorHelper.getString(EngineerQuestionContract.VARIABLES);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
 		cursor.close();
 		cursorHelper.destroy();
-		return new EngineerQuestion(id, questionText, variables, difficulty, priority);
+		return new EngineerQuestion(id, questionText, variables, difficulty, priority, timeStep, timeSteps);
 	}
 
-	public static HiqHTriviaQuestion buildHiqHTriviaQuestion(Cursor cursor, int weightSum) {
+	public static HiqTriviaQuestion buildHiqHTriviaQuestion(Cursor cursor, int weightSum) {
 		Random rand = new Random();
 		int selection = rand.nextInt(weightSum) + 1;
 		int cumulativeWeight = 0;
@@ -223,15 +235,17 @@ public class DatabaseModelFactory {
 		long id = cursorHelper.getLong(QuestionContract._ID);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
-		String incorrectAnswer1 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT1);
-		String incorrectAnswer2 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT2);
-		String incorrectAnswer3 = cursorHelper.getString(HiqHTriviaQuestionContract.ANSWER_INCORRECT3);
+		String incorrectAnswer1 = cursorHelper.getString(HiqTriviaQuestionContract.ANSWER_INCORRECT1);
+		String incorrectAnswer2 = cursorHelper.getString(HiqTriviaQuestionContract.ANSWER_INCORRECT2);
+		String incorrectAnswer3 = cursorHelper.getString(HiqTriviaQuestionContract.ANSWER_INCORRECT3);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
 		cursor.close();
 		cursorHelper.destroy();
-		return new HiqHTriviaQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
-				priority);
+		return new HiqTriviaQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
+				priority, timeStep, timeSteps);
 	}
 
 	public static CustomQuestion buildCustomQuestion(Cursor cursor, int weightSum) {
@@ -259,10 +273,12 @@ public class DatabaseModelFactory {
 		String incorrectAnswer3 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT3);
 		Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
+		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
 		cursor.close();
 		cursorHelper.destroy();
 		return new CustomQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
-				priority);
+				priority, timeStep, timeSteps);
 	}
 
 	public static List<CustomQuestion> buildAllCustomQuestions(Cursor cursor) {
@@ -283,7 +299,9 @@ public class DatabaseModelFactory {
 				wrong3 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT3);
 				Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-				questions.add(new CustomQuestion(id, text, answer, wrong1, wrong2, wrong3, difficulty, priority));
+				int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+				int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
+				questions.add(new CustomQuestion(id, text, answer, wrong1, wrong2, wrong3, difficulty, priority, timeStep, timeSteps));
 				cursor.moveToNext();
 			}
 			cursor.close();

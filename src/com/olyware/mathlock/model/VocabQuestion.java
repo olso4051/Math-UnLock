@@ -28,8 +28,9 @@ public class VocabQuestion extends Question {
 
 	PartOfSpeech partOfSpeech;
 
-	public VocabQuestion(long id, String text, String correctAnswer, Difficulty difficulty, PartOfSpeech partOfSpeech, int priority) {
-		super(id, text, correctAnswer, difficulty, priority);
+	public VocabQuestion(long id, String text, String correctAnswer, Difficulty difficulty, PartOfSpeech partOfSpeech, int priority,
+			int timeStep, int timeSteps) {
+		super(id, text, correctAnswer, difficulty, priority, timeStep, timeSteps);
 		this.partOfSpeech = partOfSpeech;
 	}
 

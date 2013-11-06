@@ -7,7 +7,7 @@ public final class StatisticContract extends QuestionContract {
 
 	static {
 		ALL_COLUMNS = new String[] { BaseContract._ID, StatisticContract.PACKAGE, StatisticContract.CORRECT, QuestionContract.DIFFICULTY,
-				StatisticContract.TIME };
+				StatisticContract.TIME, StatisticContract.TIME2SOLVE };
 	}
 
 	// COLUMN DEFS
@@ -22,7 +22,11 @@ public final class StatisticContract extends QuestionContract {
 	public static final String CORRECT = "correct";
 
 	/**
-	 * 1 - Easy 2 - Medium 3 - Hard Type : INTEGER
+	 * Type : INTEGER
 	 */
 	public static final String TIME = "time";
+	/**
+	 * Type : INTEGER
+	 */
+	public static final String TIME2SOLVE = "time_2_solve";
 }

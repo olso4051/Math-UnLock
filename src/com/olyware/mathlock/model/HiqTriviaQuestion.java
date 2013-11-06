@@ -1,12 +1,12 @@
 package com.olyware.mathlock.model;
 
-public class HiqHTriviaQuestion extends Question {
+public class HiqTriviaQuestion extends Question {
 
 	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
 
-	public HiqHTriviaQuestion(long id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
-			String incorrectAnswer3, Difficulty difficulty, int priority) {
-		super(id, text, correctAnswer, difficulty, priority);// not the right correct answer at this point
+	public HiqTriviaQuestion(long id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
+			String incorrectAnswer3, Difficulty difficulty, int priority, int timeStep, int timeSteps) {
+		super(id, text, correctAnswer, difficulty, priority, timeStep, timeSteps);// not the right correct answer at this point
 		this.incorrectAnswer1 = incorrectAnswer1;
 		this.incorrectAnswer2 = incorrectAnswer2;
 		this.incorrectAnswer3 = incorrectAnswer3;
@@ -34,7 +34,7 @@ public class HiqHTriviaQuestion extends Question {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HiqHTriviaQuestion other = (HiqHTriviaQuestion) obj;
+		HiqTriviaQuestion other = (HiqTriviaQuestion) obj;
 		if (incorrectAnswer1 == null) {
 			if (other.incorrectAnswer1 != null)
 				return false;

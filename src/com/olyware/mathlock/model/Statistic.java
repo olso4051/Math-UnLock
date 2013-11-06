@@ -2,17 +2,17 @@ package com.olyware.mathlock.model;
 
 public class Statistic {
 
-	String pack;
-	String correct;
+	String pack, correct;
 	Difficulty difficulty;
-	long time;
+	long time, time2Solve;
 
-	public Statistic(String pack, String correct, Difficulty difficulty, long time) {
+	public Statistic(String pack, String correct, Difficulty difficulty, long time, long time2Solve) {
 		super();
 		this.pack = pack;
 		this.correct = correct;
 		this.difficulty = difficulty;
 		this.time = time;
+		this.time2Solve = time2Solve;
 	}
 
 	public void setPack(String pack) {
@@ -31,6 +31,10 @@ public class Statistic {
 		this.time = time;
 	}
 
+	public void setTime2Solve(long time2Solve) {
+		this.time2Solve = time2Solve;
+	}
+
 	public String getPack() {
 		return pack;
 	}
@@ -45,6 +49,10 @@ public class Statistic {
 
 	public long getTime() {
 		return time;
+	}
+
+	public long getTime2Solve() {
+		return time2Solve;
 	}
 
 	@Override
