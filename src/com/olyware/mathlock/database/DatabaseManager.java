@@ -86,7 +86,10 @@ public class DatabaseManager {
 		cursor2.moveToFirst();
 		double sum = cursor2.getInt(0);
 		cursor2.close();
-		return sum / count;
+		if (count > 0)
+			return sum / count;
+		else
+			return 0;
 	}
 
 	public long addStat(Statistic stat) {
@@ -253,6 +256,9 @@ public class DatabaseManager {
 			values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
 			values.put(QuestionContract.DIFFICULTY, difficulty);
 			values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
+			values.put(QuestionContract.TIME_STEP, 0);
+			values.put(QuestionContract.TIME_STEPS, 0);
+			values.put(CustomQuestionContract.CATEGORY, question[5]);
 			return db.insert(CustomQuestionContract.TABLE_NAME, null, values);
 		} else
 			return -1;
@@ -269,6 +275,9 @@ public class DatabaseManager {
 			values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
 			values.put(QuestionContract.DIFFICULTY, difficulty);
 			values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
+			values.put(QuestionContract.TIME_STEP, 0);
+			values.put(QuestionContract.TIME_STEPS, 0);
+			values.put(CustomQuestionContract.CATEGORY, question[5]);
 			return db.update(CustomQuestionContract.TABLE_NAME, values, where, null);
 		} else
 			return 0;

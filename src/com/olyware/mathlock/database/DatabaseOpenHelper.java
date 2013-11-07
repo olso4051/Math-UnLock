@@ -197,6 +197,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 				values.put(CustomQuestionContract.ANSWER_INCORRECT3, cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT3));
 				values.put(QuestionContract.DIFFICULTY, cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				values.put(QuestionContract.PRIORITY, cursorHelper.getInteger(QuestionContract.PRIORITY));
+				values.put(QuestionContract.TIME_STEP, cursorHelper.getInteger(QuestionContract.TIME_STEP));
+				values.put(QuestionContract.TIME_STEPS, cursorHelper.getInteger(QuestionContract.TIME_STEPS));
+				values.put(CustomQuestionContract.CATEGORY, cursorHelper.getInteger(CustomQuestionContract.CATEGORY));
 				newDB.insert(CustomQuestionContract.TABLE_NAME, null, values);
 				cursor.moveToNext();
 				values.clear();

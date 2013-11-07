@@ -2,18 +2,23 @@ package com.olyware.mathlock.model;
 
 public class CustomQuestion extends Question {
 
-	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3;
+	private String incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, category;
 
 	public CustomQuestion(long id, String text, String correctAnswer, String incorrectAnswer1, String incorrectAnswer2,
-			String incorrectAnswer3, Difficulty difficulty, int priority, int timeStep, int timeSteps) {
+			String incorrectAnswer3, Difficulty difficulty, int priority, int timeStep, int timeSteps, String category) {
 		super(id, text, correctAnswer, difficulty, priority, timeStep, timeSteps);
 		this.incorrectAnswer1 = incorrectAnswer1;
 		this.incorrectAnswer2 = incorrectAnswer2;
 		this.incorrectAnswer3 = incorrectAnswer3;
+		this.category = category;
 	}
 
 	public String[] getAnswers() {
 		return new String[] { correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
+	}
+
+	public String getCategory() {
+		return category;
 	}
 
 	@Override

@@ -275,10 +275,11 @@ public class DatabaseModelFactory {
 		int priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
 		int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
 		int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
+		String category = cursorHelper.getString(CustomQuestionContract.CATEGORY);
 		cursor.close();
 		cursorHelper.destroy();
 		return new CustomQuestion(id, questionText, correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3, difficulty,
-				priority, timeStep, timeSteps);
+				priority, timeStep, timeSteps, category);
 	}
 
 	public static List<CustomQuestion> buildAllCustomQuestions(Cursor cursor) {
@@ -301,7 +302,9 @@ public class DatabaseModelFactory {
 				priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
 				int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
 				int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
-				questions.add(new CustomQuestion(id, text, answer, wrong1, wrong2, wrong3, difficulty, priority, timeStep, timeSteps));
+				String category = cursorHelper.getString(CustomQuestionContract.CATEGORY);
+				questions.add(new CustomQuestion(id, text, answer, wrong1, wrong2, wrong3, difficulty, priority, timeStep, timeSteps,
+						category));
 				cursor.moveToNext();
 			}
 			cursor.close();

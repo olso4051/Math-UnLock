@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -60,7 +61,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int startingPmoney = 0, initialStreakToIncrease = 40;
+	final private int startingPmoney = 10000, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -570,6 +571,7 @@ public class MainActivity extends Activity {
 					EnabledPackageKeys[count] = PackageKeys[i];
 					location[count] = i;
 					weights[count] = dbManager.getPriority(i, Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax), ID);
+					Log.d("test", "weight = " + weights[count]);
 					totalWeight += weights[count];
 					count++;
 				}

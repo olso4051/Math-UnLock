@@ -9,7 +9,7 @@ public final class CustomQuestionContract extends QuestionContract {
 		ALL_COLUMNS = new String[] { BaseContract._ID, QuestionContract.QUESTION_TEXT, QuestionContract.ANSWER_CORRECT,
 				CustomQuestionContract.ANSWER_INCORRECT1, CustomQuestionContract.ANSWER_INCORRECT2,
 				CustomQuestionContract.ANSWER_INCORRECT3, QuestionContract.DIFFICULTY, CustomQuestionContract.PRIORITY,
-				QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS };
+				QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS, CustomQuestionContract.CATEGORY };
 	}
 
 	// COLUMN DEFS
@@ -25,6 +25,10 @@ public final class CustomQuestionContract extends QuestionContract {
 	 * Type: TEXT
 	 */
 	public static final String ANSWER_INCORRECT3 = "answer_incorrect3";
+	/**
+	 * Type: TEXT
+	 */
+	public static final String CATEGORY = "category";
 
 	// Prevent instantiation of this class
 	private CustomQuestionContract() {
