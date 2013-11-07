@@ -37,11 +37,11 @@ public class ShowProgressActivity extends Activity {
 	private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
 	private GraphView graphView;
-	private String[] unlockPackageKeys, displayPackageKeys, EggKeys;
+	private String[] unlockPackageKeys, EggKeys;
 	private int[] EggMaxValues;
 	private String[] times;
 	private long[] oldestTimes = { System.currentTimeMillis(), 31536000000l, 15768000000l, 2628000000l, 604800000l, 86400000l };
-	private List<String> packages;
+	private List<String> packages, customCategories, displayPackageKeys, displayCustomPackageKeys;
 	private String[] difficulties = new String[Difficulty.getSize() + 1];	// +1 for all difficulties
 	private String selectedPackage, selectedDifficulty;
 
@@ -57,9 +57,13 @@ public class ShowProgressActivity extends Activity {
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
 		dbManager = new DatabaseManager(getApplicationContext());
+		customCategories = dbManager.getAllCustomCategories();
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		displayPackageKeys = getResources().getStringArray(R.array.display_packages);
+		displayPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
+		displayCustomPackageKeys = EZ.list();
+		for (String cat : customCategories)
+			displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
 		times = getResources().getStringArray(R.array.times);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
@@ -210,16 +214,19 @@ public class ShowProgressActivity extends Activity {
 
 	private List<String> getUnlockedPackages() {
 		List<String> list = new ArrayList<String>();
-		if (sharedPrefsMoney.getBoolean("unlock_all", false))
-			for (int i = 0; i < unlockPackageKeys.length; i++) {
-				list.add(displayPackageKeys[i]);
+		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
+			for (int i = 0; i < unlockPackageKeys.length - 1; i++) {
+				list.add(displayPackageKeys.get(i));
 			}
-		else {
-			list.add(displayPackageKeys[0]);
-			for (int i = 1; i < unlockPackageKeys.length; i++) {
+			list.addAll(displayCustomPackageKeys);
+		} else {
+			list.add(displayPackageKeys.get(0));
+			for (int i = 1; i < unlockPackageKeys.length - 1; i++) {
 				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
-					list.add(displayPackageKeys[i]);
+					list.add(displayPackageKeys.get(i));
 			}
+			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[unlockPackageKeys.length - 1], false))
+				list.addAll(displayCustomPackageKeys);
 		}
 		return list;
 	}

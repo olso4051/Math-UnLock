@@ -46,49 +46,67 @@ public class DatabaseManager {
 		}
 	}
 
-	public double getPriority(int table, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
+	public double getPriority(int table, String fromLanguage, String toLanguage, Difficulty minDifficulty, Difficulty maxDifficulty,
+			long notID) {
 		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
-				+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
+				+ String.valueOf(minDifficulty.getValue());
+		String priorities = QuestionContract.PRIORITY;
+		// String notIDs = " AND " + BaseContract._ID + " != " + notID;
 		String tableName, allColumns[];
+		List<String> cats = getAllCustomCategories();
+		boolean success;
 		switch (table) {
 		case 0:			// math question
 			tableName = MathQuestionContract.TABLE_NAME;
 			allColumns = MathQuestionContract.ALL_COLUMNS;
+			success = true;
 			break;
 		case 1:			// vocabulary question
 			tableName = VocabQuestionContract.TABLE_NAME;
 			allColumns = VocabQuestionContract.ALL_COLUMNS;
+			success = true;
 			break;
 		case 2:			// language question
 			tableName = LanguageQuestionContract.TABLE_NAME;
 			allColumns = LanguageQuestionContract.ALL_COLUMNS;
+			priorities = fromLanguage + LanguageQuestionContract.PRIORITIES + " + " + toLanguage + LanguageQuestionContract.PRIORITIES;
+			success = true;
 			break;
 		case 3:			// engineer question
 			tableName = EngineerQuestionContract.TABLE_NAME;
 			allColumns = EngineerQuestionContract.ALL_COLUMNS;
+			success = true;
 			break;
 		case 4:			// HiqH Trivia question
 			tableName = HiqTriviaQuestionContract.TABLE_NAME2;
 			allColumns = HiqTriviaQuestionContract.ALL_COLUMNS;
-			break;
-		case 5:			// Custom question
-			tableName = CustomQuestionContract.TABLE_NAME;
-			allColumns = CustomQuestionContract.ALL_COLUMNS;
+			success = true;
 			break;
 		default:
 			tableName = MathQuestionContract.TABLE_NAME;
 			allColumns = MathQuestionContract.ALL_COLUMNS;
+			success = false;
 			break;
 		}
-		Cursor cursor2 = db.query(tableName, allColumns, where, null, null, null, null);
-		double count = cursor2.getCount();
-		cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + tableName + " WHERE " + where, null);
-		cursor2.moveToFirst();
-		double sum = cursor2.getInt(0);
-		cursor2.close();
-		if (count > 0)
-			return sum / count;
-		else
+		// Custom question
+		if ((table > 4) && (table < 5 + cats.size())) {
+			tableName = CustomQuestionContract.TABLE_NAME;
+			allColumns = CustomQuestionContract.ALL_COLUMNS;
+			where = where + " AND " + CustomQuestionContract.CATEGORY + " = '" + cats.get(table - 5).replaceAll("'", "''") + "'";
+			success = true;
+		}
+		if (success) {
+			Cursor cursor2 = db.query(tableName, allColumns, where, null, null, null, null);
+			double count = cursor2.getCount();
+			cursor2 = db.rawQuery("SELECT SUM(" + priorities + ") FROM " + tableName + " WHERE " + where, null);
+			cursor2.moveToFirst();
+			double sum = cursor2.getInt(0);
+			cursor2.close();
+			if (count > 0)
+				return sum / count;
+			else
+				return 0;
+		} else
 			return 0;
 	}
 
@@ -161,7 +179,7 @@ public class DatabaseManager {
 					+ String.valueOf(minDifficulty.getValue()) + " AND " + fromLanguage + "!=" + toLanguage + " AND " + BaseContract._ID
 					+ " != " + notID;
 			String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
-					QuestionContract._ID };
+					QuestionContract._ID, QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS };
 			cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 
 			Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
@@ -206,11 +224,14 @@ public class DatabaseManager {
 			return null;
 	}
 
-	public CustomQuestion getCustomQuestion(Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
+	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		if (db.isOpen()) {
 			String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
-					+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-			cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+					+ String.valueOf(minDifficulty.getValue()) + " AND " + CustomQuestionContract.CATEGORY + " = '"
+					+ category.replaceAll("'", "''") + "'";
+			String notIDs = " AND " + BaseContract._ID + " != " + notID;
+			cursor = db
+					.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where + notIDs, null, null, null, null);
 
 			int sum = 0;
 			if (cursor.getCount() > 0) {
@@ -220,8 +241,17 @@ public class DatabaseManager {
 				sum = cursor2.getInt(0);
 				cursor2.close();
 			} else {
-				where = "difficulty == " + "-1";
 				cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+				if (cursor.getCount() > 0) {
+					Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + CustomQuestionContract.TABLE_NAME
+							+ " WHERE " + where, null);
+					cursor2.moveToFirst();
+					sum = cursor2.getInt(0);
+					cursor2.close();
+				} else {
+					where = "difficulty == " + "-1";
+					cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+				}
 			}
 			return DatabaseModelFactory.buildCustomQuestion(cursor, sum);
 		} else
@@ -234,6 +264,16 @@ public class DatabaseManager {
 			String[] columns = CustomQuestionContract.ALL_COLUMNS;
 			cursor = db.query(CustomQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
 			return DatabaseModelFactory.buildAllCustomQuestions(cursor);
+		} else
+			return null;
+	}
+
+	public List<String> getAllCustomCategories() {
+		if (db.isOpen()) {
+			String where = " WHERE difficulty >= " + 0;
+			String sql = "SELECT distinct " + CustomQuestionContract.CATEGORY + " FROM " + CustomQuestionContract.TABLE_NAME;
+			cursor = db.rawQuery(sql + where, null);
+			return DatabaseModelFactory.buildAllCustomCategories(cursor);
 		} else
 			return null;
 	}

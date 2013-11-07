@@ -339,7 +339,7 @@ public class ShowStoreActivity extends Activity {
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
 		// enables the question pack that was unlocked
-		else if (product <= unlockPackageKeys.length - 1)				// if false then product is an extra
+		else if (product <= unlockPackageKeys.length - 2)				// if false then product is custom or an extra
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
 		// enables the rotating slide extra
 		else if (product == 7) {

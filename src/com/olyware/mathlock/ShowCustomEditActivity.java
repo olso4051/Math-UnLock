@@ -276,10 +276,13 @@ public class ShowCustomEditActivity extends Activity {
 			category.setOnItemSelectedListener(new OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-					if (pos == categories.size() - 1)
+					if (pos == categories.size() - 1) {
 						inputs[5].setEnabled(true);
-					else
+						inputs[5].setText("");
+					} else {
 						inputs[5].setEnabled(false);
+						inputs[5].setText(category.getSelectedItem().toString());
+					}
 				}
 
 				@Override
@@ -296,7 +299,7 @@ public class ShowCustomEditActivity extends Activity {
 				category.setSelection(categories.indexOf(questionData.get(positionFinal).getCategory()));
 			} else {
 				difficulty.setSelection(0);
-				category.setSelection(0);
+				category.setSelection(adapterCategories.getCount() - 1);
 				inputs[5].setEnabled(true);
 			}
 
@@ -305,18 +308,14 @@ public class ShowCustomEditActivity extends Activity {
 			done.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String cat;
-					if (category.getSelectedItemPosition() == categories.size() - 1)
-						cat = inputs[5].getText().toString();
-					else
-						cat = category.getSelectedItem().toString();
 					if (addButtonTextFinal.equals(getString(R.string.add)))
 						addCustomQuestion(inputs[0].getText().toString(), inputs[1].getText().toString(), inputs[2].getText().toString(),
-								inputs[3].getText().toString(), inputs[4].getText().toString(), difficulty.getSelectedItemPosition(), cat);
+								inputs[3].getText().toString(), inputs[4].getText().toString(), difficulty.getSelectedItemPosition(),
+								inputs[5].getText().toString());
 					else if (addButtonTextFinal.equals(getString(R.string.update)))
 						updateCustomQuestion(positionFinal, inputs[0].getText().toString(), inputs[1].getText().toString(), inputs[2]
 								.getText().toString(), inputs[3].getText().toString(), inputs[4].getText().toString(), difficulty
-								.getSelectedItemPosition(), cat);
+								.getSelectedItemPosition(), inputs[5].getText().toString());
 				}
 			});
 			cancel = (Button) findViewById(R.id.cancel);
@@ -397,18 +396,20 @@ public class ShowCustomEditActivity extends Activity {
 	}
 
 	private boolean testQuestion(String[] question) {
-		boolean tooLongShort[] = new boolean[] { false, false, false, false, false };
+		boolean tooLongShort[] = new boolean[question.length];// { false, false, false, false, false, false };
 		boolean same = false;
 		List<String> q = new ArrayList<String>();
 		for (int i = 0; i < question.length; i++) {
 			if ((question[i].length() > MAX_LENGTH) || (question[i].length() == 0))
 				tooLongShort[i] = true;
-			if (i > 0)
+			else
+				tooLongShort[i] = false;
+			if ((i > 0) && (i < 5))
 				if (q.contains(question[i]))
 					same = true;
 			q.add(question[i]);
 		}
-		if (tooLongShort[0] || tooLongShort[1] || tooLongShort[2] || tooLongShort[3] || tooLongShort[4]) {
+		if (tooLongShort[0] || tooLongShort[1] || tooLongShort[2] || tooLongShort[3] || tooLongShort[4] || tooLongShort[5]) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.input_error);
 			builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));

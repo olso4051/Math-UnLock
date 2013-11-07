@@ -288,8 +288,8 @@ public class DatabaseModelFactory {
 			cursor.moveToFirst();
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			long id;
-			int priority;
-			String text, answer, wrong1, wrong2, wrong3;
+			int priority, timeStep, timeSteps;
+			String text, answer, wrong1, wrong2, wrong3, category;
 			while (!cursor.isAfterLast()) {
 				cursorHelper.setCursor(cursor);
 				id = cursorHelper.getLong(QuestionContract._ID);
@@ -300,9 +300,9 @@ public class DatabaseModelFactory {
 				wrong3 = cursorHelper.getString(CustomQuestionContract.ANSWER_INCORRECT3);
 				Difficulty difficulty = Difficulty.fromValue(cursorHelper.getInteger(QuestionContract.DIFFICULTY));
 				priority = cursorHelper.getInteger(QuestionContract.PRIORITY);
-				int timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
-				int timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
-				String category = cursorHelper.getString(CustomQuestionContract.CATEGORY);
+				timeStep = cursorHelper.getInteger(QuestionContract.TIME_STEP);
+				timeSteps = cursorHelper.getInteger(QuestionContract.TIME_STEPS);
+				category = cursorHelper.getString(CustomQuestionContract.CATEGORY);
 				questions.add(new CustomQuestion(id, text, answer, wrong1, wrong2, wrong3, difficulty, priority, timeStep, timeSteps,
 						category));
 				cursor.moveToNext();
@@ -311,5 +311,21 @@ public class DatabaseModelFactory {
 			cursorHelper.destroy();
 		}
 		return questions;
+	}
+
+	public static List<String> buildAllCustomCategories(Cursor cursor) {
+		List<String> categories = EZ.list();
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			while (!cursor.isAfterLast()) {
+				cursorHelper.setCursor(cursor);
+				categories.add(cursorHelper.getString(CustomQuestionContract.CATEGORY));
+				cursor.moveToNext();
+			}
+			cursor.close();
+			cursorHelper.destroy();
+		}
+		return categories;
 	}
 }

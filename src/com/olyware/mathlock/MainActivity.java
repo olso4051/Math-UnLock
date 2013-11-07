@@ -81,7 +81,8 @@ public class MainActivity extends Activity {
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private String[] PackageKeys, unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
+	private List<String> customCategories, PackageKeys;
+	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
 	private long ID = 0;
@@ -197,14 +198,18 @@ public class MainActivity extends Activity {
 
 		mHandler = new Handler();
 		dbManager = new DatabaseManager(getApplicationContext());
+		customCategories = dbManager.getAllCustomCategories();
 
-		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
+		LanguageEntries = getResources().getStringArray(R.array.language_entries);
+		PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+		for (String cat : customCategories)
+			PackageKeys.add(getString(R.string.custom_enable) + cat);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 		hints = getResources().getStringArray(R.array.hints);
-		EnabledPacks = new boolean[PackageKeys.length];
+		EnabledPacks = new boolean[PackageKeys.size()];
 
 		clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
 
@@ -273,6 +278,9 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < EnabledPacks.length; i++)
 			EnabledPacks[i] = false;
 
+		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
+		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
 		getEnabledPackages();
@@ -336,11 +344,15 @@ public class MainActivity extends Activity {
 		// set the unlock type
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 
-		// get the localized language entries
-		LanguageEntries = getResources().getStringArray(R.array.language_entries);
-
 		// reset attempts to first attempt
 		attempts = 1;
+
+		customCategories.clear();
+		PackageKeys.clear();
+		customCategories = dbManager.getAllCustomCategories();
+		PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+		for (String cat : customCategories)
+			PackageKeys.add(getString(R.string.custom_enable) + cat);
 
 		// get unlocked and enabled item changes
 		getEnabledPackages();
@@ -566,11 +578,12 @@ public class MainActivity extends Activity {
 			difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
 			difficulty = difficultyMax;
 
-			for (int i = 0; i < PackageKeys.length; i++) {
-				if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
-					EnabledPackageKeys[count] = PackageKeys[i];
+			for (int i = 0; i < PackageKeys.size(); i++) {
+				if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
+					EnabledPackageKeys[count] = PackageKeys.get(i);
 					location[count] = i;
-					weights[count] = dbManager.getPriority(i, Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax), ID);
+					weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
+							Difficulty.fromValue(difficultyMax), ID);
 					Log.d("test", "weight = " + weights[count]);
 					totalWeight += weights[count];
 					count++;
@@ -588,11 +601,12 @@ public class MainActivity extends Activity {
 
 			// pick a random enabled package
 			int randPack = rand.nextInt((int) Math.floor(totalWeight));
+			Log.d("rand test", "randPack = " + randPack);
 			count = 0;
 			double cumulativeWeight = 0;
 			while (count < EnabledPackages) {
 				cumulativeWeight += weights[count];
-				if (cumulativeWeight >= randPack) {
+				if (cumulativeWeight > randPack) {
 					break;
 				}
 				count++;
@@ -619,16 +633,21 @@ public class MainActivity extends Activity {
 				currentPack = getString(R.string.hiqh_trivia);
 				success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 				break;
-			case 5:			// Custom question
-				currentPack = getString(R.string.custom);
-				success = setCustomProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-				break;
 			default:
 				success = false;
 				break;
 			}
-			if (!success)
-				return;
+			if (!success) {
+				// custom question
+				if ((location[count] > 4) && (location[count] < PackageKeys.size())) {
+					currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 5);
+					success = setCustomProblem(customCategories.get(location[count] - 5), Difficulty.fromValue(difficultyMin),
+							Difficulty.fromValue(difficultyMax));
+				}
+				// failed to load a question
+				if (!success)
+					return;
+			}
 
 			answerLoc = rand.nextInt(4);			// set a random location for the correct answer
 			int offset = 1;
@@ -769,7 +788,7 @@ public class MainActivity extends Activity {
 	}
 
 	private boolean setHiqHTriviaProblem(Difficulty min, Difficulty max) {
-		currentTableName = getString(R.string.hiqh_trivia_table);
+		currentTableName = getString(R.string.hiq_trivia_table);
 		HiqTriviaQuestion question = dbManager.getHiqTriviaQuestion(min, max, ID);
 		if (question == null)
 			return false;
@@ -785,9 +804,9 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	private boolean setCustomProblem(Difficulty min, Difficulty max) {
+	private boolean setCustomProblem(String category, Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.custom_table);
-		CustomQuestion question = dbManager.getCustomQuestion(min, max, ID);
+		CustomQuestion question = dbManager.getCustomQuestion(category, min, max, ID);
 		if (question == null)
 			return false;
 		ID = question.getID();
@@ -810,8 +829,8 @@ public class MainActivity extends Activity {
 				UnlockedPackages = true;
 			}
 
-		for (int i = 0; i < PackageKeys.length; i++) {
-			if (sharedPrefs.getBoolean(PackageKeys[i], false)) {
+		for (int i = 0; i < PackageKeys.size(); i++) {
+			if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
 				EnabledPacks[i] = true;
 				count++;
 			} else

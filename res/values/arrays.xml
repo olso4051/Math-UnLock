@@ -164,14 +164,14 @@
 	<string name="vocab_table">t_vocab_question</string>
     <string name="language_table">t_language_question</string>
     <string name="engineer_table">t_engineer_question</string>
-    <string name="hiqh_trivia_table">t_hiqh_trivia_question</string>
+    <string name="hiq_trivia_table">t_hiq_trivia_question</string>
     <string name="custom_table">t_custom_question</string>
     <string-array name="table_names">
         <item name="math">@string/math_table</item>
         <item name="vocab">@string/vocab_table</item>
         <item name="language">@string/language_table</item>
         <item name="engineer">@string/engineer_table</item>
-        <item name="hiqh_trivia">@string/hiqh_trivia_table</item>
+        <item name="hiqh_trivia">@string/hiq_trivia_table</item>
         <item name="custom_trivia">@string/custom_table</item>
     </string-array>
     
@@ -199,13 +199,14 @@
         <item>1000</item>
         <item>1000</item>
     </integer-array>
+    <string name="custom_enable">enable_custom_</string>
     <string-array name="enable_package_keys">
         <item>enable_math</item>
         <item>enable_vocab</item>
         <item>enable_language</item>
 		<item>enable_engineer</item>
 		<item>enable_hiqh_trivia</item>
-		<item>enable_custom</item>
+		<!-- <item>enable_custom</item> -->
     </string-array>
 
     <string name="all">All</string>
@@ -222,7 +223,7 @@
         <item>@string/language</item>
 		<item>@string/engineer</item>
 		<item>@string/hiqh_trivia</item>
-		<item>@string/custom</item>
+		<!-- <item>@string/custom</item> -->
     </string-array>
     <string-array name="settings_keys">
         <item>settings_math</item>

@@ -1,22 +1,29 @@
 package com.olyware.mathlock;
 
+import java.util.List;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.view.WindowManager;
 
+import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
+	private List<String> categories;
 	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff, lockscreen2;
+	private DatabaseManager dbManager;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -28,6 +35,9 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+
+		dbManager = new DatabaseManager(getApplicationContext());
+		categories = dbManager.getAllCustomCategories();
 
 		SharedPreferences sharedPrefs = getPreferenceScreen().getSharedPreferences();
 		SharedPreferences sharedPrefsMoney = this.getSharedPreferences("Packages", 0);
@@ -74,7 +84,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		// enable settings for unlocked packages
 		for (int i = 1; i < unlockAllKeys.length; i++) {
 			Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
-			Preference Pref_Packages2 = findPreference(settingsPackageKeys[i - 1] + "2");
+			// Preference Pref_Packages2 = findPreference(settingsPackageKeys[i - 1] + "2");
 			boolean set = false;
 			if (i < unlockPackageKeys.length)
 				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
@@ -87,8 +97,19 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				set = Pref_Packages.isEnabled();
 
 			Pref_Packages.setEnabled(set);
-			if (Pref_Packages2 != null)
-				Pref_Packages2.setEnabled(set);
+			// if (Pref_Packages2 != null)
+			// Pref_Packages2.setEnabled(set);
+			if (settingsPackageKeys[i - 1].equals("settings_custom") && (categories.size() > 0)) {
+				PreferenceCategory customSettingsCategory = (PreferenceCategory) Pref_Packages;
+				for (String cat : categories) {
+					CheckBoxPreference pref = new CheckBoxPreference(this);
+					pref.setKey(getString(R.string.custom_enable) + cat);
+					pref.setTitle(getString(R.string.enable));
+					pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
+					customSettingsCategory.addPreference(pref);
+				}
+				// findPreference(settingsPackageKeys[i - 1] + "2").setEnabled(set);
+			}
 		}
 	}
 
