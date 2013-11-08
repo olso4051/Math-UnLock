@@ -225,13 +225,14 @@
 		<item>@string/hiqh_trivia</item>
 		<!-- <item>@string/custom</item> -->
     </string-array>
+    <string name="custom_settings">settings_custom</string>
     <string-array name="settings_keys">
         <item>settings_math</item>
         <item>settings_vocab</item>
         <item>settings_language</item>
 		<item>settings_engineer</item>
 		<item>settings_hiqh_trivia</item>
-		<item>settings_custom</item>
+		<item>@string/custom_settings</item>
 		<item>type</item>
 		<item>type</item>
     </string-array>

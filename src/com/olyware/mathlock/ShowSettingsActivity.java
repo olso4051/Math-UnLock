@@ -99,7 +99,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			Pref_Packages.setEnabled(set);
 			// if (Pref_Packages2 != null)
 			// Pref_Packages2.setEnabled(set);
-			if (settingsPackageKeys[i - 1].equals("settings_custom") && (categories.size() > 0)) {
+			if (settingsPackageKeys[i - 1].equals(getString(R.string.custom_settings)) && (categories.size() > 0)) {
 				PreferenceCategory customSettingsCategory = (PreferenceCategory) Pref_Packages;
 				for (String cat : categories) {
 					CheckBoxPreference pref = new CheckBoxPreference(this);
@@ -150,6 +150,17 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	protected void onResume() {
 		super.onResume();
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+		categories = dbManager.getAllCustomCategories();
+		PreferenceCategory prefCat = (PreferenceCategory) findPreference(getString(R.string.custom_settings));
+		for (String cat : categories) {
+			if (prefCat.findPreference(getString(R.string.custom_enable) + cat) == null) {
+				CheckBoxPreference pref = new CheckBoxPreference(this);
+				pref.setKey(getString(R.string.custom_enable) + cat);
+				pref.setTitle(getString(R.string.enable));
+				pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
+				prefCat.addPreference(pref);
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")

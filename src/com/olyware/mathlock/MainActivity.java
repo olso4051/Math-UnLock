@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -61,7 +60,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int startingPmoney = 10000, initialStreakToIncrease = 40;
+	final private int startingPmoney = 0, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -88,7 +87,6 @@ public class MainActivity extends Activity {
 	private long ID = 0;
 
 	private int EnabledPackages = 0;
-	private boolean EnabledPacks[];
 	private boolean locked, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false;
 	final private long MONTH = 2592000000l;
@@ -209,7 +207,6 @@ public class MainActivity extends Activity {
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 		hints = getResources().getStringArray(R.array.hints);
-		EnabledPacks = new boolean[PackageKeys.size()];
 
 		clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
 
@@ -275,15 +272,14 @@ public class MainActivity extends Activity {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		editorPrefsStats = sharedPrefsStats.edit();
-		for (int i = 0; i < EnabledPacks.length; i++)
-			EnabledPacks[i] = false;
 
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
-		getEnabledPackages();
+		UnlockedPackages = getUnlockedPackages();
+		EnabledPackages = getEnabledPackages();
 		setProblemAndAnswer();
 	}
 
@@ -355,7 +351,8 @@ public class MainActivity extends Activity {
 			PackageKeys.add(getString(R.string.custom_enable) + cat);
 
 		// get unlocked and enabled item changes
-		getEnabledPackages();
+		UnlockedPackages = getUnlockedPackages();
+		EnabledPackages = getEnabledPackages();
 
 		// start background service to wait for screen to turn off
 		Intent sIntent = new Intent(this, ScreenService.class);
@@ -584,7 +581,6 @@ public class MainActivity extends Activity {
 					location[count] = i;
 					weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
 							Difficulty.fromValue(difficultyMax), ID);
-					Log.d("test", "weight = " + weights[count]);
 					totalWeight += weights[count];
 					count++;
 				}
@@ -601,7 +597,6 @@ public class MainActivity extends Activity {
 
 			// pick a random enabled package
 			int randPack = rand.nextInt((int) Math.floor(totalWeight));
-			Log.d("rand test", "randPack = " + randPack);
 			count = 0;
 			double cumulativeWeight = 0;
 			while (count < EnabledPackages) {
@@ -821,22 +816,21 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	private void getEnabledPackages() {
-		int count = 0;
-
+	private boolean getUnlockedPackages() {
 		for (int i = 0; i < unlockPackageKeys.length; i++)
 			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
-				UnlockedPackages = true;
+				return true;
 			}
+		return false;
+	}
 
+	private int getEnabledPackages() {
+		int count = 0;
 		for (int i = 0; i < PackageKeys.size(); i++) {
-			if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
-				EnabledPacks[i] = true;
+			if (sharedPrefs.getBoolean(PackageKeys.get(i), false))
 				count++;
-			} else
-				EnabledPacks[i] = false;
 		}
-		EnabledPackages = count;
+		return count;
 	}
 
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
