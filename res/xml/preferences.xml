@@ -140,16 +140,6 @@
 		        android:title="@string/settings_custom_title"
 		        android:enabled="false"
 		        android:key="settings_custom">
-		        <!-- <CheckBoxPreference
-			        android:key="enable_custom"
-			        android:title="@string/enable"
-			        android:summary="@string/enable_custom_summary"
-			        android:defaultValue="false"/> -->
-		        <Preference android:title="@string/custom_pack_edit"
-				    android:enabled="false"
-				    android:key="settings_custom2" >
-				    <intent android:action="com.olyware.mathlock.ShowCustomEditActivity"/>
-				</Preference>
 			</PreferenceCategory>
 		</PreferenceScreen>
 	</PreferenceCategory>

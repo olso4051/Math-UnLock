@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -152,14 +153,21 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 		categories = dbManager.getAllCustomCategories();
 		PreferenceCategory prefCat = (PreferenceCategory) findPreference(getString(R.string.custom_settings));
+		prefCat.removeAll();
+		Preference customEdit = new Preference(this);
+		customEdit.setTitle(getString(R.string.custom_pack_edit));
+		customEdit.setKey("settings_custom2");
+		customEdit.setIntent(new Intent(this, ShowCustomEditActivity.class));
+		prefCat.addPreference(customEdit);
 		for (String cat : categories) {
-			if (prefCat.findPreference(getString(R.string.custom_enable) + cat) == null) {
-				CheckBoxPreference pref = new CheckBoxPreference(this);
-				pref.setKey(getString(R.string.custom_enable) + cat);
-				pref.setTitle(getString(R.string.enable));
-				pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
-				prefCat.addPreference(pref);
-			}
+			// if (prefCat.findPreference(getString(R.string.custom_enable) + cat) == null) {
+			CheckBoxPreference pref = new CheckBoxPreference(this);
+			pref.setKey(getString(R.string.custom_enable) + cat);
+			pref.setTitle(getString(R.string.enable));
+			pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
+			pref.setDefaultValue(false);
+			prefCat.addPreference(pref);
+			// }
 		}
 	}
 

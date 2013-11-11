@@ -226,31 +226,40 @@ public class DatabaseManager {
 
 	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
 		if (db.isOpen()) {
-			String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
-					+ String.valueOf(minDifficulty.getValue()) + " AND " + CustomQuestionContract.CATEGORY + " = '"
-					+ category.replaceAll("'", "''") + "'";
+			String diff = " AND difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+					+ String.valueOf(minDifficulty.getValue());
+			String where = CustomQuestionContract.CATEGORY + " = '" + category.replaceAll("'", "''") + "'";
 			String notIDs = " AND " + BaseContract._ID + " != " + notID;
-			cursor = db
-					.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where + notIDs, null, null, null, null);
+			cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where + diff + notIDs, null, null,
+					null, null);
 
 			int sum = 0;
 			if (cursor.getCount() > 0) {
 				Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + CustomQuestionContract.TABLE_NAME
-						+ " WHERE " + where, null);
+						+ " WHERE " + where + diff, null);
 				cursor2.moveToFirst();
 				sum = cursor2.getInt(0);
 				cursor2.close();
 			} else {
-				cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+				cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where + diff, null, null, null,
+						null);
 				if (cursor.getCount() > 0) {
 					Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + CustomQuestionContract.TABLE_NAME
-							+ " WHERE " + where, null);
+							+ " WHERE " + where + diff, null);
 					cursor2.moveToFirst();
 					sum = cursor2.getInt(0);
 					cursor2.close();
 				} else {
-					where = "difficulty == " + "-1";
 					cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+					if (cursor.getCount() > 0) {
+						where = "difficulty == " + "-2";
+						cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null,
+								null);
+					} else {
+						where = "difficulty == " + "-1";
+						cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null,
+								null);
+					}
 				}
 			}
 			return DatabaseModelFactory.buildCustomQuestion(cursor, sum);

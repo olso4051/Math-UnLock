@@ -1,6 +1,7 @@
 <resources>
 
     <string name="app_name">Hiq</string>
+    <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
 
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
@@ -143,7 +144,7 @@
     <string name="swipe_option">Slide Option Up to Select</string>
     <string name="swipe_screen">Swipe Here to Answer</string>
     <string name="swipe_unlock">Slide Lock to the Answer</string>
-    <string name="test_prep">Custom Packs\nComing Soon!</string>
+    <string name="test_prep">Test Prep Packs\nComing Soon!</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="input_error">Input Error!</string>
     <string name="type_default">0</string>

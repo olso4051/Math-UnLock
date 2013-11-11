@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
 	private long ID = 0;
 
 	private int EnabledPackages = 0;
-	private boolean locked, UnlockedPackages = false;
+	private boolean locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false;
 	final private long MONTH = 2592000000l;
 
@@ -132,12 +132,12 @@ public class MainActivity extends Activity {
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		paused = false;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		ctx = this;
 		locked = this.getIntent().getBooleanExtra("locked", false);
+		unlocking = locked;
 
 		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 		mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -292,12 +292,33 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	protected void onPause() {
+		paused = true;
+
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefs.edit().putLong("timeout", System.currentTimeMillis()).commit();
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		if (attached)
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		editorPrefsMoney.putInt("money", Money.getMoney());
+		editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
+		if (!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
+			editorPrefsMoney.putBoolean("dontShowLastTime", dontShow);
+		editorPrefsMoney.commit();
+
+		joystick.removeCallbacks();
+
+		super.onPause();
+	}
+
+	@Override
 	protected void onStop() {
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		joystick.removeCallbacks();
 
-		setProblemAndAnswer();
+		// setProblemAndAnswer();
 		super.onStop();
 	}
 
@@ -364,10 +385,13 @@ public class MainActivity extends Activity {
 
 		// setup the question and answers
 		// resetQuestionWorth(0);
-		startCountdown();
+		// startCountdown();
 		// resetTimer();
 		// if (changed)
-		// setProblemAndAnswer(0);
+		if (!unlocking)
+			setProblemAndAnswer();
+		else
+			startCountdown();
 
 		if (!UnlockedPackages)
 			displayInfo(true);
@@ -402,27 +426,6 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	protected void onPause() {
-		paused = true;
-
-		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPrefs.edit().putLong("timeout", System.currentTimeMillis()).commit();
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		editorPrefsMoney = sharedPrefsMoney.edit();
-		if (attached)
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		editorPrefsMoney.putInt("money", Money.getMoney());
-		editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
-		if (!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
-			editorPrefsMoney.putBoolean("dontShowLastTime", dontShow);
-		editorPrefsMoney.commit();
-
-		joystick.removeCallbacks();
-
-		super.onPause();
-	}
-
-	@Override
 	public void onBackPressed() {
 		if (locked && UnlockedPackages) {		// if locked then don't allow back button to exit app
 			return;
@@ -448,6 +451,7 @@ public class MainActivity extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		locked = intent.getBooleanExtra("locked", false);
+		unlocking = locked;
 	}
 
 	@Override
@@ -596,15 +600,19 @@ public class MainActivity extends Activity {
 			joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
 
 			// pick a random enabled package
-			int randPack = rand.nextInt((int) Math.floor(totalWeight));
-			count = 0;
-			double cumulativeWeight = 0;
-			while (count < EnabledPackages) {
-				cumulativeWeight += weights[count];
-				if (cumulativeWeight > randPack) {
-					break;
+			if (totalWeight == 0)
+				count = 0;
+			else {
+				int randPack = rand.nextInt((int) Math.floor(totalWeight));
+				count = 0;
+				double cumulativeWeight = 0;
+				while (count < EnabledPackages) {
+					cumulativeWeight += weights[count];
+					if (cumulativeWeight > randPack) {
+						break;
+					}
+					count++;
 				}
-				count++;
 			}
 
 			switch (location[count]) {
@@ -932,9 +940,11 @@ public class MainActivity extends Activity {
 			displayInfo(false);
 			break;
 		case 6:		// Store was selected
+			unlocking = false;
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case 7:		// progress was selected
+			unlocking = false;
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
@@ -943,6 +953,7 @@ public class MainActivity extends Activity {
 			break;
 		case 9:		// settings was selected
 			fromSettings = true;
+			unlocking = false;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
 		case 10:	// missed the lock button
