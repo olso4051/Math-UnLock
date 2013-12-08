@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -26,6 +27,26 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff, lockscreen2;
 	private DatabaseManager dbManager;
 
+	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
+		@Override
+		protected Void doInBackground(Void... voids) {
+			publishProgress(0);
+			dbManager = new DatabaseManager(getApplicationContext());
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onPostExecute(Void v) {
+			addCustomPreferences();
+			super.onPostExecute(null);
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +58,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 
-		dbManager = new DatabaseManager(getApplicationContext());
-		categories = dbManager.getAllCustomCategories();
+		new OpenDatabase().execute();
 
 		SharedPreferences sharedPrefs = getPreferenceScreen().getSharedPreferences();
 		SharedPreferences sharedPrefsMoney = this.getSharedPreferences("Packages", 0);
@@ -85,7 +105,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		// enable settings for unlocked packages
 		for (int i = 1; i < unlockAllKeys.length; i++) {
 			Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
-			// Preference Pref_Packages2 = findPreference(settingsPackageKeys[i - 1] + "2");
 			boolean set = false;
 			if (i < unlockPackageKeys.length)
 				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
@@ -98,19 +117,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				set = Pref_Packages.isEnabled();
 
 			Pref_Packages.setEnabled(set);
-			// if (Pref_Packages2 != null)
-			// Pref_Packages2.setEnabled(set);
-			if (settingsPackageKeys[i - 1].equals(getString(R.string.custom_settings)) && (categories.size() > 0)) {
-				PreferenceCategory customSettingsCategory = (PreferenceCategory) Pref_Packages;
-				for (String cat : categories) {
-					CheckBoxPreference pref = new CheckBoxPreference(this);
-					pref.setKey(getString(R.string.custom_enable) + cat);
-					pref.setTitle(getString(R.string.enable));
-					pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
-					customSettingsCategory.addPreference(pref);
-				}
-				// findPreference(settingsPackageKeys[i - 1] + "2").setEnabled(set);
-			}
 		}
 	}
 
@@ -146,29 +152,10 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onResume() {
 		super.onResume();
-		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-		categories = dbManager.getAllCustomCategories();
-		PreferenceCategory prefCat = (PreferenceCategory) findPreference(getString(R.string.custom_settings));
-		prefCat.removeAll();
-		Preference customEdit = new Preference(this);
-		customEdit.setTitle(getString(R.string.custom_pack_edit));
-		customEdit.setKey("settings_custom2");
-		customEdit.setIntent(new Intent(this, ShowCustomEditActivity.class));
-		prefCat.addPreference(customEdit);
-		for (String cat : categories) {
-			// if (prefCat.findPreference(getString(R.string.custom_enable) + cat) == null) {
-			CheckBoxPreference pref = new CheckBoxPreference(this);
-			pref.setKey(getString(R.string.custom_enable) + cat);
-			pref.setTitle(getString(R.string.enable));
-			pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
-			pref.setDefaultValue(false);
-			prefCat.addPreference(pref);
-			// }
-		}
+		addCustomPreferences();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -182,6 +169,29 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	public void onAttachedToWindow() {
 		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+	}
+
+	@SuppressWarnings("deprecation")
+	private void addCustomPreferences() {
+		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+		if (dbManager != null) {
+			PreferenceCategory prefCat = (PreferenceCategory) findPreference(getString(R.string.custom_settings));
+			prefCat.removeAll();
+			Preference customEdit = new Preference(this);
+			customEdit.setTitle(getString(R.string.custom_pack_edit));
+			customEdit.setKey("settings_custom2");
+			customEdit.setIntent(new Intent(this, ShowCustomEditActivity.class));
+			prefCat.addPreference(customEdit);
+			categories = dbManager.getAllCustomCategories();
+			for (String cat : categories) {
+				CheckBoxPreference pref = new CheckBoxPreference(this);
+				pref.setKey(getString(R.string.custom_enable) + cat);
+				pref.setTitle(getString(R.string.enable));
+				pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
+				pref.setDefaultValue(false);
+				prefCat.addPreference(pref);
+			}
+		}
 	}
 
 	private String typeIntToString(String key) {

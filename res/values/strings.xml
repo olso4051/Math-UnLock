@@ -6,6 +6,7 @@
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
     <string name="add_new_category">New Category</string>
+    <string name="add_new_pack">Import CSV</string>
     <string name="add_question">Add Question!</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
@@ -24,6 +25,7 @@
     <string name="custom_question_text">Question</string>
     <string name="custom_wrong_text">Incorrect Answer</string>
     <string name="date">Monday\nJanuary 1</string>
+    <string name="db_loading">Database Update in Progress</string>
     <string name="default_entry">0</string>
     <string name="default_money">0</string>
     <string name="delete">Delete</string>
@@ -109,6 +111,7 @@
     <string name="prompt_time">Time Scale</string>
     <string name="prompt_package">Package</string>
     <string name="prompt_difficulty">Difficulty</string>
+    <string name="purchase_package_custom_message">Are you sure you want to upload this question pack? It will cost up to</string>
     <string name="purchase_package_message">Are you sure you want to unlock this package?</string>
     <string name="purchased">Unlocked</string>
     <string name="quiz_mode">Quiz Mode?</string>

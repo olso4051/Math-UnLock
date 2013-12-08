@@ -19,13 +19,16 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.SoundEffectConstants;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -60,10 +63,11 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int startingPmoney = 0, initialStreakToIncrease = 40;
+	final private int startingPmoney = 20000, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
+	final private String[] answersNA = { "N/A", "N/A", "N/A", "N/A" }, answersNone = { "", "", "", "" };
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
@@ -129,6 +133,35 @@ public class MainActivity extends Activity {
 		return SKU;
 	}
 
+	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
+		@Override
+		protected Void doInBackground(Void... voids) {
+			Log.d("race", "doInBackground started");
+			dbManager = new DatabaseManager(getApplicationContext());
+			customCategories = dbManager.getAllCustomCategories();
+			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+			for (String cat : customCategories)
+				PackageKeys.add(getString(R.string.custom_enable) + cat);
+			UnlockedPackages = getUnlockedPackages();
+			EnabledPackages = getEnabledPackages();
+			Log.d("race", "doInBackground finished");
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onPostExecute(Void v) {
+			Log.d("race", "doInBackground onPostExecute started");
+			setProblemAndAnswer();
+			super.onPostExecute(null);
+			Log.d("race", "doInBackground onPostExecute finished");
+		}
+	}
+
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -138,6 +171,17 @@ public class MainActivity extends Activity {
 		ctx = this;
 		locked = this.getIntent().getBooleanExtra("locked", false);
 		unlocking = locked;
+
+		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsStats = sharedPrefsStats.edit();
+
+		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
+		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 
 		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 		mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -195,13 +239,9 @@ public class MainActivity extends Activity {
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
 		mHandler = new Handler();
-		dbManager = new DatabaseManager(getApplicationContext());
-		customCategories = dbManager.getAllCustomCategories();
 
-		LanguageEntries = getResources().getStringArray(R.array.language_entries);
 		PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-		for (String cat : customCategories)
-			PackageKeys.add(getString(R.string.custom_enable) + cat);
+		LanguageEntries = getResources().getStringArray(R.array.language_entries);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
@@ -265,22 +305,11 @@ public class MainActivity extends Activity {
 		};
 
 		apps = new ArrayList<ApplicationInfo>();
-		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		sharedPrefsStats = getSharedPreferences("Stats", 0);
-		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsStats = sharedPrefsStats.edit();
-
-		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
-		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
 
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
-		UnlockedPackages = getUnlockedPackages();
-		EnabledPackages = getEnabledPackages();
-		setProblemAndAnswer();
+
+		new OpenDatabase().execute();
 	}
 
 	@Override
@@ -300,7 +329,7 @@ public class MainActivity extends Activity {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		if (attached)
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		editorPrefsMoney.putInt("money", Money.getMoney());
 		editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
 		if (!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
@@ -336,6 +365,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		Log.d("race", "onResume started");
 		paused = false;
 		super.onResume();
 		if (locked && quizMode)
@@ -364,20 +394,20 @@ public class MainActivity extends Activity {
 		// reset attempts to first attempt
 		attempts = 1;
 
-		customCategories.clear();
-		PackageKeys.clear();
-		customCategories = dbManager.getAllCustomCategories();
-		PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-		for (String cat : customCategories)
-			PackageKeys.add(getString(R.string.custom_enable) + cat);
+		if (dbManager != null) {
+			customCategories = dbManager.getAllCustomCategories();
+			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+			for (String cat : customCategories)
+				PackageKeys.add(getString(R.string.custom_enable) + cat);
+		}
 
 		// get unlocked and enabled item changes
 		UnlockedPackages = getUnlockedPackages();
 		EnabledPackages = getEnabledPackages();
 
-		// start background service to wait for screen to turn off
+		// start background service to wait for screen to turn off. if service is already running startService does nothing
 		Intent sIntent = new Intent(this, ScreenService.class);
-		if ((EnabledPackages > 0) && (sharedPrefs.getBoolean("lockscreen", true))) {
+		if (((EnabledPackages > 0) || (dbManager == null)) && (sharedPrefs.getBoolean("lockscreen", true))) {
 			this.startService(sIntent);
 		} else {
 			this.stopService(sIntent);
@@ -423,6 +453,7 @@ public class MainActivity extends Activity {
 
 		// save money into shared preferences
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+		Log.d("race", "onResume finished");
 	}
 
 	@Override
@@ -566,7 +597,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setProblemAndAnswer() {
-		if (EnabledPackages > 0) {
+		if ((EnabledPackages > 0) && (dbManager != null)) {
 			joystick.setProblem(true);
 			final String EnabledPackageKeys[] = new String[EnabledPackages];
 			final int location[] = new int[EnabledPackages];
@@ -672,16 +703,18 @@ public class MainActivity extends Activity {
 			answerView.resetGuess();
 			joystick.resetGuess();
 			joystick.setProblem(false);
-			if (!UnlockedPackages)
+			if (!UnlockedPackages) {
 				problem.setText(R.string.none_unlocked);
-			else
+				answersRandom = answersNA;
+			} else if (dbManager == null) {
+				problem.setText(R.string.db_loading);
+				answersRandom = answersNone;
+			} else {
 				problem.setText(R.string.none_enabled);
-			String temp[] = { "N/A", "N/A", "N/A", "N/A" };
-			answersRandom = temp;
-			for (int i = 0; i < 4; i++) {
-				answerView.setAnswers(answersRandom, 0);
-				joystick.setAnswers(answersRandom, 0);
+				answersRandom = answersNA;
 			}
+			answerView.setAnswers(answersRandom, 0);
+			joystick.setAnswers(answersRandom, 0);
 		}
 	}
 
@@ -867,9 +900,12 @@ public class MainActivity extends Activity {
 
 	private void JoystickSelected(int s, boolean vibrate, int Extra) {
 		dialogOn = false;
-		if ((sharedPrefs.getBoolean("vibration", true) && vibrate)
-				&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
-			vib.vibrate(50);	// vibrate for 50ms
+		if (vibrate)
+			if (sharedPrefs.getBoolean("vibration", true)
+					&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
+				vib.vibrate(50);	// vibrate for 50ms
+			else
+				joystick.playSoundEffect(SoundEffectConstants.CLICK);
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
 		switch (s) {
 		case 0:		// A was selected

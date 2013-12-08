@@ -295,20 +295,37 @@ public class DatabaseManager {
 			return 0;
 	}
 
+	public long addCustomQuestion(String[] question) {
+		return addCustomQuestion(new String[] { question[0], question[1], question[2], question[3], question[4], question[5] },
+				Integer.parseInt(question[6]));
+	}
+
 	public long addCustomQuestion(String[] question, int difficulty) {
 		if (db.isOpen()) {
-			ContentValues values = new ContentValues();
-			values.put(QuestionContract.QUESTION_TEXT, question[0]);
-			values.put(QuestionContract.ANSWER_CORRECT, question[1]);
-			values.put(CustomQuestionContract.ANSWER_INCORRECT1, question[2]);
-			values.put(CustomQuestionContract.ANSWER_INCORRECT2, question[3]);
-			values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
-			values.put(QuestionContract.DIFFICULTY, difficulty);
-			values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
-			values.put(QuestionContract.TIME_STEP, 0);
-			values.put(QuestionContract.TIME_STEPS, 0);
-			values.put(CustomQuestionContract.CATEGORY, question[5]);
-			return db.insert(CustomQuestionContract.TABLE_NAME, null, values);
+			String select = "Select count(1) FROM " + CustomQuestionContract.TABLE_NAME;
+			String where = " WHERE " + QuestionContract.QUESTION_TEXT + " = '" + question[0].replaceAll("'", "''") + "'" + " AND "
+					+ QuestionContract.ANSWER_CORRECT + " = '" + question[1].replaceAll("'", "''") + "'" + " AND "
+					+ CustomQuestionContract.ANSWER_INCORRECT1 + " = '" + question[2].replaceAll("'", "''") + "'" + " AND "
+					+ CustomQuestionContract.ANSWER_INCORRECT2 + " = '" + question[3].replaceAll("'", "''") + "'" + " AND "
+					+ CustomQuestionContract.ANSWER_INCORRECT3 + " = '" + question[4].replaceAll("'", "''") + "'" + " AND "
+					+ CustomQuestionContract.CATEGORY + " = '" + question[5].replaceAll("'", "''") + "'";
+			cursor = db.rawQuery(select + where, null);
+			cursor.moveToFirst();
+			if (cursor.getInt(0) == 0) {
+				ContentValues values = new ContentValues();
+				values.put(QuestionContract.QUESTION_TEXT, question[0]);
+				values.put(QuestionContract.ANSWER_CORRECT, question[1]);
+				values.put(CustomQuestionContract.ANSWER_INCORRECT1, question[2]);
+				values.put(CustomQuestionContract.ANSWER_INCORRECT2, question[3]);
+				values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
+				values.put(QuestionContract.DIFFICULTY, difficulty);
+				values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
+				values.put(QuestionContract.TIME_STEP, 0);
+				values.put(QuestionContract.TIME_STEPS, 0);
+				values.put(CustomQuestionContract.CATEGORY, question[5]);
+				return db.insert(CustomQuestionContract.TABLE_NAME, null, values);
+			} else
+				return -1;
 		} else
 			return -1;
 	}

@@ -45,17 +45,17 @@ public enum Difficulty {
 
 	public static Difficulty fromValue(String value) {
 		Difficulty difficulty = null;
-		if (value.equals("Very Easy"))
+		if (value.equals("Very Easy") || value.equals("0"))
 			difficulty = VERY_EASY;
-		else if (value.equals("Easy"))
+		else if (value.equals("Easy") || value.equals("1"))
 			difficulty = EASY;
-		else if (value.equals("Medium"))
+		else if (value.equals("Medium") || value.equals("2"))
 			difficulty = MEDIUM;
-		else if (value.equals("Hard"))
+		else if (value.equals("Hard") || value.equals("3"))
 			difficulty = HARD;
-		else if (value.equals("Very Hard"))
+		else if (value.equals("Very Hard") || value.equals("4"))
 			difficulty = VERY_HARD;
-		else if (value.equals("Insane"))
+		else if (value.equals("Insane") || value.equals("5"))
 			difficulty = INSANE;
 
 		return difficulty;
@@ -84,6 +84,27 @@ public enum Difficulty {
 			break;
 		}
 		return difficulty;
+	}
+
+	public static boolean isDifficulty(String value) {
+		if (value == null) {
+			return false;
+		}
+		int length = value.length();
+		if (length == 0) {
+			return false;
+		}
+		if (value.charAt(0) < '0' || value.charAt(0) > '5') {
+			return false;
+		}
+		return true;
+	}
+
+	public static boolean isDifficulty(int value) {
+		if (value < 0 || value > 5) {
+			return false;
+		}
+		return true;
 	}
 
 	public int getValue() {

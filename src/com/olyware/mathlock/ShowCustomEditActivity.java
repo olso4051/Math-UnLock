@@ -1,14 +1,26 @@
 package com.olyware.mathlock;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -23,24 +35,35 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.database.contracts.CustomQuestionContract;
+import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Clock;
+import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.CustomArrayAdapter;
 import com.olyware.mathlock.utils.EZ;
+import com.olyware.mathlock.utils.FileDialog;
+import com.olyware.mathlock.utils.MoneyHelper;
 
 public class ShowCustomEditActivity extends Activity {
 
+	private final String FTYPE = ".csv";
 	private final int MAX_LENGTH = 50;
+	private File sdFilePath;
+	private FileDialog fileDialog;
 	private int layoutID;
 	private LinearLayout layout;
 	private Typefaces fonts;
 	private Clock clock;
 	private ImageButton back;
+	private TextView moneyText;
 	private EditText[] inputs = new EditText[6];
+	private String cat;
 	private String[] difficulties = new String[Difficulty.getSize()];
 	ArrayAdapter<String> adapterDifficulties, adapterCategories;
 	private Spinner difficulty, category;
@@ -51,13 +74,92 @@ public class ShowCustomEditActivity extends Activity {
 	private List<CustomQuestion> questionData;
 	private List<Integer> ids;
 	private ArrayList<String> questions, categories;
+	private Coins Money = new Coins(0, 0);
+
+	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
+		@Override
+		protected Void doInBackground(Void... voids) {
+			publishProgress(0);
+			dbManager = new DatabaseManager(getApplicationContext());
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onPostExecute(Void v) {
+			resetContentView(R.layout.activity_custom_edit2, null, -1);
+			super.onPostExecute(v);
+		}
+	}
+
+	private class addCustomPack extends AsyncTask<ArrayList<String[]>, Integer, Integer> {
+		@Override
+		protected Integer doInBackground(ArrayList<String[]>... newQuestions) {
+			int count = 0;
+			for (int i = 0; i < newQuestions[0].size(); i++) {
+				long id = dbManager.addCustomQuestion(newQuestions[0].get(i));
+				count += id >= 0 ? 1 : 0;
+			}
+			categories.clear();
+			categories.add(getString(R.string.category_all));
+			questionData = EZ.list(dbManager.getAllCustomQuestions());
+			for (int i = 0; i < questionData.size(); i++) {
+				if (!categories.contains(questionData.get(i).getCategory()))
+					categories.add(questionData.get(i).getCategory());
+			}
+			questions.clear();
+			ids.clear();
+			questions.add(getString(R.string.add_new_pack));
+			questions.add(getString(R.string.add_new));
+			for (int i = 0; i < questionData.size(); i++) {
+				if (questionData.get(i).getCategory().equals(cat) || cat.equals(getString(R.string.category_all))) {
+					ids.add(i);
+					questions.add(questionData.get(i).getQuestionText());
+				}
+			}
+			return count;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			if (result >= 0) {
+				SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
+				SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+				Money.decreaseMoneyAndPaidWithDebt(result);
+				editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
+				editorPrefsMoney.putInt("money", Money.getMoney());
+				editorPrefsMoney.commit();
+				MoneyHelper.setMoney(ShowCustomEditActivity.this, moneyText, Money.getMoney(), Money.getMoneyPaid());
+				adapter.notifyDataSetChanged();
+				adapterCategories.notifyDataSetChanged();
+				Toast.makeText(ShowCustomEditActivity.this, "Uploaded " + result + " question(s)", Toast.LENGTH_LONG).show();
+			}
+			category.setEnabled(true);
+			list.setEnabled(true);
+			super.onPostExecute(result);
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		new OpenDatabase().execute();
+
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		// SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+		sdFilePath = new File(sharedPrefs.getString("hiq_path", Environment.getExternalStorageDirectory() + ""));// + "//yourdir//");
+
 		fonts = Typefaces.getInstance(this);
-		dbManager = new DatabaseManager(getApplicationContext());
 
 		for (int i = 0; i < difficulties.length; i++) {
 			difficulties[i] = Difficulty.fromValueString(i);
@@ -79,7 +181,89 @@ public class ShowCustomEditActivity extends Activity {
 
 		ids = EZ.list();
 
+		fileDialog = new FileDialog(this, sdFilePath, FTYPE);
+		fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
+			public void fileSelected(final File file) {
+				final String fileName = FilenameUtils.removeExtension(file.getName());
+				String filePath = FilenameUtils.removeExtension(file.getParent());
+				Log.d("test", "filePath = " + filePath);
+				ArrayList<String[]> tempQuestions = new ArrayList<String[]>();
+				int lines = -1;
+				try {
+					FileReader fileR = new FileReader(file);
+					BufferedReader buffer = new BufferedReader(fileR);
+					String line = buffer.readLine();
+					String[] lineEntries = line.split(",");
+					if (lineEntries[0].equals(QuestionContract.QUESTION_TEXT) && lineEntries[1].equals(QuestionContract.ANSWER_CORRECT)
+							&& lineEntries[2].equals(CustomQuestionContract.ANSWER_INCORRECT1)
+							&& lineEntries[3].equals(CustomQuestionContract.ANSWER_INCORRECT2)
+							&& lineEntries[4].equals(CustomQuestionContract.ANSWER_INCORRECT3)
+							&& lineEntries[5].equals(QuestionContract.DIFFICULTY)) {
+						lines++;
+						line = buffer.readLine();
+						while (line != null) {
+							lineEntries = line.split(",");
+							if (lineEntries.length == 6)
+								if (Difficulty.isDifficulty(lineEntries[5]))
+									if (testQuestion(lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3], lineEntries[4],
+											fileName)) {
+										tempQuestions.add(new String[] { lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3],
+												lineEntries[4], fileName, lineEntries[5] });
+										lines += 1;
+									}
+							line = buffer.readLine();
+						}
+					} else {
+						lines = 0;
+					}
+					buffer.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				final ArrayList<String[]> tempQuestionsFinal = tempQuestions;
+				AlertDialog.Builder builder = new AlertDialog.Builder(ShowCustomEditActivity.this);
+				builder.setTitle(FilenameUtils.removeExtension(file.getName())).setCancelable(false);
+				if (Money.getMoney() + Money.getMoneyPaid() >= lines) {
+					builder.setMessage(getString(R.string.purchase_package_custom_message) + " " + lines + " " + getString(R.string.coins));
+					builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							questions.clear();
+							questions.add(getString(R.string.db_loading));
+							adapter.notifyDataSetChanged();
+							category.setEnabled(false);
+							list.setEnabled(false);
+							new addCustomPack().execute(tempQuestionsFinal);
+						}
+					});
+					builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+				} else {
+					builder.setMessage(getString(R.string.not_enough_coins));
+					builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+				}
+				builder.create().show();
+				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ShowCustomEditActivity.this);
+				SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+				editorPrefs.putString("hiq_path", filePath).commit();
+			}
+		});
+
 		resetContentView(R.layout.activity_custom_edit2, null, -1);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		initMoney();
 	}
 
 	@Override
@@ -104,8 +288,9 @@ public class ShowCustomEditActivity extends Activity {
 
 	private void resetContentView(int layoutResId, String addButtonText, int position) {
 		final int positionFinal = position;
-		layoutID = layoutResId;
 		final String addButtonTextFinal = addButtonText;
+		final boolean dbOpened = (dbManager != null);
+		layoutID = layoutResId;
 		if (clock != null)
 			clock.destroy();
 		if (questionData != null)
@@ -125,18 +310,23 @@ public class ShowCustomEditActivity extends Activity {
 		layout = (LinearLayout) findViewById(R.id.layout);
 		EZ.setFont((ViewGroup) layout, fonts.robotoLight);
 
-		questionData = EZ.list();
-		questionData.addAll(dbManager.getAllCustomQuestions());
-
 		categories = new ArrayList<String>();
 		if (layoutResId == R.layout.activity_custom_edit2)
 			categories.add(getString(R.string.category_all));
-		for (int i = 0; i < questionData.size(); i++) {
-			if (!categories.contains(questionData.get(i).getCategory()))
-				categories.add(questionData.get(i).getCategory());
+
+		if (dbOpened) {
+			questionData = EZ.list(dbManager.getAllCustomQuestions());
+			for (int i = 0; i < questionData.size(); i++) {
+				if (!categories.contains(questionData.get(i).getCategory()))
+					categories.add(questionData.get(i).getCategory());
+			}
+		} else {
+			questionData = EZ.list();
 		}
 		if (layoutResId == R.layout.activity_custom_edit)
 			categories.add(getString(R.string.add_new_category));
+		cat = getString(R.string.category_all);
+
 		adapterCategories = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
@@ -153,6 +343,8 @@ public class ShowCustomEditActivity extends Activity {
 		adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 		clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
+		moneyText = (TextView) findViewById(R.id.money);
+
 		back = (ImageButton) findViewById(R.id.back);
 		back.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -177,16 +369,20 @@ public class ShowCustomEditActivity extends Activity {
 			category.setOnItemSelectedListener(new OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-					String cat = category.getItemAtPosition(pos).toString();
+					cat = category.getItemAtPosition(pos).toString();
 					questions.clear();
 					ids.clear();
-					questions.add(getString(R.string.add_new));
-					for (int i = 0; i < questionData.size(); i++) {
-						if (questionData.get(i).getCategory().equals(cat) || cat.equals(getString(R.string.category_all))) {
-							ids.add(i);
-							questions.add(questionData.get(i).getQuestionText());
+					if (dbOpened) {
+						questions.add(getString(R.string.add_new_pack));
+						questions.add(getString(R.string.add_new));
+						for (int i = 0; i < questionData.size(); i++) {
+							if (questionData.get(i).getCategory().equals(cat) || cat.equals(getString(R.string.category_all))) {
+								ids.add(i);
+								questions.add(questionData.get(i).getQuestionText());
+							}
 						}
-					}
+					} else
+						questions.add(getString(R.string.db_loading));
 					adapter = new CustomArrayAdapter<String>(ShowCustomEditActivity.this, R.layout.list_text_item, R.id.text, questions);
 					list.setAdapter(adapter);
 				}
@@ -197,56 +393,64 @@ public class ShowCustomEditActivity extends Activity {
 			});
 
 			questions = new ArrayList<String>();
-			questions.add(getString(R.string.add_new));
-			for (int i = 0; i < questionData.size(); i++) {
-				ids.add(i);
-				questions.add(questionData.get(i).getQuestionText());
-			}
+			if (dbOpened) {
+				questions.add(getString(R.string.add_new_pack));
+				questions.add(getString(R.string.add_new));
+				for (int i = 0; i < questionData.size(); i++) {
+					ids.add(i);
+					questions.add(questionData.get(i).getQuestionText());
+				}
+			} else
+				questions.add(getString(R.string.db_loading));
 			adapter = new CustomArrayAdapter<String>(this, R.layout.list_text_item, R.id.text, questions);
 			list.setAdapter(adapter);
-			list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-					if (pos == 0)
-						resetContentView(R.layout.activity_custom_edit, getString(R.string.add), -1);
-					else {
-						final int posFinal = ids.get(pos - 1);
-						final Dialog d = new Dialog(ShowCustomEditActivity.this);
-						View v = getLayoutInflater().inflate(R.layout.copy_edit_delete_cancel, null);
-						d.setContentView(v);
-						d.setTitle(R.string.question);
-						((TextView) d.findViewById(R.id.message)).setText(questions.get(pos));
-						((Button) d.findViewById(R.id.copy)).setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								resetContentView(R.layout.activity_custom_edit, getString(R.string.add), posFinal);
-								d.dismiss();
-							}
-						});
-						((Button) d.findViewById(R.id.edit)).setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								resetContentView(R.layout.activity_custom_edit, getString(R.string.update), posFinal);
-								d.dismiss();
-							}
-						});
-						((Button) d.findViewById(R.id.delete)).setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								deleteCustomQuestion(posFinal);
-								d.dismiss();
-							}
-						});
-						((Button) d.findViewById(R.id.cancel)).setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								d.dismiss();
-							}
-						});
-						d.show();
+			if (dbOpened) {
+				list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+						if (pos == 0)
+							fileDialog.showDialog();
+						else if (pos == 1)
+							resetContentView(R.layout.activity_custom_edit, getString(R.string.add), -1);
+						else {
+							final int posFinal = ids.get(pos - 2);
+							final Dialog d = new Dialog(ShowCustomEditActivity.this);
+							View v = getLayoutInflater().inflate(R.layout.copy_edit_delete_cancel, null);
+							d.setContentView(v);
+							d.setTitle(R.string.question);
+							((TextView) d.findViewById(R.id.message)).setText(questions.get(pos));
+							((Button) d.findViewById(R.id.copy)).setOnClickListener(new View.OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									resetContentView(R.layout.activity_custom_edit, getString(R.string.add), posFinal);
+									d.dismiss();
+								}
+							});
+							((Button) d.findViewById(R.id.edit)).setOnClickListener(new View.OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									resetContentView(R.layout.activity_custom_edit, getString(R.string.update), posFinal);
+									d.dismiss();
+								}
+							});
+							((Button) d.findViewById(R.id.delete)).setOnClickListener(new View.OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									deleteCustomQuestion(posFinal);
+									d.dismiss();
+								}
+							});
+							((Button) d.findViewById(R.id.cancel)).setOnClickListener(new View.OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									d.dismiss();
+								}
+							});
+							d.show();
+						}
 					}
-				}
-			});
+				});
+			}
 		} else if (layoutResId == R.layout.activity_custom_edit) {
 			list = null;
 			questions = null;
@@ -337,8 +541,15 @@ public class ShowCustomEditActivity extends Activity {
 				public void onClick(DialogInterface dialog, int id) {
 					dbManager.removeCustomQuestion(questionData.get(posFinal).getID());
 					questionData.remove(posFinal);
-					questions.remove(posFinal + 1);
+					questions.remove(posFinal + 2);
+					categories.clear();
+					categories.add(getString(R.string.category_all));
+					for (int i = 0; i < questionData.size(); i++) {
+						if (!categories.contains(questionData.get(i).getCategory()))
+							categories.add(questionData.get(i).getCategory());
+					}
 					adapter.notifyDataSetChanged();
+					adapterCategories.notifyDataSetChanged();
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -395,6 +606,10 @@ public class ShowCustomEditActivity extends Activity {
 		}
 	}
 
+	private boolean testQuestion(String q, String a, String w1, String w2, String w3, String c) {
+		return testQuestion(new String[] { q, a, w1, w2, w3, c });
+	}
+
 	private boolean testQuestion(String[] question) {
 		boolean tooLongShort[] = new boolean[question.length];// { false, false, false, false, false, false };
 		boolean same = false;
@@ -433,5 +648,11 @@ public class ShowCustomEditActivity extends Activity {
 			return false;
 		}
 		return true;
+	}
+
+	private void initMoney() {
+		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
+		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 	}
 }

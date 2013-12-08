@@ -202,10 +202,11 @@ public class AnswerView extends View {
 		this.correctLoc = correctLoc;
 		this.quickUnlock = false;
 		equations = false;
-		if (answers[0].charAt(0) == '$')
-			if (answers[0].length() > 1)
-				if (answers[0].charAt(1) != '$')
-					equations = true;
+		if (answers[0].length() > 1)
+			if (answers[0].charAt(0) == '$')
+				if (answers[0].length() > 1)
+					if (answers[0].charAt(1) != '$')
+						equations = true;
 		resetTextSize();
 		if (measured)
 			setDimensions(false);

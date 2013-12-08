@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -47,6 +48,32 @@ public class ShowProgressActivity extends Activity {
 
 	private DatabaseManager dbManager;
 
+	private class OpenDatabase extends AsyncTask<Void, Integer, Integer> {
+		@Override
+		protected Integer doInBackground(Void... voids) {
+			publishProgress(0);
+			dbManager = new DatabaseManager(getApplicationContext());
+			customCategories = dbManager.getAllCustomCategories();
+			for (String cat : customCategories)
+				displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
+			return 0;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			if (result == 0) {
+				initSpinners();
+				setGraph();
+			}
+			super.onPostExecute(result);
+		}
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,17 +83,14 @@ public class ShowProgressActivity extends Activity {
 		typefaces = Typefaces.getInstance(this);
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
-		dbManager = new DatabaseManager(getApplicationContext());
-		customCategories = dbManager.getAllCustomCategories();
-
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		displayPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
 		displayCustomPackageKeys = EZ.list();
-		for (String cat : customCategories)
-			displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
 		times = getResources().getStringArray(R.array.times);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+
+		new OpenDatabase().execute();
 
 		back = (ImageButton) findViewById(R.id.back);
 		back.setOnClickListener(new OnClickListener() {
@@ -234,19 +258,21 @@ public class ShowProgressActivity extends Activity {
 	private void setGraph() {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		long oldestTime = getOldestTime();
-		List<Integer> percent = dbManager.getStatPercentArray(oldestTime, selectedPackage, selectedDifficulty);
 
-		int test[];
-		if (percent.size() < 1) {
-			test = new int[1];
-			test[0] = 50;
-		} else {
-			test = new int[percent.size()];
-			for (int i = 0; i < test.length; i++)
-				test[i] = percent.get(i);
-		}
-		// graphView.setMovingAverage(rnd.nextInt(50) + 1);
-		graphView.setArray(test);
+		if (dbManager != null) {
+			List<Integer> percent = dbManager.getStatPercentArray(oldestTime, selectedPackage, selectedDifficulty);
+			int test[];
+			if (percent.size() < 1) {
+				test = new int[] { 50 };
+			} else {
+				test = new int[percent.size()];
+				for (int i = 0; i < test.length; i++)
+					test[i] = percent.get(i);
+			}
+			// graphView.setMovingAverage(rnd.nextInt(50) + 1);
+			graphView.setArray(test);
+		} else
+			graphView.setArray(new int[] { 50 });
 		int correct = sharedPrefsStats.getInt("correct", 0);
 		int wrong = sharedPrefsStats.getInt("wrong", 0);
 		int coins = sharedPrefsStats.getInt("coins", 0);

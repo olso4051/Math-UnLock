@@ -226,10 +226,11 @@ public class JoystickView extends View {
 			answerTextPaint[i].setTextSize(answerSizePix);
 			bounds[i] = new Rect();
 			equation[i] = false;
-			if (answers[i].charAt(0) == '$')
-				if (answers[i].length() > 1)
-					if (answers[i].charAt(1) != '$')
-						equation[i] = true;
+			if (answers[i].length() > 1)
+				if (answers[i].charAt(0) == '$')
+					if (answers[i].length() > 1)
+						if (answers[i].charAt(1) != '$')
+							equation[i] = true;
 
 			layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i], answerSizeSPDefault);
 			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
@@ -1642,10 +1643,11 @@ public class JoystickView extends View {
 	private void setLayouts() {
 		for (int i = 0; i < NumAnswers - 1; i++) {
 			equation[i] = false;
-			if (answers[i].charAt(0) == '$')
-				if (answers[i].length() > 1)
-					if (answers[i].charAt(1) != '$')
-						equation[i] = true;
+			if (answers[i].length() > 1)
+				if (answers[i].charAt(0) == '$')
+					if (answers[i].length() > 1)
+						if (answers[i].charAt(1) != '$')
+							equation[i] = true;
 			answerTextPaint[i].getTextBounds(answers[i], 0, answers[i].length(), bounds[i]);
 			if (equation[i]) {
 				int W = Width / 2 - pad * 2;

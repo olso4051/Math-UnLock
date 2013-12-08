@@ -59,6 +59,40 @@ public class ShowStoreActivity extends Activity {
 
 		Cost = MainActivity.getCost();
 		SKU = MainActivity.getSKU();
+		moneyText = (TextView) findViewById(R.id.money);
+		EggKeys = getResources().getStringArray(R.array.egg_keys);
+		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+		initMoney();
+		costSmall = (TextView) findViewById(R.id.cost_small);
+		costLarge = (TextView) findViewById(R.id.cost_large);
+		costAll = (TextView) findViewById(R.id.cost_all);
+		buttonCoins1 = (Button) findViewById(R.id.extra_coins1);
+		buttonCoins1.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
+						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[0], Cost[0] + 1,
+				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+			}
+		});
+		buttonCoins2 = (Button) findViewById(R.id.extra_coins2);
+		buttonCoins2.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				purchaseCoins(ShowStoreActivity.this, SKU[1], Cost[1] + 1, mPurchaseFinishedListener,
+						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[1], Cost[1] + 1,
+				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+			}
+		});
+		buttonCoins3 = (Button) findViewById(R.id.extra_coins3);
+		buttonCoins3.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				purchaseCoins(ShowStoreActivity.this, SKU[2], Cost[2] + 1, mPurchaseFinishedListener,
+						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[2], Cost[2] + 1,
+				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
+			}
+		});
 
 		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 		mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -144,8 +178,6 @@ public class ShowStoreActivity extends Activity {
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		unlockCost = getResources().getIntArray(R.array.unlock_cost);
 		packageInfo = getResources().getStringArray(R.array.package_info);
-		EggKeys = getResources().getStringArray(R.array.egg_keys);
-		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 
 		back = (ImageButton) findViewById(R.id.back);
 		back.setOnClickListener(new OnClickListener() {
@@ -154,40 +186,8 @@ public class ShowStoreActivity extends Activity {
 			}
 		});
 
-		moneyText = (TextView) findViewById(R.id.money);
 		buy = new Button[unlockCost.length];
 		cost = new TextView[unlockCost.length];
-
-		costSmall = (TextView) findViewById(R.id.cost_small);
-		costLarge = (TextView) findViewById(R.id.cost_large);
-		costAll = (TextView) findViewById(R.id.cost_all);
-		buttonCoins1 = (Button) findViewById(R.id.extra_coins1);
-		buttonCoins1.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
-						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[0], Cost[0] + 1,
-				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-			}
-		});
-		buttonCoins2 = (Button) findViewById(R.id.extra_coins2);
-		buttonCoins2.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				purchaseCoins(ShowStoreActivity.this, SKU[1], Cost[1] + 1, mPurchaseFinishedListener,
-						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[1], Cost[1] + 1,
-				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-			}
-		});
-		buttonCoins3 = (Button) findViewById(R.id.extra_coins3);
-		buttonCoins3.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				purchaseCoins(ShowStoreActivity.this, SKU[2], Cost[2] + 1, mPurchaseFinishedListener,
-						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[2], Cost[2] + 1,
-				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-			}
-		});
 
 		packsTitle = ((TextView) findViewById(R.id.packs));
 		packsTitle.setPaintFlags(packsTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -234,7 +234,6 @@ public class ShowStoreActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		initMoney();
 		setCost();
 		if (!firstPack)
 			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]));

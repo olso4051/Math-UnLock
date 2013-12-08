@@ -59,12 +59,13 @@ public class EquationView extends AutoResizeTextView {
 	@Override
 	public void setText(CharSequence text, BufferType type) {
 		equation = false;
-		if (text.charAt(0) == '$')
-			if (text.length() > 1)
-				if (text.charAt(1) != '$')
-					equation = true;
-				else
-					text = text.subSequence(1, text.length());
+		if (text.length() > 1)
+			if (text.charAt(0) == '$')
+				if (text.length() > 1)
+					if (text.charAt(1) != '$')
+						equation = true;
+					else
+						text = text.subSequence(1, text.length());
 		if (equation) {
 			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color, 40);
 		} else {
