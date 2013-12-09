@@ -39,8 +39,7 @@
 	        android:entryValues="@array/type_values012"
 	        android:defaultValue="@string/type_default" />
         <PreferenceScreen
-	        android:key="general_settings"
-	        android:title="@string/settings_general"
+	        android:title="@string/settings_advanced"
 	        android:persistent="false">
 	        <CheckBoxPreference
 		        android:key="lockscreen"

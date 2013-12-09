@@ -32,7 +32,7 @@ import com.olyware.mathlock.R;
 
 public class JoystickView extends View {
 	private final int NumAnswers = 5, answerSizeSPDefault = 40, answerHintSizeSPDefault = 30, textFrames = 10, textFrameTime = 50,
-			answerFrameTime = 33, startFrames = 30, startFrameTime = 50, pulseFrames = 30, pulseFrameTime = 33, spinFrameTime = 33;
+			answerFrameTime = 33, startFrames = 30, startFrameTime = 50, spinFrameTime = 33;
 	private final long tapLength = 250;
 	private final float degreeStepInitial = 1;
 
@@ -53,7 +53,7 @@ public class JoystickView extends View {
 
 	private int TextHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP, answerHintSizeSP, Width, Height, dstHeight, pad = 10,
 			diffX1, diffY1, diffX, diffY, spacing, rUnlock, rUnlockChange, rBig, rSmall, rApps, swipeLengthOption, swipeLength1, type = 0,
-			pulseFrame = 0, correctLoc, correctGuess, wrongGuess, selectAppDrag, numAnswersDisplayed = 0, appCenterVert, appCenterHorz;
+			correctLoc, correctGuess, wrongGuess, selectAppDrag, numAnswersDisplayed = 0, appCenterVert, appCenterHorz;
 	private int state = 0;// state: direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
 	private long tapTimer, lastTime = 0;
 	private float answerSizePix, answerHintSizePix, optionX, optionY, degrees = 0, radians = 0, degreeStep = degreeStepInitial,
@@ -63,7 +63,7 @@ public class JoystickView extends View {
 			wrong = false, paused = false, measured = false, isFirstApp = false, isFirstApp2 = false;
 
 	private int[] selectLeft = new int[5], selectRight = new int[5];
-	private double[] X = new double[NumAnswers], Y = new double[NumAnswers], sin = new double[pulseFrames];
+	private double[] X = new double[NumAnswers], Y = new double[NumAnswers];
 	private boolean[] selectAnswers = new boolean[NumAnswers], selectOptions = new boolean[5];
 	private String[] answers = { "N/A", "N/A", "N/A", "N/A", "?" };
 	private String[] answerTitles;
@@ -75,7 +75,7 @@ public class JoystickView extends View {
 	private JoystickSelectListener listener;
 	private JoystickTouchListener listenerTouch;
 
-	private Runnable revealText, finishText, startAnimate, finishAnimate, pulseLock, spin, revealAnswers;
+	private Runnable revealText, finishText, startAnimate, finishAnimate, spin, revealAnswers;
 	private Handler answerHandler, textHandler, animateHandler;
 
 	private List<Drawable> d;
@@ -316,9 +316,6 @@ public class JoystickView extends View {
 		selectUnlock = false;
 		selectAppDrag = -1;
 
-		for (int i = 0; i < pulseFrames; i++) {
-			sin[i] = Math.sin(Math.PI * 2 * i / pulseFrames);
-		}
 		listener = new JoystickSelectListener() {
 			@Override
 			public void OnSelect(int s, boolean vibrate, int Extra) {
@@ -545,12 +542,11 @@ public class JoystickView extends View {
 	}
 
 	public void setAnswers(String answers[], int correctLoc) {
-		this.answers = new String[] { answers[0], answers[1], answers[2], answers[3], "?" };
+		this.answers = new String[] { answers[0], answers[1], answers[2], answers[3], res.getString(R.string.unknown) };
 		this.correctLoc = correctLoc;
 		this.quickUnlock = false;
 		centerOffset = 0;
 		if (measured) {
-			animateHandler.removeCallbacks(pulseLock);
 			animateHandler.removeCallbacks(spin);
 			switch (type) {
 			case 1:
@@ -570,8 +566,6 @@ public class JoystickView extends View {
 				RectForAnswers[4].set(Width / 4 - rUnlock * 2, centerY - rUnlock * 2, Width / 4 + rUnlock * 2, centerY + rUnlock * 2);
 				RectForAnswers[5].set(Width * 3 / 4 - rUnlock * 2, centerY - rUnlock * 2, Width * 3 / 4 + rUnlock * 2, centerY + rUnlock
 						* 2);
-				if (type == 0)
-					animateHandler.postDelayed(pulseLock, pulseFrameTime);
 				break;
 			case 2:
 				break;
@@ -585,7 +579,6 @@ public class JoystickView extends View {
 			answers[loc] = answers[correctLoc];
 			answers[correctLoc] = temp;
 			correctLoc = loc;
-			animateHandler.removeCallbacks(pulseLock);
 			animateHandler.removeCallbacks(spin);
 			switch (type) {
 			case 1:
@@ -594,7 +587,6 @@ public class JoystickView extends View {
 				break;
 			case 0:
 				setDimensions();
-				animateHandler.postDelayed(pulseLock, pulseFrameTime);
 				break;
 			case 2:
 				break;
@@ -609,7 +601,6 @@ public class JoystickView extends View {
 		animateHandler.post(finishAnimate);
 		switch (type) {
 		case 0:
-			animateHandler.postDelayed(pulseLock, pulseFrameTime);
 			break;
 		case 1:
 			animateHandler.postDelayed(spin, spinFrameTime);
@@ -631,13 +622,11 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		animateHandler.removeCallbacks(pulseLock);
 		animateHandler.removeCallbacks(spin);
 		switch (type) {
 		case 0:
 			measured = true;
 			setDimensions();
-			animateHandler.postDelayed(pulseLock, pulseFrameTime);
 			break;
 		case 1:
 			measured = true;
@@ -1171,7 +1160,6 @@ public class JoystickView extends View {
 		}
 		selectSideBar = false;
 
-		animateHandler.removeCallbacks(pulseLock);
 		for (int ans = 0; ans < X.length; ans++) {
 			answerHandler.removeCallbacks(revealAnswers);
 			X[ans] = -rApps;
@@ -1180,9 +1168,6 @@ public class JoystickView extends View {
 		}
 		switch (type) {
 		case 0:
-			setHintDimensions();
-			animateHandler.postDelayed(pulseLock, pulseFrameTime);
-			break;
 		case 1:
 			setHintDimensions();
 			break;
@@ -1350,7 +1335,6 @@ public class JoystickView extends View {
 						RectForUnlock.set((int) touchX - rUnlock, (int) touchY - rUnlock, (int) touchX + rUnlock, (int) touchY + rUnlock);
 
 						selectUnlock = true;
-						animateHandler.removeCallbacks(pulseLock);
 						if (listener != null)
 							listener.OnSelect(-1, true, -1);		// send a vibrate signal
 					} else if (firstTouch) {
@@ -1487,28 +1471,6 @@ public class JoystickView extends View {
 				invalidate();
 			}
 		};
-		pulseLock = new Runnable() {
-			@Override
-			public void run() {
-				if (!selectUnlock) {
-					int size = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
-					int oldPulseFrame = pulseFrame;
-					pulseFrame = (int) (System.currentTimeMillis() % (pulseFrameTime * pulseFrames) / pulseFrameTime);
-					if (pulseFrame < oldPulseFrame) {
-						pulseFrame = 0;
-						animateHandler.removeCallbacks(pulseLock);
-						animateHandler.postDelayed(pulseLock, pulseFrameTime * pulseFrames);
-					} else {
-						int change = (int) (rUnlockChange * sin[pulseFrame] + rUnlock - size);
-						RectForUnlockPulse.set(RectForUnlockPulse.left - change, RectForUnlockPulse.top - change, RectForUnlockPulse.right
-								+ change, RectForUnlockPulse.bottom + change);
-						invalidate();
-						animateHandler.removeCallbacks(pulseLock);
-						animateHandler.postDelayed(pulseLock, pulseFrameTime);
-					}
-				}
-			}
-		};
 		spin = new Runnable() {
 			@Override
 			public void run() {
@@ -1612,22 +1574,18 @@ public class JoystickView extends View {
 	}
 
 	private void setHintLayouts() {
-		String str = "?";
+		String str;
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
-			removePulseAnimation();
 			str = res.getString(R.string.swipe_option);
 		} else if (selectUnlock) {
-			removePulseAnimation();
-			str = "?";
+			str = res.getString(R.string.unknown);
 		} else if (problem) {
 			if (wrong) {
-				removePulseAnimation();
 				str = res.getString(R.string.swipe_new);
 			} else {
 				str = res.getString(R.string.swipe_unlock);
 			}
 		} else {
-			removePulseAnimation();
 			str = res.getString(R.string.swipe_exit);
 		}
 		if (!answers[NumAnswers - 1].equals(str)) {
@@ -1706,17 +1664,6 @@ public class JoystickView extends View {
 		answerHintSizeSP = answerHintSizeSPDefault;
 		answerHintSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerHintSizeSP, res.getDisplayMetrics());
 		answerTextPaint[NumAnswers - 1].setTextSize(answerHintSizePix);
-	}
-
-	private void removePulseAnimation() {
-		animateHandler.removeCallbacks(pulseLock);
-		int centerX = (int) touchX;
-		int centerY = (int) touchY;
-		if (!selectUnlock) {
-			centerX = Width / 2;
-			centerY = (TextHeight - textSizePix + centerOffset) / 2;
-		}
-		RectForUnlockPulse.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
 	}
 
 	private void setArc(int startDeg, int totalDeg) {

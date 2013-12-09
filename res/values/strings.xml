@@ -36,6 +36,7 @@
     <string name="difficulty_max">Max Difficulty</string>
     <string name="difficulty_min">Min Difficulty</string>
     <string name="difficulty_summary">Very Easy</string>
+    <string name="download">Download</string>
     <string name="dynamic_slide">Dynamic Slide</string>
     <string name="edit">Edit</string>
     <string name="egg_found">Easter Egg Found Worth </string>
@@ -62,21 +63,17 @@
     <string name="go_negative">Go In Debt</string>
     <string name="goto_store">Goto Store</string>
     <string name="hint_title">Helpful Hint</string>
+    <string name="howto_import_csv">How To Import CSV</string>
+    <string name="howto_import_csv1">1. Create a text file with the first line\n\n</string>
+    <string name="howto_import_csv2">2. Separate each collumn with a \',\'\n\n3. Put each question on a new line\n\n4. Difficulty should be in the range 0–5\n\n5. Save the file with a .csv extension\n\n6. The name of the file will be the category for all the imported questions\n\n7. Move the file to your extrnal sd card or internal phone storage</string>
+    
     <string name="info_coins_title">Thanks for your interest in buying coins!</string>
     <string name="info_coins_message">Unlock your first question pack before buying coins though. It\'s Free!</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying Hiq!</string>
     <string name="info_title_first_pack">First Pack is Unlocked!</string>
-    <string name="info_message">-Hiq is trying hard to increase your IQ. Because of that we won\'t show you ads. We hope you like our product, after you try it we hope you rate and comment it in the Play Store!\n\n
-        -Answer Questions to earn coins, and increase that IQ\n\n
-		-Use Coins to buy question packs and extras\n\n
-		-Buy coins in the store or find them lying around (HINT: Share Hiq to find some more coins)\n\n
-		-Choose question types and difficulty in Settings tab\n\n
-		-Try Quiz-mode for an endless supply of questions\n\n
-		-Check out your stats and achievements in the Progress tab\n\n
-		-Check out what else we have to offer in the Store\n\n
-		-Show this help in the Info tab
-	</string>
+    <string name="info_message">-Hiq is trying hard to increase your IQ. Because of that we won\'t show you ads. We hope you like our product, after you try it we hope you rate and comment it in the Play Store!\n\n-Answer Questions to earn coins, and increase that IQ\n\n-Use Coins to buy question packs and extras\n\n-Buy coins in the store or find them lying around (HINT: Share Hiq to find some more coins)\n\n-Choose question types and difficulty in Settings tab\n\n-Try Quiz-mode for an endless supply of questions\n\n-Check out your stats and achievements in the Progress tab\n\n-Check out what else we have to offer in the Store\n\n-Show this help in the Info tab</string>
+    
     <string name="info_message_first">Your first question pack is on us! Go to the store and unlock your first question pack</string>
     <string name="info_message_first_pack">Go answer questions and get more coins</string>
     <string name="info_message_first_pack_buy">Buy Coins Now</string>
@@ -122,10 +119,10 @@
     <string name="same_entries">All questions and answers must be different</string>
     <string name="security_title">Security</string>
     <string name="settings">Settings</string>
+    <string name="settings_advanced">Avanced Settings</string>
     <string name="settings_questions">Question Packs</string>
     <string name="settings_question_pack">Question Pack Settings</string>
     <string name="settings_engineer_title">Engineering Questions</string>
-    <string name="settings_general">General Settings</string>
     <string name="settings_gre_title">GRE Questions</string>
     <string name="settings_hiqh_trivia_title">Hiq Trivia Questions</string>
     <string name="settings_language_title">Language Questions</string>
@@ -153,6 +150,7 @@
     <string name="type_default">0</string>
     <string name="type_summary">Static Slide</string>
     <string name="type_title">Unlocking Mechanism</string>
+    <string name="unknown">I don\'t know</string>
     <string name="unlock">Unlock</string>
     <string name="unlock_all">All Packs</string>
     <string name="unlock_custom">Custom Pack</string>

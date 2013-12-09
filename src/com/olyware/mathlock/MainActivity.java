@@ -18,17 +18,16 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.SoundEffectConstants;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -100,6 +99,7 @@ public class MainActivity extends Activity {
 	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
 	private int attempts = 1;
 
+	MediaPlayer answerIncorrectClick, answerCorrectClick, buttonClick;
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
@@ -136,7 +136,6 @@ public class MainActivity extends Activity {
 	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
 		@Override
 		protected Void doInBackground(Void... voids) {
-			Log.d("race", "doInBackground started");
 			dbManager = new DatabaseManager(getApplicationContext());
 			customCategories = dbManager.getAllCustomCategories();
 			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
@@ -144,7 +143,6 @@ public class MainActivity extends Activity {
 				PackageKeys.add(getString(R.string.custom_enable) + cat);
 			UnlockedPackages = getUnlockedPackages();
 			EnabledPackages = getEnabledPackages();
-			Log.d("race", "doInBackground finished");
 			return null;
 		}
 
@@ -155,10 +153,8 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void v) {
-			Log.d("race", "doInBackground onPostExecute started");
 			setProblemAndAnswer();
 			super.onPostExecute(null);
-			Log.d("race", "doInBackground onPostExecute finished");
 		}
 	}
 
@@ -172,6 +168,10 @@ public class MainActivity extends Activity {
 		locked = this.getIntent().getBooleanExtra("locked", false);
 		unlocking = locked;
 
+		answerIncorrectClick = MediaPlayer.create(this, R.raw.answer_incorrect);
+		answerCorrectClick = MediaPlayer.create(this, R.raw.answer_correct);
+		buttonClick = MediaPlayer.create(this, R.raw.button_click);
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -365,7 +365,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		Log.d("race", "onResume started");
 		paused = false;
 		super.onResume();
 		if (locked && quizMode)
@@ -453,7 +452,6 @@ public class MainActivity extends Activity {
 
 		// save money into shared preferences
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
-		Log.d("race", "onResume finished");
 	}
 
 	@Override
@@ -884,10 +882,15 @@ public class MainActivity extends Activity {
 			dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 					.currentTimeMillis(), startTime - System.currentTimeMillis()));
 			if (correct) {
+				if (questionWorth > 0)
+					answerCorrectClick.start();
+				else
+					buttonClick.start();
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
 				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
+				answerIncorrectClick.start();
 				answerView.setIncorrectGuess(guessLoc);
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
@@ -900,12 +903,11 @@ public class MainActivity extends Activity {
 
 	private void JoystickSelected(int s, boolean vibrate, int Extra) {
 		dialogOn = false;
-		if (vibrate)
+		if (vibrate) {
 			if (sharedPrefs.getBoolean("vibration", true)
 					&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
 				vib.vibrate(50);	// vibrate for 50ms
-			else
-				joystick.playSoundEffect(SoundEffectConstants.CLICK);
+		}
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
 		switch (s) {
 		case 0:		// A was selected
@@ -957,7 +959,8 @@ public class MainActivity extends Activity {
 				});
 			}
 			break;
-		case 4:	// question mark(tell me the answer) was selected
+		case 4:	// question mark(tell me the answer/I don't know) was selected
+			buttonClick.start();
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[1], EggMaxValues[1]));
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
@@ -972,22 +975,27 @@ public class MainActivity extends Activity {
 			});
 			break;
 		case 5:		// info was selected
+			buttonClick.start();
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[2], EggMaxValues[2]));
 			displayInfo(false);
 			break;
 		case 6:		// Store was selected
+			buttonClick.start();
 			unlocking = false;
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case 7:		// progress was selected
+			buttonClick.start();
 			unlocking = false;
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
+			buttonClick.start();
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case 9:		// settings was selected
+			buttonClick.start();
 			fromSettings = true;
 			unlocking = false;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
@@ -998,6 +1006,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 11:	// quickUnlock activated
+			buttonClick.start();
 			setApps();
 			resetQuestionWorth(0);
 			switch (Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))) {
@@ -1014,15 +1023,18 @@ public class MainActivity extends Activity {
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
 			break;
 		case 12:	// add app was selected
+			buttonClick.start();
 			selectApp();
 			break;
 		case 13:	// app was selected
+			buttonClick.start();
 			if (Extra < apps.size()) {
 				startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
 				finish();
 			}
 			break;
 		case 14:	// remove app was selected
+			buttonClick.start();
 			removeAppFromAll(Extra);
 			break;
 		}

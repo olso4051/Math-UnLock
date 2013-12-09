@@ -14,13 +14,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -186,7 +187,6 @@ public class ShowCustomEditActivity extends Activity {
 			public void fileSelected(final File file) {
 				final String fileName = FilenameUtils.removeExtension(file.getName());
 				String filePath = FilenameUtils.removeExtension(file.getParent());
-				Log.d("test", "filePath = " + filePath);
 				ArrayList<String[]> tempQuestions = new ArrayList<String[]>();
 				int lines = -1;
 				try {
@@ -373,6 +373,7 @@ public class ShowCustomEditActivity extends Activity {
 					questions.clear();
 					ids.clear();
 					if (dbOpened) {
+						questions.add(getString(R.string.howto_import_csv));
 						questions.add(getString(R.string.add_new_pack));
 						questions.add(getString(R.string.add_new));
 						for (int i = 0; i < questionData.size(); i++) {
@@ -394,6 +395,7 @@ public class ShowCustomEditActivity extends Activity {
 
 			questions = new ArrayList<String>();
 			if (dbOpened) {
+				questions.add(getString(R.string.howto_import_csv));
 				questions.add(getString(R.string.add_new_pack));
 				questions.add(getString(R.string.add_new));
 				for (int i = 0; i < questionData.size(); i++) {
@@ -409,11 +411,13 @@ public class ShowCustomEditActivity extends Activity {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 						if (pos == 0)
-							fileDialog.showDialog();
+							showHowTo();
 						else if (pos == 1)
+							fileDialog.showDialog();
+						else if (pos == 2)
 							resetContentView(R.layout.activity_custom_edit, getString(R.string.add), -1);
 						else {
-							final int posFinal = ids.get(pos - 2);
+							final int posFinal = ids.get(pos - 3);
 							final Dialog d = new Dialog(ShowCustomEditActivity.this);
 							View v = getLayoutInflater().inflate(R.layout.copy_edit_delete_cancel, null);
 							d.setContentView(v);
@@ -541,7 +545,7 @@ public class ShowCustomEditActivity extends Activity {
 				public void onClick(DialogInterface dialog, int id) {
 					dbManager.removeCustomQuestion(questionData.get(posFinal).getID());
 					questionData.remove(posFinal);
-					questions.remove(posFinal + 2);
+					questions.remove(posFinal + 3);
 					categories.clear();
 					categories.add(getString(R.string.category_all));
 					for (int i = 0; i < questionData.size(); i++) {
@@ -604,6 +608,27 @@ public class ShowCustomEditActivity extends Activity {
 				builder.create().show();
 			}
 		}
+	}
+
+	private void showHowTo() {
+		String header = QuestionContract.QUESTION_TEXT + "," + QuestionContract.ANSWER_CORRECT + ","
+				+ CustomQuestionContract.ANSWER_INCORRECT1 + "," + CustomQuestionContract.ANSWER_INCORRECT2 + ","
+				+ CustomQuestionContract.ANSWER_INCORRECT3 + "," + QuestionContract.DIFFICULTY + "\n\n";
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.howto_import_csv);
+		builder.setMessage(getString(R.string.howto_import_csv1) + header + getString(R.string.howto_import_csv2));
+		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				// Do nothing
+			}
+		});
+		builder.setNegativeButton(R.string.download, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://learnwithhiq.com/downloads.php"));
+				startActivity(intent);
+			}
+		});
+		builder.create().show();
 	}
 
 	private boolean testQuestion(String q, String a, String w1, String w2, String w3, String c) {
