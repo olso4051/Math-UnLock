@@ -48,6 +48,7 @@ import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.CustomArrayAdapter;
 import com.olyware.mathlock.utils.EZ;
+import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.FileDialog;
 import com.olyware.mathlock.utils.MoneyHelper;
 
@@ -66,6 +67,8 @@ public class ShowCustomEditActivity extends Activity {
 	private EditText[] inputs = new EditText[6];
 	private String cat;
 	private String[] difficulties = new String[Difficulty.getSize()];
+	private String[] EggKeys;
+	private int[] EggMaxValues;
 	ArrayAdapter<String> adapterDifficulties, adapterCategories;
 	private Spinner difficulty, category;
 	private Button done, cancel;
@@ -105,24 +108,28 @@ public class ShowCustomEditActivity extends Activity {
 				long id = dbManager.addCustomQuestion(newQuestions[0].get(i));
 				count += id >= 0 ? 1 : 0;
 			}
-			categories.clear();
-			categories.add(getString(R.string.category_all));
-			questionData = EZ.list(dbManager.getAllCustomQuestions());
-			for (int i = 0; i < questionData.size(); i++) {
-				if (!categories.contains(questionData.get(i).getCategory()))
-					categories.add(questionData.get(i).getCategory());
-			}
-			questions.clear();
-			ids.clear();
-			questions.add(getString(R.string.add_new_pack));
-			questions.add(getString(R.string.add_new));
-			for (int i = 0; i < questionData.size(); i++) {
-				if (questionData.get(i).getCategory().equals(cat) || cat.equals(getString(R.string.category_all))) {
-					ids.add(i);
-					questions.add(questionData.get(i).getQuestionText());
+			if (count > 0) {
+				categories.clear();
+				categories.add(getString(R.string.category_all));
+				questionData = EZ.list(dbManager.getAllCustomQuestions());
+				for (int i = 0; i < questionData.size(); i++) {
+					if (!categories.contains(questionData.get(i).getCategory()))
+						categories.add(questionData.get(i).getCategory());
 				}
-			}
-			return count;
+				questions.clear();
+				ids.clear();
+				questions.add(getString(R.string.howto_import_csv));
+				questions.add(getString(R.string.add_new_pack));
+				questions.add(getString(R.string.add_new));
+				for (int i = 0; i < questionData.size(); i++) {
+					if (questionData.get(i).getCategory().equals(cat) || cat.equals(getString(R.string.category_all))) {
+						ids.add(i);
+						questions.add(questionData.get(i).getQuestionText());
+					}
+				}
+				return count;
+			} else
+				return -1;
 		}
 
 		@Override
@@ -132,7 +139,8 @@ public class ShowCustomEditActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Integer result) {
-			if (result >= 0) {
+			if (result > 0) {
+				Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, EggKeys[16], EggMaxValues[16]));
 				SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 				SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 				Money.decreaseMoneyAndPaidWithDebt(result);
@@ -143,7 +151,8 @@ public class ShowCustomEditActivity extends Activity {
 				adapter.notifyDataSetChanged();
 				adapterCategories.notifyDataSetChanged();
 				Toast.makeText(ShowCustomEditActivity.this, "Uploaded " + result + " question(s)", Toast.LENGTH_LONG).show();
-			}
+			} else
+				Toast.makeText(ShowCustomEditActivity.this, "Uploaded 0 question(s)", Toast.LENGTH_LONG).show();
 			category.setEnabled(true);
 			list.setEnabled(true);
 			super.onPostExecute(result);
@@ -156,8 +165,10 @@ public class ShowCustomEditActivity extends Activity {
 
 		new OpenDatabase().execute();
 
+		EggKeys = getResources().getStringArray(R.array.egg_keys);
+		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		// SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
 		sdFilePath = new File(sharedPrefs.getString("hiq_path", Environment.getExternalStorageDirectory() + ""));// + "//yourdir//");
 
 		fonts = Typefaces.getInstance(this);
@@ -573,6 +584,7 @@ public class ShowCustomEditActivity extends Activity {
 			builder.setTitle(R.string.add_question);
 			builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
+					Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, EggKeys[15], EggMaxValues[15]));
 					dbManager.addCustomQuestion(question, difficulty);
 					resetContentView(R.layout.activity_custom_edit2, null, -1);
 				}

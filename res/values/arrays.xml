@@ -263,13 +263,16 @@
         <item>purchase2</item>
         <item>purchase3</item>
         <item>double_tap</item>
+        <item>add_app</item>
+        <item>add_question</item>
+        <item>import_csv</item>
     </string-array>
     <integer-array name="egg_max_values">
         <item>500</item>
         <item>500</item>
         <item>500</item>
         <item>500</item>
-        <item>100</item>
+        <item>500</item>
         <item>1000</item>
         <item>500</item>
         <item>1000</item>
@@ -279,6 +282,9 @@
         <item>5000</item>
         <item>10000</item>
         <item>500</item>
+        <item>500</item>
+        <item>500</item>
+        <item>1000</item>
     </integer-array>
     
     <string-array name="answer_titles">

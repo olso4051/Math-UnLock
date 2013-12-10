@@ -500,6 +500,7 @@ public class MainActivity extends Activity {
 					Intent test = pm.getLaunchIntentForPackage(pack.packageName);
 					if (test != null) {
 						if (data.getComponent().equals(test.getComponent())) {
+							Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[14], EggMaxValues[14]));
 							sharedPrefsApps.edit().putInt("size", apps.size() + 1).putString("app" + apps.size(), pack.packageName)
 									.commit();
 							apps.add(pack);

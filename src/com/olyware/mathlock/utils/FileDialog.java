@@ -51,7 +51,6 @@ public class FileDialog {
 	public Dialog createFileDialog() {
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-
 		builder.setTitle(currentPath.getPath());
 		if (selectDirectoryOption) {
 			builder.setPositiveButton("Select directory", new DialogInterface.OnClickListener() {
@@ -60,7 +59,6 @@ public class FileDialog {
 				}
 			});
 		}
-
 		builder.setItems(fileList, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				String fileChosen = fileList[which];
@@ -74,7 +72,6 @@ public class FileDialog {
 					fireFileSelectedEvent(chosenFile);
 			}
 		});
-
 		dialog = builder.show();
 		return dialog;
 	}
