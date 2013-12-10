@@ -3,21 +3,31 @@ package com.olyware.mathlock.utils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
+import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ListenerList.FireHandler;
 
 public class FileDialog {
 	private static final String PARENT_DIR = "..";
-	private String[] fileList;
+	private int dp5;
+	private List<File> files, dirs, allEntries;
 	private File currentPath;
+	private Context ctx;
+	private Locale loc;
 
 	public interface FileSelectedListener {
 		void fileSelected(File file);
@@ -29,7 +39,6 @@ public class FileDialog {
 
 	private ListenerList<FileSelectedListener> fileListenerList = new ListenerList<FileDialog.FileSelectedListener>();
 	private ListenerList<DirectorySelectedListener> dirListenerList = new ListenerList<FileDialog.DirectorySelectedListener>();
-	private final Activity activity;
 	private boolean selectDirectoryOption;
 	private String fileEndsWith;
 
@@ -37,20 +46,53 @@ public class FileDialog {
 	 * @param activity
 	 * @param initialPath
 	 */
-	public FileDialog(Activity activity, File path, String fileEndsWith) {
-		this.activity = activity;
+	public FileDialog(Context ctx, File path, String fileEndsWith) {
+		this.ctx = ctx;
+		loc = new Locale("en");
+		dp5 = (int) (5 * ctx.getResources().getDisplayMetrics().density + 0.5f);
 		if (!path.exists())
 			path = Environment.getExternalStorageDirectory();
-		this.fileEndsWith = fileEndsWith != null ? fileEndsWith.toLowerCase(new Locale("en")) : fileEndsWith;
+		this.fileEndsWith = fileEndsWith != null ? fileEndsWith.toLowerCase(loc) : fileEndsWith;
+		files = new ArrayList<File>();
+		dirs = new ArrayList<File>();
+		allEntries = new ArrayList<File>();
 		loadFileList(path);
 	}
+
+	public class FileAdapter extends ArrayAdapter<File> {
+		public FileAdapter(int resid) {
+			super(ctx, resid, allEntries);
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// User super class to create the View
+			View v = super.getView(position, convertView, parent);
+			TextView tv = (TextView) v.findViewById(R.id.file_text);
+			// Put the image on the TextView
+			if (allEntries.get(position).equals(currentPath)) {
+				tv.setText(PARENT_DIR);
+				tv.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+			} else if (allEntries.get(position).isDirectory()) {
+				tv.setCompoundDrawablesWithIntrinsicBounds(ctx.getResources().getDrawable(R.drawable.folder), null, null, null);
+				tv.setCompoundDrawablePadding(dp5);
+				tv.setText(allEntries.get(position).getName());
+			} else {
+				tv.setCompoundDrawablesWithIntrinsicBounds(ctx.getResources().getDrawable(R.drawable.file), null, null, null);
+				tv.setCompoundDrawablePadding(dp5);
+				tv.setText(allEntries.get(position).getName());
+			}
+			return tv;
+		}
+	};
 
 	/**
 	 * @return file dialog
 	 */
 	public Dialog createFileDialog() {
 		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+		FileAdapter fAdapter = new FileAdapter(R.layout.file_list_text_item);
+
 		builder.setTitle(currentPath.getPath());
 		if (selectDirectoryOption) {
 			builder.setPositiveButton("Select directory", new DialogInterface.OnClickListener() {
@@ -59,7 +101,19 @@ public class FileDialog {
 				}
 			});
 		}
-		builder.setItems(fileList, new DialogInterface.OnClickListener() {
+		builder.setAdapter(fAdapter, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				File chosenFile = getChosenFile(allEntries.get(which));
+				if (chosenFile.isDirectory()) {
+					loadFileList(chosenFile);
+					dialog.cancel();
+					dialog.dismiss();
+					showDialog();
+				} else
+					fireFileSelectedEvent(chosenFile);
+			}
+		});
+		/*builder.setItems(fileList, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				String fileChosen = fileList[which];
 				File chosenFile = getChosenFile(fileChosen);
@@ -71,7 +125,7 @@ public class FileDialog {
 				} else
 					fireFileSelectedEvent(chosenFile);
 			}
-		});
+		});*/
 		dialog = builder.show();
 		return dialog;
 	}
@@ -121,40 +175,63 @@ public class FileDialog {
 
 	private void loadFileList(File path) {
 		this.currentPath = path;
-		List<String> r = new ArrayList<String>();
 		if (path.exists()) {
-			if (path.getParentFile() != null)
-				r.add(PARENT_DIR);
-			FilenameFilter filter = new FilenameFilter() {
+			if (path.getParentFile() != null) {
+				// r.add(PARENT_DIR);
+			}
+			FilenameFilter filterFiles = new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					File sel = new File(dir, filename);
 					if (!sel.canRead())
 						return false;
-					if (selectDirectoryOption)
-						return sel.isDirectory();
-					else {
-						boolean endsWith = fileEndsWith != null ? filename.toLowerCase(new Locale("en")).endsWith(fileEndsWith) : true;
-						return endsWith || sel.isDirectory();
-					}
+					else if (sel.isDirectory())
+						return false;
+					else
+						return fileEndsWith != null ? filename.toLowerCase(loc).endsWith(fileEndsWith) : true;
 				}
 			};
-			String[] fileList1 = path.list(filter);
-			for (String file : fileList1) {
-				r.add(file);
+			FilenameFilter filterDirs = new FilenameFilter() {
+				public boolean accept(File dir, String filename) {
+					File sel = new File(dir, filename);
+					if (!sel.canRead())
+						return false;
+					else
+						return sel.isDirectory();
+				}
+			};
+			File[] dirs1 = path.listFiles(filterDirs);
+			File[] files1 = path.listFiles(filterFiles);
+			dirs.clear();
+			files.clear();
+			for (File dir : dirs1) {
+				dirs.add(dir);
 			}
+			for (File file : files1) {
+				files.add(file);
+			}
+			Comparator<File> comp = new Comparator<File>() {
+				public int compare(File f1, File f2) {
+					return f1.getName().toLowerCase(loc).compareTo(f2.getName().toLowerCase(loc));
+				}
+			};
+			Collections.sort(dirs, comp);
+			Collections.sort(files, comp);
+			allEntries.clear();
+			allEntries.add(currentPath);
+			allEntries.addAll(dirs);
+			allEntries.addAll(files);
 		}
-		fileList = (String[]) r.toArray(new String[] {});
 	}
 
-	private File getChosenFile(String fileChosen) {
-		if (fileChosen.equals(PARENT_DIR))
+	private File getChosenFile(File fileChosen) {
+		if (fileChosen == currentPath)
 			return currentPath.getParentFile();
 		else
-			return new File(currentPath, fileChosen);
+			return fileChosen;
 	}
 
 	public void setFileEndsWith(String fileEndsWith) {
-		this.fileEndsWith = fileEndsWith != null ? fileEndsWith.toLowerCase(new Locale("en")) : fileEndsWith;
+		this.fileEndsWith = fileEndsWith != null ? fileEndsWith.toLowerCase(loc) : fileEndsWith;
 	}
 }
 
