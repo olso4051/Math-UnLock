@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
 	final private String[] answersNA = { "N/A", "N/A", "N/A", "N/A" }, answersNone = { "", "", "", "" };
+	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
@@ -168,9 +169,6 @@ public class MainActivity extends Activity {
 		locked = this.getIntent().getBooleanExtra("locked", false);
 		unlocking = locked;
 
-		answerIncorrectClick = MediaPlayer.create(this, R.raw.answer_incorrect);
-		answerCorrectClick = MediaPlayer.create(this, R.raw.answer_correct);
-		buttonClick = MediaPlayer.create(this, R.raw.button_click);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -338,6 +336,10 @@ public class MainActivity extends Activity {
 
 		joystick.removeCallbacks();
 
+		answerIncorrectClick.release();
+		answerCorrectClick.release();
+		buttonClick.release();
+
 		super.onPause();
 	}
 
@@ -369,6 +371,11 @@ public class MainActivity extends Activity {
 		super.onResume();
 		if (locked && quizMode)
 			quizMode = joystick.setQuizMode(false);
+
+		// load the sound files
+		answerIncorrectClick = MediaPlayer.create(this, R.raw.answer_incorrect);
+		answerCorrectClick = MediaPlayer.create(this, R.raw.answer_correct);
+		buttonClick = MediaPlayer.create(this, R.raw.button_click);
 
 		// get settings
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -884,14 +891,14 @@ public class MainActivity extends Activity {
 					.currentTimeMillis(), startTime - System.currentTimeMillis()));
 			if (correct) {
 				if (questionWorth > 0)
-					answerCorrectClick.start();
+					playSound(PLAY_CORRECT);
 				else
-					buttonClick.start();
+					playSound(PLAY_BEEP);
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
 				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
-				answerIncorrectClick.start();
+				playSound(PLAY_WRONG);
 				answerView.setIncorrectGuess(guessLoc);
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
@@ -961,7 +968,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 4:	// question mark(tell me the answer/I don't know) was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[1], EggMaxValues[1]));
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
@@ -976,27 +983,27 @@ public class MainActivity extends Activity {
 			});
 			break;
 		case 5:		// info was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[2], EggMaxValues[2]));
 			displayInfo(false);
 			break;
 		case 6:		// Store was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case 7:		// progress was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case 9:		// settings was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			fromSettings = true;
 			unlocking = false;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
@@ -1007,7 +1014,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 11:	// quickUnlock activated
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			setApps();
 			resetQuestionWorth(0);
 			switch (Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))) {
@@ -1024,18 +1031,18 @@ public class MainActivity extends Activity {
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
 			break;
 		case 12:	// add app was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			selectApp();
 			break;
 		case 13:	// app was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			if (Extra < apps.size()) {
 				startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
 				finish();
 			}
 			break;
 		case 14:	// remove app was selected
-			buttonClick.start();
+			playSound(PLAY_BEEP);
 			removeAppFromAll(Extra);
 			break;
 		}
@@ -1239,5 +1246,29 @@ public class MainActivity extends Activity {
 		Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
 		pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
 		startActivityForResult(pickIntent, R.id.REQUEST_PICK_APP);
+	}
+
+	private void playSound(int ID) {
+		if (!locked) {
+			if (ID == PLAY_CORRECT) {
+				if (answerCorrectClick.isPlaying()) {
+					answerCorrectClick.reset();
+					answerCorrectClick = MediaPlayer.create(this, R.raw.answer_correct);
+				}
+				answerCorrectClick.start();
+			} else if (ID == PLAY_WRONG) {
+				if (answerIncorrectClick.isPlaying()) {
+					answerIncorrectClick.reset();
+					answerIncorrectClick = MediaPlayer.create(this, R.raw.answer_incorrect);
+				}
+				answerIncorrectClick.start();
+			} else if (ID == PLAY_BEEP) {
+				if (buttonClick.isPlaying()) {
+					buttonClick.reset();
+					buttonClick = MediaPlayer.create(this, R.raw.button_click);
+				}
+				buttonClick.start();
+			}
+		}
 	}
 }
