@@ -336,6 +336,9 @@ public class MainActivity extends Activity {
 
 		joystick.removeCallbacks();
 
+		answerIncorrectClick.reset();
+		answerCorrectClick.reset();
+		buttonClick.reset();
 		answerIncorrectClick.release();
 		answerCorrectClick.release();
 		buttonClick.release();

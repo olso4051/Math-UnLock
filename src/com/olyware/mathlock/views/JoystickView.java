@@ -806,7 +806,6 @@ public class JoystickView extends View {
 		}
 
 		// Draw the option bar
-		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
 			canvas.drawRect(dstRectForOpt, optPaint);// darken the text behind settings stuff
 			canvas.drawTextOnPath(res.getString(R.string.swipe_here), optionPath, 0, 0, optionPaintWhite);
@@ -817,6 +816,7 @@ public class JoystickView extends View {
 				}
 			}
 		}
+		canvas.drawRoundRect(dstRectForSet, textSizePix, textSizePix, settingsPaint);
 		canvas.drawText(res.getString(R.string.side_bar), Width / 2, TextHeight, textPaintBlack);
 		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, settingsPaint);
 		if (quizMode)
@@ -1502,10 +1502,10 @@ public class JoystickView extends View {
 		case 2:
 			break;
 		}
-		dstRectForOpt.set(0, TextHeight - textSizePix, Width, optionY - swipeLengthOption * 3);
-		dstRectForSet.set(0, TextHeight - textSizePix, Width, TextHeight - textSizePix + dstHeight);
+		dstRectForOpt.set(0, optionY - swipeLengthOption * 3, Width, Height);
+		dstRectForSet.set(0, TextHeight - textSizePix, Width, Height + textSizePix);
 		settingsPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, TextHeight - textSizePix + dstHeight, Color.WHITE,
-				Color.TRANSPARENT, TileMode.MIRROR));
+				Color.BLACK, TileMode.MIRROR));
 		optPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, optionY - swipeLengthOption * 3, Color.BLACK,
 				Color.TRANSPARENT, TileMode.MIRROR));
 		int temp = side + rBig * 2 + pad;
