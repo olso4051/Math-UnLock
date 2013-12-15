@@ -62,7 +62,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int startingPmoney = 20000, initialStreakToIncrease = 40;
+	final private int startingPmoney = 0, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -1077,12 +1077,27 @@ public class MainActivity extends Activity {
 				editorPrefsStats.putInt("currentStreak", 1);
 			if (currentStreak >= sharedPrefsStats.getInt("streakToIncrease", initialStreakToIncrease)) {
 				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
-				if (currentMax < 5) {
-					int max = Math.min(5, currentMax + 1);
-					editorPrefsStats.putInt("streakToIncrease", currentStreak + initialStreakToIncrease);
-					editorPrefs.putString("difficulty_max", String.valueOf(max)).commit();
-					Toast.makeText(this, getString(R.string.difficulty_increased), Toast.LENGTH_SHORT).show();
+				switch (currentMax) {
+				case 0:
+					Toast.makeText(this, getString(R.string.difficulty_increase0), Toast.LENGTH_LONG).show();
+					break;
+				case 1:
+					Toast.makeText(this, getString(R.string.difficulty_increase1), Toast.LENGTH_LONG).show();
+					break;
+				case 2:
+					Toast.makeText(this, getString(R.string.difficulty_increase2), Toast.LENGTH_LONG).show();
+					break;
+				case 3:
+					Toast.makeText(this, getString(R.string.difficulty_increase3), Toast.LENGTH_LONG).show();
+					break;
+				case 4:
+					Toast.makeText(this, getString(R.string.difficulty_increase4), Toast.LENGTH_LONG).show();
+					break;
+				case 5:
+					Toast.makeText(this, getString(R.string.difficulty_increase5), Toast.LENGTH_LONG).show();
+					break;
 				}
+				editorPrefsStats.putInt("streakToIncrease", currentStreak + initialStreakToIncrease);
 			}
 			if (answerTimeFast > ms)
 				editorPrefsStats.putLong("answerTimeFast", ms);

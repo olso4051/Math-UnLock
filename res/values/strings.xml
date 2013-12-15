@@ -32,6 +32,12 @@
     <string name="delete_question">Delete Question!</string>
     <string name="difficulty">Difficulty</string>
     <string name="difficulty_default">0</string>
+    <string name="difficulty_increase0">You\'re pretty good, increase the difficulty in settings</string>
+    <string name="difficulty_increase1">Wow you\'re getting better, try a higher difficulty</string>
+    <string name="difficulty_increase2">Not too shabby, there\'s more difficulty settings though</string>
+    <string name="difficulty_increase3">Increase the difficulty, and then I might be impressed</string>
+    <string name="difficulty_increase4">You\'re a Pro! I\'ll be impressed if you increase the difficulty</string>
+    <string name="difficulty_increase5">You\'ve reached Brad level, Nice Job!</string>
     <string name="difficulty_increased">Difficulty Increased!</string>
     <string name="difficulty_max">Max Difficulty</string>
     <string name="difficulty_min">Min Difficulty</string>
