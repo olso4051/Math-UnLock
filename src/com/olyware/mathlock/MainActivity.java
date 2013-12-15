@@ -779,9 +779,12 @@ public class MainActivity extends Activity {
 		decreaseRate = questions.get(0).getTimeStep();
 
 		// Display the vocabulary question and answers
+		decreaseRate = questions.get(0).getQuestionText().length();
 		for (int i = 0; i < answers.length; i++) {
 			answers[i] = questions.get(i).getCorrectAnswer();
+			decreaseRate += answers[i].length();
 		}
+		decreaseRate = decreaseRate * 10;
 		problem.setText("Define: " + questions.get(0).getQuestionText());
 		return true;
 	}
@@ -808,9 +811,12 @@ public class MainActivity extends Activity {
 		decreaseRate = questions.get(0).getTimeStep();
 
 		// Display the language question and answers
+		decreaseRate = questions.get(0).getQuestionText().length();
 		for (int i = 0; i < answers.length; i++) {
 			answers[i] = questions.get(i).getCorrectAnswer();
+			decreaseRate += answers[i].length();
 		}
+		decreaseRate = decreaseRate * 10;
 		problem.setText(fromLanguageLocal + " → " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
 		return true;
 	}
@@ -1077,25 +1083,31 @@ public class MainActivity extends Activity {
 				editorPrefsStats.putInt("currentStreak", 1);
 			if (currentStreak >= sharedPrefsStats.getInt("streakToIncrease", initialStreakToIncrease)) {
 				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
-				switch (currentMax) {
-				case 0:
-					Toast.makeText(this, getString(R.string.difficulty_increase0), Toast.LENGTH_LONG).show();
-					break;
-				case 1:
-					Toast.makeText(this, getString(R.string.difficulty_increase1), Toast.LENGTH_LONG).show();
-					break;
-				case 2:
-					Toast.makeText(this, getString(R.string.difficulty_increase2), Toast.LENGTH_LONG).show();
-					break;
-				case 3:
-					Toast.makeText(this, getString(R.string.difficulty_increase3), Toast.LENGTH_LONG).show();
-					break;
-				case 4:
-					Toast.makeText(this, getString(R.string.difficulty_increase4), Toast.LENGTH_LONG).show();
-					break;
-				case 5:
-					Toast.makeText(this, getString(R.string.difficulty_increase5), Toast.LENGTH_LONG).show();
-					break;
+				if ((currentMax < 5) && (sharedPrefs.getBoolean("algorithm", true))) {
+					int max = Math.min(5, currentMax + 1);
+					editorPrefs.putString("difficulty_max", String.valueOf(max)).commit();
+					Toast.makeText(this, getString(R.string.difficulty_increased), Toast.LENGTH_SHORT).show();
+				} else {
+					switch (currentMax) {
+					case 0:
+						Toast.makeText(this, getString(R.string.difficulty_increase0), Toast.LENGTH_LONG).show();
+						break;
+					case 1:
+						Toast.makeText(this, getString(R.string.difficulty_increase1), Toast.LENGTH_LONG).show();
+						break;
+					case 2:
+						Toast.makeText(this, getString(R.string.difficulty_increase2), Toast.LENGTH_LONG).show();
+						break;
+					case 3:
+						Toast.makeText(this, getString(R.string.difficulty_increase3), Toast.LENGTH_LONG).show();
+						break;
+					case 4:
+						Toast.makeText(this, getString(R.string.difficulty_increase4), Toast.LENGTH_LONG).show();
+						break;
+					case 5:
+						Toast.makeText(this, getString(R.string.difficulty_increase5), Toast.LENGTH_LONG).show();
+						break;
+					}
 				}
 				editorPrefsStats.putInt("streakToIncrease", currentStreak + initialStreakToIncrease);
 			}

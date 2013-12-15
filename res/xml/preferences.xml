@@ -56,6 +56,11 @@
 		        android:entryValues="@array/lockscreen2_values"
 		        android:defaultValue="@string/default_entry" />
 	        <CheckBoxPreference
+		        android:key="algorithm"
+		        android:title="@string/enable_algorithm"
+		        android:summary="@string/enable_algorithm_summary"
+		        android:defaultValue="true"/>
+	        <CheckBoxPreference
 		        android:key="vibration"
 		        android:title="@string/enable_vibration"
 		        android:summary="@string/enable_vibration_summary"

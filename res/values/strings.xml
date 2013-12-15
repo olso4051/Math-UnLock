@@ -49,12 +49,14 @@
     <string name="egg_message">Egg worth = </string>
     <string name="egg_title">Easter Egg Found!</string>
     <string name="enable">Enable</string>
+    <string name="enable_algorithm">Hiq Algorithm</string>
+    <string name="enable_algorithm_summary">When selected, Hiq will automatically adjust difficulty settings</string>
     <string name="enable_custom_summary">Custom Questions</string>
     <string name="enable_engineer_summary">Engineering Questions</string>
     <string name="enable_hiqh_trivia_summary">Hiq Trivia Questions</string>
     <string name="enable_language_summary">Language questions</string>
     <string name="enable_lockscreen">Lockscreen On/Off</string>
-    <string name="enable_lockscreen_summary">Use app as a lockscreen</string>
+    <string name="enable_lockscreen_summary">When checked, Hiq will be set as your lockscreen</string>
     <string name="enable_lockscreen2">Lockscreen Timeout Period</string>
     <string name="enable_lockscreen2_summary">Immediately</string>
     <string name="enable_math_summary">Math questions</string>
