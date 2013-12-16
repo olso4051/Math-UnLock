@@ -56,7 +56,7 @@
     <string name="enable_hiqh_trivia_summary">Hiq Trivia Questions</string>
     <string name="enable_language_summary">Language questions</string>
     <string name="enable_lockscreen">Lockscreen On/Off</string>
-    <string name="enable_lockscreen_summary">When checked, Hiq will be set as your lockscreen</string>
+    <string name="enable_lockscreen_summary">When selected, Hiq will be set as your lockscreen</string>
     <string name="enable_lockscreen2">Lockscreen Timeout Period</string>
     <string name="enable_lockscreen2_summary">Immediately</string>
     <string name="enable_math_summary">Math questions</string>

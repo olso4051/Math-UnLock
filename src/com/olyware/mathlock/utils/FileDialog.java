@@ -50,8 +50,11 @@ public class FileDialog {
 		this.ctx = ctx;
 		loc = new Locale("en");
 		dp5 = (int) (5 * ctx.getResources().getDisplayMetrics().density + 0.5f);
-		if (!path.exists())
+		if (!path.exists() || !path.isDirectory()) {
 			path = Environment.getExternalStorageDirectory();
+			if (!path.exists() || !path.isDirectory())
+				path = Environment.getRootDirectory();
+		}
 		this.fileEndsWith = fileEndsWith != null ? fileEndsWith.toLowerCase(loc) : fileEndsWith;
 		files = new ArrayList<File>();
 		dirs = new ArrayList<File>();
@@ -176,9 +179,6 @@ public class FileDialog {
 	private void loadFileList(File path) {
 		this.currentPath = path;
 		if (path.exists()) {
-			if (path.getParentFile() != null) {
-				// r.add(PARENT_DIR);
-			}
 			FilenameFilter filterFiles = new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					File sel = new File(dir, filename);
@@ -203,12 +203,14 @@ public class FileDialog {
 			File[] files1 = path.listFiles(filterFiles);
 			dirs.clear();
 			files.clear();
-			for (File dir : dirs1) {
-				dirs.add(dir);
-			}
-			for (File file : files1) {
-				files.add(file);
-			}
+			if (dirs1 != null)
+				for (File dir : dirs1) {
+					dirs.add(dir);
+				}
+			if (files1 != null)
+				for (File file : files1) {
+					files.add(file);
+				}
 			Comparator<File> comp = new Comparator<File>() {
 				public int compare(File f1, File f2) {
 					return f1.getName().toLowerCase(loc).compareTo(f2.getName().toLowerCase(loc));
@@ -217,7 +219,9 @@ public class FileDialog {
 			Collections.sort(dirs, comp);
 			Collections.sort(files, comp);
 			allEntries.clear();
-			allEntries.add(currentPath);
+			if (path.getParentFile() != null) {
+				allEntries.add(currentPath);
+			}
 			allEntries.addAll(dirs);
 			allEntries.addAll(files);
 		}
