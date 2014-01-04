@@ -46,65 +46,75 @@ public class DatabaseManager {
 		}
 	}
 
+	public boolean isDestroyed() {
+		if (db.isOpen())
+			return false;
+		else
+			return true;
+	}
+
 	public double getPriority(int table, String fromLanguage, String toLanguage, Difficulty minDifficulty, Difficulty maxDifficulty,
 			long notID) {
-		String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
-				+ String.valueOf(minDifficulty.getValue());
-		String priorities = QuestionContract.PRIORITY;
-		// String notIDs = " AND " + BaseContract._ID + " != " + notID;
-		String tableName, allColumns[];
-		List<String> cats = getAllCustomCategories();
-		boolean success;
-		switch (table) {
-		case 0:			// math question
-			tableName = MathQuestionContract.TABLE_NAME;
-			allColumns = MathQuestionContract.ALL_COLUMNS;
-			success = true;
-			break;
-		case 1:			// vocabulary question
-			tableName = VocabQuestionContract.TABLE_NAME;
-			allColumns = VocabQuestionContract.ALL_COLUMNS;
-			success = true;
-			break;
-		case 2:			// language question
-			tableName = LanguageQuestionContract.TABLE_NAME;
-			allColumns = LanguageQuestionContract.ALL_COLUMNS;
-			priorities = fromLanguage + LanguageQuestionContract.PRIORITIES + " + " + toLanguage + LanguageQuestionContract.PRIORITIES;
-			success = true;
-			break;
-		case 3:			// engineer question
-			tableName = EngineerQuestionContract.TABLE_NAME;
-			allColumns = EngineerQuestionContract.ALL_COLUMNS;
-			success = true;
-			break;
-		case 4:			// HiqH Trivia question
-			tableName = HiqTriviaQuestionContract.TABLE_NAME2;
-			allColumns = HiqTriviaQuestionContract.ALL_COLUMNS;
-			success = true;
-			break;
-		default:
-			tableName = MathQuestionContract.TABLE_NAME;
-			allColumns = MathQuestionContract.ALL_COLUMNS;
-			success = false;
-			break;
-		}
-		// Custom question
-		if ((table > 4) && (table < 5 + cats.size())) {
-			tableName = CustomQuestionContract.TABLE_NAME;
-			allColumns = CustomQuestionContract.ALL_COLUMNS;
-			where = where + " AND " + CustomQuestionContract.CATEGORY + " = '" + cats.get(table - 5).replaceAll("'", "''") + "'";
-			success = true;
-		}
-		if (success) {
-			Cursor cursor2 = db.query(tableName, allColumns, where, null, null, null, null);
-			double count = cursor2.getCount();
-			cursor2 = db.rawQuery("SELECT SUM(" + priorities + ") FROM " + tableName + " WHERE " + where, null);
-			cursor2.moveToFirst();
-			double sum = cursor2.getInt(0);
-			cursor2.close();
-			if (count > 0)
-				return sum / count;
-			else
+		if (db.isOpen()) {
+			String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+					+ String.valueOf(minDifficulty.getValue());
+			String priorities = QuestionContract.PRIORITY;
+			// String notIDs = " AND " + BaseContract._ID + " != " + notID;
+			String tableName, allColumns[];
+			List<String> cats = getAllCustomCategories();
+			boolean success;
+			switch (table) {
+			case 0:			// math question
+				tableName = MathQuestionContract.TABLE_NAME;
+				allColumns = MathQuestionContract.ALL_COLUMNS;
+				success = true;
+				break;
+			case 1:			// vocabulary question
+				tableName = VocabQuestionContract.TABLE_NAME;
+				allColumns = VocabQuestionContract.ALL_COLUMNS;
+				success = true;
+				break;
+			case 2:			// language question
+				tableName = LanguageQuestionContract.TABLE_NAME;
+				allColumns = LanguageQuestionContract.ALL_COLUMNS;
+				priorities = fromLanguage + LanguageQuestionContract.PRIORITIES + " + " + toLanguage + LanguageQuestionContract.PRIORITIES;
+				success = true;
+				break;
+			case 3:			// engineer question
+				tableName = EngineerQuestionContract.TABLE_NAME;
+				allColumns = EngineerQuestionContract.ALL_COLUMNS;
+				success = true;
+				break;
+			case 4:			// HiqH Trivia question
+				tableName = HiqTriviaQuestionContract.TABLE_NAME2;
+				allColumns = HiqTriviaQuestionContract.ALL_COLUMNS;
+				success = true;
+				break;
+			default:
+				tableName = MathQuestionContract.TABLE_NAME;
+				allColumns = MathQuestionContract.ALL_COLUMNS;
+				success = false;
+				break;
+			}
+			// Custom question
+			if ((table > 4) && (table < 5 + cats.size())) {
+				tableName = CustomQuestionContract.TABLE_NAME;
+				allColumns = CustomQuestionContract.ALL_COLUMNS;
+				where = where + " AND " + CustomQuestionContract.CATEGORY + " = '" + cats.get(table - 5).replaceAll("'", "''") + "'";
+				success = true;
+			}
+			if (success) {
+				Cursor cursor2 = db.query(tableName, allColumns, where, null, null, null, null);
+				double count = cursor2.getCount();
+				cursor2 = db.rawQuery("SELECT SUM(" + priorities + ") FROM " + tableName + " WHERE " + where, null);
+				cursor2.moveToFirst();
+				double sum = cursor2.getInt(0);
+				cursor2.close();
+				if (count > 0)
+					return sum / count;
+				else
+					return 0;
+			} else
 				return 0;
 		} else
 			return 0;

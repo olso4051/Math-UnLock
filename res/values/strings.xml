@@ -73,7 +73,8 @@
     <string name="hint_title">Helpful Hint</string>
     <string name="howto_import_csv">How To Import CSV</string>
     <string name="howto_import_csv1">1. Create a text file with the first line\n\n</string>
-    <string name="howto_import_csv2">2. Separate each collumn with a \',\'\n\n3. Put each question on a new line\n\n4. Difficulty should be in the range 0–5\n\n5. Save the file with a .csv extension\n\n6. The name of the file will be the category for all the imported questions\n\n7. Move the file to your extrnal sd card or internal phone storage</string>
+    <string name="howto_import_csv2">2. Separate each collumn with a \',\'\n\n3. Limit each collumn to</string>
+    <string name="howto_import_csv3">characters\n\n4. Put each question on a new line\n\n5. Difficulty should be in the range 0–5\n\n6. Save the file with a .csv extension\n\n7. The name of the file will be the category for all the imported questions\n\n8. Move the file to your extrnal sd card or internal phone storage</string>
     
     <string name="info_coins_title">Thanks for your interest in buying coins!</string>
     <string name="info_coins_message">Unlock your first question pack before buying coins though. It\'s Free!</string>

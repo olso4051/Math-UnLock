@@ -62,11 +62,11 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity {
-	final private int startingPmoney = 20000, initialStreakToIncrease = 40;
+	final private int startingPmoney = 0, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
-	final private String[] answersNA = { "N/A", "N/A", "N/A", "N/A" }, answersNone = { "", "", "", "" };
+	final private String[] answersNone = { "", "", "", "" };
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
@@ -363,7 +363,8 @@ public class MainActivity extends Activity {
 			mHelper.dispose();
 		mHelper = null;
 		if (dbManager != null)
-			dbManager.destroy();
+			if (!dbManager.isDestroyed())
+				dbManager.destroy();
 		joystick.removeCallbacks();
 		super.onDestroy();
 	}
@@ -403,12 +404,13 @@ public class MainActivity extends Activity {
 		// reset attempts to first attempt
 		attempts = 1;
 
-		if (dbManager != null) {
-			customCategories = dbManager.getAllCustomCategories();
-			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-			for (String cat : customCategories)
-				PackageKeys.add(getString(R.string.custom_enable) + cat);
-		}
+		if (dbManager != null)
+			if (!dbManager.isDestroyed()) {
+				customCategories = dbManager.getAllCustomCategories();
+				PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+				for (String cat : customCategories)
+					PackageKeys.add(getString(R.string.custom_enable) + cat);
+			}
 
 		// get unlocked and enabled item changes
 		UnlockedPackages = getUnlockedPackages();
@@ -607,120 +609,129 @@ public class MainActivity extends Activity {
 
 	private void setProblemAndAnswer() {
 		if ((EnabledPackages > 0) && (dbManager != null)) {
-			joystick.setProblem(true);
-			final String EnabledPackageKeys[] = new String[EnabledPackages];
-			final int location[] = new int[EnabledPackages];
-			double weights[] = new double[EnabledPackages], totalWeight = 0;
-			int count = 0;
-			boolean success;
+			if (!dbManager.isDestroyed()) {
+				joystick.setProblem(true);
+				final String EnabledPackageKeys[] = new String[EnabledPackages];
+				final int location[] = new int[EnabledPackages];
+				double weights[] = new double[EnabledPackages], totalWeight = 0;
+				int count = 0;
+				boolean success;
 
-			// get the difficulty
-			difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
-			difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
-			difficulty = difficultyMax;
+				// get the difficulty
+				difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
+				difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
+				difficulty = difficultyMax;
 
-			for (int i = 0; i < PackageKeys.size(); i++) {
-				if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
-					EnabledPackageKeys[count] = PackageKeys.get(i);
-					location[count] = i;
-					weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
-							Difficulty.fromValue(difficultyMax), ID);
-					totalWeight += weights[count];
-					count++;
-				}
-			}
-
-			questionWorth = 0;
-			answerView.resetGuess();
-			joystick.resetGuess();
-			imageLeft = null;
-			problem.setCompoundDrawables(imageLeft, null, null, null);
-			joystick.unPauseSelection();
-			sharedPrefsStats = getSharedPreferences("Stats", 0);
-			joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
-
-			// pick a random enabled package
-			if (totalWeight == 0)
-				count = 0;
-			else {
-				int randPack = rand.nextInt((int) Math.floor(totalWeight));
-				count = 0;
-				double cumulativeWeight = 0;
-				while (count < EnabledPackages) {
-					cumulativeWeight += weights[count];
-					if (cumulativeWeight > randPack) {
-						break;
+				for (int i = 0; i < PackageKeys.size(); i++) {
+					if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
+						EnabledPackageKeys[count] = PackageKeys.get(i);
+						location[count] = i;
+						weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
+								Difficulty.fromValue(difficultyMax), ID);
+						totalWeight += weights[count];
+						count++;
 					}
-					count++;
 				}
-			}
 
-			switch (location[count]) {
-			case 0:			// math question
-				currentPack = getString(R.string.math);
-				success = setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-				break;
-			case 1:			// vocabulary question
-				currentPack = getString(R.string.vocab);
-				success = setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-				break;
-			case 2:			// language question
-				currentPack = getString(R.string.language);
-				success = setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-				break;
-			case 3:			// engineer question
-				currentPack = getString(R.string.engineer);
-				success = setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-				break;
-			case 4:			// HiqH Trivia question
-				currentPack = getString(R.string.hiqh_trivia);
-				success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-				break;
-			default:
-				success = false;
-				break;
-			}
-			if (!success) {
-				// custom question
-				if ((location[count] > 4) && (location[count] < PackageKeys.size())) {
-					currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 5);
-					success = setCustomProblem(customCategories.get(location[count] - 5), Difficulty.fromValue(difficultyMin),
-							Difficulty.fromValue(difficultyMax));
+				questionWorth = 0;
+				answerView.resetGuess();
+				joystick.resetGuess();
+				imageLeft = null;
+				problem.setCompoundDrawables(imageLeft, null, null, null);
+				joystick.unPauseSelection();
+				sharedPrefsStats = getSharedPreferences("Stats", 0);
+				joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
+
+				// pick a random enabled package
+				if (totalWeight == 0)
+					count = 0;
+				else {
+					int randPack = rand.nextInt((int) Math.floor(totalWeight));
+					count = 0;
+					double cumulativeWeight = 0;
+					while (count < EnabledPackages) {
+						cumulativeWeight += weights[count];
+						if (cumulativeWeight > randPack) {
+							break;
+						}
+						count++;
+					}
 				}
-				// failed to load a question
-				if (!success)
-					return;
-			}
 
-			answerLoc = rand.nextInt(4);			// set a random location for the correct answer
-			int offset = 1;
-			for (int i = 0; i < 4; i++) {
-				if (i == answerLoc) {
-					answersRandom[i] = answers[0];
-					offset = 0;
-				} else {
-					answersRandom[i] = answers[i + offset];
+				switch (location[count]) {
+				case 0:			// math question
+					currentPack = getString(R.string.math);
+					success = setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+					break;
+				case 1:			// vocabulary question
+					currentPack = getString(R.string.vocab);
+					success = setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+					break;
+				case 2:			// language question
+					currentPack = getString(R.string.language);
+					success = setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+					break;
+				case 3:			// engineer question
+					currentPack = getString(R.string.engineer);
+					success = setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+					break;
+				case 4:			// HiqH Trivia question
+					currentPack = getString(R.string.hiqh_trivia);
+					success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+					break;
+				default:
+					success = false;
+					break;
 				}
+				if (!success) {
+					// custom question
+					if ((location[count] > 4) && (location[count] < PackageKeys.size())) {
+						currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 5);
+						success = setCustomProblem(customCategories.get(location[count] - 5), Difficulty.fromValue(difficultyMin),
+								Difficulty.fromValue(difficultyMax));
+					}
+					// failed to load a question
+					if (!success)
+						return;
+				}
+
+				answerLoc = rand.nextInt(4);			// set a random location for the correct answer
+				int offset = 1;
+				for (int i = 0; i < 4; i++) {
+					if (i == answerLoc) {
+						answersRandom[i] = answers[0];
+						offset = 0;
+					} else {
+						answersRandom[i] = answers[i + offset];
+					}
+				}
+
+				answerView.setAnswers(answersRandom, answerLoc);
+				joystick.setAnswers(answersRandom, answerLoc);
+				problem.setTextColor(defaultTextColor);
+				resetQuestionWorth(questionWorthMax);
+			} else {
+				answerView.resetGuess();
+				joystick.resetGuess();
+				joystick.setProblem(false);
+				problem.setText(R.string.db_loading);
+				answersRandom = answersNone;
+				answerView.setAnswers(answersRandom, 0);
+				joystick.setAnswers(answersRandom, 0);
 			}
-
-			answerView.setAnswers(answersRandom, answerLoc);
-			joystick.setAnswers(answersRandom, answerLoc);
-			problem.setTextColor(defaultTextColor);
-			resetQuestionWorth(questionWorthMax);
-
 		} else {
 			answerView.resetGuess();
 			joystick.resetGuess();
 			joystick.setProblem(false);
 			if (!UnlockedPackages) {
 				problem.setText(R.string.none_unlocked);
-				answersRandom = answersNA;
+				answersRandom = answersNone;
 			} else if (dbManager == null) {
 				problem.setText(R.string.db_loading);
 				answersRandom = answersNone;
 			} else {
 				problem.setText(R.string.none_enabled);
-				answersRandom = answersNA;
+				answersRandom = answersNone;
 			}
 			answerView.setAnswers(answersRandom, 0);
 			joystick.setAnswers(answersRandom, 0);

@@ -112,7 +112,10 @@ public class JoystickView extends View {
 		}
 
 		public double getAngle() {
-			return angle;
+			if (angle < 0)
+				return angle + 2 * Math.PI;
+			else
+				return angle;
 		}
 
 		public float getX() {

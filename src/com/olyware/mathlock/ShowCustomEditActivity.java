@@ -578,7 +578,7 @@ public class ShowCustomEditActivity extends Activity {
 
 	private void addCustomQuestion(String q, String a, String w1, String w2, String w3, int d, String c) {
 		final String[] question = new String[] { q, a, w1, w2, w3, c };
-		if (testQuestion(question)) {
+		if (testQuestion(question, true)) {
 			final int difficulty = d;
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.add_question);
@@ -602,7 +602,7 @@ public class ShowCustomEditActivity extends Activity {
 		final int posFinal = position;
 		if ((position >= 0) && (position < questionData.size())) {
 			final String[] question = new String[] { q, a, w1, w2, w3, c };
-			if (testQuestion(question)) {
+			if (testQuestion(question, true)) {
 				final int difficulty = d;
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.update_question);
@@ -626,9 +626,11 @@ public class ShowCustomEditActivity extends Activity {
 		String header = QuestionContract.QUESTION_TEXT + "," + QuestionContract.ANSWER_CORRECT + ","
 				+ CustomQuestionContract.ANSWER_INCORRECT1 + "," + CustomQuestionContract.ANSWER_INCORRECT2 + ","
 				+ CustomQuestionContract.ANSWER_INCORRECT3 + "," + QuestionContract.DIFFICULTY + "\n\n";
+		String limit = " " + MAX_LENGTH + " ";
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.howto_import_csv);
-		builder.setMessage(getString(R.string.howto_import_csv1) + header + getString(R.string.howto_import_csv2));
+		builder.setMessage(getString(R.string.howto_import_csv1) + header + getString(R.string.howto_import_csv2) + limit
+				+ getString(R.string.howto_import_csv3));
 		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				// Do nothing
@@ -644,10 +646,10 @@ public class ShowCustomEditActivity extends Activity {
 	}
 
 	private boolean testQuestion(String q, String a, String w1, String w2, String w3, String c) {
-		return testQuestion(new String[] { q, a, w1, w2, w3, c });
+		return testQuestion(new String[] { q, a, w1, w2, w3, c }, false);
 	}
 
-	private boolean testQuestion(String[] question) {
+	private boolean testQuestion(String[] question, boolean displayDialogs) {
 		boolean tooLongShort[] = new boolean[question.length];// { false, false, false, false, false, false };
 		boolean same = false;
 		List<String> q = new ArrayList<String>();
@@ -662,26 +664,30 @@ public class ShowCustomEditActivity extends Activity {
 			q.add(question[i]);
 		}
 		if (tooLongShort[0] || tooLongShort[1] || tooLongShort[2] || tooLongShort[3] || tooLongShort[4] || tooLongShort[5]) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.input_error);
-			builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// Do nothing
-				}
-			});
-			builder.create().show();
+			if (displayDialogs) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.input_error);
+				builder.setMessage(getString(R.string.max_length) + " " + MAX_LENGTH + " " + getString(R.string.max_length2));
+				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// Do nothing
+					}
+				});
+				builder.create().show();
+			}
 			return false;
 		} else if (same) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.input_error);
-			builder.setMessage(getString(R.string.same_entries));
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					// Do nothing
-				}
-			});
-			builder.create().show();
+			if (displayDialogs) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.input_error);
+				builder.setMessage(getString(R.string.same_entries));
+				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// Do nothing
+					}
+				});
+				builder.create().show();
+			}
 			return false;
 		}
 		return true;
