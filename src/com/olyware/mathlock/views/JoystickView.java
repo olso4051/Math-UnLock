@@ -1505,11 +1505,11 @@ public class JoystickView extends View {
 		case 2:
 			break;
 		}
-		dstRectForOpt.set(0, optionY - swipeLengthOption * 3, Width, Height);
+		dstRectForOpt.set(0, Math.max(optionY - swipeLengthOption * 3, 0), Width, Height);
 		dstRectForSet.set(0, TextHeight - textSizePix, Width, Height + textSizePix);
 		settingsPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, TextHeight - textSizePix + dstHeight, Color.WHITE,
 				Color.BLACK, TileMode.MIRROR));
-		optPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, optionY - swipeLengthOption * 3, Color.BLACK,
+		optPaint.setShader(new LinearGradient(0, TextHeight - textSizePix, 0, Math.max(optionY - swipeLengthOption * 3, 0), Color.BLACK,
 				Color.TRANSPARENT, TileMode.MIRROR));
 		int temp = side + rBig * 2 + pad;
 		dstRectForS.set(selectLeft[4], temp - rBig - rSmall, selectRight[4], temp - rBig + rSmall);
