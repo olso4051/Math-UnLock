@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
 	private int EnabledPackages = 0;
 	private boolean locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false;
-	final private long MONTH = 2592000000l;
+	final private long MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
 
 	private int answerLoc = 0;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
@@ -371,6 +371,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		long currentTime = System.currentTimeMillis();
 		paused = false;
 		super.onResume();
 		if (locked && quizMode)
@@ -389,7 +390,7 @@ public class MainActivity extends Activity {
 		editorPrefsStats = sharedPrefsStats.edit();
 		if (sharedPrefsMoney.getBoolean("first", true)) {
 			Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", startingPmoney));
-			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis() - MONTH * 3 / 4);// give them a week before asking
+			editorPrefsMoney.putLong("lastTime", currentTime - MONTH * 3 / 4);// give them a week before asking
 			editorPrefsMoney.putBoolean("first", false);
 			editorPrefsMoney.commit();
 		} else {
@@ -437,11 +438,17 @@ public class MainActivity extends Activity {
 		if (!UnlockedPackages)
 			displayInfo(true);
 		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
-				&& (sharedPrefsMoney.getLong("lastTime", 0) <= System.currentTimeMillis() - MONTH))
+				&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
 			displayRateShare();
 		else if (sharedPrefs.getBoolean("hints", true)) {
 			setProblemAndAnswer();
 			displayHints(0, false);
+		}
+
+		// Backup preferences every day
+		if (sharedPrefs.getLong("lastTimeBackup", 0) <= currentTime - DAY) {
+			sharedPrefs.edit().putLong("lastTimeBackup", currentTime).commit();
+			EZ.requestBackup(this);
 		}
 
 		// set image if it was set when the screen was off

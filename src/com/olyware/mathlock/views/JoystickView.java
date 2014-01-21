@@ -1533,13 +1533,15 @@ public class JoystickView extends View {
 		maxH = Math.max(bounds[NumAnswers - 1].height(), layout[NumAnswers - 1].getHeight());
 		maxH = Math.max(maxH, answerHintSizePix);
 		if ((maxH > (rUnlock * 2 - pad * 2)) && (Height > 0)) {
-			decreaseHintSize();
-			setHintDimensions();
-			return;
+			if (decreaseHintSize()) {
+				setHintDimensions();
+				return;
+			}
 		} else if (isLayoutSplittingWords(answers[NumAnswers - 1], layout[NumAnswers - 1])) {
-			decreaseHintSize();
-			setHintDimensions();
-			return;
+			if (decreaseHintSize()) {
+				setHintDimensions();
+				return;
+			}
 		}
 		answerTextPaint[NumAnswers - 1].setTextSize(answerHintSizePix);
 		invalidate();
@@ -1553,13 +1555,15 @@ public class JoystickView extends View {
 				maxH = Math.max(bounds[i].height(), layout[i].getHeight());
 				maxH = Math.max(maxH, answerSizePix);
 				if ((maxH > ((TextHeight - textSizePix) / 2 - pad * 3 - rUnlock)) && (Height > 0)) {
-					decreaseAnswerSize();
-					setDimensions();
-					return;
+					if (decreaseAnswerSize()) {
+						setDimensions();
+						return;
+					}
 				} else if (isLayoutSplittingWords(answers[i], layout[i])) {
-					decreaseAnswerSize();
-					setDimensions();
-					return;
+					if (decreaseAnswerSize()) {
+						setDimensions();
+						return;
+					}
 				}
 			} else {
 				if (layoutE[i].getTextSizePix() > answerSizePix) {
@@ -1633,12 +1637,15 @@ public class JoystickView extends View {
 		return false;
 	}
 
-	private void decreaseAnswerSize() {
+	private boolean decreaseAnswerSize() {
+		if (answerSizeSP == 1)
+			return false;
 		answerSizeSP = Math.max(answerSizeSP - 1, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
+		return true;
 	}
 
 	private void changeAnswerSize(int SP, float Pix) {
@@ -1649,10 +1656,13 @@ public class JoystickView extends View {
 		}
 	}
 
-	private void decreaseHintSize() {
+	private boolean decreaseHintSize() {
+		if (answerHintSizeSP == 1)
+			return false;
 		answerHintSizeSP = Math.max(answerHintSizeSP - 1, 1);
 		answerHintSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerHintSizeSP, res.getDisplayMetrics());
 		answerTextPaint[NumAnswers - 1].setTextSize(answerHintSizePix);
+		return true;
 	}
 
 	private void resetAnswerSize() {
