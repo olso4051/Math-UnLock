@@ -6,8 +6,8 @@
     
     <!-- Google Analytics Tracking strings -->
     <string name="google_analytics_tracking_id">UA-48722021-1</string>
-	<string name="enable_tracking">Allow Google Analytics Tracking</string>
-	<string name="enable_tracking_summary">sends app usage data to the developer to help the make app as cool as possible</string>
+	<string name="enable_tracking">Google Analytics</string>
+	<string name="enable_tracking_summary">sends app usage data to the developer to help the make app as cool as possible. We won\'t gather any personal information</string>
     
     <string name="add">Add</string>
     <string name="add_new">New Question</string>

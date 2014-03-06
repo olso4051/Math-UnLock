@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.MapBuilder;
+import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 
 public class EggHelper {
@@ -18,6 +20,7 @@ public class EggHelper {
 	private static Context ctx;
 
 	public static int unlockEgg(Context contex, TextView c, final String Egg, int max) {
+
 		ctx = contex;
 		coins = c;
 		sharedPrefsEggs = ctx.getSharedPreferences("Eggs", 0);
@@ -31,6 +34,8 @@ public class EggHelper {
 			editorPrefsEggs = sharedPrefsEggs.edit();
 			editorPrefsEggs.putBoolean(Egg, true).commit();
 			MoneyHelper.setMoney(ctx, coins, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));// setMoney();
+
+			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
 
 			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else
@@ -51,6 +56,8 @@ public class EggHelper {
 			editorPrefsEggs = sharedPrefsEggs.edit();
 			editorPrefsEggs.putBoolean(Egg, true).commit();
 			MoneyHelper.setMoney(ctx, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));
+
+			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
 
 			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else

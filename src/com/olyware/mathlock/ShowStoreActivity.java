@@ -163,18 +163,18 @@ public class ShowStoreActivity extends Activity {
 			public void onConsumeFinished(Purchase purchase, IabResult result) {
 				if (result.isSuccess()) {
 					if (purchase.getSku().equals(SKU[0])) {
-						sendTransaction(purchase.getOrderId(), 0.99d);
+						sendTransaction(purchase.getOrderId(), 0.99 * .7);
 						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 0.99d);
 						updateMoney(Cost[0]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[10], EggMaxValues[10]));
 					} else if (purchase.getSku().equals(SKU[1])) {
 						sendTransaction(purchase.getOrderId(), 1.99d);
-						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 1.99d);
+						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 1.99 * .7);
 						updateMoney(Cost[1]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[11], EggMaxValues[11]));
 					} else if (purchase.getSku().equals(SKU[2])) {
 						sendTransaction(purchase.getOrderId(), 2.99d);
-						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 2.99d);
+						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 2.99 * .7);
 						updateMoney(Cost[2]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[12], EggMaxValues[12]));
 					}
