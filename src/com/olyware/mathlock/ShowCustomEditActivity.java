@@ -38,6 +38,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -55,6 +57,7 @@ import com.olyware.mathlock.utils.MoneyHelper;
 public class ShowCustomEditActivity extends Activity {
 
 	private final String FTYPE = ".csv";
+	final private static String SCREEN_LABEL = "Custom Screen";
 	private final int MAX_LENGTH = 50;
 	private File sdFilePath;
 	private FileDialog fileDialog;
@@ -106,6 +109,7 @@ public class ShowCustomEditActivity extends Activity {
 			int count = 0;
 			for (int i = 0; i < newQuestions[0].size(); i++) {
 				long id = dbManager.addCustomQuestion(newQuestions[0].get(i));
+				cat = id >= 0 ? newQuestions[0].get(i)[5] : cat;
 				count += id >= 0 ? 1 : 0;
 			}
 			if (count > 0) {
@@ -140,6 +144,7 @@ public class ShowCustomEditActivity extends Activity {
 		@Override
 		protected void onPostExecute(Integer result) {
 			if (result > 0) {
+				sendEvent("custom_question", "add_pack", cat, (long) result);
 				Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, EggKeys[16], EggMaxValues[16]));
 				SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 				SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
@@ -269,6 +274,14 @@ public class ShowCustomEditActivity extends Activity {
 		});
 
 		resetContentView(R.layout.activity_custom_edit2, null, -1);
+
+		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
 	}
 
 	@Override
@@ -554,6 +567,8 @@ public class ShowCustomEditActivity extends Activity {
 			builder.setTitle(R.string.delete_question);
 			builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
+					sendEvent("custom_question", "delete_question", questionData.get(posFinal).getQuestionText(),
+							(long) questionData.get(posFinal).getDifficulty().getValue());
 					dbManager.removeCustomQuestion(questionData.get(posFinal).getID());
 					questionData.remove(posFinal);
 					questions.remove(posFinal + 3);
@@ -584,6 +599,7 @@ public class ShowCustomEditActivity extends Activity {
 			builder.setTitle(R.string.add_question);
 			builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
+					sendEvent("custom_question", "add_question", question[0], (long) difficulty);
 					Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, EggKeys[15], EggMaxValues[15]));
 					dbManager.addCustomQuestion(question, difficulty);
 					resetContentView(R.layout.activity_custom_edit2, null, -1);
@@ -608,6 +624,7 @@ public class ShowCustomEditActivity extends Activity {
 				builder.setTitle(R.string.update_question);
 				builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						sendEvent("custom_question", "update_question", question[0], (long) difficulty);
 						dbManager.updateCustomQuestion(questionData.get(posFinal).getID(), question, difficulty);
 						resetContentView(R.layout.activity_custom_edit2, null, -1);
 					}
@@ -697,5 +714,9 @@ public class ShowCustomEditActivity extends Activity {
 		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
+	}
+
+	private void sendEvent(String category, String action, String label, Long value) {
+		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 }

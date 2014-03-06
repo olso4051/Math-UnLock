@@ -34,6 +34,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
@@ -68,6 +70,8 @@ public class MainActivity extends Activity {
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
 	final private String[] answersNone = { "", "", "", "" };
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
+	final private static String SCREEN_LABEL = "Home Screen";
+
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
@@ -308,6 +312,9 @@ public class MainActivity extends Activity {
 		showWallpaper();
 
 		new OpenDatabase().execute();
+
+		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+		MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
 	}
 
 	@Override
@@ -347,12 +354,17 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
+	}
+
+	@Override
 	protected void onStop() {
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		joystick.removeCallbacks();
-
-		// setProblemAndAnswer();
+		MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "end");
 		super.onStop();
 	}
 
@@ -524,6 +536,7 @@ public class MainActivity extends Activity {
 									.commit();
 							apps.add(pack);
 							joystick.addApp(pack.loadIcon(pm));
+							sendEvent("apps", "add_app", pack.name, null);
 						}
 					}
 				}
@@ -898,7 +911,7 @@ public class MainActivity extends Activity {
 		return false;
 	}
 
-	private int getEnabledPackages() {
+	public int getEnabledPackages() {
 		int count = 0;
 		for (int i = 0; i < PackageKeys.size(); i++) {
 			if (sharedPrefs.getBoolean(PackageKeys.get(i), false))
@@ -909,6 +922,7 @@ public class MainActivity extends Activity {
 
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
 		if (unknown) {
+			sendEvent("question", "question_answered", "unknown", (long) questionWorth);
 			answerView.setCorrectGuess(correctLoc);
 			joystick.setCorrectGuess(correctLoc);
 		} else {
@@ -917,6 +931,7 @@ public class MainActivity extends Activity {
 			dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 					.currentTimeMillis(), startTime - System.currentTimeMillis()));
 			if (correct) {
+				sendEvent("question", "question_answered", "correct", (long) questionWorth);
 				if (questionWorth > 0)
 					playSound(PLAY_CORRECT);
 				else
@@ -925,6 +940,7 @@ public class MainActivity extends Activity {
 				dMoney = Money.increaseMoney(questionWorth);
 				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
+				sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
 				playSound(PLAY_WRONG);
 				answerView.setIncorrectGuess(guessLoc);
 				joystick.setIncorrectGuess(guessLoc);
@@ -1010,6 +1026,7 @@ public class MainActivity extends Activity {
 			});
 			break;
 		case 5:		// info was selected
+			sendEvent("ui_action", "settings_selected", "info", null);
 			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[2], EggMaxValues[2]));
 			displayInfo(false);
@@ -1025,6 +1042,7 @@ public class MainActivity extends Activity {
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case 8:		// quiz Mode was selected
+			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
 			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
@@ -1041,6 +1059,7 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 11:	// quickUnlock activated
+			sendEvent("question", "double_tap", "quick_unlock", null);
 			playSound(PLAY_BEEP);
 			setApps();
 			resetQuestionWorth(0);
@@ -1064,11 +1083,13 @@ public class MainActivity extends Activity {
 		case 13:	// app was selected
 			playSound(PLAY_BEEP);
 			if (Extra < apps.size()) {
+				sendEvent("apps", "launch_app", apps.get(Extra).name, null);
 				startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
 				finish();
 			}
 			break;
 		case 14:	// remove app was selected
+			sendEvent("apps", "delete_app", apps.get(Extra).name, null);
 			playSound(PLAY_BEEP);
 			removeAppFromAll(Extra);
 			break;
@@ -1318,5 +1339,9 @@ public class MainActivity extends Activity {
 				buttonClick.start();
 			}
 		}
+	}
+
+	private void sendEvent(String category, String action, String label, Long value) {
+		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 }

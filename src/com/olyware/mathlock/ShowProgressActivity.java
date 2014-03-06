@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
@@ -29,6 +31,7 @@ import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.views.GraphView;
 
 public class ShowProgressActivity extends Activity {
+	final private static String SCREEN_LABEL = "Progress Screen";
 	private LinearLayout layout;
 	private Typefaces typefaces;
 	private Coins Money = new Coins(0, 0);
@@ -114,6 +117,14 @@ public class ShowProgressActivity extends Activity {
 
 		initSpinners();
 		setGraph();
+
+		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
 	}
 
 	@Override

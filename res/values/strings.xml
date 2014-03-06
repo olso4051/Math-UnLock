@@ -1,8 +1,14 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+	tools:ignore="TypographyDashes">
 
     <string name="app_name">Hiq</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
-
+    
+    <!-- Google Analytics Tracking strings -->
+    <string name="google_analytics_tracking_id">UA-48722021-1</string>
+	<string name="enable_tracking">Allow Google Analytics Tracking</string>
+	<string name="enable_tracking_summary">sends app usage data to the developer to help the make app as cool as possible</string>
+    
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
     <string name="add_new_category">New Category</string>

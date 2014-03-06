@@ -21,6 +21,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.IabHelper;
@@ -30,6 +32,7 @@ import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.Purchase;
 
 public class ShowStoreActivity extends Activity {
+	final private static String SCREEN_LABEL = "Store Screen";
 	private int[] Cost;
 	private String[] SKU;
 	private ImageButton back;
@@ -56,6 +59,8 @@ public class ShowStoreActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
+
+		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
 		Cost = MainActivity.getCost();
 		SKU = MainActivity.getSKU();
@@ -158,12 +163,18 @@ public class ShowStoreActivity extends Activity {
 			public void onConsumeFinished(Purchase purchase, IabResult result) {
 				if (result.isSuccess()) {
 					if (purchase.getSku().equals(SKU[0])) {
+						sendTransaction(purchase.getOrderId(), 0.99d);
+						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 0.99d);
 						updateMoney(Cost[0]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[10], EggMaxValues[10]));
 					} else if (purchase.getSku().equals(SKU[1])) {
+						sendTransaction(purchase.getOrderId(), 1.99d);
+						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 1.99d);
 						updateMoney(Cost[1]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[11], EggMaxValues[11]));
 					} else if (purchase.getSku().equals(SKU[2])) {
+						sendTransaction(purchase.getOrderId(), 2.99d);
+						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 2.99d);
 						updateMoney(Cost[2]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[12], EggMaxValues[12]));
 					}
@@ -229,6 +240,12 @@ public class ShowStoreActivity extends Activity {
 		} else {
 			// handled by IabHelper
 		}
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
 	}
 
 	@Override
@@ -334,19 +351,24 @@ public class ShowStoreActivity extends Activity {
 		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);		// unlocks the product
 		editorPrefsMoney.commit();
 		// enables all the question packs
-		if (product == 0)												// 0 is unlock_all
+		if (product == 0) {												// 0 is unlock_all
+			sendEvent("store", "unlocked_pack", "all_packages", (long) amount);
 			for (int i = 0; i < PackageKeys.length; i++)
 				editorPrefs.putBoolean(PackageKeys[i], true);
+		}
 		// enables the question pack that was unlocked
-		else if (product <= unlockPackageKeys.length - 2)				// if false then product is custom or an extra
+		else if (product <= unlockPackageKeys.length - 2) {				// if false then product is custom or an extra
+			sendEvent("store", "unlocked_pack", PackageKeys[product - 1], (long) amount);
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
-		// enables the rotating slide extra
-		else if (product == 7) {
+			// enables the rotating slide extra
+		} else if (product == 7) {
+			sendEvent("store", "unlocked_extra", "rotating_slide", (long) amount);
 			editorPrefs.putString("type", "1");
 			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
 		}
 		// enables the dynamic slide extra
 		else if (product == 8) {
+			sendEvent("store", "unlocked_extra", "dynamic_slide", (long) amount);
 			editorPrefs.putString("type", "2");
 			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
 		}
@@ -390,5 +412,17 @@ public class ShowStoreActivity extends Activity {
 				cost[a].setCompoundDrawablePadding(0);
 			}
 		}
+	}
+
+	private void sendEvent(String category, String action, String label, Long value) {
+		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+	}
+
+	private void sendTransaction(String transactionID, Double revenue) {
+		MyApplication.getGaTracker().send(MapBuilder.createTransaction(transactionID, "In-App Store", revenue, 0.0d, 0.0d, "USD").build());
+	}
+
+	private void sendItem(String transactionID, String name, String SKU, String category, Double price) {
+		MyApplication.getGaTracker().send(MapBuilder.createItem(transactionID, name, SKU, category, price, 1L, "USD").build());
 	}
 }

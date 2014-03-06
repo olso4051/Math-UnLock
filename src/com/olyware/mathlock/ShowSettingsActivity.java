@@ -16,10 +16,13 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.view.WindowManager;
 
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+	final private static String SCREEN_LABEL = "Settings Screen";
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
 	private List<String> categories;
 	private int[] EggMaxValues;
@@ -52,6 +55,9 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
+
+		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
@@ -130,26 +136,42 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 					Integer.parseInt(sharedPrefs.getString("difficulty_max", "0")));
 			int min = Math.min(Integer.parseInt(sharedPrefs.getString(key, "0")),
 					Integer.parseInt(sharedPrefs.getString("difficulty_min", "0")));
+			if (key.equals("difficulty_max"))
+				sendEvent("settings", "difficulty_changed", key, (long) max);
+			else
+				sendEvent("settings", "difficulty_changed", key, (long) min);
 			setDifficultySummaries(min, max);
 		} else if (key.equals("max_tries")) {
 			String summary = ((sharedPrefs.getString(key, "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString(key, "1")));
+			sendEvent("settings", "max_tries_changed", summary, null);
 			connectionPref.setSummary(summary);
 		} else if (key.equals("type")) {
 			EggHelper.unlockEgg(this, EggKeys[7], EggMaxValues[7]);
-			connectionPref.setSummary(typeIntToString(sharedPrefs.getString(key, "0")));
+			String type = typeIntToString(sharedPrefs.getString(key, "0"));
+			sendEvent("settings", "unlock_type_changed", type, null);
+			connectionPref.setSummary(type);
 		} else if (key.equals("from_language")) {
+			sendEvent("settings", "language_changed", fromLanguage.getEntry().toString(), null);
 			// if you changed from_language to the same as to_language then swap to_language to old from_language
 			if (fromLanguage.findIndexOfValue(fromLanguage.getValue()) == toOldValueIndex)
 				toLanguage.setValueIndex(fromOldValueIndex);
 			setLanguageSummaries();
 		} else if (key.equals("to_language")) {
+			sendEvent("settings", "language_changed", toLanguage.getEntry().toString(), null);
 			// opposite of from_language change
 			if (toLanguage.findIndexOfValue(toLanguage.getValue()) == fromOldValueIndex)
 				fromLanguage.setValueIndex(toOldValueIndex);
 			setLanguageSummaries();
 		} else if (key.equals("lockscreen2")) {
+			sendEvent("settings", "timeout_changed", lockscreen2.getEntry().toString(), null);
 			lockscreen2.setSummary(lockscreen2.getEntry());
 		}
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
 	}
 
 	@Override
@@ -217,5 +239,9 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		maxDiff.setValueIndex(max);
 		minDiff.setSummary(minDiff.getEntry());
 		maxDiff.setSummary(maxDiff.getEntry());
+	}
+
+	private void sendEvent(String category, String action, String label, Long value) {
+		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 }
