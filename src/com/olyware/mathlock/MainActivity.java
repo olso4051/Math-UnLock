@@ -1352,7 +1352,7 @@ public class MainActivity extends Activity {
 		if (action.equals("question_answered")) {
 			if (quizMode)
 				action = "quiz_mode_" + action;
-			else if (answerView.getQuickUnlock())
+			if (answerView.getQuickUnlock())
 				action = "quick_unlock_" + action;
 		}
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
