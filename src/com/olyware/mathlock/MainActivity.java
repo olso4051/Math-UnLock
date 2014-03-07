@@ -1349,6 +1349,12 @@ public class MainActivity extends Activity {
 	}
 
 	private void sendEvent(String category, String action, String label, Long value) {
+		if (action.equals("question_answered")) {
+			if (quizMode)
+				action = "quiz_mode_" + action;
+			else if (answerView.getQuickUnlock())
+				action = "quick_unlock_" + action;
+		}
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
@@ -1362,7 +1368,7 @@ public class MainActivity extends Activity {
 	* @return A map that may contain campaign or referrer
 	*     that may be sent with any Google Analytics hit.
 	*/
-	Map<String, String> getReferrerMapFromUri(Uri uri) {
+	private Map<String, String> getReferrerMapFromUri(Uri uri) {
 		MapBuilder paramMap = new MapBuilder();
 
 		// If no URI, return an empty Map.

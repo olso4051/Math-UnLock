@@ -81,7 +81,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		maxDiff.setSummary(maxDiff.getEntry());
 
 		// Set summary to be the user-description for the selected value
-		Preference Pref_max_tries = findPreference("max_tries");
+		ListPreference Pref_max_tries = (ListPreference) findPreference("max_tries");
 		String summary = ((sharedPrefs.getString("max_tries", "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString("max_tries", "1")));
 		Pref_max_tries.setSummary(summary);
 
@@ -165,6 +165,30 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		} else if (key.equals("lockscreen2")) {
 			sendEvent("settings", "timeout_changed", lockscreen2.getEntry().toString(), null);
 			lockscreen2.setSummary(lockscreen2.getEntry());
+		} else if (key.equals("lockscreen")) {
+			CheckBoxPreference prefLockscreen = (CheckBoxPreference) findPreference("lockscreen");
+			if (prefLockscreen.isChecked())
+				sendEvent("settings", "lockscreen", "lockscreen_on", null);
+			else
+				sendEvent("settings", "lockscreen", "lockscreen_off", null);
+		} else if (key.equals("algorithm")) {
+			CheckBoxPreference prefLockscreen = (CheckBoxPreference) findPreference("algorithm");
+			if (prefLockscreen.isChecked())
+				sendEvent("settings", "algorithm", "algorithm_on", null);
+			else
+				sendEvent("settings", "algorithm", "algorithm_off", null);
+		} else if (key.equals("vibration")) {
+			CheckBoxPreference prefLockscreen = (CheckBoxPreference) findPreference("vibration");
+			if (prefLockscreen.isChecked())
+				sendEvent("settings", "vibration", "vibration_on", null);
+			else
+				sendEvent("settings", "vibration", "vibration_off", null);
+		} else if (key.equals("analytics_tracking")) {
+			CheckBoxPreference prefLockscreen = (CheckBoxPreference) findPreference("analytics_tracking");
+			if (prefLockscreen.isChecked())
+				sendEvent("settings", "analytics_tracking", "analytics_tracking_on", null);
+			else
+				sendEvent("settings", "analytics_tracking", "analytics_tracking_off", null);
 		}
 	}
 

@@ -33,14 +33,14 @@ public class MyApplication extends Application {
 		// The following line triggers the initialization of ACRA
 		// ACRA.init(this);
 
-		initializeGa();
+		initializeGoogleAnalytics();
 	}
 
 	/*
 	 * Method to handle basic Google Analytics initialization. This call will not
 	 * block as all Google Analytics work occurs off the main thread.
 	 */
-	private void initializeGa() {
+	private void initializeGoogleAnalytics() {
 		mGa = GoogleAnalytics.getInstance(this);
 		mTracker = mGa.getTracker(getString(R.string.google_analytics_tracking_id));
 
@@ -52,12 +52,12 @@ public class MyApplication extends Application {
 
 		// Set the opt out flag when user updates a tracking preference.
 		SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		GoogleAnalytics.getInstance(getApplicationContext()).setAppOptOut(!userPrefs.getBoolean(TRACKING_PREF_KEY, true));
+		mGa.setAppOptOut(!userPrefs.getBoolean(TRACKING_PREF_KEY, true));
 		userPrefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if (key.equals(TRACKING_PREF_KEY)) {
-					GoogleAnalytics.getInstance(getApplicationContext()).setAppOptOut(!sharedPreferences.getBoolean(key, true));
+					mGa.setAppOptOut(!sharedPreferences.getBoolean(key, true));
 				}
 			}
 		});

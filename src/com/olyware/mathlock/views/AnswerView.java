@@ -225,6 +225,10 @@ public class AnswerView extends View {
 		invalidate();
 	}
 
+	public boolean getQuickUnlock() {
+		return quickUnlock;
+	}
+
 	public String[] getAnswers() {
 		return answers;
 	}
