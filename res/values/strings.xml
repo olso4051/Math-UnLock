@@ -8,6 +8,13 @@
     <string name="google_analytics_tracking_id">UA-48722021-1</string>
 	<string name="enable_tracking">Google Analytics</string>
 	<string name="enable_tracking_summary">sends app usage data to the developer to help the make app as cool as possible. We won\'t gather any personal information</string>
+	
+	<!-- Google Cloud Messaging -->
+    <string name="gcm_api_id">101819117475</string>
+    <string name="gcm_reg_id_property">registration_id</string>
+    <string name="gcm_reg_id_property_old">registration_id_old</string>
+    <string name="gcm_app_version_property">app_version</string>
+    <string name="service_base_url">http://www.learnwithhiq.com/api/</string>
     
     <string name="add">Add</string>
     <string name="add_new">New Question</string>

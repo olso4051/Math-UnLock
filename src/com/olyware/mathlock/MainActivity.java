@@ -1,9 +1,10 @@
 package com.olyware.mathlock;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -13,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
@@ -26,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -37,6 +40,9 @@ import android.widget.Toast;
 
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
@@ -64,7 +70,7 @@ import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements RegisterID.RegisterIdResponse {
 	final private int startingPmoney = 0, initialStreakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
@@ -72,7 +78,12 @@ public class MainActivity extends Activity {
 	final private String[] answersNone = { "", "", "", "" };
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen";
-	final private static String CAMPAIGN_SOURCE_PARAM = "utm_source";
+
+	final private static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+	private String API_ID, regID;
+	private Context appCtx;
+	GoogleCloudMessaging gcm;
+	AtomicInteger msgId = new AtomicInteger();
 
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
@@ -171,6 +182,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		Log.d("GAtest", "onCreate");
 		ctx = this;
 		locked = this.getIntent().getBooleanExtra("locked", false);
 		unlocking = locked;
@@ -317,6 +329,27 @@ public class MainActivity extends Activity {
 
 		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 		MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
+
+		// Check device for Play Services APK. If check succeeds, proceed with GCM registration.
+		API_ID = getString(R.string.gcm_api_id);
+		appCtx = getApplicationContext();
+		if (checkPlayServices()) {
+			gcm = GoogleCloudMessaging.getInstance(this);
+			regID = getRegistrationId(appCtx);
+			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+			if (regID.equals("")) {
+				SharedPreferences.Editor editorGA = prefsGA.edit();
+				editorGA.putBoolean("reg_uploaded", false).commit();
+				registerInBackground(this);
+			} else if (prefsGA.getBoolean("reg_uploaded", false)) {
+				SharedPreferences prefsGCM = getGCMPreferences(this);
+				String regIdOld = prefsGCM.getString(getString(R.string.gcm_reg_id_property_old), "");
+				String referral = prefsGA.getString("utm_content", "");
+				sendRegistrationIdToBackend(this, regID, regIdOld, referral);
+			}
+		} else {
+			Toast.makeText(this, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
+		}
 	}
 
 	@Override
@@ -329,6 +362,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		Log.d("GAtest", "onPause");
 		paused = true;
 
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -357,17 +391,13 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onStart() {
+		Log.d("GAtest", "onStart");
 		super.onStart();
-		// Get the intent that started this Activity.
-		Intent intent = this.getIntent();
-		Uri uri = intent.getData();
-
-		// Send a screenview using any available campaign or referrer data.
-		MyApplication.getGaTracker().send(MapBuilder.createAppView().setAll(getReferrerMapFromUri(uri)).build());
 	}
 
 	@Override
 	protected void onStop() {
+		Log.d("GAtest", "onStop");
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		joystick.removeCallbacks();
@@ -377,6 +407,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		Log.d("GAtest", "onDestroy");
 		clock.destroy();
 		if (mHelper != null)
 			mHelper.dispose();
@@ -390,9 +421,11 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		Log.d("GAtest", "onResume");
 		long currentTime = System.currentTimeMillis();
 		paused = false;
 		super.onResume();
+		checkPlayServices();
 		if (locked && quizMode)
 			quizMode = joystick.setQuizMode(false);
 
@@ -1210,7 +1243,8 @@ public class MainActivity extends Activity {
 						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
-								"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
+								"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
+										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D");// +content);
 						fromShare = true;
 					}
 				});
@@ -1258,7 +1292,8 @@ public class MainActivity extends Activity {
 					dialogOn = false;
 					// TODO make this work for images, currently null is passed as the image
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
-							"http://play.google.com/store/apps/details?id=com.olyware.mathlock");
+							"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
+									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D");
 					fromShare = true;
 				}
 			});
@@ -1358,38 +1393,113 @@ public class MainActivity extends Activity {
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
-	/*
-	* Given a URI, returns a map of campaign data that can be sent with
-	* any GA hit.
-	*
-	* @param uri A hierarchical URI that may or may not have campaign data
-	*     stored in query parameters.
-	*
-	* @return A map that may contain campaign or referrer
-	*     that may be sent with any Google Analytics hit.
-	*/
-	private Map<String, String> getReferrerMapFromUri(Uri uri) {
-		MapBuilder paramMap = new MapBuilder();
-
-		// If no URI, return an empty Map.
-		if (uri == null) {
-			return paramMap.build();
+	private boolean checkPlayServices() {
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		if (resultCode != ConnectionResult.SUCCESS) {
+			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+				GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+			} else {
+				Toast.makeText(this, "This device is not supported.", Toast.LENGTH_LONG).show();
+				finish();
+			}
+			return false;
 		}
+		return true;
+	}
 
-		// Source is the only required campaign field. No need to continue if not
-		// present.
-		if (uri.getQueryParameter(CAMPAIGN_SOURCE_PARAM) != null) {
-			// MapBuilder.setCampaignParamsFromUrl parses Google Analytics campaign
-			// ("UTM") parameters from a string URL into a Map that can be set on
-			// the Tracker.
-			paramMap.setCampaignParamsFromUrl(uri.toString());
-
-			// If no source parameter, set authority to source and medium to
-			// "referral".
-		} else if (uri.getAuthority() != null) {
-			paramMap.set(Fields.CAMPAIGN_MEDIUM, "referral");
-			paramMap.set(Fields.CAMPAIGN_SOURCE, uri.getAuthority());
+	private String getRegistrationId(Context context) {
+		final SharedPreferences prefs = getGCMPreferences(context);
+		String registrationId = prefs.getString(getString(R.string.gcm_reg_id_property), "");
+		if (registrationId.equals("")) {
+			Toast.makeText(this, "Registration not found.", Toast.LENGTH_LONG).show();
+			return "";
 		}
-		return paramMap.build();
+		// Check if app was updated; if so, it must clear the registration ID since the existing regID is not guaranteed to work with the
+		// new app version.
+		int registeredVersion = prefs.getInt(getString(R.string.gcm_app_version_property), Integer.MIN_VALUE);
+		int currentVersion = getAppVersion(context);
+		if (registeredVersion != currentVersion) {
+			Toast.makeText(this, "App version changed.", Toast.LENGTH_LONG).show();
+			return "";
+		}
+		return registrationId;
+	}
+
+	private SharedPreferences getGCMPreferences(Context context) {
+		// This sample app persists the registration ID in shared preferences, but
+		// how you store the regID in your app is up to you.
+		return getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+	}
+
+	private static int getAppVersion(Context context) {
+		try {
+			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+			return packageInfo.versionCode;
+		} catch (NameNotFoundException e) {
+			// should never happen
+			throw new RuntimeException("Could not get package name: " + e);
+		}
+	}
+
+	private void registerInBackground(final Activity act) {
+		final SharedPreferences prefsGCM = getGCMPreferences(this);
+		final String registrationIdOld = prefsGCM.getString(getString(R.string.gcm_reg_id_property), "");
+		final String referral = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("utm_content", "");
+		new AsyncTask<Void, Integer, String>() {
+			@Override
+			protected String doInBackground(Void... params) {
+				String msg = "";
+				try {
+					if (gcm == null) {
+						gcm = GoogleCloudMessaging.getInstance(appCtx);
+					}
+					regID = gcm.register(API_ID);
+					msg = "Device registered, registration ID=" + regID;
+
+					// send the registration ID to the server
+					sendRegistrationIdToBackend(act, regID, registrationIdOld, referral);
+
+					// Persist the regID - no need to register again.
+					storeRegistrationId(appCtx, regID, registrationIdOld);
+				} catch (IOException ex) {
+					msg = "Error :" + ex.getMessage();
+					// If there is an error, don't just keep trying to register. Require the user to click a button again, or perform
+					// exponential back-off.
+				}
+				return msg;
+			}
+
+			@Override
+			protected void onPostExecute(String msg) {
+				// Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show();
+			}
+		}.execute(null, null, null);
+	}
+
+	private void sendRegistrationIdToBackend(Activity act, String regIdNew, String regIdOld, String referral) {
+		new RegisterID(act).execute(regIdNew, regIdOld, referral);
+	}
+
+	private void storeRegistrationId(Context context, String regId, String regIdOld) {
+		final SharedPreferences prefs = getGCMPreferences(context);
+		int appVersion = getAppVersion(context);
+		Log.d("GCMtest", "Saving regId on app version " + appVersion);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(getString(R.string.gcm_reg_id_property_old), regIdOld);
+		editor.putString(getString(R.string.gcm_reg_id_property), regId);
+		editor.putInt(getString(R.string.gcm_app_version_property), appVersion);
+		editor.commit();
+	}
+
+	public void registrationResult(int result) {
+		Log.d("GAtest", "upload result = " + result);
+		SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editPrefs = prefsGA.edit();
+		if (result == 0) {
+			editPrefs.putBoolean("reg_uploaded", true);
+		} else if (result == 1) {
+			editPrefs.putBoolean("reg_uploaded", false);
+		}
+		editPrefs.commit();
 	}
 }
