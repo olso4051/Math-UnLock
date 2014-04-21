@@ -1,6 +1,8 @@
 package com.olyware.mathlock;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -1219,6 +1221,12 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					}
 				});
 			} else {
+				final String content;
+				try {
+					content = URLEncoder.encode(regID, "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					return;
+				}
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
 				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -1244,7 +1252,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D");// +content);
+										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + content);
 						fromShare = true;
 					}
 				});
@@ -1262,6 +1270,12 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			sharedPrefsMoney = getSharedPreferences("Packages", 0);
 			editorPrefsMoney = sharedPrefsMoney.edit();
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
+			final String content;
+			try {
+				content = URLEncoder.encode(regID, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				return;
+			}
 
 			boolean initial[] = { dontShow };
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1293,7 +1307,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					// TODO make this work for images, currently null is passed as the image
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D");
+									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + content);
 					fromShare = true;
 				}
 			});
