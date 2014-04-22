@@ -7,6 +7,7 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -15,10 +16,11 @@ import android.util.Base64;
 
 public class RegisterID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
+	private String userID;
 	RegisterIdResponse mCallback;
 
 	public interface RegisterIdResponse {
-		void registrationResult(int result);
+		void registrationResult(int result, String userID);
 	}
 
 	public RegisterID(Activity act) {
@@ -61,6 +63,12 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
+			try {
+				userID = jsonResponse.getString("id");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return 1;
+			}
 			return 0;
 		} else {
 			return 1;
@@ -69,6 +77,6 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 
 	@Override
 	protected void onPostExecute(Integer result) {
-		mCallback.registrationResult(result);
+		mCallback.registrationResult(result, userID);
 	}
 }

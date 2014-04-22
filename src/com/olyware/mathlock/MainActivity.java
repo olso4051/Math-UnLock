@@ -72,7 +72,7 @@ import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends Activity implements RegisterID.RegisterIdResponse {
-	final private int startingPmoney = 0, initialStreakToIncrease = 40;
+	final private int startingPmoney = 20000, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -342,7 +342,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(this);
-			} else if (prefsGA.getBoolean("reg_uploaded", false)) {
+			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				SharedPreferences prefsGCM = getGCMPreferences(this);
 				String regIdOld = prefsGCM.getString(getString(R.string.gcm_reg_id_property_old), "");
 				String referral = prefsGA.getString("utm_content", "");
@@ -1161,7 +1161,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				editorPrefsStats.putInt("currentStreak", currentStreak + 1);
 			else
 				editorPrefsStats.putInt("currentStreak", 1);
-			if (currentStreak >= sharedPrefsStats.getInt("streakToIncrease", initialStreakToIncrease)) {
+			if (currentStreak >= sharedPrefsStats.getInt("streakToIncrease", streakToIncrease)) {
 				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
 				if ((currentMax < 5) && (sharedPrefs.getBoolean("algorithm", true))) {
 					int max = Math.min(5, currentMax + 1);
@@ -1189,12 +1189,12 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						break;
 					}
 				}
-				editorPrefsStats.putInt("streakToIncrease", currentStreak + initialStreakToIncrease);
+				editorPrefsStats.putInt("streakToIncrease", currentStreak + streakToIncrease);
 			}
 			if (answerTimeFast > ms)
 				editorPrefsStats.putLong("answerTimeFast", ms);
 		} else {
-			editorPrefsStats.putInt("streakToIncrease", initialStreakToIncrease);
+			editorPrefsStats.putInt("streakToIncrease", streakToIncrease);
 			editorPrefsStats.putInt("wrong", wrong + 1);
 			editorPrefsStats.putInt("coins", coins + dMoney);
 			if (currentStreak >= 0)
@@ -1220,11 +1220,23 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					}
 				});
 			} else {
-				final String encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
-				final String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
-				Log.d("GAtest", "regID = " + regID);
-				Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
-				Log.d("GAtest", "decryptedID = regID" + regID.equals(decryptedContentForURL));
+				String userID = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
+				String baseLink = getString(R.string.share_base_url);
+				final String link;
+				if (userID.equals("")) {
+					link = baseLink;
+				} else {
+					// encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
+					String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
+					String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
+					link = baseLink + getString(R.string.share_content_url) + encryptedContentForURL;
+					// Log.d("GAtest", "regID = " + regID);
+					Log.d("GAtest", "userID = " + userID);
+					Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
+					Log.d("GAtest", "decryptedID = " + decryptedContentForURL);
+					// Log.d("GAtest", "(decryptedID == regID) = " + regID.equals(decryptedContentForURL));
+					Log.d("GAtest", "(decryptedID == userID) = " + userID.equals(decryptedContentForURL));
+				}
 
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
@@ -1249,9 +1261,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
-						ShareHelper.share(ctx, null, null, getString(R.string.share_message),
-								"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + encryptedContentForURL);
+						ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
 						fromShare = true;
 					}
 				});
@@ -1270,11 +1280,23 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			editorPrefsMoney = sharedPrefsMoney.edit();
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
 
-			final String encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
-			final String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
-			Log.d("GAtest", "regID = " + regID);
-			Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
-			Log.d("GAtest", "decryptedID = regID" + regID.equals(decryptedContentForURL));
+			String userID = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
+			String baseLink = getString(R.string.share_base_url);
+			final String link;
+			if (userID.equals("")) {
+				link = baseLink;
+			} else {
+				// encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
+				String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
+				String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
+				link = baseLink + getString(R.string.share_content_url) + encryptedContentForURL;
+				// Log.d("GAtest", "regID = " + regID);
+				Log.d("GAtest", "userID = " + userID);
+				Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
+				Log.d("GAtest", "decryptedID = " + decryptedContentForURL);
+				// Log.d("GAtest", "(decryptedID == regID) = " + regID.equals(decryptedContentForURL));
+				Log.d("GAtest", "(decryptedID == userID) = " + userID.equals(decryptedContentForURL));
+			}
 
 			boolean initial[] = { dontShow };
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1304,9 +1326,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
 					dialogOn = false;
 					// TODO make this work for images, currently null is passed as the image
-					ShareHelper.share(ctx, null, null, getString(R.string.share_message),
-							"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + encryptedContentForURL);
+					ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
 					fromShare = true;
 				}
 			});
@@ -1485,6 +1505,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			@Override
 			protected void onPostExecute(String msg) {
 				// Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show();
+				Log.d("GAtest", msg);
 			}
 		}.execute(null, null, null);
 	}
@@ -1496,7 +1517,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private void storeRegistrationId(Context context, String regId, String regIdOld) {
 		final SharedPreferences prefs = getGCMPreferences(context);
 		int appVersion = getAppVersion(context);
-		Log.d("GCMtest", "Saving regId on app version " + appVersion);
+		Log.d("GAtest", "Saving regId on app version " + appVersion);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString(getString(R.string.gcm_reg_id_property_old), regIdOld);
 		editor.putString(getString(R.string.gcm_reg_id_property), regId);
@@ -1504,12 +1525,14 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		editor.commit();
 	}
 
-	public void registrationResult(int result) {
+	public void registrationResult(int result, String userID) {
 		Log.d("GAtest", "upload result = " + result);
+		Log.d("GAtest", "userID = " + userID);
 		SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editPrefs = prefsGA.edit();
-		if (result == 0) {
+		if ((result == 0) && (userID != null)) {
 			editPrefs.putBoolean("reg_uploaded", true);
+			editPrefs.putString("user_id", userID);
 		} else if (result == 1) {
 			editPrefs.putBoolean("reg_uploaded", false);
 		}
