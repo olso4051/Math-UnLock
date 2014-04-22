@@ -1,8 +1,6 @@
 package com.olyware.mathlock;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -1222,14 +1220,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					}
 				});
 			} else {
-				String encryptedContent = new EncryptionHelper().encrypt(regID);
-				final String URLencryptedContent;
-				try {
-					URLencryptedContent = URLEncoder.encode(encryptedContent, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					return;
-				}
-				Log.d("GAtest", "regID = " + regID + " | URLecryptedID = " + URLencryptedContent);
+				final String encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
+				final String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
+				Log.d("GAtest", "regID = " + regID);
+				Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
+				Log.d("GAtest", "decryptedID = regID" + regID.equals(decryptedContentForURL));
 
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
@@ -1254,9 +1249,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
-						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
+						ShareHelper.share(ctx, null, null, getString(R.string.share_message),
 								"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + URLencryptedContent);
+										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + encryptedContentForURL);
 						fromShare = true;
 					}
 				});
@@ -1275,14 +1270,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			editorPrefsMoney = sharedPrefsMoney.edit();
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
 
-			String encryptedContent = new EncryptionHelper().encrypt(regID);
-			final String URLencryptedContent;
-			try {
-				URLencryptedContent = URLEncoder.encode(encryptedContent, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				return;
-			}
-			Log.d("GAtest", "regID = " + regID + " | URLecryptedID = " + URLencryptedContent);
+			final String encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
+			final String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
+			Log.d("GAtest", "regID = " + regID);
+			Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
+			Log.d("GAtest", "decryptedID = regID" + regID.equals(decryptedContentForURL));
 
 			boolean initial[] = { dontShow };
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1312,9 +1304,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
 					dialogOn = false;
 					// TODO make this work for images, currently null is passed as the image
-					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
+					ShareHelper.share(ctx, null, null, getString(R.string.share_message),
 							"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + URLencryptedContent);
+									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + encryptedContentForURL);
 					fromShare = true;
 				}
 			});

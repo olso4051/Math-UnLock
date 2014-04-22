@@ -79,7 +79,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			if (value != null) {
 				if (key.equals("utm_content")) {
 					EncryptionHelper encryption = new EncryptionHelper();
-					value = encryption.decrypt(value);
+					value = encryption.decryptForURL(value);
 				}
 				editor.putString(key, value);
 				Log.d("GAtest", "key = " + value);
