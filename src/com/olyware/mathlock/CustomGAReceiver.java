@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.analytics.tracking.android.CampaignTrackingReceiver;
+import com.olyware.mathlock.utils.EncryptionHelper;
 
 /*
 *  A simple Broadcast Receiver to receive an INSTALL_REFERRER
@@ -76,6 +77,10 @@ public class CustomGAReceiver extends BroadcastReceiver {
 		for (String key : EXPECTED_PARAMETERS) {
 			String value = params.get(key);
 			if (value != null) {
+				if (key.equals("utm_content")) {
+					EncryptionHelper encryption = new EncryptionHelper();
+					value = encryption.decrypt(value);
+				}
 				editor.putString(key, value);
 				Log.d("GAtest", "key = " + value);
 			}

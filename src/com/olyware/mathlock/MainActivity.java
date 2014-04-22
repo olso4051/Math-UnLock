@@ -59,6 +59,7 @@ import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
@@ -1221,12 +1222,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					}
 				});
 			} else {
-				final String content;
+				String encryptedContent = new EncryptionHelper().encrypt(regID);
+				final String URLencryptedContent;
 				try {
-					content = URLEncoder.encode(regID, "UTF-8");
+					URLencryptedContent = URLEncoder.encode(encryptedContent, "UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					return;
 				}
+				Log.d("GAtest", "regID = " + regID + " | URLecryptedID = " + URLencryptedContent);
+
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
 				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -1252,7 +1256,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
 						ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 								"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + content);
+										+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + URLencryptedContent);
 						fromShare = true;
 					}
 				});
@@ -1270,12 +1274,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			sharedPrefsMoney = getSharedPreferences("Packages", 0);
 			editorPrefsMoney = sharedPrefsMoney.edit();
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
-			final String content;
+
+			String encryptedContent = new EncryptionHelper().encrypt(regID);
+			final String URLencryptedContent;
 			try {
-				content = URLEncoder.encode(regID, "UTF-8");
+				URLencryptedContent = URLEncoder.encode(encryptedContent, "UTF-8");
 			} catch (UnsupportedEncodingException e) {
 				return;
 			}
+			Log.d("GAtest", "regID = " + regID + " | URLecryptedID = " + URLencryptedContent);
 
 			boolean initial[] = { dontShow };
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1307,7 +1314,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					// TODO make this work for images, currently null is passed as the image
 					ShareHelper.share(ctx, getString(R.string.share_subject), null, getString(R.string.share_message),
 							"https://play.google.com/store/apps/details?id=com.olyware.mathlock"
-									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + content);
+									+ "&referrer=utm_source%3Dapp%26utm_medium%3Dshare%26utm_content%3D" + URLencryptedContent);
 					fromShare = true;
 				}
 			});
