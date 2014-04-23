@@ -57,11 +57,11 @@ import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
-import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
+import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.Purchase;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.AnswerReadyListener;
@@ -79,8 +79,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	final private String[] answersNone = { "", "", "", "" };
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen";
-
 	final private static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
 	private String API_ID, regID;
 	private Context appCtx;
 	GoogleCloudMessaging gcm;
@@ -103,6 +103,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private int defaultTextColor;
 
 	private List<String> customCategories, PackageKeys;
+	private List<Integer> streakToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
@@ -199,6 +200,10 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		fromLanguage = sharedPrefs.getString("from_language", getString(R.string.language_from_default));
 		toLanguage = sharedPrefs.getString("to_language", getString(R.string.language_to_default));
+
+		streakToNotify = new ArrayList<Integer>();
+		for (int i : getResources().getIntArray(R.array.notify_streaks))
+			streakToNotify.add(i);
 
 		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 		mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -490,8 +495,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		if (!UnlockedPackages)
 			displayInfo(true);
-		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
-				&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
+		else if (((!sharedPrefsMoney.getBoolean("dontShowLastTime", false)) && (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime
+				- MONTH))
+				|| this.getIntent().getBooleanExtra("share", false))
 			displayRateShare();
 		else if (sharedPrefs.getBoolean("hints", true)) {
 			setProblemAndAnswer();
@@ -1146,14 +1152,14 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		int correct = sharedPrefsStats.getInt("correct", 0);
 		int wrong = sharedPrefsStats.getInt("wrong", 0);
 		int total = correct + wrong;
-		int coins = sharedPrefsStats.getInt("coins", 0);
+		int coinsPlusMinus = sharedPrefsStats.getInt("coins", 0);
 		int bestStreak = sharedPrefsStats.getInt("bestStreak", 0);
 		int currentStreak = sharedPrefsStats.getInt("currentStreak", 0);
 		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", Long.MAX_VALUE);
 		if (right) {
 			editorPrefsStats.putInt("correct", correct + 1);
-			editorPrefsStats.putInt("coins", coins + dMoney);
+			editorPrefsStats.putInt("coins", coinsPlusMinus + dMoney);
 			if (currentStreak >= bestStreak) {
 				editorPrefsStats.putInt("bestStreak", bestStreak + 1);
 				editorPrefsStats.putInt("currentStreak", currentStreak + 1);
@@ -1161,7 +1167,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				editorPrefsStats.putInt("currentStreak", currentStreak + 1);
 			else
 				editorPrefsStats.putInt("currentStreak", 1);
-			if (currentStreak >= sharedPrefsStats.getInt("streakToIncrease", streakToIncrease)) {
+			if ((currentStreak + 1) >= sharedPrefsStats.getInt("streakToIncrease", streakToIncrease)) {
 				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
 				if ((currentMax < 5) && (sharedPrefs.getBoolean("algorithm", true))) {
 					int max = Math.min(5, currentMax + 1);
@@ -1193,10 +1199,17 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			}
 			if (answerTimeFast > ms)
 				editorPrefsStats.putLong("answerTimeFast", ms);
+			if (streakToNotify.contains(currentStreak + 1)) {
+				int number = sharedPrefsStats.getInt("streak" + (currentStreak + 1), 0);
+				int value = (number == 0) ? (currentStreak + 1) : 0;
+				editorPrefsStats.putInt("streak" + (currentStreak + 1), number + 1);
+				new NotificationHelper(this).sendNotification((currentStreak + 1) + " " + getString(R.string.notification_title_streak),
+						getString(R.string.notification_message_streak), number + 1, value, 0);
+			}
 		} else {
 			editorPrefsStats.putInt("streakToIncrease", streakToIncrease);
 			editorPrefsStats.putInt("wrong", wrong + 1);
-			editorPrefsStats.putInt("coins", coins + dMoney);
+			editorPrefsStats.putInt("coins", coinsPlusMinus + dMoney);
 			if (currentStreak >= 0)
 				editorPrefsStats.putInt("currentStreak", 0);
 			else
@@ -1220,23 +1233,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					}
 				});
 			} else {
-				String userID = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
-				String baseLink = getString(R.string.share_base_url);
-				final String link;
-				if (userID.equals("")) {
-					link = baseLink;
-				} else {
-					// encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
-					String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
-					String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
-					link = baseLink + getString(R.string.share_content_url) + encryptedContentForURL;
-					// Log.d("GAtest", "regID = " + regID);
-					Log.d("GAtest", "userID = " + userID);
-					Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
-					Log.d("GAtest", "decryptedID = " + decryptedContentForURL);
-					// Log.d("GAtest", "(decryptedID == regID) = " + regID.equals(decryptedContentForURL));
-					Log.d("GAtest", "(decryptedID == userID) = " + userID.equals(decryptedContentForURL));
-				}
+				final String link = ShareHelper.buildShareURL(this);
 
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
@@ -1279,25 +1276,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			sharedPrefsMoney = getSharedPreferences("Packages", 0);
 			editorPrefsMoney = sharedPrefsMoney.edit();
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
-
-			String userID = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
-			String baseLink = getString(R.string.share_base_url);
-			final String link;
-			if (userID.equals("")) {
-				link = baseLink;
-			} else {
-				// encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
-				String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
-				String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
-				link = baseLink + getString(R.string.share_content_url) + encryptedContentForURL;
-				// Log.d("GAtest", "regID = " + regID);
-				Log.d("GAtest", "userID = " + userID);
-				Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
-				Log.d("GAtest", "decryptedID = " + decryptedContentForURL);
-				// Log.d("GAtest", "(decryptedID == regID) = " + regID.equals(decryptedContentForURL));
-				Log.d("GAtest", "(decryptedID == userID) = " + userID.equals(decryptedContentForURL));
-			}
-
+			final String link = ShareHelper.buildShareURL(this);
 			boolean initial[] = { dontShow };
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.rate_title).setCancelable(false);

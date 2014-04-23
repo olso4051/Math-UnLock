@@ -59,4 +59,12 @@ public class MoneyHelper {
 		editorPrefsMoney.putInt("paid_money", Pmoney);
 		editorPrefsMoney.commit();
 	}
+
+	public static void increaseMoney(Context context, int m, int p) {
+		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + m);
+		editorPrefsMoney.putInt("paid_money", sharedPrefsMoney.getInt("paid_money", 0) + p);
+		editorPrefsMoney.commit();
+	}
 }

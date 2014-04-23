@@ -305,4 +305,10 @@
 	    <item>See help and info</item>
     </string-array>
     
+    <integer-array name="notify_streaks">
+        <item>100</item>
+        <item>250</item>
+        <item>500</item>
+        <item>1000</item>
+    </integer-array>
 </resources>

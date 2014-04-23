@@ -19,6 +19,11 @@
     <!-- Sharing -->
     <string name="share_base_url">https://play.google.com/store/apps/details?id=com.olyware.mathlock&amp;referrer=utm_source%3Dapp%26utm_medium%3Dshare</string>
     <string name="share_content_url">%26utm_content%3D</string>
+    
+    <!-- Notifications -->
+    <string name="notification_title_streak">In a row right!</string>
+    <string name="notification_message_streak">Share Hiq and challenge your friends.</string>
+    
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
     <string name="add_new_category">New Category</string>

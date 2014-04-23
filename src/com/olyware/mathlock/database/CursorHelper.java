@@ -26,6 +26,14 @@ public class CursorHelper {
 		return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
 	}
 
+	public boolean getBoolean(String columnName) {
+		String s = getString(columnName);
+		if (Boolean.parseBoolean(s) || s.equals("1"))
+			return true;
+		else
+			return false;
+	}
+
 	public void destroy() {
 		cursor.close();
 	}
