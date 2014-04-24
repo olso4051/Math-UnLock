@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.google.analytics.tracking.android.CampaignTrackingReceiver;
 import com.olyware.mathlock.utils.EncryptionHelper;
+import com.olyware.mathlock.utils.MoneyHelper;
 
 /*
 *  A simple Broadcast Receiver to receive an INSTALL_REFERRER
@@ -79,6 +80,8 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			if (value != null) {
 				if (key.equals("utm_content")) {
 					value = new EncryptionHelper().decryptForURL(value);
+					// TODO add a check that this content is a user
+					MoneyHelper.increasePaidMoney(context, 40);
 				}
 				editor.putString(key, value);
 				Log.d("GAtest", "key = " + value);

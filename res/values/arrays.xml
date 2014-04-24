@@ -306,13 +306,13 @@
     </string-array>
     
     <integer-array name="notify_streaks">
-        <item>100</item>
+        <item>3</item>
         <item>250</item>
         <item>500</item>
         <item>1000</item>
     </integer-array>
     <integer-array name="notify_total_questions">
-        <item>1000</item>
+        <item>10</item>
         <item>2000</item>
         <item>5000</item>
         <item>10000</item>

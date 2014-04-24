@@ -2,6 +2,7 @@
 	tools:ignore="TypographyDashes">
 
     <string name="app_name">Hiq</string>
+    <string name="app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
     
     <!-- Google Analytics Tracking strings -->
@@ -17,13 +18,29 @@
     <string name="service_base_url">http://www.learnwithhiq.com/api/</string>
     
     <!-- Sharing -->
-    <string name="share_base_url">https://play.google.com/store/apps/details?id=com.olyware.mathlock&amp;referrer=utm_source%3Dapp%26utm_medium%3Dshare</string>
-    <string name="share_content_url">%26utm_content%3D</string>
+    <string name="share_link_url_easy">https://play.google.com/store/apps/details?id=com.olyware.mathlock</string>
+    <string name="share_link_url">https://play.google.com/store/apps/details?id=com.olyware.mathlock&amp;referrer=utm_source%3Dapp%26utm_medium%3Dshare</string>
+    <string name="share_content_url">%2526utm_content%3D</string>
+    <string name="share_link_url_facebook">https://play.google.com/store/apps/details?id=com.olyware.mathlock%26referrer=utm_source%3Dapp%2526utm_medium%3Dshare%2526utm_content%3D</string>
+    <string name="share_base_url_facebook">https://www.facebook.com/dialog/feed?app_id=</string>
+    <string name="share_base_url_facebook_link">&amp;link=</string>
+    <string name="share_base_url_facebook_base_name">&amp;name=</string>
+    <string name="share_base_url_facebook_name">&amp;name=Hiq%20Lockscreen</string>
+    <string formatted="false" name="share_base_url_facebook_caption">&amp;caption=Unlock%20Your%20IQ%21</string>
+    <string formatted="false" name="share_base_url_facebook_base_caption">&amp;caption=</string>
+    <string formatted="false" name="share_base_url_facebook_description">&amp;description=Download%20Hiq%20From%20This%20Link%20And%20Get%2040%20Gold%20Coins</string>
+    <string name="share_base_url_facebook_redirect">&amp;redirect_uri=http://www.facebook.com</string>
     
     <!-- Notifications -->
     <string name="notification_title_streak">Questions in a row right!</string>
+    <string name="notification_title_streak_facebook1">I just got</string>
+    <string name="notification_title_streak_facebook2">questions in a row right!</string>
     <string name="notification_title_total">Total Questions Answered!</string>
+    <string name="notification_title_total_facebook1">I\'ve answered over</string>
+    <string name="notification_title_total_facebook2">questions</string>
     <string name="notification_message_streak">Share Hiq and challenge your friends.</string>
+    <string name="notification_message_streak_facebook">Can you get more and Unlock YOUR IQ?</string>
+    <string name="notification_message_total_facebook">You could be Unlocking Your IQ too</string>
     <string name="notification_delete_action">NOTIFICATION_DELETED</string>
     
     <string name="add">Add</string>
@@ -164,6 +181,8 @@
     <string name="share_message">I\'m unlocking my IQ, Try Hiq today and you can too!</string>
     <string name="share_subject">@string/app_name</string>
     <string name="share_with">Share with…</string>
+    <string name="share_with_facebook">Share on Facebook</string>
+    <string name="share_with_other">Share on Other</string>
     <string name="side_bar">Settings and Info</string>
     <string name="silent">Sound Off</string>
     <string name="sound">Sound On</string>

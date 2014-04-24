@@ -247,11 +247,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			public void onConsumeFinished(Purchase purchase, IabResult result) {
 				if (result.isSuccess()) {
 					if (purchase.getSku().equals(SKU[0])) {
-						updateMoney(Cost[0]);
+						updatePaidMoney(Cost[0]);
 					} else if (purchase.getSku().equals(SKU[1])) {
-						updateMoney(Cost[1]);
+						updatePaidMoney(Cost[1]);
 					} else if (purchase.getSku().equals(SKU[2])) {
-						updateMoney(Cost[2]);
+						updatePaidMoney(Cost[2]);
 					}
 				} else {
 					// handle error
@@ -498,9 +498,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		if (!UnlockedPackages)
 			displayInfo(true);
-		else if (((!sharedPrefsMoney.getBoolean("dontShowLastTime", false)) && (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime
-				- MONTH))
-				|| this.getIntent().getBooleanExtra("share", false))
+		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
+				&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
 			displayRateShare();
 		else if (sharedPrefs.getBoolean("hints", true)) {
 			setProblemAndAnswer();
@@ -1225,9 +1224,12 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				int number = sharedPrefsStats.getInt("streak" + (currentStreak + 1), 0);
 				int value = (currentStreak + 1) / 6 * (difficulty + 1);
 				editorPrefsStats.putInt("streak" + (currentStreak + 1), number + 1);
-				MoneyHelper.setMoney(this, coins, Money.getMoney() + value, Money.getMoneyPaid());
+				updateMoney(value);
 				new NotificationHelper(this).sendNotification((currentStreak + 1) + " " + getString(R.string.notification_title_streak),
-						getString(R.string.notification_message_streak), number + 1, 0);
+						getString(R.string.notification_message_streak), number + 1,
+						getString(R.string.notification_title_streak_facebook1) + " " + (currentStreak + 1) + " "
+								+ getString(R.string.notification_title_streak_facebook2),
+						getString(R.string.notification_message_streak_facebook), 0);
 			}
 		} else {
 			editorPrefsStats.putInt("streakToIncrease", streakToIncrease);
@@ -1244,16 +1246,18 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		editorPrefsStats.putInt("difficultyAve", (int) ((totalDifficulty + difficulty) / total));
 		if (totalToNotify.contains(total)) {
 			int value = total / 15;
-			MoneyHelper.setMoney(this, coins, Money.getMoney() + value, Money.getMoneyPaid());
+			updateMoney(value);
 			new NotificationHelper(this).sendNotification(total + " " + getString(R.string.notification_title_total),
-					getString(R.string.notification_message_streak), value, 1);
+					getString(R.string.notification_message_streak), value, getString(R.string.notification_title_total_facebook1) + " "
+							+ total + " " + getString(R.string.notification_title_total_facebook2),
+					getString(R.string.notification_message_total_facebook), 1);
 		}
 		editorPrefsStats.commit();
 	}
 
 	private void displayInfo(boolean first) {
 		if (!dialogOn) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
 				builder.setTitle(R.string.info_title_first);
 				builder.setMessage(getString(R.string.info_message_first)).setCancelable(false);
@@ -1265,12 +1269,17 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				});
 			} else {
 				final String link = ShareHelper.buildShareURL(this);
-
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
-				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				builder.setPositiveButton(R.string.share_with_other, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
+						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
+						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
+						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
+						// ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
+						ShareHelper.share(ctx, null, null, ctx.getString(R.string.share_message), link);
+						fromShare = true;
 					}
 				});
 				builder.setNeutralButton(R.string.rate, new DialogInterface.OnClickListener() {
@@ -1283,17 +1292,19 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						fromPlay = true;
 					}
 				});
-				builder.setNegativeButton(R.string.share_with, new DialogInterface.OnClickListener() {
+				builder.setNegativeButton(R.string.share_with_facebook, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
 						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
 						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
 						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
-						ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
+						// ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
+						ShareHelper.shareFacebook(ctx);
 						fromShare = true;
 					}
 				});
 			}
+			builder.setCancelable(true);
 			AlertDialog alert = builder.create();
 			dialogOn = true;
 			alert.show();
@@ -1309,7 +1320,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
 			final String link = ShareHelper.buildShareURL(this);
 			boolean initial[] = { dontShow };
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.rate_title).setCancelable(false);
 			builder.setMultiChoiceItems(R.array.dont_show_again, initial, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialogInterface, int item, boolean state) {
@@ -1329,14 +1340,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					fromPlay = true;
 				}
 			});
-			builder.setNeutralButton(R.string.share_with, new DialogInterface.OnClickListener() {
+			builder.setNeutralButton(R.string.share_with_facebook, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					sharedPrefsMoney = getSharedPreferences("Packages", 0);
 					editorPrefsMoney = sharedPrefsMoney.edit();
 					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
 					dialogOn = false;
 					// TODO make this work for images, currently null is passed as the image
-					ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
+					// ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
+					ShareHelper.shareFacebook(ctx);
 					fromShare = true;
 				}
 			});
@@ -1385,8 +1397,13 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		}
 	}
 
-	private void updateMoney(int amount) {
+	private void updatePaidMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
+		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+	}
+
+	private void updateMoney(int amount) {
+		Money.increaseMoney(amount);
 		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 	}
 
