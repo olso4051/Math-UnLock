@@ -359,6 +359,18 @@ public class DatabaseManager {
 			return 0;
 	}
 
+	public long getTotalDifficulty() {
+		if (db.isOpen()) {
+			String sql = "SELECT SUM(" + StatisticContract.DIFFICULTY + ") FROM " + StatisticContract.TABLE_NAME;
+			cursor = db.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+				return cursor.getLong(0);
+			else
+				return 0;
+		} else
+			return 0;
+	}
+
 	public boolean increasePriority(String tableName, String fromLanguage, String toLanguage, long ID) {
 		if (db.isOpen()) {
 			if (!(tableName == null)) {

@@ -292,8 +292,10 @@ public class ShowProgressActivity extends Activity {
 		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", 0);
 		long answerTimeAve = sharedPrefsStats.getLong("answerTimeAve", 0);
+		int difficultyAve = sharedPrefsStats.getInt("difficultyAve", 0);
+
 		String eggs = EggHelper.getNumberUnlocked(this) + " / " + EggHelper.getTotalEggs(this);
-		graphView.setStats(correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve, eggs);
+		graphView.setStats(difficultyAve, correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve, eggs);
 	}
 
 	private long getOldestTime() {

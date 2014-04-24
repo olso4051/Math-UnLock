@@ -103,7 +103,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private int defaultTextColor;
 
 	private List<String> customCategories, PackageKeys;
-	private List<Integer> streakToNotify;
+	private List<Integer> streakToNotify, totalToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
 	private String currentPack, currentTableName, fromLanguage, toLanguage;
@@ -204,6 +204,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		streakToNotify = new ArrayList<Integer>();
 		for (int i : getResources().getIntArray(R.array.notify_streaks))
 			streakToNotify.add(i);
+		totalToNotify = new ArrayList<Integer>();
+		for (int i : getResources().getIntArray(R.array.notify_total_questions))
+			totalToNotify.add(i);
 
 		String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 		mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -1059,6 +1062,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			break;
 		case 4:	// question mark(tell me the answer/I don't know) was selected
 			playSound(PLAY_BEEP);
+			resetStreak();
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[1], EggMaxValues[1]));
 			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
 			joystick.setWrongGuess();
@@ -1108,6 +1112,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		case 11:	// quickUnlock activated
 			sendEvent("question", "double_tap", "quick_unlock", null);
 			playSound(PLAY_BEEP);
+			resetStreak();
 			setApps();
 			resetQuestionWorth(0);
 			switch (Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))) {
@@ -1143,6 +1148,16 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		}
 	}
 
+	private void resetStreak() {
+		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		editorPrefsStats = sharedPrefsStats.edit();
+		int currentStreak = sharedPrefsStats.getInt("currentStreak", 0);
+		editorPrefsStats.putInt("streakToIncrease", streakToIncrease);
+		if (currentStreak >= 0)
+			editorPrefsStats.putInt("currentStreak", 0);
+		editorPrefsStats.commit();
+	}
+
 	private void updateStats(boolean right) {
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		editorPrefsStats = sharedPrefsStats.edit();
@@ -1151,11 +1166,18 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		long ms = System.currentTimeMillis() - startTime;
 		int correct = sharedPrefsStats.getInt("correct", 0);
 		int wrong = sharedPrefsStats.getInt("wrong", 0);
-		int total = correct + wrong;
+		int total = correct + wrong + 1;
 		int coinsPlusMinus = sharedPrefsStats.getInt("coins", 0);
 		int bestStreak = sharedPrefsStats.getInt("bestStreak", 0);
 		int currentStreak = sharedPrefsStats.getInt("currentStreak", 0);
 		long totalTime = sharedPrefsStats.getLong("totalTime", 0);
+		long totalDifficulty = sharedPrefsStats.getLong("totalDifficulty", -1);
+		if (totalDifficulty == -1)
+			if (total > 1)
+				totalDifficulty = dbManager.getTotalDifficulty();
+			else
+				totalDifficulty = 0;
+		Log.d("GAtest", "totalDifficulty = " + totalDifficulty);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", Long.MAX_VALUE);
 		if (right) {
 			editorPrefsStats.putInt("correct", correct + 1);
@@ -1201,10 +1223,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				editorPrefsStats.putLong("answerTimeFast", ms);
 			if (streakToNotify.contains(currentStreak + 1)) {
 				int number = sharedPrefsStats.getInt("streak" + (currentStreak + 1), 0);
-				int value = (number == 0) ? (currentStreak + 1) : 0;
+				int value = (currentStreak + 1) / 6 * (difficulty + 1);
 				editorPrefsStats.putInt("streak" + (currentStreak + 1), number + 1);
+				MoneyHelper.setMoney(this, coins, Money.getMoney() + value, Money.getMoneyPaid());
 				new NotificationHelper(this).sendNotification((currentStreak + 1) + " " + getString(R.string.notification_title_streak),
-						getString(R.string.notification_message_streak), number + 1, value, 0);
+						getString(R.string.notification_message_streak), number + 1, 0);
 			}
 		} else {
 			editorPrefsStats.putInt("streakToIncrease", streakToIncrease);
@@ -1216,7 +1239,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				editorPrefsStats.putInt("currentStreak", currentStreak - 1);
 		}
 		editorPrefsStats.putLong("totalTime", totalTime + ms);
-		editorPrefsStats.putLong("answerTimeAve", (totalTime + ms) / (total + 1));
+		editorPrefsStats.putLong("answerTimeAve", (totalTime + ms) / total);
+		editorPrefsStats.putLong("totalDifficulty", totalDifficulty + difficulty);
+		editorPrefsStats.putInt("difficultyAve", (int) ((totalDifficulty + difficulty) / total));
+		if (totalToNotify.contains(total)) {
+			int value = total / 15;
+			MoneyHelper.setMoney(this, coins, Money.getMoney() + value, Money.getMoneyPaid());
+			new NotificationHelper(this).sendNotification(total + " " + getString(R.string.notification_title_total),
+					getString(R.string.notification_message_streak), value, 1);
+		}
 		editorPrefsStats.commit();
 	}
 

@@ -21,8 +21,10 @@
     <string name="share_content_url">%26utm_content%3D</string>
     
     <!-- Notifications -->
-    <string name="notification_title_streak">In a row right!</string>
+    <string name="notification_title_streak">Questions in a row right!</string>
+    <string name="notification_title_total">Total Questions Answered!</string>
     <string name="notification_message_streak">Share Hiq and challenge your friends.</string>
+    <string name="notification_delete_action">NOTIFICATION_DELETED</string>
     
     <string name="add">Add</string>
     <string name="add_new">New Question</string>

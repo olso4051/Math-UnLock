@@ -311,4 +311,16 @@
         <item>500</item>
         <item>1000</item>
     </integer-array>
+    <integer-array name="notify_total_questions">
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>20000</item>
+        <item>50000</item>
+        <item>100000</item>
+        <item>200000</item>
+        <item>500000</item>
+        <item>1000000</item>
+    </integer-array>
 </resources>

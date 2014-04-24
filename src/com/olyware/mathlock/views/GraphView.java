@@ -15,6 +15,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
 
 public class GraphView extends View {
@@ -28,8 +29,8 @@ public class GraphView extends View {
 	private float left, top, right, bottom;
 	private Typeface font;
 
-	private String Stats[] = { "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak", "Current Streak", "Total Study Time",
-			"Fastest Time", "Average Time", "coins/hr (cph)", "Eggs Found" };
+	private String Stats[] = { "Average Difficulty", "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak",
+			"Current Streak", "Total Study Time", "Fastest Time", "Average Time", "coins/hr (cph)", "Eggs Found" };
 	private String StatsValues[] = new String[Stats.length];
 
 	private Paint TextLabelPaint, TextStatsPaintL, TextStatsPaintR, TextStatsPaintC, GraphPaint, LinePaint;
@@ -94,7 +95,7 @@ public class GraphView extends View {
 		TextStatsPaintC.setTypeface(font);
 
 		movingAverage = 20;
-		setStats(0, 0, 0, 0, 0, 0, 0, 0, "0 / 0");
+		setStats(0, 0, 0, 0, 0, 0, 0, 0, 0, "0 / 0");
 		padVert = textStatsSizePix / 2;
 		padHorz = 7;
 		padScrollPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, padHorz, getResources().getDisplayMetrics());
@@ -149,21 +150,22 @@ public class GraphView extends View {
 		// }
 	}
 
-	public void setStats(int correct, int wrong, int coins, long totalTime, int streakBest, int streakCurrent, long answerTimeFast,
-			long answerTimeAve, String eggs) {
-		StatsValues[0] = correct + "";
-		StatsValues[1] = wrong + "";
-		StatsValues[2] = coins + "";
-		StatsValues[3] = streakBest + "";
-		StatsValues[4] = streakCurrent + "";
-		StatsValues[5] = format(totalTime);
-		StatsValues[6] = format(answerTimeFast);
-		StatsValues[7] = format(answerTimeAve);
+	public void setStats(int difficultyAve, int correct, int wrong, int coins, long totalTime, int streakBest, int streakCurrent,
+			long answerTimeFast, long answerTimeAve, String eggs) {
+		StatsValues[0] = Difficulty.fromValueString(difficultyAve);
+		StatsValues[1] = correct + "";
+		StatsValues[2] = wrong + "";
+		StatsValues[3] = coins + "";
+		StatsValues[4] = streakBest + "";
+		StatsValues[5] = streakCurrent + "";
+		StatsValues[6] = format(totalTime);
+		StatsValues[7] = format(answerTimeFast);
+		StatsValues[8] = format(answerTimeAve);
 		if (totalTime != 0)
-			StatsValues[8] = coins * 1000l * 60l * 60l / totalTime + "";
+			StatsValues[9] = coins * 1000l * 60l * 60l / totalTime + "";
 		else
-			StatsValues[8] = 0 + "";
-		StatsValues[9] = eggs;
+			StatsValues[9] = 0 + "";
+		StatsValues[10] = eggs;
 	}
 
 	// =========================================
