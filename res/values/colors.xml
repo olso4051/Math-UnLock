@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="header">#323232</color>
+    <color name="sub_header">#3d3d3d</color>
+    <color name="supporting_text">#9a9a9a</color>
+    <color name="supporting_text_highlight">#e1e1e1</color>
+    
+    <color name="button_background_default">#005cb5</color>
+    <color name="button_background_pressed">#003c76</color>
+    <color name="button_background_disabled">@color/supporting_text</color>
+    <color name="button_text">#ffffff</color>
+    <color name="button_intro_default">#00000000</color>
+    <color name="button_intro_pressed">#37ffffff</color>
+    <color name="button_intro_text">#ffffff</color>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="login_horizontal_margin">48dp</dimen>
+    <dimen name="login_horizontal_margin_half">24dp</dimen>
+    <dimen name="login_vertical_margin">16dp</dimen>
+    <dimen name="login_vertical_margin_large">48dp</dimen>
+    
+    <dimen name="text_size_huge">40sp</dimen>
+    <dimen name="text_size_extra_large">30sp</dimen>
+    <dimen name="text_size_large">22sp</dimen>
+    <dimen name="text_size_normal_plus">17sp</dimen>
+    <dimen name="text_size_normal">16sp</dimen>
+    <dimen name="text_size_small">15sp</dimen>
+    <dimen name="text_size_extra_small">13sp</dimen>
+</resources>
