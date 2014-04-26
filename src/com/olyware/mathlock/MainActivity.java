@@ -351,10 +351,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(this);
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
-				SharedPreferences prefsGCM = getGCMPreferences(this);
-				String regIdOld = prefsGCM.getString(getString(R.string.gcm_reg_id_property_old), "");
 				String referral = prefsGA.getString("utm_content", "");
-				sendRegistrationIdToBackend(this, regID, regIdOld, referral);
+				sendRegistrationIdToBackend(this, regID, referral);
 			}
 		} else {
 			Toast.makeText(this, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
@@ -1502,8 +1500,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	}
 
 	private void registerInBackground(final Activity act) {
-		final SharedPreferences prefsGCM = getGCMPreferences(this);
-		final String registrationIdOld = prefsGCM.getString(getString(R.string.gcm_reg_id_property), "");
 		final String referral = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("utm_content", "");
 		new AsyncTask<Void, Integer, String>() {
 			@Override
@@ -1517,10 +1513,10 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					msg = "Device registered, registration ID=" + regID;
 
 					// send the registration ID to the server
-					sendRegistrationIdToBackend(act, regID, registrationIdOld, referral);
+					sendRegistrationIdToBackend(act, regID, referral);
 
 					// Persist the regID - no need to register again.
-					storeRegistrationId(appCtx, regID, registrationIdOld);
+					storeRegistrationId(appCtx, regID);
 				} catch (IOException ex) {
 					msg = "Error :" + ex.getMessage();
 					// If there is an error, don't just keep trying to register. Require the user to click a button again, or perform
@@ -1537,16 +1533,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		}.execute(null, null, null);
 	}
 
-	private void sendRegistrationIdToBackend(Activity act, String regIdNew, String regIdOld, String referral) {
-		new RegisterID(act).execute(regIdNew, regIdOld, referral);
+	private void sendRegistrationIdToBackend(Activity act, String regId, String referral) {
+		new RegisterID(act).execute("", "", "", regId, "", referral);
 	}
 
-	private void storeRegistrationId(Context context, String regId, String regIdOld) {
+	private void storeRegistrationId(Context context, String regId) {
 		final SharedPreferences prefs = getGCMPreferences(context);
 		int appVersion = getAppVersion(context);
 		Log.d("GAtest", "Saving regId on app version " + appVersion);
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(getString(R.string.gcm_reg_id_property_old), regIdOld);
 		editor.putString(getString(R.string.gcm_reg_id_property), regId);
 		editor.putInt(getString(R.string.gcm_app_version_property), appVersion);
 		editor.commit();

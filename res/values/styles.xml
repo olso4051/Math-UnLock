@@ -4,5 +4,35 @@
     <style name="AppThemeBlack" parent="android:Theme.Black.NoTitleBar" />
     <style name="AppThemeWallFull" parent="android:Theme.Wallpaper.NoTitleBar.Fullscreen" />
     <style name="AppThemeWall" parent="android:Theme.Wallpaper.NoTitleBar" />
+    <style name="LoginTheme" parent="AppThemeBlack">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@drawable/login_background</item>
+    </style>
 
+    <style name="SpanningView">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/login_horizontal_margin</item>
+        <item name="android:layout_marginRight">@dimen/login_horizontal_margin</item>
+        <item name="android:layout_marginBottom">@dimen/login_vertical_margin</item>
+    </style>
+    <style name="SpanningView.EditText">
+        <item name="android:background">@drawable/login_edittext</item>
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:longClickable">false</item>
+    </style>
+    <style name="SpanningView.Button">
+        <item name="android:background">@drawable/login_button</item>
+        <item name="android:textColor">@color/button_text</item>
+    </style>
+    <style name="SpanningView.Button.Left">
+        <item name="android:background">@drawable/login_button</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:layout_marginRight">@dimen/login_horizontal_margin_half</item>
+    </style>
+    <style name="SpanningView.Button.Right">
+        <item name="android:background">@drawable/login_button</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:layout_marginLeft">@dimen/login_horizontal_margin_half</item>
+    </style>
 </resources>

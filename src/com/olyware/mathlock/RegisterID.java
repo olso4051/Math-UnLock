@@ -32,24 +32,42 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		}
 	}
 
+	public String getUserID() {
+		if (userID != null)
+			return userID;
+		else
+			return "";
+	}
+
 	@Override
 	protected Integer doInBackground(String... s) {
 		// POST to API with old and new registration, also referral's registration
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		HttpPost httppost = new HttpPost(baseURL + "GCMregistration");
+		HttpPost httppost = new HttpPost(baseURL + "register");
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
 		try {
 			JSONObject data = new JSONObject();
-			if (s[1].equals(""))
-				data.put("status", "new");
-			else
-				data.put("status", "update");
-			data.put("newID", s[0]);
-			data.put("oldID", s[1]);
-			data.put("referral", s[2]);
+			if (s[0].length() > 0) {
+				data.put("username", s[0]);
+			}
+			if (s[1].length() > 0) {
+				data.put("password", s[1]);
+			}
+			if (s[2].length() > 0) {
+				data.put("registration_id", s[2]);
+			}
+			if (s[3].length() > 0) {
+				data.put("user_id", s[3]);
+				data.put("status", "UPDATE");
+			} else {
+				data.put("status", "NEW");
+			}
+			if (s[4].length() > 0) {
+				data.put("referral", s[4]);
+			}
 			String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httppost.setEntity(new StringEntity(data.toString()));
 			httppost.setHeader("Content-Type", "application/json");
@@ -64,7 +82,7 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
 			try {
-				userID = jsonResponse.getString("id");
+				userID = jsonResponse.getString("user_id");
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return 1;

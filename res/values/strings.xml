@@ -43,6 +43,21 @@
     <string name="notification_message_total_facebook">You could be Unlocking Your IQ too</string>
     <string name="notification_delete_action">NOTIFICATION_DELETED</string>
     
+    <!-- Preferences(users) -->
+    <string name="pref_user_info">user_info</string>
+    <string name="pref_user_username">username</string>
+    <string name="pref_user_password">password</string>
+    <string name="pref_user_userid">user_id</string>
+    
+    <!-- Login Activity -->
+    <string name="fragment_login_disclaimer">Login to get cool social features. Login with Facebook or create a new user account with Hiq. We won\'t share this information with anyone.</string>
+    <string name="fragment_login_username_hint">Username</string>
+    <string name="fragment_login_password_hint">Password</string>
+    <string name="fragment_login_nickname_hint">Nickname (this is what your friends will see)</string>
+    <string name="fragment_login_button_login_text">Login</string>
+    <string name="fragment_login_button_skip_text">Skip</string>
+    <string name="fragment_login_logging_in">Logging In&#8230;</string>
+    
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
     <string name="add_new_category">New Category</string>
