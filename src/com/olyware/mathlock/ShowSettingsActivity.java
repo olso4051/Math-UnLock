@@ -26,7 +26,7 @@ import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	final private static String SCREEN_LABEL = "Settings Screen";
-	private String mPrefUserInfo, mPrefUserUsername, mPrefUserPassword, mPrefUserUserID, mPrefUserLoggedIn;
+	private String mPrefUserInfo, mPrefUserSkipped;
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
 	private List<String> categories;
 	private int[] EggMaxValues;
@@ -70,10 +70,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 		mPrefUserInfo = getString(R.string.pref_user_info);
-		mPrefUserUsername = getString(R.string.pref_user_username);
-		mPrefUserPassword = getString(R.string.pref_user_password);
-		mPrefUserUserID = getString(R.string.pref_user_userid);
-		mPrefUserLoggedIn = getString(R.string.pref_user_logged_in);
+		mPrefUserSkipped = getString(R.string.pref_user_skipped);
 
 		new OpenDatabase().execute();
 
@@ -139,7 +136,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 
 		// set logout button title depending on logged in setting
 		Preference logoutButton = (PreferenceScreen) findPreference("logout_button");
-		if (sharedPrefsUsers.getBoolean(mPrefUserLoggedIn, false))
+		if (sharedPrefsUsers.getBoolean(mPrefUserSkipped, false))
 			logoutButton.setTitle(getString(R.string.settings_logout));
 		else
 			logoutButton.setTitle(getString(R.string.settings_login));
@@ -147,8 +144,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
 				SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-				sharedPrefsUsers.edit().putString(mPrefUserUserID, "").putString(mPrefUserUsername, "").putString(mPrefUserPassword, "")
-						.putBoolean(mPrefUserLoggedIn, false).commit();
+				sharedPrefsUsers.edit().putBoolean(mPrefUserSkipped, false).commit();
 				Intent broadcastIntent = new Intent(getString(R.string.logout_receiver_filter));
 				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);
 				Intent loginIntent = new Intent(ctx, LoginActivity.class);

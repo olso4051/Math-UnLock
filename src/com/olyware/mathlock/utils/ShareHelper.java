@@ -75,7 +75,8 @@ public class ShareHelper {
 	}
 
 	public static String buildShareFacebookURL(Context context) {
-		String userID = context.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
+		String userID = context.getSharedPreferences(context.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
+				context.getString(R.string.pref_user_userid), "");
 		String baseLink = context.getString(R.string.share_base_url_facebook) + context.getString(R.string.app_id)
 				+ context.getString(R.string.share_base_url_facebook_link);
 		String baseLinkEasy = baseLink + context.getString(R.string.share_link_url_easy);
@@ -100,7 +101,8 @@ public class ShareHelper {
 			title = context.getString(R.string.share_base_url_facebook_name);
 			caption = context.getString(R.string.share_base_url_facebook_caption);
 		}
-		String userID = context.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
+		String userID = context.getSharedPreferences(context.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
+				context.getString(R.string.pref_user_userid), "");
 		String baseLink = context.getString(R.string.share_base_url_facebook) + context.getString(R.string.app_id)
 				+ context.getString(R.string.share_base_url_facebook_link);
 		String baseLinkEasy = baseLink + context.getString(R.string.share_link_url_easy);

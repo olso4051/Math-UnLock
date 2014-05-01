@@ -1463,118 +1463,17 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
-	/*private boolean checkPlayServices() {
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-		if (resultCode != ConnectionResult.SUCCESS) {
-			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-				GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
-			} else {
-				Toast.makeText(this, "This device is not supported.", Toast.LENGTH_LONG).show();
-				finish();
-			}
-			return false;
-		}
-		return true;
-	}
-
-	private String getRegistrationId(Context context) {
-		final SharedPreferences prefs = getGCMPreferences(context);
-		String registrationId = prefs.getString(getString(R.string.gcm_reg_id_property), "");
-		if (registrationId.equals("")) {
-			Log.d("GAtest", "Registration not found");
-			return "";
-		}
-		// Check if app was updated; if so, it must clear the registration ID since the existing regID is not guaranteed to work with the
-		// new app version.
-		int registeredVersion = prefs.getInt(getString(R.string.gcm_app_version_property), Integer.MIN_VALUE);
-		int currentVersion = getAppVersion(context);
-		if (registeredVersion != currentVersion) {
-			Log.d("GAtest", "App version changed");
-			return "";
-		}
-		return registrationId;
-	}
-
-	private SharedPreferences getGCMPreferences(Context context) {
-		// This sample app persists the registration ID in shared preferences, but
-		// how you store the regID in your app is up to you.
-		return getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-	}
-
-	private static int getAppVersion(Context context) {
-		try {
-			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-			return packageInfo.versionCode;
-		} catch (NameNotFoundException e) {
-			// should never happen
-			throw new RuntimeException("Could not get package name: " + e);
-		}
-	}
-
-	private void registerInBackground(final Activity act) {
-		final String referral = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("utm_content", "");
-		new AsyncTask<Void, Integer, String>() {
-			@Override
-			protected String doInBackground(Void... params) {
-				String msg = "";
-				try {
-					if (gcm == null) {
-						gcm = MyApplication.getGcmInstance();
-					}
-					regID = gcm.register(API_ID);
-					msg = "Device registered, registration ID=" + regID;
-
-					// send the registration ID to the server
-					sendRegistrationIdToBackend(act, regID, referral);
-
-					// Persist the regID - no need to register again.
-					storeRegistrationId(ctx, appCtx, regID);
-				} catch (IOException ex) {
-					msg = "Error :" + ex.getMessage();
-					// If there is an error, don't just keep trying to register. Require the user to click a button again, or perform
-					// exponential back-off.
-				}
-				return msg;
-			}
-
-			@Override
-			protected void onPostExecute(String msg) {
-				Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show();
-				// Log.d("GAtest", msg);
-			}
-		}.execute(null, null, null);
-	}
-
-	private void sendRegistrationIdToBackend(Activity act, String regId, String referral) {
-		new RegisterID(act).execute("", "", "", regId, "", referral);
-	}
-
-	private void storeRegistrationId(Context act, Context context, String regId) {
-		final SharedPreferences prefs = getGCMPreferences(context);
-		int appVersion = getAppVersion(context);
-		Log.d("GAtest", "Saving regId on app version " + appVersion);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(getString(R.string.gcm_reg_id_property), regId);
-		editor.putInt(getString(R.string.gcm_app_version_property), appVersion);
-		editor.commit();
-		if (SaveHelper.SaveTextFile(regId)) {
-			Toast.makeText(act, "created file with reg_id", Toast.LENGTH_LONG).show();
-		} else {
-			Toast.makeText(act, "failed to create file with reg_id", Toast.LENGTH_LONG).show();
-		}
-	}*/
-
 	public void registrationResult(int result, String userID) {
 		Log.d("GAtest", "upload result = " + result);
 		Log.d("GAtest", "userID = " + userID);
-		SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
-		SharedPreferences.Editor editPrefs = prefsGA.edit();
+		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		SharedPreferences.Editor editPrefsUserInfo = sharedPrefsUserInfo.edit();
 		if ((result == 0) && (userID != null)) {
-			editPrefs.putBoolean("reg_uploaded", true);
-			editPrefs.putString("user_id", userID);
+			editPrefsUserInfo.putBoolean(getString(R.string.pref_user_reg_uploaded), true);
+			editPrefsUserInfo.putString(getString(R.string.pref_user_userid), userID);
 		} else if (result == 1) {
-			editPrefs.putBoolean("reg_uploaded", false);
+			editPrefsUserInfo.putBoolean(getString(R.string.pref_user_reg_uploaded), false);
 		}
-		editPrefs.commit();
+		editPrefsUserInfo.commit();
 	}
 }

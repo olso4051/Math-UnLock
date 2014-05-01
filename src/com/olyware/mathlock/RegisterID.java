@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Base64;
-import android.util.Log;
 
 public class RegisterID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
@@ -68,20 +67,18 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			}
 			if (s[2].length() > 0) {
 				data.put("user_id", s[2]);
-				data.put("status", "UPDATE");
+				data.put("status", "update");
 			} else {
-				data.put("status", "NEW");
+				data.put("status", "new");
 			}
 			if (s[3].length() > 0) {
 				data.put("referral", s[3]);
 			}
-			Log.d("AnimationTest", "JSON built");
 			String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
 			httpput.setHeader("Content-Type", "application/json");
 			httpput.setHeader("Authorization", authorizationString);
 			HttpResponse response = httpclient.execute(httpput);
-			Log.d("AnimationTest", "http execute");
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			jsonResponse = new JSONObject(fullResult);

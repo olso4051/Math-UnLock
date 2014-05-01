@@ -22,7 +22,7 @@ import com.olyware.mathlock.utils.MoneyHelper;
 *  the Google Analytics receiver.
 */
 public class CustomGAReceiver extends BroadcastReceiver {
-	final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_term", "utm_content", "utm_campaign" };
+	final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -78,18 +78,28 @@ public class CustomGAReceiver extends BroadcastReceiver {
 				Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorUserInfo = sharedPrefsUserInfo.edit();
 
+		boolean referralData = true;
 		for (String key : EXPECTED_PARAMETERS) {
 			String value = params.get(key);
 			if (value != null) {
-				if (key.equals("utm_content")) {
+				if (key.equals("utm_source")) {
+					if (!value.equals("app"))
+						referralData = false;
+				} else if (key.equals("utm_medium")) {
+					if (!value.equals("share"))
+						referralData = false;
+				}
+				if (referralData && key.equals("utm_content")) {
 					value = new EncryptionHelper().decryptForURL(value);
 					// TODO add a check that this content is a user
 					MoneyHelper.increasePaidMoney(context, 40);
 					editorUserInfo.putString(context.getString(R.string.pref_user_referrer), value);
+					Log.d("GAtest", "referral key = " + value);
 				}
 				editor.putString(key, value);
 				Log.d("GAtest", "key = " + value);
-			}
+			} else
+				referralData = false;
 		}
 
 		editor.commit();

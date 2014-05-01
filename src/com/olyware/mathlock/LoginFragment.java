@@ -27,7 +27,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		public void onFinish();
 	}
 
-	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer;
+	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped;
 	private float transY = 0;
 	private EditText username;
 	private Button facebook, login, skip;
@@ -85,10 +85,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		mPrefUserUsername = ctx.getString(R.string.pref_user_username);
 		mPrefUserUserID = ctx.getString(R.string.pref_user_userid);
 		mPrefUserReferrer = ctx.getString(R.string.pref_user_referrer);
+		mPrefUserLoggedIn = ctx.getString(R.string.pref_user_logged_in);
+		mPrefUserSkipped = ctx.getString(R.string.pref_user_skipped);
 
 		// check if user is logged in
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		if (!sharedPrefsUserInfo.getString(mPrefUserUserID, "").equals("")) {
+		if (!sharedPrefsUserInfo.getBoolean(mPrefUserLoggedIn, false)) {
 			startMainActivity();
 		}
 
@@ -120,11 +122,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 	@Override
 	public void onClick(View view) {
+		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
 		if (view.getId() == R.id.fragment_login_button_login_facebook) {
+			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			logIn();
 		} else if (view.getId() == R.id.fragment_login_button_login) {
+			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			logIn();
 		} else if (view.getId() == R.id.fragment_login_button_skip) {
+			editUserInfo.putBoolean(mPrefUserSkipped, true).commit();
 			startMainActivity();
 		}
 	}
@@ -245,6 +252,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	}
 
 	private void startMainActivity() {
+		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
+		editUserInfo.putBoolean(mPrefUserLoggedIn, true).commit();
 		Intent i = new Intent(getActivity(), MainActivity.class);
 		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
