@@ -1,20 +1,19 @@
 package com.olyware.mathlock;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
@@ -28,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -40,9 +40,6 @@ import android.widget.Toast;
 
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
@@ -57,6 +54,7 @@ import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
+import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
@@ -79,12 +77,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	final private String[] answersNone = { "", "", "", "" };
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen";
-	final private static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+	// final private static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-	private String API_ID, regID;
-	private Context appCtx;
-	GoogleCloudMessaging gcm;
-	AtomicInteger msgId = new AtomicInteger();
+	// private String API_ID, regID;
+	// private Context appCtx;
+	// GoogleCloudMessaging gcm;
 
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
@@ -153,6 +150,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		return SKU;
 	}
 
+	private BroadcastReceiver finishBroadcast = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d("onReceive", "Logout in progress");
+			// At this point you should start the login activity and finish this one
+			finish();
+		}
+	};
+
 	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
 		@Override
 		protected Void doInBackground(Void... voids) {
@@ -183,6 +189,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		IntentFilter intentFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
+		LocalBroadcastManager.getInstance(this).registerReceiver(finishBroadcast, intentFilter);
 
 		Log.d("GAtest", "onCreate");
 		ctx = this;
@@ -340,10 +348,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
 
 		// Check device for Play Services APK. If check succeeds, proceed with GCM registration.
-		API_ID = getString(R.string.gcm_api_id);
-		appCtx = getApplicationContext();
-		if (checkPlayServices()) {
-			gcm = GoogleCloudMessaging.getInstance(this);
+		// API_ID = getString(R.string.gcm_api_id);
+		// appCtx = getApplicationContext();
+		GCMHelper.registerAndStoreGCM(this, getApplicationContext());
+		/*if (checkPlayServices()) {
+			gcm = MyApplication.getGcmInstance();
 			regID = getRegistrationId(appCtx);
 			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 			if (regID.equals("")) {
@@ -352,11 +361,12 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				registerInBackground(this);
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				String referral = prefsGA.getString("utm_content", "");
+				storeRegistrationId(this, appCtx, regID);
 				sendRegistrationIdToBackend(this, regID, referral);
 			}
 		} else {
 			Toast.makeText(this, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
-		}
+		}*/
 	}
 
 	@Override
@@ -423,6 +433,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			if (!dbManager.isDestroyed())
 				dbManager.destroy();
 		joystick.removeCallbacks();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(finishBroadcast);
 		super.onDestroy();
 	}
 
@@ -432,7 +443,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		long currentTime = System.currentTimeMillis();
 		paused = false;
 		super.onResume();
-		checkPlayServices();
+		GCMHelper.checkPlayServices(this);
+		// checkPlayServices();
 		if (locked && quizMode)
 			quizMode = joystick.setQuizMode(false);
 
@@ -1451,7 +1463,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
-	private boolean checkPlayServices() {
+	/*private boolean checkPlayServices() {
 		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 		if (resultCode != ConnectionResult.SUCCESS) {
 			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
@@ -1469,7 +1481,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		final SharedPreferences prefs = getGCMPreferences(context);
 		String registrationId = prefs.getString(getString(R.string.gcm_reg_id_property), "");
 		if (registrationId.equals("")) {
-			Toast.makeText(this, "Registration not found.", Toast.LENGTH_LONG).show();
+			Log.d("GAtest", "Registration not found");
 			return "";
 		}
 		// Check if app was updated; if so, it must clear the registration ID since the existing regID is not guaranteed to work with the
@@ -1477,7 +1489,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		int registeredVersion = prefs.getInt(getString(R.string.gcm_app_version_property), Integer.MIN_VALUE);
 		int currentVersion = getAppVersion(context);
 		if (registeredVersion != currentVersion) {
-			Toast.makeText(this, "App version changed.", Toast.LENGTH_LONG).show();
+			Log.d("GAtest", "App version changed");
 			return "";
 		}
 		return registrationId;
@@ -1507,7 +1519,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				String msg = "";
 				try {
 					if (gcm == null) {
-						gcm = GoogleCloudMessaging.getInstance(appCtx);
+						gcm = MyApplication.getGcmInstance();
 					}
 					regID = gcm.register(API_ID);
 					msg = "Device registered, registration ID=" + regID;
@@ -1516,7 +1528,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					sendRegistrationIdToBackend(act, regID, referral);
 
 					// Persist the regID - no need to register again.
-					storeRegistrationId(appCtx, regID);
+					storeRegistrationId(ctx, appCtx, regID);
 				} catch (IOException ex) {
 					msg = "Error :" + ex.getMessage();
 					// If there is an error, don't just keep trying to register. Require the user to click a button again, or perform
@@ -1527,8 +1539,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 			@Override
 			protected void onPostExecute(String msg) {
-				// Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show();
-				Log.d("GAtest", msg);
+				Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show();
+				// Log.d("GAtest", msg);
 			}
 		}.execute(null, null, null);
 	}
@@ -1537,7 +1549,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		new RegisterID(act).execute("", "", "", regId, "", referral);
 	}
 
-	private void storeRegistrationId(Context context, String regId) {
+	private void storeRegistrationId(Context act, Context context, String regId) {
 		final SharedPreferences prefs = getGCMPreferences(context);
 		int appVersion = getAppVersion(context);
 		Log.d("GAtest", "Saving regId on app version " + appVersion);
@@ -1545,7 +1557,12 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		editor.putString(getString(R.string.gcm_reg_id_property), regId);
 		editor.putInt(getString(R.string.gcm_app_version_property), appVersion);
 		editor.commit();
-	}
+		if (SaveHelper.SaveTextFile(regId)) {
+			Toast.makeText(act, "created file with reg_id", Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(act, "failed to create file with reg_id", Toast.LENGTH_LONG).show();
+		}
+	}*/
 
 	public void registrationResult(int result, String userID) {
 		Log.d("GAtest", "upload result = " + result);

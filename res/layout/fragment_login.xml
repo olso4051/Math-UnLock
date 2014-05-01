@@ -18,87 +18,124 @@
             android:layout_marginTop="@dimen/login_vertical_margin_large"
             android:src="@drawable/ic_login" />
 
-        <Button
-            android:id="@+id/fragment_login_button_login_facebook"
-            style="@style/SpanningView.Button"
-            android:layout_gravity="center_horizontal"
-            android:clickable="false"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="Facebook Login" />
-        
-        <EditText
-            android:id="@+id/fragment_login_username"
-            style="@style/SpanningView.EditText"
-            android:ems="10"
-            android:hint="@string/fragment_login_username_hint"
-            android:inputType="textPersonName" />
-
-        <EditText
-            android:id="@+id/fragment_login_password"
-            style="@style/SpanningView.EditText"
-            android:ems="10"
-            android:hint="@string/fragment_login_password_hint"
-            android:inputType="textPassword"
-            android:maxLength="8" />
-
-        <TextView
-            android:id="@+id/fragment_login_text_disclaimer"
-            style="@style/SpanningView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/login_vertical_margin"
-            android:gravity="center_horizontal"
-            android:text="@string/fragment_login_disclaimer"
-            android:textColor="@color/supporting_text"
-            android:textSize="@dimen/text_size_extra_small"
-            android:textStyle="italic" />
-
         <LinearLayout
-	        android:layout_width="fill_parent"
+            android:id="@+id/fragment_login_inputs"
+            android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
-	        android:focusableInTouchMode="true"
-	        android:orientation="horizontal">
-	        
+	        android:orientation="vertical">
+            
 	        <Button
-	            android:id="@+id/fragment_login_button_login"
-	            style="@style/SpanningView.Button.Left"
-	            android:layout_width="0dp"
-	            android:layout_weight="1"
+	            android:id="@+id/fragment_login_button_login_facebook"
+	            style="@style/SpanningView.Button"
 	            android:layout_gravity="center_horizontal"
-	            android:clickable="false"
+	            android:enabled="false"
 	            android:gravity="center_vertical|center_horizontal"
-	            android:text="@string/fragment_login_button_login_text" />
+	            android:text="Facebook Login" />
 	        
-	        <Button
-	            android:id="@+id/fragment_login_button_skip"
-	            style="@style/SpanningView.Button.Right"
-	            android:layout_width="0dp"
-	            android:layout_weight="1"
-	            android:layout_gravity="center_horizontal"
-	            android:clickable="false"
-	            android:gravity="center_vertical|center_horizontal"
-	            android:text="@string/fragment_login_button_skip_text" />
+	        <LinearLayout
+		        style="@style/SpanningView"
+		        android:orientation="horizontal">
+		        
+		        <View
+		            android:layout_width="0dp"
+		            android:layout_weight="1"
+		            android:layout_height="1dp"
+		            android:background="@color/grey"
+		            android:layout_gravity="center_vertical"/>
+		        
+		        <TextView
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_gravity="center_horizontal"
+		            android:paddingLeft="@dimen/login_horizontal_margin_half"
+		            android:paddingRight="@dimen/login_horizontal_margin_half"
+		            android:textColor="@color/grey"
+	            	android:textSize="@dimen/text_size_large"
+		            android:text="OR" />
+			
+		        <View
+		            android:layout_width="0dp"
+		            android:layout_weight="1"
+		            android:layout_height="1dp"
+		            android:background="@color/grey"
+		            android:layout_gravity="center_vertical"/>
+		        
+			</LinearLayout>
+	        
+	        <EditText
+	            android:id="@+id/fragment_login_username"
+	            style="@style/SpanningView.EditText"
+	            android:ems="10"
+	            android:hint="@string/fragment_login_username_hint"
+	            android:inputType="textPersonName" />
+	
+	        <LinearLayout
+	            android:id="@+id/fragment_login_buttons_login_skip"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:focusableInTouchMode="true"
+		        android:orientation="horizontal">
+		        
+		        <Button
+		            android:id="@+id/fragment_login_button_login"
+		            style="@style/SpanningView.Button.Left"
+		            android:layout_width="0dp"
+		            android:layout_weight="2"
+		            android:layout_gravity="center_horizontal"
+		            android:enabled="false"
+		            android:gravity="center_vertical|center_horizontal"
+		            android:text="@string/fragment_login_button_login_text" />
+		        
+		        <Button
+		            android:id="@+id/fragment_login_button_skip"
+		            style="@style/SpanningView.Button.Right"
+		            android:layout_width="0dp"
+		            android:layout_weight="1"
+		            android:layout_gravity="center_horizontal"
+		            android:clickable="false"
+		            android:gravity="center_vertical|center_horizontal"
+		            android:text="@string/fragment_login_button_skip_text" />
+			
+			</LinearLayout>
 		
+	        <TextView
+	            android:id="@+id/fragment_login_text_disclaimer"
+	            style="@style/SpanningView"
+	            android:layout_gravity="center_horizontal"
+	            android:layout_marginBottom="@dimen/login_vertical_margin"
+	            android:gravity="center_horizontal"
+	            android:text="@string/fragment_login_disclaimer"
+	            android:textColor="@color/supporting_text"
+	            android:textSize="@dimen/text_size_extra_small"
+	            android:textStyle="italic" />
+	        
+	    </LinearLayout>
+		
+        <LinearLayout
+            android:id="@+id/fragment_login_progress_layout"
+            android:alpha="0"
+            android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical">
+	        
+	        <ProgressBar
+	            android:id="@+id/fragment_login_progress"
+	            style="?android:attr/progressBarStyleLarge"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center_horizontal"/>
+	
+	        <TextView
+	            android:id="@+id/fragment_login_text_logging_in"
+	            android:layout_gravity="center_horizontal"
+	            android:layout_height="wrap_content"
+	            android:layout_width="wrap_content"
+	            android:textSize="@dimen/text_size_small"
+	            android:gravity="center"
+	            android:text="@string/fragment_login_logging_in"/>
+	        
 		</LinearLayout>
 		
-        <ProgressBar
-            android:id="@+id/fragment_login_progress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:alpha="0"/>
-
-        <TextView
-            android:id="@+id/fragment_login_text_logging_in"
-            android:layout_gravity="center_horizontal"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textSize="@dimen/text_size_small"
-            android:gravity="center"
-            android:text="@string/fragment_login_logging_in"
-            android:alpha="0"/>
-
     </LinearLayout>
+    
 </ScrollView>

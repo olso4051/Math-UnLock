@@ -74,6 +74,9 @@ public class CustomGAReceiver extends BroadcastReceiver {
 	public static void storeReferralParams(Context context, Map<String, String> params) {
 		SharedPreferences storage = context.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = storage.edit();
+		SharedPreferences sharedPrefsUserInfo = context.getSharedPreferences(context.getString(R.string.pref_user_info),
+				Context.MODE_PRIVATE);
+		SharedPreferences.Editor editorUserInfo = sharedPrefsUserInfo.edit();
 
 		for (String key : EXPECTED_PARAMETERS) {
 			String value = params.get(key);
@@ -82,6 +85,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 					value = new EncryptionHelper().decryptForURL(value);
 					// TODO add a check that this content is a user
 					MoneyHelper.increasePaidMoney(context, 40);
+					editorUserInfo.putString(context.getString(R.string.pref_user_referrer), value);
 				}
 				editor.putString(key, value);
 				Log.d("GAtest", "key = " + value);

@@ -12,8 +12,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.nineoldandroids.animation.AnimatorSet;
@@ -28,40 +27,39 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		public void onFinish();
 	}
 
-	private String mPrefUserInfo, mPrefUserUsername, mPrefUserPassword, mPrefUserUserID;
+	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer;
 	private float transY = 0;
-	private EditText username, password;
+	private EditText username;
 	private Button facebook, login, skip;
-	private TextView disclaimer, loggingIn;
-	private ProgressBar progressBar;
+	private LinearLayout inputs, progress;
 
-	private void saveSessionID(String userID) {
-		SharedPreferences sharedPreferences = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		sharedPreferences.edit().putString(mPrefUserUserID, userID).commit();
+	private void saveUserID(String userID) {
+		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+		sharedPrefsUserInfo.edit().putString(mPrefUserUserID, userID).commit();
 	}
 
 	/**
 	 * Saves user info and switches to the main activity
-	 * 
-	 * @param userInfo
-	 *            the info with which to login
 	 */
 	void logIn() {
-		String uName = username.getText().toString();
-		String uPass = password.getText().toString();
+
 		facebook.setEnabled(false);
 		login.setEnabled(false);
 		skip.setEnabled(false);
 
-		SharedPreferences sharedPrefs = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		sharedPrefs.edit().putString(mPrefUserUsername, uName).putString(mPrefUserPassword, uPass).commit();
+		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+		String regID = sharedPrefsUserInfo.getString(mPrefUserUsername, "");
+		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
+		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
+		String uName = username.getText().toString();
+		sharedPrefsUserInfo.edit().putString(mPrefUserUsername, uName).commit();
 
 		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		View focus = getActivity().getCurrentFocus();
 		if (imm != null && focus != null) {
 			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
-		attemptLogin(uName, uPass, "regID", "userID", "userID");
+		attemptLogin(uName, regID, userID, referrer);
 
 		startAnimationProgress();
 	}
@@ -85,22 +83,24 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 		mPrefUserInfo = ctx.getString(R.string.pref_user_info);
 		mPrefUserUsername = ctx.getString(R.string.pref_user_username);
-		mPrefUserPassword = ctx.getString(R.string.pref_user_password);
 		mPrefUserUserID = ctx.getString(R.string.pref_user_userid);
+		mPrefUserReferrer = ctx.getString(R.string.pref_user_referrer);
 
 		// check if user is logged in
-		SharedPreferences sharedPreferences = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		if (!sharedPreferences.getString(mPrefUserUserID, "").equals("")) {
+		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+		if (!sharedPrefsUserInfo.getString(mPrefUserUserID, "").equals("")) {
 			startMainActivity();
 		}
+
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_login, container, false);
 
+		inputs = (LinearLayout) view.findViewById(R.id.fragment_login_inputs);
+		progress = (LinearLayout) view.findViewById(R.id.fragment_login_progress_layout);
 		username = (EditText) view.findViewById(R.id.fragment_login_username);
-		password = (EditText) view.findViewById(R.id.fragment_login_password);
 		facebook = (Button) view.findViewById(R.id.fragment_login_button_login_facebook);
 		facebook.setOnClickListener(this);
 		login = (Button) view.findViewById(R.id.fragment_login_button_login);
@@ -108,12 +108,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		skip = (Button) view.findViewById(R.id.fragment_login_button_skip);
 		skip.setOnClickListener(this);
 
-		setAlpha(view);
+		setAlpha();
 
 		if (savedInstanceState == null) {
-			SharedPreferences sharedPrefs = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-			username.setText(sharedPrefs.getString(mPrefUserUsername, ""));
-			password.setText(sharedPrefs.getString(mPrefUserPassword, ""));
+			SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+			username.setText(sharedPrefsUserInfo.getString(mPrefUserUsername, ""));
 		}
 
 		return view;
@@ -121,17 +120,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 	@Override
 	public void onClick(View view) {
-		if (view.getId() == R.id.fragment_login_button_login) {
+		if (view.getId() == R.id.fragment_login_button_login_facebook) {
+			logIn();
+		} else if (view.getId() == R.id.fragment_login_button_login) {
 			logIn();
 		} else if (view.getId() == R.id.fragment_login_button_skip) {
 			startMainActivity();
-		} else if (view.getId() == R.id.fragment_login_button_skip) {
-			logIn();
 		}
 	}
 
-	private void attemptLogin(String username, String password, String regID, String userID, String referral) {
-		new RegisterID(getActivity()) {
+	private void attemptLogin(String username, String regID, String userID, String referral) {
+		new RegisterID(this, getActivity()) {
 			@Override
 			protected Integer doInBackground(String... s) {
 				return super.doInBackground(s);
@@ -143,24 +142,22 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 				}
 				return 3;*/
 			}
-		}.execute(username, password, regID, userID, referral);
+		}.execute(username, regID, userID, referral);
 	}
 
 	public void registrationResult(int result, String userID) {
 		if (result == 0) {
 			// success
-			saveSessionID(userID);
+			saveUserID(userID);
 			startMainActivity();
 		} else if (result == 1) {
 			// network error
 			Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
 			endAnimationProgress();
-			// TODO popup box with button to call 624-walk
 		} else if (result == 2) {
 			// service error
 			Toast.makeText(getActivity(), "service error", Toast.LENGTH_LONG).show();
 			endAnimationProgress();
-			// TODO same popup box
 		} else if (result == 3) {
 			// developer didn't login
 			endAnimationProgress();
@@ -168,13 +165,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		}
 	}
 
-	private void setAlpha(View root) {
-		ObjectAnimator animationProgressFadeOut = ObjectAnimator.ofFloat(progressBar, "alpha", 0);
+	public void GCMRegistrationDone() {
+		facebook.setEnabled(true);
+		login.setEnabled(true);
+	}
+
+	private void setAlpha() {
+		ObjectAnimator animationProgressFadeOut = ObjectAnimator.ofFloat(progress, "alpha", 0);
 		animationProgressFadeOut.setDuration(0);
-		ObjectAnimator animationLoggingInFadeOut = ObjectAnimator.ofFloat(loggingIn, "alpha", 0);
-		animationLoggingInFadeOut.setDuration(0);
 		AnimatorSet animSet = new AnimatorSet();
-		animSet.playTogether(animationProgressFadeOut, animationLoggingInFadeOut);
+		animSet.playTogether(animationProgressFadeOut);
 		animSet.start();
 	}
 
@@ -194,65 +194,33 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	private AnimatorSet setupStartAnimation() {
 		AnimatorSet animSet = new AnimatorSet();
 
-		float width = username.getWidth() * 2;
+		float width = facebook.getWidth() * 2;
 		if (transY == 0) {
 			int[] locations = new int[2];
-			username.getLocationOnScreen(locations);
+			facebook.getLocationOnScreen(locations);
 			float userNameY = locations[1];
-			progressBar.getLocationOnScreen(locations);
+			progress.getLocationOnScreen(locations);
 			float progressBarY = locations[1];
 			transY = userNameY - progressBarY;
 		}
 
 		AnimatorSet centerProgress = new AnimatorSet();
-		ObjectAnimator animationProgressCenterX = ObjectAnimator.ofFloat(progressBar, "translationX", +width);
+		ObjectAnimator animationProgressCenterX = ObjectAnimator.ofFloat(progress, "translationX", width);
 		animationProgressCenterX.setDuration(0);
-		ObjectAnimator animationProgressCenterY = ObjectAnimator.ofFloat(progressBar, "translationY", transY);
+		ObjectAnimator animationProgressCenterY = ObjectAnimator.ofFloat(progress, "translationY", transY);
 		animationProgressCenterY.setDuration(0);
-		ObjectAnimator animationLoggingInCenterX = ObjectAnimator.ofFloat(loggingIn, "translationX", +width);
-		animationLoggingInCenterX.setDuration(0);
-		ObjectAnimator animationLoggingInCenterY = ObjectAnimator.ofFloat(loggingIn, "translationY", transY);
-		animationLoggingInCenterY.setDuration(0);
-		centerProgress.playTogether(animationProgressCenterX, animationProgressCenterY, animationLoggingInCenterX,
-				animationLoggingInCenterY);
+		centerProgress.playTogether(animationProgressCenterX, animationProgressCenterY);
 
 		AnimatorSet animMoveLeft = new AnimatorSet();
-		ObjectAnimator animationFacebookX = ObjectAnimator.ofFloat(facebook, "translationX", -width);
-		animationFacebookX.setDuration(250);
-		ObjectAnimator animationNameX = ObjectAnimator.ofFloat(username, "translationX", -width);
-		animationNameX.setDuration(250);
-		ObjectAnimator animationPhoneX = ObjectAnimator.ofFloat(password, "translationX", -width);
-		animationPhoneX.setDuration(250);
-		ObjectAnimator animationDisclaimerX = ObjectAnimator.ofFloat(disclaimer, "translationX", -width);
-		animationDisclaimerX.setDuration(250);
-		ObjectAnimator animationButtonX = ObjectAnimator.ofFloat(login, "translationX", -width);
-		animationButtonX.setDuration(250);
-		ObjectAnimator animationSkipX = ObjectAnimator.ofFloat(skip, "translationX", -width);
-		animationSkipX.setDuration(250);
-		ObjectAnimator animationProgressX = ObjectAnimator.ofFloat(progressBar, "translationX", 0);
+		ObjectAnimator animationInputsX = ObjectAnimator.ofFloat(inputs, "translationX", -width);
+		animationInputsX.setDuration(250);
+		ObjectAnimator animationProgressX = ObjectAnimator.ofFloat(progress, "translationX", 0);
 		animationProgressX.setDuration(250);
-		ObjectAnimator animationLoggingInX = ObjectAnimator.ofFloat(loggingIn, "translationX", 0);
-		animationLoggingInX.setDuration(250);
-		ObjectAnimator animationFacebookFadeOut = ObjectAnimator.ofFloat(facebook, "alpha", 0);
-		animationFacebookFadeOut.setDuration(250);
-		ObjectAnimator animationNameFadeOut = ObjectAnimator.ofFloat(username, "alpha", 0);
-		animationNameFadeOut.setDuration(250);
-		ObjectAnimator animationPhoneFadeOut = ObjectAnimator.ofFloat(password, "alpha", 0);
-		animationPhoneFadeOut.setDuration(250);
-		ObjectAnimator animationDisclaimerFadeOut = ObjectAnimator.ofFloat(disclaimer, "alpha", 0);
-		animationDisclaimerFadeOut.setDuration(250);
-		ObjectAnimator animationButtonFadeOut = ObjectAnimator.ofFloat(login, "alpha", 0);
-		animationButtonFadeOut.setDuration(250);
-		ObjectAnimator animationSkipFadeOut = ObjectAnimator.ofFloat(skip, "alpha", 0);
-		animationSkipFadeOut.setDuration(250);
-		ObjectAnimator animationProgressFadeIn = ObjectAnimator.ofFloat(progressBar, "alpha", 1);
+		ObjectAnimator animationInputsFadeOut = ObjectAnimator.ofFloat(inputs, "alpha", 0);
+		animationInputsFadeOut.setDuration(250);
+		ObjectAnimator animationProgressFadeIn = ObjectAnimator.ofFloat(progress, "alpha", 1);
 		animationProgressFadeIn.setDuration(250);
-		ObjectAnimator animationLoggingInFadeIn = ObjectAnimator.ofFloat(loggingIn, "alpha", 1);
-		animationLoggingInFadeIn.setDuration(250);
-		animMoveLeft.playTogether(animationFacebookX, animationNameX, animationPhoneX, animationDisclaimerX, animationButtonX,
-				animationSkipX, animationProgressX, animationLoggingInX, animationFacebookFadeOut, animationNameFadeOut,
-				animationPhoneFadeOut, animationDisclaimerFadeOut, animationButtonFadeOut, animationSkipFadeOut, animationProgressFadeIn,
-				animationLoggingInFadeIn);
+		animMoveLeft.playTogether(animationInputsX, animationProgressX, animationInputsFadeOut, animationProgressFadeIn);
 
 		animSet.play(centerProgress).before(animMoveLeft);
 
@@ -261,43 +229,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 	private AnimatorSet setupEndAnimation() {
 		AnimatorSet animMoveRight = new AnimatorSet();
-		float width = username.getWidth() * 2;
+		float width = facebook.getWidth() * 2;
 
-		ObjectAnimator animationFacebookX = ObjectAnimator.ofFloat(facebook, "translationX", 0);
+		ObjectAnimator animationFacebookX = ObjectAnimator.ofFloat(inputs, "translationX", 0);
 		animationFacebookX.setDuration(250);
-		ObjectAnimator animationNameX = ObjectAnimator.ofFloat(username, "translationX", 0);
-		animationNameX.setDuration(250);
-		ObjectAnimator animationPhoneX = ObjectAnimator.ofFloat(password, "translationX", 0);
-		animationPhoneX.setDuration(250);
-		ObjectAnimator animationDisclaimerX = ObjectAnimator.ofFloat(disclaimer, "translationX", 0);
-		animationDisclaimerX.setDuration(250);
-		ObjectAnimator animationButtonX = ObjectAnimator.ofFloat(login, "translationX", 0);
-		animationButtonX.setDuration(250);
-		ObjectAnimator animationSkipX = ObjectAnimator.ofFloat(skip, "translationX", 0);
-		animationSkipX.setDuration(250);
-		ObjectAnimator animationProgressX = ObjectAnimator.ofFloat(progressBar, "translationX", width);
+		ObjectAnimator animationProgressX = ObjectAnimator.ofFloat(progress, "translationX", width);
 		animationProgressX.setDuration(250);
-		ObjectAnimator animationLoggingInX = ObjectAnimator.ofFloat(loggingIn, "translationX", width);
-		animationLoggingInX.setDuration(250);
-		ObjectAnimator animationFacebookFadeIn = ObjectAnimator.ofFloat(facebook, "alpha", 1);
+		ObjectAnimator animationFacebookFadeIn = ObjectAnimator.ofFloat(inputs, "alpha", 1);
 		animationFacebookFadeIn.setDuration(250);
-		ObjectAnimator animationNameFadeIn = ObjectAnimator.ofFloat(username, "alpha", 1);
-		animationNameFadeIn.setDuration(250);
-		ObjectAnimator animationPassFadeIn = ObjectAnimator.ofFloat(password, "alpha", 1);
-		animationPassFadeIn.setDuration(250);
-		ObjectAnimator animationDisclaimerFadeIn = ObjectAnimator.ofFloat(disclaimer, "alpha", 1);
-		animationDisclaimerFadeIn.setDuration(250);
-		ObjectAnimator animationButtonFadeIn = ObjectAnimator.ofFloat(login, "alpha", 1);
-		animationButtonFadeIn.setDuration(250);
-		ObjectAnimator animationSkipFadeIn = ObjectAnimator.ofFloat(skip, "alpha", 1);
-		animationSkipFadeIn.setDuration(250);
-		ObjectAnimator animationProgressFadeOut = ObjectAnimator.ofFloat(progressBar, "alpha", 0);
+		ObjectAnimator animationProgressFadeOut = ObjectAnimator.ofFloat(progress, "alpha", 0);
 		animationProgressFadeOut.setDuration(250);
-		ObjectAnimator animationLoggingInFadeOut = ObjectAnimator.ofFloat(loggingIn, "alpha", 0);
-		animationLoggingInFadeOut.setDuration(250);
-		animMoveRight.playTogether(animationFacebookX, animationNameX, animationPhoneX, animationDisclaimerX, animationButtonX,
-				animationSkipX, animationProgressX, animationLoggingInX, animationFacebookFadeIn, animationNameFadeIn, animationPassFadeIn,
-				animationDisclaimerFadeIn, animationButtonFadeIn, animationSkipFadeIn, animationProgressFadeOut, animationLoggingInFadeOut);
+		animMoveRight.playTogether(animationFacebookX, animationProgressX, animationFacebookFadeIn, animationProgressFadeOut);
 
 		return animMoveRight;
 	}

@@ -3,6 +3,7 @@
     <dimen name="login_horizontal_margin">48dp</dimen>
     <dimen name="login_horizontal_margin_half">24dp</dimen>
     <dimen name="login_vertical_margin">16dp</dimen>
+    <dimen name="login_vertical_margin_half">8dp</dimen>
     <dimen name="login_vertical_margin_large">48dp</dimen>
     
     <dimen name="text_size_huge">40sp</dimen>

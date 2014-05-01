@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -14,6 +15,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceScreen;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.WindowManager;
 
 import com.google.analytics.tracking.android.Fields;
@@ -23,12 +26,14 @@ import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	final private static String SCREEN_LABEL = "Settings Screen";
+	private String mPrefUserInfo, mPrefUserUsername, mPrefUserPassword, mPrefUserUserID, mPrefUserLoggedIn;
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
 	private List<String> categories;
 	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff, lockscreen2;
 	private DatabaseManager dbManager;
+	private Context ctx;
 
 	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
 		@Override
@@ -55,6 +60,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
+		ctx = this;
 
 		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
@@ -63,11 +69,17 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
 		EggKeys = getResources().getStringArray(R.array.egg_keys);
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+		mPrefUserInfo = getString(R.string.pref_user_info);
+		mPrefUserUsername = getString(R.string.pref_user_username);
+		mPrefUserPassword = getString(R.string.pref_user_password);
+		mPrefUserUserID = getString(R.string.pref_user_userid);
+		mPrefUserLoggedIn = getString(R.string.pref_user_logged_in);
 
 		new OpenDatabase().execute();
 
 		SharedPreferences sharedPrefs = getPreferenceScreen().getSharedPreferences();
-		SharedPreferences sharedPrefsMoney = this.getSharedPreferences("Packages", 0);
+		SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		SharedPreferences sharedPrefsUsers = getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 
 		// set valid language values
 		fromLanguage = (ListPreference) findPreference("from_language");
@@ -124,6 +136,29 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 
 			Pref_Packages.setEnabled(set);
 		}
+
+		// set logout button title depending on logged in setting
+		Preference logoutButton = (PreferenceScreen) findPreference("logout_button");
+		if (sharedPrefsUsers.getBoolean(mPrefUserLoggedIn, false))
+			logoutButton.setTitle(getString(R.string.settings_logout));
+		else
+			logoutButton.setTitle(getString(R.string.settings_login));
+		logoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+				sharedPrefsUsers.edit().putString(mPrefUserUserID, "").putString(mPrefUserUsername, "").putString(mPrefUserPassword, "")
+						.putBoolean(mPrefUserLoggedIn, false).commit();
+				Intent broadcastIntent = new Intent(getString(R.string.logout_receiver_filter));
+				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);
+				Intent loginIntent = new Intent(ctx, LoginActivity.class);
+				loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(loginIntent);
+				finish();
+				return false;
+			}
+		});
 	}
 
 	@SuppressWarnings("deprecation")

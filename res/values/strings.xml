@@ -15,7 +15,7 @@
     <string name="gcm_reg_id_property">registration_id</string>
     <string name="gcm_reg_id_property_old">registration_id_old</string>
     <string name="gcm_app_version_property">app_version</string>
-    <string name="service_base_url">http://www.learnwithhiq.com/api/</string>
+    <string name="service_base_url">http://api.learnwithhiq.com/HiQ_backend/</string>
     
     <!-- Sharing -->
     <string name="share_link_url_easy">https://play.google.com/store/apps/details?id=com.olyware.mathlock</string>
@@ -48,15 +48,21 @@
     <string name="pref_user_username">username</string>
     <string name="pref_user_password">password</string>
     <string name="pref_user_userid">user_id</string>
+    <string name="pref_user_logged_in">logged_in</string>
+    <string name="pref_user_reg_uploaded">reg_uploaded</string>
+    <string name="pref_user_referrer">referrer</string>
     
     <!-- Login Activity -->
     <string name="fragment_login_disclaimer">Login to get cool social features. Login with Facebook or create a new user account with Hiq. We won\'t share this information with anyone.</string>
     <string name="fragment_login_username_hint">Username</string>
     <string name="fragment_login_password_hint">Password</string>
     <string name="fragment_login_nickname_hint">Nickname (this is what your friends will see)</string>
-    <string name="fragment_login_button_login_text">Login</string>
+    <string name="fragment_login_button_login_text">Login with Hiq</string>
     <string name="fragment_login_button_skip_text">Skip</string>
     <string name="fragment_login_logging_in">Logging In&#8230;</string>
+    <string name="logout_receiver_filter">com.olyware.mathlock.ACTION_LOGOUT</string>
+    <string name="settings_logout">Logout</string>
+    <string name="settings_login">Login</string>
     
     <string name="add">Add</string>
     <string name="add_new">New Question</string>

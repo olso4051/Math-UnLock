@@ -2,6 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:picker="http://schemas.android.com/apk/res/com.olyware."
     android:key="screen" >
+    <PreferenceScreen
+        android:key="logout_button"
+        android:title="@string/settings_logout" />
     <PreferenceCategory
         android:title="@string/settings"
         android:key="settings">

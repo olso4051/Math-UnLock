@@ -10,10 +10,12 @@ import android.preference.PreferenceManager;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger.LogLevel;
 import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 @ReportsCrashes(formKey = "", // will not be used
 mailTo = "olso4051@umn.edu", mode = ReportingInteractionMode.TOAST, resToastText = R.string.crash_toast_text)
 public class MyApplication extends Application {
+	private static GoogleCloudMessaging mGcm;
 	private static GoogleAnalytics mGa;
 	private static Tracker mTracker;
 
@@ -34,6 +36,11 @@ public class MyApplication extends Application {
 		// ACRA.init(this);
 
 		initializeGoogleAnalytics();
+		initGCM();
+	}
+
+	private void initGCM() {
+		mGcm = GoogleCloudMessaging.getInstance(this);
 	}
 
 	/*
@@ -63,17 +70,16 @@ public class MyApplication extends Application {
 		});
 	}
 
-	/*
-	 * Returns the Google Analytics tracker.
-	 */
+	public static GoogleAnalytics getGaInstance() {
+		return mGa;
+	}
+
 	public static Tracker getGaTracker() {
 		return mTracker;
 	}
 
-	/*
-	 * Returns the Google Analytics instance.
-	 */
-	public static GoogleAnalytics getGaInstance() {
-		return mGa;
+	public static GoogleCloudMessaging getGcmInstance() {
+		return mGcm;
 	}
+
 }
