@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.service;
 
 import java.util.List;
 
@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.olyware.mathlock.R;
+import com.olyware.mathlock.R.array;
 import com.olyware.mathlock.utils.EZ;
 
 public class BootReceiver extends BroadcastReceiver {

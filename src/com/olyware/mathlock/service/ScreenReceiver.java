@@ -1,7 +1,11 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.service;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.olyware.mathlock.MainActivity;
+import com.olyware.mathlock.R;
+import com.olyware.mathlock.R.array;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

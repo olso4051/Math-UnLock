@@ -82,7 +82,7 @@
             android:screenOrientation="portrait" >
         </activity>
 
-        <service android:name=".ScreenService" />
+        <service android:name="com.olyware.mathlock.service.ScreenService" />
 
         <activity
             android:name="com.olyware.mathlock.ShowSettingsActivity"
@@ -102,7 +102,7 @@
         </activity>
         
 		<receiver
-		    android:name=".BootReceiver">
+		    android:name="com.olyware.mathlock.service.BootReceiver">
 		    <intent-filter>
 		        <action android:name="android.intent.action.BOOT_COMPLETED" />
 		    </intent-filter>
@@ -110,15 +110,15 @@
 		
 		<!-- Used for Google Play Store Campaign Measurement-->;
 		<service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
-		<receiver android:name=".CustomGAReceiver"
+		<receiver android:name="com.olyware.mathlock.service.CustomGAReceiver"
 		    android:exported="true" >
 			<intent-filter>
 				<action android:name="com.android.vending.INSTALL_REFERRER" />
 			</intent-filter>
 		</receiver>
-		
+
 		<receiver
-            android:name=".GcmBroadcastReceiver"
+            android:name="com.olyware.mathlock.service.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -126,7 +126,7 @@
             </intent-filter>
         </receiver>
         
-        <service android:name=".GcmIntentService" />
+        <service android:name="com.olyware.mathlock.service.GcmIntentService" />
         
         <meta-data
             android:name="com.google.android.backup.api_key"

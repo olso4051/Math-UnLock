@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.analytics.tracking.android.CampaignTrackingReceiver;
+import com.olyware.mathlock.R;
+import com.olyware.mathlock.R.string;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.MoneyHelper;
 

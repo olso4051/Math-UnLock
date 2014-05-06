@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.service;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +14,11 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.olyware.mathlock.LoginActivity;
+import com.olyware.mathlock.MainActivity;
+import com.olyware.mathlock.R;
+import com.olyware.mathlock.R.drawable;
+import com.olyware.mathlock.R.string;
 
 public class GcmIntentService extends IntentService {
 	public static final int NOTIFICATION_ID = 1;

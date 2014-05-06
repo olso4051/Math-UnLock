@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.service;
 
 import android.app.Activity;
 import android.content.ComponentName;
