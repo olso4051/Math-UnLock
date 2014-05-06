@@ -168,9 +168,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		login.setEnabled(true);
 	}
 
-	public void GCMConfirmDone(int result) {
+	/*public void GCMConfirmDone(int result) {
 		startMainActivity();
-	}
+	}*/
 
 	private void setAlpha() {
 		ObjectAnimator animationProgressFadeOut = ObjectAnimator.ofFloat(progress, "alpha", 0);

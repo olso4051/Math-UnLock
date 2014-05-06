@@ -7,6 +7,7 @@ import java.util.Random;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,26 +17,29 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v8.renderscript.Allocation;
+import android.support.v8.renderscript.Element;
+import android.support.v8.renderscript.RenderScript;
+import android.support.v8.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -270,23 +274,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		};
 
 		layout = (LinearLayout) findViewById(R.id.layout);
-		if (sharedPrefs.getInt("layout_width", 0) == 0 || sharedPrefs.getInt("layout_height", 0) == 0) {
-			ViewTreeObserver vtoLayout = layout.getViewTreeObserver();
-			vtoLayout.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-				@Override
-				public void onGlobalLayout() {
-					SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-					sharedPrefs.edit().putInt("layout_width", layout.getWidth()).putInt("layout_height", layout.getHeight()).commit();
-					ViewTreeObserver obs = layout.getViewTreeObserver();
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-						obs.removeOnGlobalLayoutListener(this);
-					} else {
-						obs.removeGlobalOnLayoutListener(this);
-					}
-				}
-
-			});
-		}
 		typefaces = Typefaces.getInstance(this);
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
@@ -317,14 +304,17 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			}
 		});
 		Display display = getWindowManager().getDefaultDisplay();
-		int sizeY;
-		if (android.os.Build.VERSION.SDK_INT < 13)
+		int sizeY, sizeX;
+		if (android.os.Build.VERSION.SDK_INT < 13) {
 			sizeY = display.getHeight();
-		else {
+			sizeX = display.getWidth();
+		} else {
 			Point size = new Point();
 			display.getSize(size);
 			sizeY = size.y;
+			sizeX = size.x;
 		}
+		sharedPrefs.edit().putInt("layout_width", sizeX).putInt("layout_height", sizeY).commit();
 		answerView.setParentHeight(sizeY);
 
 		joystick = (JoystickView) findViewById(R.id.joystick);
@@ -693,9 +683,53 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		answerView.setUnlockType(type);
 	}
 
+	@SuppressLint("NewApi")
 	private void showWallpaper() {
-		// dims the wallpaper so app has more contrast
-		layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
+		int w = sharedPrefs.getInt("layout_width", 0);
+		int h = sharedPrefs.getInt("layout_height", 0);
+		if (w > 0 && h > 0) {
+			// get wallpaper as a bitmap
+			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
+
+			// set scaling factors
+			int left = bitmap.getWidth() / 2 - w / 2;
+			int top = bitmap.getHeight() / 2 - h / 2;
+
+			// scale the bitmap to fit on the background
+			bitmap = Bitmap.createBitmap(bitmap, left, top, w, h);
+
+			// blur bitmap
+			Log.d("GAtest", "blurring background");
+			final RenderScript rs = RenderScript.create(this);
+			final Allocation input = Allocation.createFromBitmap(rs, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+			final Allocation output = Allocation.createTyped(rs, input.getType());
+			final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+			script.setRadius(10f);
+			script.setInput(input);
+			script.forEach(output);
+			output.copyTo(bitmap);
+
+			// dim the gitmap
+			final RenderScript rs2 = RenderScript.create(this);
+			final ScriptC_dim scriptDim = new ScriptC_dim(rs2);
+			scriptDim.set_dimmingValue(0.75f);
+			final Allocation alloc1 = Allocation.createFromBitmap(rs2, bitmap, Allocation.MipmapControl.MIPMAP_NONE,
+					Allocation.USAGE_SCRIPT);
+			final Allocation alloc2 = Allocation.createTyped(rs2, alloc1.getType());
+			scriptDim.forEach_dim(alloc1, alloc2);
+			alloc2.copyTo(bitmap);
+
+			// convert bitmap to BitmapDrawable so we can set it as the background
+			BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), bitmap);
+			// Bdrawable.setAlpha(100);
+			if (android.os.Build.VERSION.SDK_INT < 16)
+				layout.setBackgroundDrawable(Bdrawable);
+			else
+				layout.setBackground(Bdrawable);
+		} else {
+			// dims the wallpaper so app has more contrast
+			layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
+		}
 	}
 
 	private void setImage() {
