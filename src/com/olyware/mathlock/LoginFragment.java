@@ -35,16 +35,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	private Button facebook, login, skip;
 	private LinearLayout inputs, progress;
 
-	private void saveUserID(String userID) {
-		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		sharedPrefsUserInfo.edit().putString(mPrefUserUserID, userID).commit();
-	}
-
 	/**
 	 * Saves user info and switches to the main activity
 	 */
 	void logIn() {
-
 		facebook.setEnabled(false);
 		login.setEnabled(false);
 		skip.setEnabled(false);
@@ -161,8 +155,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	public void registrationResult(int result) {
 		if (result == 0) {
 			// success
-			// startMainActivity();
-			// Wait for GCM to get user_id, post confirm to API then startMainActivity()
+			startMainActivity();
 		} else if (result == 1) {
 			// network error
 			Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();

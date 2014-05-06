@@ -39,9 +39,15 @@
     <string name="notification_title_total_facebook1">I\'ve answered over</string>
     <string name="notification_title_total_facebook2">questions</string>
     <string name="notification_message_streak">Share Hiq and challenge your friends.</string>
-    <string name="notification_message_streak_facebook">Can you get more and Unlock YOUR IQ?</string>
+    <string name="notification_message_streak_facebook">Can you get more and Unlock Your IQ?</string>
     <string name="notification_message_total_facebook">You could be Unlocking Your IQ too</string>
     <string name="notification_delete_action">NOTIFICATION_DELETED</string>
+    <string name="notification_title_referral">Referral Activity!</string>
+    <string name="notification_title_referral_facebook1">I\'ve received</string>
+    <string name="notification_title_referral_facebook2">coins from my friends using Hiq!</string>
+    <string name="notification_message_referral1">You\'ve received</string>
+    <string name="notification_message_referral2">coins from your referral network to date</string>
+    <string name="notification_message_referral_facebook">Join me and Unlock Your IQ!</string>
     
     <!-- Preferences(users) -->
     <string name="pref_user_info">user_info</string>
@@ -51,6 +57,13 @@
     <string name="pref_user_reg_uploaded">reg_uploaded</string>
     <string name="pref_user_referrer">referrer</string>
     <string name="pref_user_skipped">skipped</string>
+    <string name="pref_user_confirmed">confirmed</string>
+    
+    <!-- Preferences(money) -->
+    <string name="pref_money">Packages</string>
+    <string name="pref_money_pending_paid">pending_paid</string>
+    <string name="pref_money_pending">pending</string>
+    <string name="pref_money_total_referral">total_referral</string>
     
     <!-- Login Activity -->
     <string name="fragment_login_disclaimer">Login to get cool social features. Login with Facebook or create a new user account with Hiq. We won\'t share this information with anyone.</string>

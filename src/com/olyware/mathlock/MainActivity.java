@@ -484,7 +484,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			editorPrefsMoney.putBoolean("first", false);
 			editorPrefsMoney.commit();
 		} else {
-			Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
+			int pendingCoins = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending_paid), 0);
+			Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0) + pendingCoins);
+			editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0).commit();
 		}
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));

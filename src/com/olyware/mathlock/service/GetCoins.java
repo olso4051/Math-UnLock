@@ -12,28 +12,33 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Base64;
 
 import com.olyware.mathlock.R;
 
-public class ConfirmID extends AsyncTask<String, Integer, Integer> {
+public class GetCoins extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
-	private boolean success, error;
+	private String coins, error;
 
 	public interface ConfirmIdResponse {
 		void confirmIDResult(int result);
 	}
 
-	public ConfirmID(Context ctx) {
+	public GetCoins(Context ctx) {
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
-	public boolean getSuccess() {
-		return success;
+	public int getCoins() {
+		if (coins != null)
+			return Integer.parseInt(coins);
+		else
+			return 0;
 	}
 
-	public boolean getError() {
-		return error;
+	public String getError() {
+		if (error != null)
+			return error;
+		else
+			return "";
 	}
 
 	@Override
@@ -41,7 +46,7 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 		// PUT to API with user_id
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		HttpPut httpput = new HttpPut(baseURL + "confirm");
+		HttpPut httpput = new HttpPut(baseURL + "coin");
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
@@ -50,10 +55,13 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 			if (s[0].length() > 0) {
 				data.put("user_id", s[0]);
 			}
-			String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
+			if (s[1].length() > 0) {
+				data.put("pickup_hash", s[1]);
+			}
+			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
 			httpput.setHeader("Content-Type", "application/json");
-			httpput.setHeader("Authorization", authorizationString);
+			// httpput.setHeader("Authorization", authorizationString);
 			HttpResponse response = httpclient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
@@ -63,9 +71,9 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			success = getBooleanFromJSON(jsonResponse, "success");
-			error = getBooleanFromJSON(jsonResponse, "error");
-			if (success)
+			coins = getStringFromJSON(jsonResponse, "success");
+			error = getStringFromJSON(jsonResponse, "error");
+			if (!coins.equals(""))
 				return 0;
 			else
 				return 1;
@@ -80,11 +88,11 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 		// result == 0 success
 	}
 
-	private boolean getBooleanFromJSON(JSONObject json, String key) {
+	private String getStringFromJSON(JSONObject json, String key) {
 		try {
-			return json.getBoolean(key);
+			return json.getString(key);
 		} catch (JSONException e) {
-			return false;
+			return "";
 		}
 	}
 }
