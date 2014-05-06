@@ -1,4 +1,4 @@
-package com.olyware.mathlock;
+package com.olyware.mathlock.service;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -10,69 +10,51 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
 
-public class RegisterID extends AsyncTask<String, Integer, Integer> {
+import com.olyware.mathlock.R;
+
+public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
-	private String userID;
-	RegisterIdResponse mCallback;
+	private boolean success, error;
+	ConfirmIdResponse mCallback;
 
-	public interface RegisterIdResponse {
-		void registrationResult(int result, String userID);
+	public interface ConfirmIdResponse {
+		void confirmIDResult(int result);
 	}
 
-	public RegisterID(Activity act) {
-		baseURL = act.getString(R.string.service_base_url);
+	public ConfirmID(Context ctx) {
+		baseURL = ctx.getString(R.string.service_base_url);
 		try {
-			mCallback = (RegisterIdResponse) act;
+			mCallback = (ConfirmIdResponse) ctx;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(act.toString() + " must implement RegisterIdResponse");
+			throw new ClassCastException(ctx.toString() + " must implement ConfirmIdResponse");
 		}
 	}
 
-	public RegisterID(LoginFragment loginFrag, Activity act) {
-		baseURL = act.getString(R.string.service_base_url);
-		try {
-			mCallback = (RegisterIdResponse) loginFrag;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(loginFrag.toString() + " must implement RegisterIdResponse");
-		}
+	public boolean getSuccess() {
+		return success;
 	}
 
-	public String getUserID() {
-		if (userID != null)
-			return userID;
-		else
-			return "";
+	public boolean getError() {
+		return error;
 	}
 
 	@Override
 	protected Integer doInBackground(String... s) {
-		// POST to API with old and new registration, also referral's registration
+		// PUT to API with user_id
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		HttpPut httpput = new HttpPut(baseURL + "register");
+		HttpPut httpput = new HttpPut(baseURL + "confirm");
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
 		try {
 			JSONObject data = new JSONObject();
 			if (s[0].length() > 0) {
-				data.put("username", s[0]);
-			}
-			if (s[1].length() > 0) {
-				data.put("registration_id", s[1]);
-			}
-			if (s[2].length() > 0) {
-				data.put("user_id", s[2]);
-				data.put("status", "update");
-			} else {
-				data.put("status", "new");
-			}
-			if (s[3].length() > 0) {
-				data.put("referral", s[3]);
+				data.put("user_id", s[0]);
 			}
 			String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
@@ -87,13 +69,12 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			try {
-				userID = jsonResponse.getString("user_id");
-			} catch (JSONException e) {
-				e.printStackTrace();
+			success = getBooleanFromJSON(jsonResponse, "success");
+			error = getBooleanFromJSON(jsonResponse, "error");
+			if (success)
+				return 0;
+			else
 				return 1;
-			}
-			return 0;
 		} else {
 			return 1;
 		}
@@ -101,6 +82,14 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 
 	@Override
 	protected void onPostExecute(Integer result) {
-		mCallback.registrationResult(result, userID);
+		mCallback.confirmIDResult(result);
+	}
+
+	private boolean getBooleanFromJSON(JSONObject json, String key) {
+		try {
+			return json.getBoolean(key);
+		} catch (JSONException e) {
+			return false;
+		}
 	}
 }

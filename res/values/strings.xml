@@ -61,8 +61,13 @@
     <string name="fragment_login_button_skip_text">Skip</string>
     <string name="fragment_login_logging_in">Logging In&#8230;</string>
     <string name="logout_receiver_filter">com.olyware.mathlock.ACTION_LOGOUT</string>
+    <string name="user_id_receiver_filter">com.olyware.mathlock.RECEIVE_USERID</string>
     <string name="settings_logout">Logout</string>
     <string name="settings_login">Login</string>
+    
+    <!-- Friend Activity -->
+    <string name="challenge">Challenge!</string>
+    <string name="send">Send</string>
     
     <string name="add">Add</string>
     <string name="add_new">New Question</string>

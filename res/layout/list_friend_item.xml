@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+    
+    <ImageView
+        android:id="@+id/image"
+        android:layout_margin="@dimen/login_vertical_margin_half"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_friend" />
+
+    <TextView 
+        android:id="@+id/text"
+        android:layout_margin="@dimen/login_vertical_margin_half"
+        android:layout_width="0dp"
+        android:layout_weight="8"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Kyle Olson"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_extra_large" />
+    
+    <CheckBox
+        android:id="@+id/challenge"
+        android:layout_marginRight="@dimen/login_vertical_margin_half"
+        android:layout_height="fill_parent"
+        android:layout_width="wrap_content"
+        android:checked="false"
+        android:button="@drawable/btn_check"/>
+    
+</LinearLayout>

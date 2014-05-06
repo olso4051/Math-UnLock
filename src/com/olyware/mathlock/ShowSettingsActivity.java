@@ -136,7 +136,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 
 		// set logout button title depending on logged in setting
 		Preference logoutButton = (PreferenceScreen) findPreference("logout_button");
-		if (sharedPrefsUsers.getBoolean(mPrefUserSkipped, false))
+		if (!sharedPrefsUsers.getBoolean(mPrefUserSkipped, false))
 			logoutButton.setTitle(getString(R.string.settings_logout));
 		else
 			logoutButton.setTitle(getString(R.string.settings_login));

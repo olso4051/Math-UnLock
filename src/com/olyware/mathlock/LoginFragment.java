@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.olyware.mathlock.service.RegisterID;
+import com.olyware.mathlock.utils.GCMHelper;
 
 public class LoginFragment extends Fragment implements View.OnClickListener, RegisterID.RegisterIdResponse {
 
@@ -48,7 +50,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		skip.setEnabled(false);
 
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		String regID = sharedPrefsUserInfo.getString(mPrefUserUsername, "");
+		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
 		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
 		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
 		String uName = username.getText().toString();
@@ -90,7 +92,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 		// check if user is logged in
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		if (!sharedPrefsUserInfo.getBoolean(mPrefUserLoggedIn, false)) {
+		if (sharedPrefsUserInfo.getBoolean(mPrefUserLoggedIn, false)) {
 			startMainActivity();
 		}
 
@@ -114,6 +116,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 		if (savedInstanceState == null) {
 			SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+			if (!GCMHelper.getRegistrationId(getActivity().getApplicationContext()).equals("")) {
+				facebook.setEnabled(true);
+				login.setEnabled(true);
+			}
 			username.setText(sharedPrefsUserInfo.getString(mPrefUserUsername, ""));
 		}
 
@@ -152,29 +158,25 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		}.execute(username, regID, userID, referral);
 	}
 
-	public void registrationResult(int result, String userID) {
+	public void registrationResult(int result) {
 		if (result == 0) {
 			// success
-			saveUserID(userID);
-			startMainActivity();
+			// startMainActivity();
+			// Wait for GCM to get user_id, post confirm to API then startMainActivity()
 		} else if (result == 1) {
 			// network error
 			Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
 			endAnimationProgress();
-		} else if (result == 2) {
-			// service error
-			Toast.makeText(getActivity(), "service error", Toast.LENGTH_LONG).show();
-			endAnimationProgress();
-		} else if (result == 3) {
-			// developer didn't login
-			endAnimationProgress();
-			// startMainActivity();
 		}
 	}
 
-	public void GCMRegistrationDone() {
+	public void GCMRegistrationDone(boolean result) {
 		facebook.setEnabled(true);
 		login.setEnabled(true);
+	}
+
+	public void GCMConfirmDone(int result) {
+		startMainActivity();
 	}
 
 	private void setAlpha() {

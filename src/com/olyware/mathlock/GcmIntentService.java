@@ -1,14 +1,17 @@
 package com.olyware.mathlock;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -23,7 +26,8 @@ public class GcmIntentService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		Bundle extras = intent.getExtras();
-		String userID = intent.getStringExtra("user_id");
+		String userID = stringFromMessage(extras.getString("message"), "user_id");
+
 		GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 		// The getMessageType() intent parameter must be the intent you received
 		// in your BroadcastReceiver.
@@ -42,18 +46,16 @@ public class GcmIntentService extends IntentService {
 				sendNotification("Deleted messages on server: " + extras.toString());
 				// If it's a regular GCM message, do some work.
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-				// This loop represents the service doing some work.
-				for (int i = 0; i < 5; i++) {
-					Toast.makeText(this, "Working... " + (i + 1) + "/5 @ " + SystemClock.elapsedRealtime(), Toast.LENGTH_LONG).show();
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-					}
+				if (!userID.equals("")) {
+					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+					sharedPrefsUserInfo.edit().putString(getString(R.string.pref_user_userid), userID).commit();
+					Intent iUserID = new Intent(LoginActivity.RECEIVE_USERID);
+					iUserID.putExtra("user_id", userID);
+					LocalBroadcastManager.getInstance(this).sendBroadcast(iUserID);
+				} else {
+					// Post notification of received message.
+					sendNotification("Received: " + extras.toString());
 				}
-				Toast.makeText(this, "Completed work @ " + SystemClock.elapsedRealtime(), Toast.LENGTH_LONG).show();
-				// Post notification of received message.
-				sendNotification("Received: " + extras.toString());
-				Toast.makeText(this, "Received: " + extras.toString(), Toast.LENGTH_LONG).show();
 			}
 		}
 		// Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -61,8 +63,6 @@ public class GcmIntentService extends IntentService {
 	}
 
 	// Put the message into a notification and post it.
-	// This is just one simple example of what you might choose to do with
-	// a GCM message.
 	private void sendNotification(String msg) {
 		mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -76,5 +76,14 @@ public class GcmIntentService extends IntentService {
 
 		mBuilder.setContentIntent(contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+	}
+
+	private String stringFromMessage(String msg, String key) {
+		try {
+			JSONObject json = new JSONObject(msg);
+			return json.getString(key);
+		} catch (JSONException e) {
+			return "";
+		}
 	}
 }

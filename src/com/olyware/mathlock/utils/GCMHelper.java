@@ -17,25 +17,33 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
-import com.olyware.mathlock.RegisterID;
+import com.olyware.mathlock.service.RegisterID;
 
 public class GCMHelper {
 
 	final private static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private static String regID;
+	static GCMResponse mCallback;
+
+	public interface GCMResponse {
+		void GCMResult(boolean result);
+	}
 
 	public static boolean registerAndStoreGCM(final Activity act, final Context app) {
 		if (checkPlayServices(act)) {
 			regID = getRegistrationId(app);
 			SharedPreferences prefsGA = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+			SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+			String username = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_username), "");
+			String userID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_userid), "");
+			String referral = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_referrer), "");
 			if (regID.equals("")) {
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
-				registerInBackground(act, app);
+				registerInBackground(act, app, true);
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
-				String referral = prefsGA.getString("utm_content", "");
 				storeRegistrationId(act, app, regID);
-				sendRegistrationIdToBackend(act, regID, referral);
+				sendRegistrationIdToBackend(act, username, regID, userID, referral);
 			}
 		} else {
 			Toast.makeText(act, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
@@ -43,13 +51,34 @@ public class GCMHelper {
 		return true;
 	}
 
-	public static boolean checkPlayServices(Activity ctx) {
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(ctx);
+	public static void registerGCM(final Activity act, final Context app) {
+		try {
+			mCallback = (GCMResponse) act;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(act.toString() + " must implement GCMResponse");
+		}
+		if (checkPlayServices(act)) {
+			regID = getRegistrationId(app);
+			Log.d("GAtest", "regID = " + regID);
+			if (regID.equals("")) {
+				Log.d("GAtest", "registerInBackground");
+				registerInBackground(act, app, false);
+			} else {
+				mCallback.GCMResult(true);
+			}
+		} else {
+			Toast.makeText(act, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
+			mCallback.GCMResult(true);
+		}
+	}
+
+	public static boolean checkPlayServices(Activity act) {
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(act);
 		if (resultCode != ConnectionResult.SUCCESS) {
 			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-				GooglePlayServicesUtil.getErrorDialog(resultCode, ctx, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+				GooglePlayServicesUtil.getErrorDialog(resultCode, act, PLAY_SERVICES_RESOLUTION_REQUEST).show();
 			} else {
-				ctx.finish();
+				act.finish();
 			}
 			return false;
 		}
@@ -90,40 +119,54 @@ public class GCMHelper {
 		}
 	}
 
-	private static void registerInBackground(final Activity act, final Context app) {
-		final String referral = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("utm_content", "");
-		new AsyncTask<Void, Integer, String>() {
+	private static void registerInBackground(final Activity act, final Context app, final boolean sendToBackend) {
+		final String username = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
+				act.getString(R.string.pref_user_username), "");
+		final String userID = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
+				act.getString(R.string.pref_user_userid), "");
+		final String referral = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
+				act.getString(R.string.pref_user_referrer), "");
+
+		new AsyncTask<Void, Integer, Boolean>() {
 			@Override
-			protected String doInBackground(Void... params) {
-				String msg = "";
+			protected Boolean doInBackground(Void... params) {
 				try {
 					GoogleCloudMessaging gcm = MyApplication.getGcmInstance();
 					regID = gcm.register(act.getString(R.string.gcm_api_id));
-					msg = "Device registered, registration ID=" + regID;
+					// msg = "Device registered, registration ID=" + regID;
 
 					// send the registration ID to the server
-					sendRegistrationIdToBackend(act, regID, referral);
+					if (sendToBackend) {
+						Log.d("GAtest", "sendRegistrationIdToBackend");
+						sendRegistrationIdToBackend(act, username, regID, userID, referral);
+					}
+					// else
+					// mCallback.GCMResult(true);
 
 					// Persist the regID - no need to register again.
 					storeRegistrationId(act, app, regID);
 				} catch (IOException ex) {
-					msg = "Error :" + ex.getMessage();
+					// msg = "Error :" + ex.getMessage();
+					// mCallback.GCMResult(false);
+					return false;
 					// If there is an error, don't just keep trying to register. Require the user to click a button again, or perform
 					// exponential back-off.
 				}
-				return msg;
+				return true;
 			}
 
 			@Override
-			protected void onPostExecute(String msg) {
+			protected void onPostExecute(Boolean GCMresult) {
 				// Toast.makeText(act, msg, Toast.LENGTH_LONG).show();
-				Log.d("GAtest", msg);
+				// Log.d("GAtest", msg);
+				if (!sendToBackend)
+					mCallback.GCMResult(GCMresult);
 			}
 		}.execute(null, null, null);
 	}
 
-	private static void sendRegistrationIdToBackend(Activity act, String regId, String referral) {
-		new RegisterID(act).execute("", "", "", regId, "", referral);
+	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral) {
+		new RegisterID(act).execute(username, regId, userID, referral);
 	}
 
 	private static void storeRegistrationId(Context act, Context context, String regId) {

@@ -49,6 +49,7 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
@@ -77,11 +78,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	final private String[] answersNone = { "", "", "", "" };
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen";
-	// final private static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
-	// private String API_ID, regID;
-	// private Context appCtx;
-	// GoogleCloudMessaging gcm;
 
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
@@ -1086,10 +1082,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			});
 			break;
 		case 5:		// info was selected
-			sendEvent("ui_action", "settings_selected", "info", null);
+			// sendEvent("ui_action", "settings_selected", "info", null);
 			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[2], EggMaxValues[2]));
-			displayInfo(false);
+			// displayInfo(false);
+			startActivity(new Intent(this, FriendActivity.class));
 			break;
 		case 6:		// Store was selected
 			playSound(PLAY_BEEP);
@@ -1153,6 +1150,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			sendEvent("apps", "delete_app", apps.get(Extra).name, null);
 			playSound(PLAY_BEEP);
 			removeAppFromAll(Extra);
+			break;
+		case 15:	// friend was selected
+			playSound(PLAY_BEEP);
+			unlocking = false;
+			startActivity(new Intent(this, FriendActivity.class));
 			break;
 		}
 	}
@@ -1463,9 +1465,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
-	public void registrationResult(int result, String userID) {
+	public void registrationResult(int result) {
 		Log.d("GAtest", "upload result = " + result);
-		Log.d("GAtest", "userID = " + userID);
+		/*Log.d("GAtest", "userID = " + userID);
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		SharedPreferences.Editor editPrefsUserInfo = sharedPrefsUserInfo.edit();
 		if ((result == 0) && (userID != null)) {
@@ -1474,6 +1476,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		} else if (result == 1) {
 			editPrefsUserInfo.putBoolean(getString(R.string.pref_user_reg_uploaded), false);
 		}
-		editPrefsUserInfo.commit();
+		editPrefsUserInfo.commit();*/
 	}
 }

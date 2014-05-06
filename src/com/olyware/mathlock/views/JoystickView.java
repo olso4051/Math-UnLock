@@ -36,13 +36,13 @@ public class JoystickView extends View {
 	private final long tapLength = 250;
 	private final float degreeStepInitial = 1;
 
-	private Bitmap bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpUnlock, bmpHand, bmpArrow;
+	private Bitmap bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpI, bmpF, bmpUnlock, bmpHand, bmpArrow;
 	private Bitmap[] bmpBack = new Bitmap[3];
 	private RectF[] RectForAnswers = new RectF[NumAnswers + 1];
 	private Rect[] bounds = new Rect[NumAnswers];
 	private RectF dstRectForSet, dstRectForOpt, RectForUnlock, RectForUnlockPulse;
-	private Rect dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI, srcRectForBack, srcRectForUnlock, srcRectForBig,
-			srcRectForSmall;
+	private Rect dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI, dstRectForF, srcRectForBack, srcRectForUnlock,
+			srcRectForBig, srcRectForSmall;
 	private Matrix rotateHand, rotateArrow;
 
 	private TextPaint[] circleTextPaint = new TextPaint[NumAnswers], answerTextPaint = new TextPaint[NumAnswers];
@@ -244,7 +244,8 @@ public class JoystickView extends View {
 		bmpQs = BitmapFactory.decodeResource(res, R.drawable.select_q2s);
 		bmpP = BitmapFactory.decodeResource(res, R.drawable.select_p2);
 		bmpStore = BitmapFactory.decodeResource(res, R.drawable.select_store2);
-		bmpI = BitmapFactory.decodeResource(res, R.drawable.select_i2);
+		bmpI = BitmapFactory.decodeResource(res, R.drawable.select_friend);
+		bmpF = BitmapFactory.decodeResource(res, R.drawable.select_friend);
 		bmpUnlock = BitmapFactory.decodeResource(res, R.drawable.unlock);
 		bmpHand = BitmapFactory.decodeResource(res, R.drawable.swipe_hand);
 		bmpArrow = BitmapFactory.decodeResource(res, R.drawable.swipe_arrow);
@@ -289,6 +290,7 @@ public class JoystickView extends View {
 		dstRectForP = new Rect();
 		dstRectForE = new Rect();
 		dstRectForI = new Rect();
+		dstRectForF = new Rect();
 		RectForUnlockPulse = new RectF();
 		RectForUnlock = new RectF();
 
@@ -649,13 +651,15 @@ public class JoystickView extends View {
 
 		optionY = Height - rBig;
 
-		spacing = (Width - rBig * 6 - rSmall * 4) / 6;
+		// spacing = (Width - rBig * 6 - rSmall * 4) / 6;
+		spacing = (Width - rBig * 8 - rSmall * 2) / 6;
 		for (int i = 0; i < selectLeft.length; i++) {
 			selectLeft[i] = Width / 2 + rBig * (Math.max(3 - i * 2, -3)) + spacing * (2 - i);
 			selectRight[i] = Width / 2 + rBig * (Math.min(5 - i * 2, 3)) + spacing * (2 - i);
 		}
 		selectLeft[4] = selectLeft[4] - rSmall * 2;
-		selectRight[0] = selectRight[0] + rSmall * 2;
+		// selectRight[0] = selectRight[0] + rSmall * 2;
+		selectRight[0] = selectRight[0] + rBig * 2;
 
 		dstHeight = rBig * 2 + textSizePix;
 
@@ -828,7 +832,8 @@ public class JoystickView extends View {
 			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, settingsPaint);
 		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, settingsPaint);
 		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, settingsPaint);
-		canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, settingsPaint);
+		// canvas.drawBitmap(bmpI, srcRectForSmall, dstRectForI, settingsPaint);
+		canvas.drawBitmap(bmpI, srcRectForBig, dstRectForI, settingsPaint);
 
 		// Draw hints
 		if (showHint) {
@@ -1189,7 +1194,8 @@ public class JoystickView extends View {
 			diffy = touchY - startY;
 			if (selectOptions[0]) {
 				s = 5;
-				dstRectForI.set((int) touchX - rSmall, (int) touchY - rSmall, (int) touchX + rSmall, (int) touchY + rSmall);
+				// dstRectForI.set((int) touchX - rSmall, (int) touchY - rSmall, (int) touchX + rSmall, (int) touchY + rSmall);
+				dstRectForI.set((int) touchX - rBig, (int) touchY - rBig, (int) touchX + rBig, (int) touchY + rBig);
 			} else if (selectOptions[1]) {
 				s = 6;
 				dstRectForE.set((int) touchX - rBig, (int) touchY - rBig, (int) touchX + rBig, (int) touchY + rBig);
@@ -1516,7 +1522,8 @@ public class JoystickView extends View {
 		dstRectForQ.set(selectLeft[3], temp - rBig * 2, selectRight[3], temp);
 		dstRectForP.set(selectLeft[2], temp - rBig * 2, selectRight[2], temp);
 		dstRectForE.set(selectLeft[1], temp - rBig * 2, selectRight[1], temp);
-		dstRectForI.set(selectLeft[0], temp - rBig - rSmall, selectRight[0], temp - rBig + rSmall);
+		// dstRectForI.set(selectLeft[0], temp - rBig - rSmall, selectRight[0], temp - rBig + rSmall);
+		dstRectForI.set(selectLeft[0], temp - rBig * 2, selectRight[0], temp);
 		if (!selectUnlock) {
 			int currentRadius = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
 			if (currentRadius <= 0)
