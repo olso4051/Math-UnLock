@@ -56,21 +56,14 @@ public class ShareHelper {
 	}
 
 	public static String buildShareURL(Context context) {
-		String userID = context.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE).getString("user_id", "");
+		String userID = context.getSharedPreferences(context.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
+				context.getString(R.string.pref_user_userid), "");
 		String baseLink = context.getString(R.string.share_link_url);
 		if (userID.equals("")) {
 			return baseLink;
 		} else {
-			// encryptedContentForURL = new EncryptionHelper().encryptForURL(regID);
 			String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
-			// String decryptedContentForURL = new EncryptionHelper().decryptForURL(encryptedContentForURL);
 			return baseLink + context.getString(R.string.share_content_url) + encryptedContentForURL;
-			/* Log.d("GAtest", "regID = " + regID);
-			Log.d("GAtest", "userID = " + userID);
-			Log.d("GAtest", "encryptedID = " + encryptedContentForURL);
-			Log.d("GAtest", "decryptedID = " + decryptedContentForURL);
-			Log.d("GAtest", "(decryptedID == regID) = " + regID.equals(decryptedContentForURL));
-			Log.d("GAtest", "(decryptedID == userID) = " + userID.equals(decryptedContentForURL));*/
 		}
 	}
 

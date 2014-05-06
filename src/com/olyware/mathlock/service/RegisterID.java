@@ -66,6 +66,7 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		String endpoint = "register";
 		if (s[2].length() > 0) {
 			endpoint = endpoint + "/update";
+			s[3] = "";
 		}
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
 		HttpEntity entity;

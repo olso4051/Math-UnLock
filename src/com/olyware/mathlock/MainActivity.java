@@ -23,6 +23,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -33,6 +34,8 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -103,7 +106,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private long ID = 0;
 
 	private int EnabledPackages = 0;
-	private boolean locked, unlocking, UnlockedPackages = false;
+	private boolean info, locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false;
 	final private long MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
 
@@ -190,7 +193,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		Log.d("GAtest", "onCreate");
 		ctx = this;
-		locked = this.getIntent().getBooleanExtra("locked", false);
+		info = getIntent().getBooleanExtra("info", false);
+		Log.d("GAtest", "info = " + info);
+		locked = getIntent().getBooleanExtra("locked", false);
 		unlocking = locked;
 
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -264,6 +269,23 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		};
 
 		layout = (LinearLayout) findViewById(R.id.layout);
+		if (sharedPrefs.getInt("layout_width", 0) == 0 || sharedPrefs.getInt("layout_height", 0) == 0) {
+			ViewTreeObserver vtoLayout = layout.getViewTreeObserver();
+			vtoLayout.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout() {
+					SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+					sharedPrefs.edit().putInt("layout_width", layout.getWidth()).putInt("layout_height", layout.getHeight()).commit();
+					ViewTreeObserver obs = layout.getViewTreeObserver();
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+						obs.removeOnGlobalLayoutListener(this);
+					} else {
+						obs.removeGlobalOnLayoutListener(this);
+					}
+				}
+
+			});
+		}
 		typefaces = Typefaces.getInstance(this);
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
@@ -504,6 +526,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		if (!UnlockedPackages)
 			displayInfo(true);
+		else if (info)
+			displayInfo(false);
 		else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 				&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
 			displayRateShare();
@@ -565,6 +589,8 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
+		info = intent.getBooleanExtra("info", false);
+		Log.d("GAtest", "info = " + info);
 		locked = intent.getBooleanExtra("locked", false);
 		unlocking = locked;
 	}
@@ -1307,10 +1333,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				builder.setNegativeButton(R.string.share_with_facebook, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
-						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
-						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
-						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
-						// ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
 						ShareHelper.shareFacebook(ctx);
 						fromShare = true;
 					}
@@ -1320,8 +1342,10 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			AlertDialog alert = builder.create();
 			dialogOn = true;
 			alert.show();
-			if (!first)
-				alert.getWindow().setLayout(layout.getWidth(), layout.getHeight() * 2 / 3);
+			int w = sharedPrefs.getInt("layout_width", 0);
+			int h = sharedPrefs.getInt("layout_height", 0);
+			if (!first && w > 0 && h > 0)
+				alert.getWindow().setLayout(w, h * 2 / 3);
 		}
 	}
 

@@ -5,6 +5,9 @@
     <PreferenceScreen
         android:key="logout_button"
         android:title="@string/settings_logout" />
+    <PreferenceScreen
+        android:key="info_button"
+        android:title="@string/settings_info" />
     <PreferenceCategory
         android:title="@string/settings"
         android:key="settings">
