@@ -188,6 +188,44 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		}
 	}
 
+	private class BlurBackground extends AsyncTask<Bitmap, Void, Bitmap> {
+		private Context ctx;
+
+		BlurBackground(Context ctx) {
+			this.ctx = ctx;
+		}
+
+		@Override
+		protected Bitmap doInBackground(Bitmap... bmps) {
+			// blur bitmap
+			final RenderScript rs = RenderScript.create(ctx);
+			final Allocation input = Allocation
+					.createFromBitmap(rs, bmps[0], Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+			final Allocation output = Allocation.createTyped(rs, input.getType());
+			final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+			script.setRadius(25f);
+			script.setInput(input);
+			script.forEach(output);
+			output.copyTo(bmps[0]);
+
+			// dim the gitmap
+			final RenderScript rs2 = RenderScript.create(ctx);
+			final ScriptC_dim scriptDim = new ScriptC_dim(rs2);
+			scriptDim.set_dimmingValue(0.75f);
+			final Allocation alloc1 = Allocation.createFromBitmap(rs2, bmps[0], Allocation.MipmapControl.MIPMAP_NONE,
+					Allocation.USAGE_SCRIPT);
+			final Allocation alloc2 = Allocation.createTyped(rs2, alloc1.getType());
+			scriptDim.forEach_dim(alloc1, alloc2);
+			alloc2.copyTo(bmps[0]);
+			return bmps[0];
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap b) {
+
+		}
+	}
+
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -687,6 +725,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private void showWallpaper() {
 		int w = sharedPrefs.getInt("layout_width", 0);
 		int h = sharedPrefs.getInt("layout_height", 0);
+		int statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
 		if (w > 0 && h > 0) {
 			// get wallpaper as a bitmap
 			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
@@ -696,36 +735,26 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			int top = bitmap.getHeight() / 2 - h / 2;
 
 			// scale the bitmap to fit on the background
-			bitmap = Bitmap.createBitmap(bitmap, left, top, w, h);
+			bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
 
-			// blur bitmap
-			Log.d("GAtest", "blurring background");
-			final RenderScript rs = RenderScript.create(this);
-			final Allocation input = Allocation.createFromBitmap(rs, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
-			final Allocation output = Allocation.createTyped(rs, input.getType());
-			final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-			script.setRadius(10f);
-			script.setInput(input);
-			script.forEach(output);
-			output.copyTo(bitmap);
+			// Blur and Dim bitmap
+			Log.d("GAtest", "blurring background time start = " + System.currentTimeMillis());
+			new BlurBackground(this) {
+				@Override
+				protected void onPostExecute(Bitmap b) {
+					Log.d("GAtest", "blurred background time end = " + System.currentTimeMillis());
+					if (layout != null) {
+						// convert bitmap to BitmapDrawable so we can set it as the background
+						BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), b);
+						// Bdrawable.setAlpha(100);
 
-			// dim the gitmap
-			final RenderScript rs2 = RenderScript.create(this);
-			final ScriptC_dim scriptDim = new ScriptC_dim(rs2);
-			scriptDim.set_dimmingValue(0.75f);
-			final Allocation alloc1 = Allocation.createFromBitmap(rs2, bitmap, Allocation.MipmapControl.MIPMAP_NONE,
-					Allocation.USAGE_SCRIPT);
-			final Allocation alloc2 = Allocation.createTyped(rs2, alloc1.getType());
-			scriptDim.forEach_dim(alloc1, alloc2);
-			alloc2.copyTo(bitmap);
-
-			// convert bitmap to BitmapDrawable so we can set it as the background
-			BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), bitmap);
-			// Bdrawable.setAlpha(100);
-			if (android.os.Build.VERSION.SDK_INT < 16)
-				layout.setBackgroundDrawable(Bdrawable);
-			else
-				layout.setBackground(Bdrawable);
+						if (android.os.Build.VERSION.SDK_INT < 16)
+							layout.setBackgroundDrawable(Bdrawable);
+						else
+							layout.setBackground(Bdrawable);
+					}
+				}
+			}.execute(bitmap);
 		} else {
 			// dims the wallpaper so app has more contrast
 			layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
