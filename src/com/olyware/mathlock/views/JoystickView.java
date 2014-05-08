@@ -80,7 +80,7 @@ public class JoystickView extends View {
 
 	private List<Drawable> d;
 	private List<App> apps;
-	private Drawable drawAdd, drawTrash, drawBackBlue, drawBackRed;
+	private Drawable test, drawAdd, drawTrash, drawBackBlue, drawBackRed;
 	private Resources res;
 	private Context ctx;
 
@@ -195,7 +195,10 @@ public class JoystickView extends View {
 		textSizeSP = 20;
 		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, res.getDisplayMetrics());
 		bmpSelectBar = BitmapFactory.decodeResource(res, R.drawable.select);
-		barHeight = bmpSelectBar.getHeight();
+		test = res.getDrawable(R.drawable.select);
+		test.setBounds(-test.getIntrinsicWidth() / 2, -test.getIntrinsicHeight() / 2, test.getIntrinsicWidth() / 2,
+				test.getIntrinsicHeight() / 2);
+		barHeight = test.getIntrinsicHeight();// bmpSelectBar.getHeight();
 		textHandler = new Handler();
 		answerHandler = new Handler();
 		animateHandler = new Handler();
@@ -250,8 +253,8 @@ public class JoystickView extends View {
 		bmpStore = BitmapFactory.decodeResource(res, R.drawable.select_store);
 		bmpFriend = BitmapFactory.decodeResource(res, R.drawable.select_friend);
 		bmpUnlock = BitmapFactory.decodeResource(res, R.drawable.unlock);
-		bmpHand = BitmapFactory.decodeResource(res, R.drawable.swipe_hand);
-		bmpArrow = BitmapFactory.decodeResource(res, R.drawable.swipe_arrow);
+		// bmpHand = BitmapFactory.decodeResource(res, R.drawable.swipe_hand);
+		// bmpArrow = BitmapFactory.decodeResource(res, R.drawable.swipe_arrow);
 		bmpBack[0] = BitmapFactory.decodeResource(res, R.drawable.gradient_background_blue);
 		bmpBack[1] = BitmapFactory.decodeResource(res, R.drawable.gradient_background_green);
 		bmpBack[2] = BitmapFactory.decodeResource(res, R.drawable.gradient_background_red);
@@ -429,6 +432,10 @@ public class JoystickView extends View {
 
 	public void showHint(int hint) {
 		showHint = true;
+		if (bmpHand == null)
+			bmpHand = BitmapFactory.decodeResource(res, R.drawable.swipe_hand);
+		if (bmpArrow == null)
+			bmpArrow = BitmapFactory.decodeResource(res, R.drawable.swipe_arrow);
 		boolean mirror = false;
 		int centerVert = 0, centerHorz = 0, handRotation = 0, arrowRotation = 0;
 		switch (hint) {
@@ -836,7 +843,13 @@ public class JoystickView extends View {
 		// canvas.drawRect(dstRectForSet, settingsPaint);
 		// canvas.drawRect(dstRectForSet, unlockPaint);
 		// canvas.drawText(res.getString(R.string.side_bar), Width / 2, TextHeight, textPaintBlack);
-		canvas.drawBitmap(bmpSelectBar, Width / 2 - bmpSelectBar.getWidth() / 2, barY - barHeight + pad, optPaint);
+
+		// canvas.drawBitmap(bmpSelectBar, Width / 2 - bmpSelectBar.getWidth() / 2, barY - barHeight + pad, optPaint);
+		canvas.save();
+		canvas.translate(Width / 2, barY - barHeight / 2 + pad);
+		test.draw(canvas);
+		canvas.restore();
+
 		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, optPaint);
 		if (quizMode)
 			canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, optPaint);

@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -127,6 +128,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats, sharedPrefsApps;
 	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
 
+	private BitmapDrawable wallpaper;
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
 	private boolean attached = false;
@@ -188,7 +190,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		}
 	}
 
-	private class BlurBackground extends AsyncTask<Bitmap, Void, Bitmap> {
+	private class BlurBackground extends AsyncTask<Bitmap, Void, BitmapDrawable> {
 		private Context ctx;
 
 		BlurBackground(Context ctx) {
@@ -196,7 +198,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		}
 
 		@Override
-		protected Bitmap doInBackground(Bitmap... bmps) {
+		protected BitmapDrawable doInBackground(Bitmap... bmps) {
 			// blur bitmap
 			final RenderScript rs = RenderScript.create(ctx);
 			final Allocation input = Allocation
@@ -217,12 +219,10 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			final Allocation alloc2 = Allocation.createTyped(rs2, alloc1.getType());
 			scriptDim.forEach_dim(alloc1, alloc2);
 			alloc2.copyTo(bmps[0]);
-			return bmps[0];
-		}
 
-		@Override
-		protected void onPostExecute(Bitmap b) {
-
+			// convert bitmap to BitmapDrawable so we can set it as the background
+			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
+			return bDrawable;
 		}
 	}
 
@@ -729,6 +729,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		if (w > 0 && h > 0) {
 			// get wallpaper as a bitmap
 			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
+			Bitmap bitmap2 = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
 
 			// set scaling factors
 			int left = bitmap.getWidth() / 2 - w / 2;
@@ -736,23 +737,47 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 			// scale the bitmap to fit on the background
 			bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
+			bitmap2 = Bitmap.createBitmap(bitmap2, left, top + statusBarHeight, w, h - statusBarHeight);
+			final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
 
 			// Blur and Dim bitmap
 			Log.d("GAtest", "blurring background time start = " + System.currentTimeMillis());
 			new BlurBackground(this) {
 				@Override
-				protected void onPostExecute(Bitmap b) {
+				protected void onPostExecute(BitmapDrawable test) {
 					Log.d("GAtest", "blurred background time end = " + System.currentTimeMillis());
+					Log.d("GAtest", "testing = " + wallpaper.equals(test));
+					TransitionDrawable background = new TransitionDrawable(new Drawable[] { wallpaper, test });
 					if (layout != null) {
-						// convert bitmap to BitmapDrawable so we can set it as the background
-						BitmapDrawable Bdrawable = new BitmapDrawable(getResources(), b);
-						// Bdrawable.setAlpha(100);
-
 						if (android.os.Build.VERSION.SDK_INT < 16)
-							layout.setBackgroundDrawable(Bdrawable);
+							layout.setBackgroundDrawable(background);
 						else
-							layout.setBackground(Bdrawable);
+							layout.setBackground(background);
+						background.startTransition(1000);
 					}
+					/*wallpaper = test;
+					int time = 1000, timeSteps = 100;
+					final int interval = 255 * timeSteps / time;
+					(new Thread() {
+						@Override
+						public void run() {
+							for (int i = 0; i < 255; i += interval) {
+								if (wallpaper != null && mHandler != null) {
+									wallpaper.setAlpha(i);
+									mHandler.postDelayed(new Runnable() {
+										public void run() {
+											if (layout != null && wallpaper != null) {
+												if (android.os.Build.VERSION.SDK_INT < 16)
+													layout.setBackgroundDrawable(wallpaper);
+												else
+													layout.setBackground(wallpaper);
+											}
+										}
+									}, 100);
+								}
+							}
+						}
+					}).start();*/
 				}
 			}.execute(bitmap);
 		} else {
