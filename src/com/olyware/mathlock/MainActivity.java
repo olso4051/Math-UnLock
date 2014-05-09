@@ -220,7 +220,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			scriptDim.forEach_dim(alloc1, alloc2);
 			alloc2.copyTo(bmps[0]);
 
-			// convert bitmap to BitmapDrawable so we can set it as the background
+			// convert bitmap to BitmapDrawable so we can set it as the background of a view
 			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
 			return bDrawable;
 		}
@@ -727,7 +727,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		int h = sharedPrefs.getInt("layout_height", 0);
 		int statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
 		if (w > 0 && h > 0) {
-			// get wallpaper as a bitmap
+			// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
 			Bitmap bitmap = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
 			Bitmap bitmap2 = ((BitmapDrawable) WallpaperManager.getInstance(this).getDrawable()).getBitmap();
 
@@ -755,29 +755,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 							layout.setBackground(background);
 						background.startTransition(1000);
 					}
-					/*wallpaper = test;
-					int time = 1000, timeSteps = 100;
-					final int interval = 255 * timeSteps / time;
-					(new Thread() {
-						@Override
-						public void run() {
-							for (int i = 0; i < 255; i += interval) {
-								if (wallpaper != null && mHandler != null) {
-									wallpaper.setAlpha(i);
-									mHandler.postDelayed(new Runnable() {
-										public void run() {
-											if (layout != null && wallpaper != null) {
-												if (android.os.Build.VERSION.SDK_INT < 16)
-													layout.setBackgroundDrawable(wallpaper);
-												else
-													layout.setBackground(wallpaper);
-											}
-										}
-									}, 100);
-								}
-							}
-						}
-					}).start();*/
 				}
 			}.execute(bitmap);
 		} else {

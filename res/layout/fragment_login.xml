@@ -24,13 +24,22 @@
 	        android:layout_height="wrap_content"
 	        android:orientation="vertical">
             
-	        <Button
+            <com.facebook.widget.LoginButton
+		        android:id="@+id/authButton"
+		        style="@style/SpanningView.Button"
+		        android:layout_gravity="center_horizontal" />
+		        <!-- android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        
+		        android:layout_marginTop="30dp" />-->
+            
+	        <!-- <Button
 	            android:id="@+id/fragment_login_button_login_facebook"
 	            style="@style/SpanningView.Button"
 	            android:layout_gravity="center_horizontal"
 	            android:enabled="false"
 	            android:gravity="center_vertical|center_horizontal"
-	            android:text="Facebook Login" />
+	            android:text="Facebook Login" />-->
 	        
 	        <LinearLayout
 		        style="@style/SpanningView"

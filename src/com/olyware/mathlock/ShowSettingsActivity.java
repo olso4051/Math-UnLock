@@ -22,11 +22,12 @@ import android.view.WindowManager;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	final private static String SCREEN_LABEL = "Settings Screen";
-	private String mPrefUserInfo, mPrefUserSkipped;
+	private String mPrefUserInfo, mPrefUserSkipped, mPrefUserLoggedIn;
 	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
 	private List<String> categories;
 	private int[] EggMaxValues;
@@ -71,6 +72,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 		mPrefUserInfo = getString(R.string.pref_user_info);
 		mPrefUserSkipped = getString(R.string.pref_user_skipped);
+		mPrefUserLoggedIn = getString(R.string.pref_user_logged_in);
 
 		new OpenDatabase().execute();
 
@@ -140,11 +142,13 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			logoutButton.setTitle(getString(R.string.settings_logout));
 		else
 			logoutButton.setTitle(getString(R.string.settings_login));
+		final Intent sIntent = new Intent(this, ScreenService.class);
 		logoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
 				SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-				sharedPrefsUsers.edit().putBoolean(mPrefUserSkipped, false).commit();
+				sharedPrefsUsers.edit().putBoolean(mPrefUserSkipped, false).putBoolean(mPrefUserLoggedIn, false).commit();
+				ctx.stopService(sIntent);
 				Intent broadcastIntent = new Intent(getString(R.string.logout_receiver_filter));
 				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);
 				Intent loginIntent = new Intent(ctx, LoginActivity.class);

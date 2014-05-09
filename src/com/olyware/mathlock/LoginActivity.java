@@ -4,14 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentActivity;
 
 import com.olyware.mathlock.utils.GCMHelper;
 
-public class LoginActivity extends ActionBarActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
+public class LoginActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
 
 	// final static public String RECEIVE_USERID = "com.olyware.mathlock.RECEIVE_USERID";
 	// final private Context ctx = this;
+	private LoginFragment mainFragment;
 
 	public void onFinish() {
 		finish();
@@ -20,7 +21,7 @@ public class LoginActivity extends ActionBarActivity implements LoginFragment.On
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);
+		// setContentView(R.layout.activity_login);
 
 		// check if user is logged in
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
@@ -29,7 +30,11 @@ public class LoginActivity extends ActionBarActivity implements LoginFragment.On
 		}
 
 		if (savedInstanceState == null) {
-			getSupportFragmentManager().beginTransaction().add(R.id.container, new LoginFragment()).commit();
+			mainFragment = new LoginFragment();
+			getSupportFragmentManager().beginTransaction().add(android.R.id.content, mainFragment).commit();
+		} else {
+			// Or set the fragment from restored state info
+			mainFragment = (LoginFragment) getSupportFragmentManager().findFragmentById(android.R.id.content);
 		}
 
 		GCMHelper.registerGCM(this, getApplicationContext());

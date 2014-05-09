@@ -58,6 +58,7 @@
     <string name="pref_user_referrer">referrer</string>
     <string name="pref_user_skipped">skipped</string>
     <string name="pref_user_confirmed">confirmed</string>
+    <string name="pref_user_facebook_name">facebook_name</string>
     
     <!-- Preferences(money) -->
     <string name="pref_money">Packages</string>

@@ -1,11 +1,14 @@
 package com.olyware.mathlock;
 
+import java.util.Arrays;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.olyware.mathlock.service.RegisterID;
@@ -29,35 +39,27 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		public void onFinish();
 	}
 
-	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped;
+	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
+			mPrefUserFacebookName;
 	private float transY = 0;
 	private EditText username;
-	private Button facebook, login, skip;
+	private Button login, skip;
 	private LinearLayout inputs, progress;
+	private UiLifecycleHelper uiHelper;
 
-	/**
-	 * Saves user info and switches to the main activity
-	 */
-	void logIn() {
-		facebook.setEnabled(false);
-		login.setEnabled(false);
-		skip.setEnabled(false);
-
-		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
-		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
-		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
-		String uName = username.getText().toString();
-		sharedPrefsUserInfo.edit().putString(mPrefUserUsername, uName).commit();
-
-		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		View focus = getActivity().getCurrentFocus();
-		if (imm != null && focus != null) {
-			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+	private Session.StatusCallback callback = new Session.StatusCallback() {
+		@Override
+		public void call(Session session, SessionState state, Exception exception) {
+			onSessionStateChange(session, state, exception, false);
 		}
-		attemptLogin(uName, regID, userID, referrer);
+	};
+	private Session.StatusCallback loginCallback = new SessionStatusCallback();
 
-		startAnimationProgress();
+	private class SessionStatusCallback implements Session.StatusCallback {
+		@Override
+		public void call(Session session, SessionState state, Exception exception) {
+			onSessionStateChange(session, state, exception, true);
+		}
 	}
 
 	@Override
@@ -77,12 +79,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		super.onCreate(savedInstanceState);
 		Context ctx = getActivity();
 
+		uiHelper = new UiLifecycleHelper(getActivity(), callback);
+		uiHelper.onCreate(savedInstanceState);
+
 		mPrefUserInfo = ctx.getString(R.string.pref_user_info);
 		mPrefUserUsername = ctx.getString(R.string.pref_user_username);
 		mPrefUserUserID = ctx.getString(R.string.pref_user_userid);
 		mPrefUserReferrer = ctx.getString(R.string.pref_user_referrer);
 		mPrefUserLoggedIn = ctx.getString(R.string.pref_user_logged_in);
 		mPrefUserSkipped = ctx.getString(R.string.pref_user_skipped);
+		mPrefUserFacebookName = ctx.getString(R.string.pref_user_facebook_name);
 
 		// check if user is logged in
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
@@ -99,19 +105,21 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		inputs = (LinearLayout) view.findViewById(R.id.fragment_login_inputs);
 		progress = (LinearLayout) view.findViewById(R.id.fragment_login_progress_layout);
 		username = (EditText) view.findViewById(R.id.fragment_login_username);
-		facebook = (Button) view.findViewById(R.id.fragment_login_button_login_facebook);
-		facebook.setOnClickListener(this);
 		login = (Button) view.findViewById(R.id.fragment_login_button_login);
 		login.setOnClickListener(this);
 		skip = (Button) view.findViewById(R.id.fragment_login_button_skip);
 		skip.setOnClickListener(this);
+
+		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
+		authButton.setOnClickListener(this);
+		authButton.setFragment(this);
+		// authButton.setReadPermissions(Arrays.asList("public_profile", "user_friends", "user_birthday", "user_location"));
 
 		setAlpha();
 
 		if (savedInstanceState == null) {
 			SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 			if (!GCMHelper.getRegistrationId(getActivity().getApplicationContext()).equals("")) {
-				facebook.setEnabled(true);
 				login.setEnabled(true);
 			}
 			username.setText(sharedPrefsUserInfo.getString(mPrefUserUsername, ""));
@@ -121,19 +129,111 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	}
 
 	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		uiHelper.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		uiHelper.onDestroy();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		uiHelper.onPause();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		// For scenarios where the main activity is launched and user session is not null, the session state change notification may not be
+		// triggered. Trigger it if it's open/closed.
+		Session session = Session.getActiveSession();
+		if (session != null && (session.isOpened() || session.isClosed())) {
+			onSessionStateChange(session, session.getState(), null, false);
+		}
+		uiHelper.onResume();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		uiHelper.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public void onClick(View view) {
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
-		if (view.getId() == R.id.fragment_login_button_login_facebook) {
-			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
-			logIn();
-		} else if (view.getId() == R.id.fragment_login_button_login) {
+		if (view.getId() == R.id.fragment_login_button_login) {
 			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			logIn();
 		} else if (view.getId() == R.id.fragment_login_button_skip) {
 			editUserInfo.putBoolean(mPrefUserSkipped, true).commit();
 			startMainActivity();
+		} else if (view.getId() == R.id.authButton) {
+			Session session = Session.getActiveSession();
+			if (!session.isOpened() && !session.isClosed()) {
+				session.openForRead(new Session.OpenRequest(this).setPermissions(
+						Arrays.asList("public_profile", "user_friends", "user_birthday", "user_location")).setCallback(loginCallback));
+			} else if (session.isOpened()) {
+				session.closeAndClearTokenInformation();
+			} else {
+				Session.openActiveSession(getActivity(), this, true, loginCallback);
+			}
 		}
+	}
+
+	private void onSessionStateChange(Session session, SessionState state, Exception exception, boolean fromFacebookButton) {
+		if (state.isOpened()) {
+			Log.d("GAtest", "Logged in... " + fromFacebookButton);
+			if (fromFacebookButton) {
+				// Request user data and show the results
+				Request.newMeRequest(session, new Request.GraphUserCallback() {
+					@Override
+					public void onCompleted(GraphUser user, Response response) {
+						if (user != null) {
+							SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName()).putBoolean(mPrefUserSkipped, false)
+									.commit();
+							Log.d("GAtest", user.toString());
+							logIn();
+						}
+					}
+				}).executeAsync();
+			}
+		} else if (state.isClosed()) {
+			Log.d("GAtest", "Logged out... " + fromFacebookButton);
+		}
+	}
+
+	/**
+	 * Saves user info and switches to the main activity
+	 */
+	void logIn() {
+		login.setEnabled(false);
+		skip.setEnabled(false);
+
+		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
+		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
+		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
+		String uName = sharedPrefsUserInfo.getString(mPrefUserFacebookName, "");
+		if (uName.equals(""))
+			uName = username.getText().toString();
+		sharedPrefsUserInfo.edit().putString(mPrefUserUsername, uName).commit();
+
+		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		View focus = getActivity().getCurrentFocus();
+		if (imm != null && focus != null) {
+			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		}
+		attemptLogin(uName, regID, userID, referrer);
+
+		startAnimationProgress();
 	}
 
 	private void attemptLogin(String username, String regID, String userID, String referral) {
@@ -164,12 +264,50 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	}
 
 	public void GCMRegistrationDone(boolean result) {
-		facebook.setEnabled(true);
 		login.setEnabled(true);
 	}
 
-	/*public void GCMConfirmDone(int result) {
-		startMainActivity();
+	// FOR REFERENCE
+	/*private String buildUserInfoDisplay(GraphUser user) {
+	    StringBuilder userInfo = new StringBuilder("");
+
+	    // Example: typed access (name)
+	    // - no special permissions required
+	    userInfo.append(String.format("Name: %s\n\n", 
+	        user.getName()));
+
+	    // Example: typed access (birthday)
+	    // - requires user_birthday permission
+	    userInfo.append(String.format("Birthday: %s\n\n", 
+	        user.getBirthday()));
+
+	    // Example: partially typed access, to location field,
+	    // name key (location)
+	    // - requires user_location permission
+	    userInfo.append(String.format("Location: %s\n\n", 
+	        user.getLocation().getProperty("name")));
+
+	    // Example: access via property name (locale)
+	    // - no special permissions required
+	    userInfo.append(String.format("Locale: %s\n\n", 
+	        user.getProperty("locale")));
+
+	    // Example: access via key for array (languages) 
+	    // - requires user_likes permission
+	    JSONArray languages = (JSONArray)user.getProperty("languages");
+	    if (languages.length() > 0) {
+	        ArrayList<String> languageNames = new ArrayList<String> ();
+	        for (int i=0; i < languages.length(); i++) {
+	            JSONObject language = languages.optJSONObject(i);
+	            // Add the language name to a list. Use JSON
+	            // methods to get access to the name field. 
+	            languageNames.add(language.optString("name"));
+	        }           
+	        userInfo.append(String.format("Languages: %s\n\n", 
+	        languageNames.toString()));
+	    }
+
+	    return userInfo.toString();
 	}*/
 
 	private void setAlpha() {
@@ -186,7 +324,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	}
 
 	private void endAnimationProgress() {
-		facebook.setEnabled(true);
 		login.setEnabled(true);
 		skip.setEnabled(true);
 		AnimatorSet animSet = setupEndAnimation();
@@ -196,10 +333,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	private AnimatorSet setupStartAnimation() {
 		AnimatorSet animSet = new AnimatorSet();
 
-		float width = facebook.getWidth() * 2;
+		float width = inputs.getWidth() * 2;
 		if (transY == 0) {
 			int[] locations = new int[2];
-			facebook.getLocationOnScreen(locations);
+			inputs.getLocationOnScreen(locations);
 			float userNameY = locations[1];
 			progress.getLocationOnScreen(locations);
 			float progressBarY = locations[1];
@@ -231,7 +368,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 
 	private AnimatorSet setupEndAnimation() {
 		AnimatorSet animMoveRight = new AnimatorSet();
-		float width = facebook.getWidth() * 2;
+		float width = inputs.getWidth() * 2;
 
 		ObjectAnimator animationFacebookX = ObjectAnimator.ofFloat(inputs, "translationX", 0);
 		animationFacebookX.setDuration(250);
