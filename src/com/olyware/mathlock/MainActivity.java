@@ -71,6 +71,7 @@ import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.Purchase;
+import com.olyware.mathlock.utils.SaveHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.AnswerReadyListener;
 import com.olyware.mathlock.views.AnswerView;
@@ -199,6 +200,11 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		@Override
 		protected BitmapDrawable doInBackground(Bitmap... bmps) {
+			String wallpaper = ctx.getString(R.string.wallpaper);
+			String blurred = ctx.getString(R.string.blurred_background);
+			// save the original wallpaper
+			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], wallpaper);
+
 			// blur bitmap
 			final RenderScript rs = RenderScript.create(ctx);
 			final Allocation input = Allocation
@@ -219,6 +225,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			final Allocation alloc2 = Allocation.createTyped(rs2, alloc1.getType());
 			scriptDim.forEach_dim(alloc1, alloc2);
 			alloc2.copyTo(bmps[0]);
+
+			// save bitmap to internal private storage
+			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], blurred);
 
 			// convert bitmap to BitmapDrawable so we can set it as the background of a view
 			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
@@ -738,17 +747,31 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			// scale the bitmap to fit on the background
 			bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
 			bitmap2 = Bitmap.createBitmap(bitmap2, left, top + statusBarHeight, w, h - statusBarHeight);
+			Bitmap wall = SaveHelper.loadBitmap(this, getString(R.string.wallpaper));
+			if (bitmap2.equals(wall)) {
+				Log.d("GAtest", "load bitmap rather than render it");
+				BitmapDrawable wallpaper = new BitmapDrawable(getResources(), wall);
+				BitmapDrawable blurred = new BitmapDrawable(getResources(), SaveHelper.loadBitmap(this,
+						getString(R.string.blurred_background)));
+				TransitionDrawable background = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
+				if (android.os.Build.VERSION.SDK_INT < 16)
+					layout.setBackgroundDrawable(background);
+				else
+					layout.setBackground(background);
+				background.startTransition(1000);
+
+			}
 			final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
 
 			// Blur and Dim bitmap
 			Log.d("GAtest", "blurring background time start = " + System.currentTimeMillis());
 			new BlurBackground(this) {
 				@Override
-				protected void onPostExecute(BitmapDrawable test) {
+				protected void onPostExecute(BitmapDrawable blurred) {
 					Log.d("GAtest", "blurred background time end = " + System.currentTimeMillis());
-					Log.d("GAtest", "testing = " + wallpaper.equals(test));
-					TransitionDrawable background = new TransitionDrawable(new Drawable[] { wallpaper, test });
+					Log.d("GAtest", "testing = " + wallpaper.equals(blurred));
 					if (layout != null) {
+						TransitionDrawable background = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
 						if (android.os.Build.VERSION.SDK_INT < 16)
 							layout.setBackgroundDrawable(background);
 						else
