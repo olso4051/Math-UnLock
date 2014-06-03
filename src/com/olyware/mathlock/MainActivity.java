@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -160,9 +161,17 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private BroadcastReceiver finishBroadcast = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d("onReceive", "Logout in progress");
+			Log.d("test", "Logout in progress");
 			// At this point you should start the login activity and finish this one
 			finish();
+		}
+	};
+
+	private BroadcastReceiver screenOnBroadcast = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d("GAtest", "Screen On");
+			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
 		}
 	};
 
@@ -203,7 +212,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			String wallpaper = ctx.getString(R.string.wallpaper);
 			String blurred = ctx.getString(R.string.blurred_background);
 			// save the original wallpaper
+			long time = System.currentTimeMillis();
 			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], wallpaper);
+			Log.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
 
 			// blur bitmap
 			final RenderScript rs = RenderScript.create(ctx);
@@ -216,7 +227,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			script.forEach(output);
 			output.copyTo(bmps[0]);
 
-			// dim the gitmap
+			// dim the bitmap
 			final RenderScript rs2 = RenderScript.create(ctx);
 			final ScriptC_dim scriptDim = new ScriptC_dim(rs2);
 			scriptDim.set_dimmingValue(0.75f);
@@ -227,7 +238,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			alloc2.copyTo(bmps[0]);
 
 			// save bitmap to internal private storage
+			time = System.currentTimeMillis();
 			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], blurred);
+			Log.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
 
 			// convert bitmap to BitmapDrawable so we can set it as the background of a view
 			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
@@ -238,15 +251,16 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		IntentFilter intentFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
-		LocalBroadcastManager.getInstance(this).registerReceiver(finishBroadcast, intentFilter);
+		IntentFilter logoutFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
+		LocalBroadcastManager.getInstance(this).registerReceiver(finishBroadcast, logoutFilter);
+		IntentFilter screenOnFilter = new IntentFilter(getString(R.string.screen_on_receiver_filter));
+		LocalBroadcastManager.getInstance(this).registerReceiver(screenOnBroadcast, screenOnFilter);
 
-		Log.d("GAtest", "onCreate");
 		ctx = this;
 		info = getIntent().getBooleanExtra("info", false);
-		Log.d("GAtest", "info = " + info);
 		locked = getIntent().getBooleanExtra("locked", false);
 		unlocking = locked;
 
@@ -395,34 +409,20 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 
 		apps = new ArrayList<ApplicationInfo>();
 
+		new OpenDatabase().execute();
+
 		setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 		showWallpaper();
 
-		new OpenDatabase().execute();
-
 		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
-		MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		if (pm.isScreenOn()) {
+			Log.d("test", "onCreate Screen is on");
+			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
+		}
 
 		// Check device for Play Services APK. If check succeeds, proceed with GCM registration.
-		// API_ID = getString(R.string.gcm_api_id);
-		// appCtx = getApplicationContext();
 		GCMHelper.registerAndStoreGCM(this, getApplicationContext());
-		/*if (checkPlayServices()) {
-			gcm = MyApplication.getGcmInstance();
-			regID = getRegistrationId(appCtx);
-			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
-			if (regID.equals("")) {
-				SharedPreferences.Editor editorGA = prefsGA.edit();
-				editorGA.putBoolean("reg_uploaded", false).commit();
-				registerInBackground(this);
-			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
-				String referral = prefsGA.getString("utm_content", "");
-				storeRegistrationId(this, appCtx, regID);
-				sendRegistrationIdToBackend(this, regID, referral);
-			}
-		} else {
-			Toast.makeText(this, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
-		}*/
 	}
 
 	@Override
@@ -463,12 +463,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	}
 
 	@Override
-	protected void onStart() {
-		Log.d("GAtest", "onStart");
-		super.onStart();
-	}
-
-	@Override
 	protected void onStop() {
 		Log.d("GAtest", "onStop");
 		if (attached)
@@ -490,6 +484,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				dbManager.destroy();
 		joystick.removeCallbacks();
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(finishBroadcast);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(screenOnBroadcast);
 		super.onDestroy();
 	}
 
@@ -500,7 +495,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		paused = false;
 		super.onResume();
 		GCMHelper.checkPlayServices(this);
-		// checkPlayServices();
 		if (locked && quizMode)
 			quizMode = joystick.setQuizMode(false);
 
@@ -630,7 +624,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		info = intent.getBooleanExtra("info", false);
-		Log.d("GAtest", "info = " + info);
 		locked = intent.getBooleanExtra("locked", false);
 		unlocking = locked;
 	}
@@ -747,9 +740,9 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			// scale the bitmap to fit on the background
 			bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
 			bitmap2 = Bitmap.createBitmap(bitmap2, left, top + statusBarHeight, w, h - statusBarHeight);
-			Bitmap wall = SaveHelper.loadBitmap(this, getString(R.string.wallpaper));
-			if (bitmap2.equals(wall)) {
-				Log.d("GAtest", "load bitmap rather than render it");
+
+			Bitmap wall = SaveHelper.loadBitmap(this, getString(R.string.wallpaper), bitmap2);
+			if (wall != null) {
 				BitmapDrawable wallpaper = new BitmapDrawable(getResources(), wall);
 				BitmapDrawable blurred = new BitmapDrawable(getResources(), SaveHelper.loadBitmap(this,
 						getString(R.string.blurred_background)));
@@ -760,26 +753,26 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 					layout.setBackground(background);
 				background.startTransition(1000);
 
-			}
-			final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
+			} else {
+				final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
 
-			// Blur and Dim bitmap
-			Log.d("GAtest", "blurring background time start = " + System.currentTimeMillis());
-			new BlurBackground(this) {
-				@Override
-				protected void onPostExecute(BitmapDrawable blurred) {
-					Log.d("GAtest", "blurred background time end = " + System.currentTimeMillis());
-					Log.d("GAtest", "testing = " + wallpaper.equals(blurred));
-					if (layout != null) {
-						TransitionDrawable background = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
-						if (android.os.Build.VERSION.SDK_INT < 16)
-							layout.setBackgroundDrawable(background);
-						else
-							layout.setBackground(background);
-						background.startTransition(1000);
+				// Blur and Dim bitmap
+				Log.d("test", "blurring background time start = " + System.currentTimeMillis());
+				new BlurBackground(this) {
+					@Override
+					protected void onPostExecute(BitmapDrawable blurred) {
+						Log.d("test", "blurred background time end = " + System.currentTimeMillis());
+						if (layout != null) {
+							TransitionDrawable background = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
+							if (android.os.Build.VERSION.SDK_INT < 16)
+								layout.setBackgroundDrawable(background);
+							else
+								layout.setBackground(background);
+							background.startTransition(1000);
+						}
 					}
-				}
-			}.execute(bitmap);
+				}.execute(bitmap);
+			}
 		} else {
 			// dims the wallpaper so app has more contrast
 			layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
@@ -800,6 +793,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	}
 
 	private void setProblemAndAnswer() {
+		Log.d("test", "setProblemAndAnswer()");
 		if ((EnabledPackages > 0) && (dbManager != null)) {
 			if (!dbManager.isDestroyed()) {
 				joystick.setProblem(true);
@@ -1305,7 +1299,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 				totalDifficulty = dbManager.getTotalDifficulty();
 			else
 				totalDifficulty = 0;
-		Log.d("GAtest", "totalDifficulty = " + totalDifficulty);
 		long answerTimeFast = sharedPrefsStats.getLong("answerTimeFast", Long.MAX_VALUE);
 		if (right) {
 			editorPrefsStats.putInt("correct", correct + 1);
@@ -1581,7 +1574,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	}
 
 	public void registrationResult(int result) {
-		Log.d("GAtest", "upload result = " + result);
+		Log.d("test", "upload result = " + result);
 		/*Log.d("GAtest", "userID = " + userID);
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		SharedPreferences.Editor editPrefsUserInfo = sharedPrefsUserInfo.edit();

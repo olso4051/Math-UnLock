@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -49,6 +50,14 @@ public class SaveHelper {
 		return b;
 	}
 
+	public static Bitmap loadBitmap(Context context, String picName, Bitmap compareBitmap) {
+		Bitmap b = loadBitmap(context, picName);
+		if (compare(b, compareBitmap))
+			return compareBitmap;
+		else
+			return null;
+	}
+
 	public static boolean SaveTextFilePublic(String txt) {
 		if (isExternalStorageWritable()) {
 			try {
@@ -83,6 +92,22 @@ public class SaveHelper {
 		}
 		File file2 = new File(file.getAbsolutePath() + "/" + fileName);
 		return file2;
+	}
+
+	private static boolean compare(Bitmap b1, Bitmap b2) {
+		if (b1.getWidth() == b2.getWidth() && b1.getHeight() == b2.getHeight()) {
+			int[] pixels1 = new int[b1.getWidth() * b1.getHeight()];
+			int[] pixels2 = new int[b2.getWidth() * b2.getHeight()];
+			b1.getPixels(pixels1, 0, b1.getWidth(), 0, 0, b1.getWidth(), b1.getHeight());
+			b2.getPixels(pixels2, 0, b2.getWidth(), 0, 0, b2.getWidth(), b2.getHeight());
+			if (Arrays.equals(pixels1, pixels2)) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 
 }

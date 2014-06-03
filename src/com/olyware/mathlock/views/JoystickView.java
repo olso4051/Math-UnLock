@@ -65,7 +65,7 @@ public class JoystickView extends View {
 	private int[] selectLeft = new int[5], selectRight = new int[5];
 	private double[] X = new double[NumAnswers], Y = new double[NumAnswers];
 	private boolean[] selectAnswers = new boolean[NumAnswers], selectOptions = new boolean[5];
-	private String[] answers = { "N/A", "N/A", "N/A", "N/A", "?" };
+	private String[] answers = { " ", " ", " ", " ", "?" };
 	private String[] answerTitles;
 
 	private StaticLayout[] layout = new StaticLayout[NumAnswers], layoutAnswers = new StaticLayout[NumAnswers];
@@ -241,7 +241,6 @@ public class JoystickView extends View {
 					if (answers[i].length() > 1)
 						if (answers[i].charAt(1) != '$')
 							equation[i] = true;
-
 			layoutE[i] = new EquationLayout(answers[i], Width, Height, answerTextPaint[i], answerSizeSPDefault);
 			layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}

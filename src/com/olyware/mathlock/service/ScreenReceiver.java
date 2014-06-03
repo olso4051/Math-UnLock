@@ -3,16 +3,17 @@ package com.olyware.mathlock.service;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.olyware.mathlock.MainActivity;
-import com.olyware.mathlock.R;
-import com.olyware.mathlock.R.array;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+
+import com.olyware.mathlock.MainActivity;
+import com.olyware.mathlock.R;
 
 public class ScreenReceiver extends BroadcastReceiver {
 	public static boolean wasScreenOn = true;
@@ -49,9 +50,14 @@ public class ScreenReceiver extends BroadcastReceiver {
 			}
 		}
 		if (screenOn) {
+			Log.d("test", "ScreenReceiver screenOn");
 			if (offTimer != null) {
 				offTimer.cancel();
 				offTimer = null;
+			} else {
+				Log.d("test", "send intent");
+				Intent broadcastIntent = new Intent(ctx.getString(R.string.screen_on_receiver_filter));
+				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);
 			}
 			wasScreenOn = true;
 		} else if (screenOff) {
@@ -64,6 +70,7 @@ public class ScreenReceiver extends BroadcastReceiver {
 						@Override
 						public void run() {
 							startMainActivity(ctx, lockscreen);
+							offTimer = null;
 						}
 					};
 					offTimer.schedule(offTimerTask, timeLast + timeoutPeriod - currentTime);

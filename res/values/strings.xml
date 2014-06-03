@@ -90,6 +90,9 @@
     <string name="blurred_background">blurred_background</string>
     <string name="wallpaper">wallpaper</string>
     
+    <!-- Broadcast -->
+    <string name="screen_on_receiver_filter">com.olyware.mathlock.ACTION_SCREEN_ON</string>
+    
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
     <string name="add_new_category">New Category</string>
@@ -200,7 +203,6 @@
     <string name="option4">Settings</string>
     <string name="packs">Question Packs</string>
     <string name="phone">Phone</string>
-    <string name="problem">1 + 1 = ?</string>
     <string name="prompt_time">Time Scale</string>
     <string name="prompt_package">Package</string>
     <string name="prompt_difficulty">Difficulty</string>
