@@ -62,6 +62,10 @@ public class LoginActivity extends FragmentActivity implements LoginFragment.OnF
 		}
 	}
 
+	public void RegisterIDResult(int result) {
+		// Do Nothing
+	}
+
 	/*public void confirmIDResult(int result) {
 		LoginFragment loginFrag = (LoginFragment) getSupportFragmentManager().findFragmentById(R.id.container);
 		if (loginFrag != null)

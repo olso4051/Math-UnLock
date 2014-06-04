@@ -27,23 +27,33 @@ public class GCMHelper {
 
 	public interface GCMResponse {
 		void GCMResult(boolean result);
+
+		void RegisterIDResult(int result);
 	}
 
 	public static boolean registerAndStoreGCM(final Activity act, final Context app) {
 		if (checkPlayServices(act)) {
+			try {
+				mCallback = (GCMResponse) act;
+			} catch (ClassCastException e) {
+				throw new ClassCastException(act.toString() + " must implement GCMResponse");
+			}
 			regID = getRegistrationId(app);
 			SharedPreferences prefsGA = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 			SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 			String username = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_username), "");
 			String userID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_userid), "");
 			String referral = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_referrer), "");
+			String birth = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_birth), "");
+			String gender = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_gender), "");
+			String location = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_location), "");
 			if (regID.equals("")) {
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(act, app, true);
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				storeRegistrationId(act, app, regID);
-				sendRegistrationIdToBackend(act, username, regID, userID, referral);
+				sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location);
 			}
 		} else {
 			Toast.makeText(act, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
@@ -120,12 +130,13 @@ public class GCMHelper {
 	}
 
 	private static void registerInBackground(final Activity act, final Context app, final boolean sendToBackend) {
-		final String username = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
-				act.getString(R.string.pref_user_username), "");
-		final String userID = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
-				act.getString(R.string.pref_user_userid), "");
-		final String referral = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
-				act.getString(R.string.pref_user_referrer), "");
+		SharedPreferences sharedPrefs = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		final String username = sharedPrefs.getString(act.getString(R.string.pref_user_username), "");
+		final String userID = sharedPrefs.getString(act.getString(R.string.pref_user_userid), "");
+		final String referral = sharedPrefs.getString(act.getString(R.string.pref_user_referrer), "");
+		final String birth = sharedPrefs.getString(act.getString(R.string.pref_user_facebook_birth), "");
+		final String gender = sharedPrefs.getString(act.getString(R.string.pref_user_facebook_gender), "");
+		final String location = sharedPrefs.getString(act.getString(R.string.pref_user_facebook_location), "");
 
 		new AsyncTask<Void, Integer, Boolean>() {
 			@Override
@@ -138,7 +149,7 @@ public class GCMHelper {
 					// send the registration ID to the server
 					if (sendToBackend) {
 						Log.d("GAtest", "sendRegistrationIdToBackend");
-						sendRegistrationIdToBackend(act, username, regID, userID, referral);
+						sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location);
 					}
 					// else
 					// mCallback.GCMResult(true);
@@ -165,8 +176,14 @@ public class GCMHelper {
 		}.execute(null, null, null);
 	}
 
-	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral) {
-		new RegisterID(act).execute(username, regId, userID, referral);
+	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral,
+			String birth, String gender, String location) {
+		new RegisterID(act) {
+			@Override
+			protected void onPostExecute(Integer result) {
+				mCallback.RegisterIDResult(result);
+			}
+		}.execute(username, regId, userID, referral, birth, gender, location);
 	}
 
 	private static void storeRegistrationId(Context act, Context context, String regId) {

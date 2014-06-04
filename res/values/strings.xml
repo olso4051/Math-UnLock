@@ -29,6 +29,7 @@
     <string formatted="false" name="share_base_url_facebook_caption">&amp;caption=Unlock%20Your%20IQ%21</string>
     <string formatted="false" name="share_base_url_facebook_base_caption">&amp;caption=</string>
     <string formatted="false" name="share_base_url_facebook_description">&amp;description=Download%20Hiq%20From%20This%20Link%20And%20Get%2040%20Gold%20Coins</string>
+    <string name="share_base_url_facebook_picture">&amp;picture=http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_redirect">&amp;redirect_uri=http://www.facebook.com</string>
     
     <!-- Notifications -->
@@ -38,7 +39,7 @@
     <string name="notification_title_total">Total Questions Answered!</string>
     <string name="notification_title_total_facebook1">I\'ve answered over</string>
     <string name="notification_title_total_facebook2">questions</string>
-    <string name="notification_message_streak">Share Hiq and challenge your friends.</string>
+    <string name="notification_message_streak">Challenge your friends to do better</string>
     <string name="notification_message_streak_facebook">Can you get more and Unlock Your IQ?</string>
     <string name="notification_message_total_facebook">You could be Unlocking Your IQ too</string>
     <string name="notification_delete_action">NOTIFICATION_DELETED</string>
@@ -46,7 +47,7 @@
     <string name="notification_title_referral_facebook1">I\'ve received</string>
     <string name="notification_title_referral_facebook2">coins from my friends using Hiq!</string>
     <string name="notification_message_referral1">You\'ve received</string>
-    <string name="notification_message_referral2">coins from your referral network to date</string>
+    <string name="notification_message_referral2">coins from your referral network</string>
     <string name="notification_message_referral_facebook">Join me and Unlock Your IQ!</string>
     
     <!-- Preferences(users) -->
@@ -59,6 +60,9 @@
     <string name="pref_user_skipped">skipped</string>
     <string name="pref_user_confirmed">confirmed</string>
     <string name="pref_user_facebook_name">facebook_name</string>
+    <string name="pref_user_facebook_birth">facebook_birth</string>
+    <string name="pref_user_facebook_gender">facebook_gender</string>
+    <string name="pref_user_facebook_location">facebook_location</string>
     
     <!-- Preferences(money) -->
     <string name="pref_money">Packages</string>

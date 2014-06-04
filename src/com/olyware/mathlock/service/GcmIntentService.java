@@ -77,9 +77,10 @@ public class GcmIntentService extends IntentService {
 							SharedPreferences sharedPrefs = getSharedPreferences(getString(R.string.pref_money), Context.MODE_PRIVATE);
 							int coins = getCoins();
 							int total = sharedPrefs.getInt(getString(R.string.pref_money_total_referral), 0) + coins;
-							sharedPrefs.edit().putInt(getString(R.string.pref_money_pending_paid), coins)
+							int pending = sharedPrefs.getInt(getString(R.string.pref_money_pending_paid), 0);
+							sharedPrefs.edit().putInt(getString(R.string.pref_money_pending_paid), pending + coins)
 									.putInt(getString(R.string.pref_money_total_referral), total).commit();
-							new NotificationHelper(ctx).sendCoinNotification(total, 3);
+							new NotificationHelper(ctx).sendCoinNotification(pending + coins);
 						}
 					}.execute(storedUserID, pickupHash);
 				} else {

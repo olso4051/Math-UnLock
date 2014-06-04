@@ -306,21 +306,21 @@
     </string-array>
     
     <integer-array name="notify_streaks">
+        <item>50</item>
         <item>100</item>
         <item>250</item>
         <item>500</item>
-        <item>1000</item>
     </integer-array>
     <integer-array name="notify_total_questions">
+        <item>500</item>
         <item>1000</item>
         <item>2000</item>
+        <item>3000</item>
+        <item>4000</item>
         <item>5000</item>
+        <item>7500</item>
         <item>10000</item>
-        <item>20000</item>
-        <item>50000</item>
-        <item>100000</item>
-        <item>200000</item>
-        <item>500000</item>
-        <item>1000000</item>
+        <item>15000</item>
+        <item>30000</item>
     </integer-array>
 </resources>

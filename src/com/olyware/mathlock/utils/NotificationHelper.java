@@ -11,6 +11,7 @@ import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 
 public class NotificationHelper {
+	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3;
 	private NotificationManager mNotificationManager;
 	NotificationCompat.Builder builder;
 	private Context ctx;
@@ -29,13 +30,13 @@ public class NotificationHelper {
 
 		// intent to share app on Facebook only
 		Intent iFacebookShare;
-		PendingIntent facebookShareIntent;
+		PendingIntent shareFacebookIntent;
 		if (titleFacebook != null && msgFacebook != null && !titleFacebook.equals("") && !msgFacebook.equals("")) {
 			iFacebookShare = ShareHelper.getShareFacebookIntent(ctx, titleFacebook, msgFacebook);
-			facebookShareIntent = PendingIntent.getActivity(ctx, 0, iFacebookShare, 0);
+			shareFacebookIntent = PendingIntent.getActivity(ctx, 0, iFacebookShare, 0);
 		} else {
 			iFacebookShare = ShareHelper.getShareFacebookIntent(ctx);
-			facebookShareIntent = PendingIntent.getActivity(ctx, 0, iFacebookShare, 0);
+			shareFacebookIntent = PendingIntent.getActivity(ctx, 0, iFacebookShare, 0);
 		}
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
@@ -46,13 +47,13 @@ public class NotificationHelper {
 		if (number > 0)
 			mBuilder.setNumber(number);
 		mBuilder.setAutoCancel(true);
-		mBuilder.addAction(R.drawable.trash, "Facebook", facebookShareIntent);
-		mBuilder.addAction(R.drawable.trash, "Other", shareIntent);
-		mBuilder.setContentIntent(shareIntent);
+		mBuilder.addAction(R.drawable.facebook, "Facebook", shareFacebookIntent);
+		mBuilder.addAction(R.drawable.share_other, "Other", shareIntent);
+		mBuilder.setContentIntent(shareFacebookIntent);
 		mNotificationManager.notify(ID, mBuilder.build());
 	}
 
-	public void sendCoinNotification(int number, int ID) {
+	public void sendCoinNotification(int number) {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		String title = ctx.getString(R.string.notification_title_referral);
 		String msg = ctx.getString(R.string.notification_message_referral1) + " " + number + " "
@@ -83,8 +84,13 @@ public class NotificationHelper {
 			mBuilder.setNumber(number);
 		mBuilder.setAutoCancel(true);
 		mBuilder.setContentIntent(mainIntent);
-		mBuilder.addAction(R.drawable.trash, "Facebook", facebookShareIntent);
-		mBuilder.addAction(R.drawable.trash, "Other", shareIntent);
-		mNotificationManager.notify(ID, mBuilder.build());
+		mBuilder.addAction(R.drawable.facebook, "Facebook", facebookShareIntent);
+		mBuilder.addAction(R.drawable.share_other, "Other", shareIntent);
+		mNotificationManager.notify(COIN_ID, mBuilder.build());
+	}
+
+	public void clearCoinNotification() {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.cancel(COIN_ID);
 	}
 }

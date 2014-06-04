@@ -58,7 +58,6 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
-import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Clock;
@@ -81,7 +80,7 @@ import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickTouchListener;
 import com.olyware.mathlock.views.JoystickView;
 
-public class MainActivity extends Activity implements RegisterID.RegisterIdResponse {
+public class MainActivity extends Activity implements GCMHelper.GCMResponse {
 	final private int startingPmoney = 20000, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
@@ -130,7 +129,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats, sharedPrefsApps;
 	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
 
-	private BitmapDrawable wallpaper;
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
 	private boolean attached = false;
@@ -170,7 +168,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 	private BroadcastReceiver screenOnBroadcast = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d("GAtest", "Screen On");
+			// screen has come on
 			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
 		}
 	};
@@ -518,6 +516,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			int pendingCoins = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending_paid), 0);
 			Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0) + pendingCoins);
 			editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0).commit();
+			new NotificationHelper(this).clearCoinNotification();
 		}
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
@@ -1351,7 +1350,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 						getString(R.string.notification_message_streak), number + 1,
 						getString(R.string.notification_title_streak_facebook1) + " " + (currentStreak + 1) + " "
 								+ getString(R.string.notification_title_streak_facebook2),
-						getString(R.string.notification_message_streak_facebook), 0);
+						getString(R.string.notification_message_streak_facebook), NotificationHelper.STREAK_ID);
 			}
 		} else {
 			editorPrefsStats.putInt("streakToIncrease", streakToIncrease);
@@ -1372,7 +1371,7 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			new NotificationHelper(this).sendNotification(total + " " + getString(R.string.notification_title_total),
 					getString(R.string.notification_message_streak), value, getString(R.string.notification_title_total_facebook1) + " "
 							+ total + " " + getString(R.string.notification_title_total_facebook2),
-					getString(R.string.notification_message_total_facebook), 1);
+					getString(R.string.notification_message_total_facebook), NotificationHelper.TOTAL_ID);
 		}
 		editorPrefsStats.commit();
 	}
@@ -1438,7 +1437,6 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 			sharedPrefsMoney = getSharedPreferences("Packages", 0);
 			editorPrefsMoney = sharedPrefsMoney.edit();
 			editorPrefsMoney.putLong("lastTime", System.currentTimeMillis()).commit();
-			final String link = ShareHelper.buildShareURL(this);
 			boolean initial[] = { dontShow };
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.rate_title).setCancelable(false);
@@ -1573,17 +1571,15 @@ public class MainActivity extends Activity implements RegisterID.RegisterIdRespo
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
-	public void registrationResult(int result) {
-		Log.d("test", "upload result = " + result);
-		/*Log.d("GAtest", "userID = " + userID);
-		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-		SharedPreferences.Editor editPrefsUserInfo = sharedPrefsUserInfo.edit();
-		if ((result == 0) && (userID != null)) {
-			editPrefsUserInfo.putBoolean(getString(R.string.pref_user_reg_uploaded), true);
-			editPrefsUserInfo.putString(getString(R.string.pref_user_userid), userID);
-		} else if (result == 1) {
-			editPrefsUserInfo.putBoolean(getString(R.string.pref_user_reg_uploaded), false);
-		}
-		editPrefsUserInfo.commit();*/
+	@Override
+	public void GCMResult(boolean result) {
+		// shouldn't get called
+		Log.d("test", "this shouldn't get called");
+	}
+
+	@Override
+	public void RegisterIDResult(int result) {
+		// TODO Auto-generated method stub
+		Log.d("test", "register id result = " + result);
 	}
 }

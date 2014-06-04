@@ -81,7 +81,8 @@ public class ShareHelper {
 					+ context.getString(R.string.share_base_url_facebook_name)
 					+ context.getString(R.string.share_base_url_facebook_caption)
 					+ context.getString(R.string.share_base_url_facebook_description)
-					+ context.getString(R.string.share_base_url_facebook_redirect);
+					+ context.getString(R.string.share_base_url_facebook_redirect)
+					+ context.getString(R.string.share_base_url_facebook_picture);
 			return baseLink;
 		}
 	}
@@ -106,7 +107,8 @@ public class ShareHelper {
 			String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
 			baseLink = baseLink + context.getString(R.string.share_link_url_facebook) + encryptedContentForURL + title + caption
 					+ context.getString(R.string.share_base_url_facebook_description)
-					+ context.getString(R.string.share_base_url_facebook_redirect);
+					+ context.getString(R.string.share_base_url_facebook_redirect)
+					+ context.getString(R.string.share_base_url_facebook_picture);
 		}
 		return baseLink;
 	}

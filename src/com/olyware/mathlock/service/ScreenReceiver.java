@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
@@ -50,12 +49,10 @@ public class ScreenReceiver extends BroadcastReceiver {
 			}
 		}
 		if (screenOn) {
-			Log.d("test", "ScreenReceiver screenOn");
 			if (offTimer != null) {
 				offTimer.cancel();
 				offTimer = null;
 			} else {
-				Log.d("test", "send intent");
 				Intent broadcastIntent = new Intent(ctx.getString(R.string.screen_on_receiver_filter));
 				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);
 			}

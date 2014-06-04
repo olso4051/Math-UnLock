@@ -14,13 +14,11 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.olyware.mathlock.LoginFragment;
 import com.olyware.mathlock.R;
 
 public class RegisterID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
 	private String success, error;
-	RegisterIdResponse mCallback;
 
 	public interface RegisterIdResponse {
 		void registrationResult(int result);
@@ -28,20 +26,6 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 
 	public RegisterID(Activity act) {
 		baseURL = act.getString(R.string.service_base_url);
-		try {
-			mCallback = (RegisterIdResponse) act;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(act.toString() + " must implement RegisterIdResponse");
-		}
-	}
-
-	public RegisterID(LoginFragment loginFrag, Activity act) {
-		baseURL = act.getString(R.string.service_base_url);
-		try {
-			mCallback = (RegisterIdResponse) loginFrag;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(loginFrag.toString() + " must implement RegisterIdResponse");
-		}
 	}
 
 	public String getSuccess() {
@@ -90,6 +74,18 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 				data.put("referral", s[3]);
 				Log.d("GAtest", "referral:" + s[3]);
 			}
+			if (s[4].length() > 0) {
+				data.put("birthday", s[4]);
+				Log.d("GAtest", "birthday:" + s[4]);
+			}
+			if (s[5].length() > 0) {
+				data.put("gender", s[5]);
+				Log.d("GAtest", "gender:" + s[5]);
+			}
+			if (s[6].length() > 0) {
+				data.put("location", s[6]);
+				Log.d("GAtest", "location:" + s[6]);
+			}
 			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
 			httpput.setHeader("Content-Type", "application/json");
@@ -113,7 +109,8 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 
 	@Override
 	protected void onPostExecute(Integer result) {
-		mCallback.registrationResult(result);
+		// override in calling class
+		// result == 0 success
 	}
 
 	private String getStringFromJSON(JSONObject json, String key) {

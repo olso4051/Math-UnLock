@@ -30,7 +30,7 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.utils.GCMHelper;
 
-public class LoginFragment extends Fragment implements View.OnClickListener, RegisterID.RegisterIdResponse {
+public class LoginFragment extends Fragment implements View.OnClickListener {
 
 	OnFinishedListener mCallback;
 
@@ -40,7 +40,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 	}
 
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
-			mPrefUserFacebookName;
+			mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation;
 	private float transY = 0;
 	private EditText username;
 	private Button login, skip;
@@ -89,6 +89,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		mPrefUserLoggedIn = ctx.getString(R.string.pref_user_logged_in);
 		mPrefUserSkipped = ctx.getString(R.string.pref_user_skipped);
 		mPrefUserFacebookName = ctx.getString(R.string.pref_user_facebook_name);
+		mPrefUserFacebookBirth = ctx.getString(R.string.pref_user_facebook_birth);
+		mPrefUserFacebookGender = ctx.getString(R.string.pref_user_facebook_gender);
+		mPrefUserFacebookLocation = ctx.getString(R.string.pref_user_facebook_location);
 
 		// check if user is logged in
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
@@ -175,10 +178,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 			editUserInfo.putBoolean(mPrefUserSkipped, true).commit();
 			startMainActivity();
 		} else if (view.getId() == R.id.authButton) {
+			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
 				session.openForRead(new Session.OpenRequest(this).setPermissions(
-						Arrays.asList("public_profile", "user_friends", "user_birthday", "user_location")).setCallback(loginCallback));
+						Arrays.asList("public_profile",/*"user_friends",*/"user_birthday", "user_location")).setCallback(loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {
@@ -197,8 +201,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 					public void onCompleted(GraphUser user, Response response) {
 						if (user != null) {
 							SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName()).putBoolean(mPrefUserSkipped, false)
-									.commit();
+							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
+									.putString(mPrefUserFacebookBirth, user.getBirthday())
+									.putString(mPrefUserFacebookGender, user.getProperty("gender").toString())
+									.putString(mPrefUserFacebookLocation, user.getLocation().getProperty("name").toString())
+									.putBoolean(mPrefUserSkipped, false).commit();
 							Log.d("GAtest", user.toString());
 							logIn();
 						}
@@ -221,6 +228,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
 		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
 		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
+		String birth = sharedPrefsUserInfo.getString(mPrefUserFacebookBirth, "");
+		String gender = sharedPrefsUserInfo.getString(mPrefUserFacebookGender, "");
+		String location = sharedPrefsUserInfo.getString(mPrefUserFacebookLocation, "");
 		String uName = sharedPrefsUserInfo.getString(mPrefUserFacebookName, "");
 		if (uName.equals(""))
 			uName = username.getText().toString();
@@ -231,36 +241,25 @@ public class LoginFragment extends Fragment implements View.OnClickListener, Reg
 		if (imm != null && focus != null) {
 			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
-		attemptLogin(uName, regID, userID, referrer);
+		attemptLogin(uName, regID, userID, referrer, birth, gender, location);
 
 		startAnimationProgress();
 	}
 
-	private void attemptLogin(String username, String regID, String userID, String referral) {
-		new RegisterID(this, getActivity()) {
+	private void attemptLogin(String username, String regID, String userID, String referral, String birth, String gender, String location) {
+		new RegisterID(getActivity()) {
 			@Override
-			protected Integer doInBackground(String... s) {
-				return super.doInBackground(s);
-				/* uncomment this section to test the progress bar and comment the line above*/
-				/*try{
-				    Thread.sleep(3000);
-				}catch (InterruptedException e){
-				    return 2;
+			protected void onPostExecute(Integer result) {
+				if (result == 0) {
+					// success
+					startMainActivity();
+				} else if (result == 1) {
+					// network error
+					Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
+					endAnimationProgress();
 				}
-				return 3;*/
 			}
-		}.execute(username, regID, userID, referral);
-	}
-
-	public void registrationResult(int result) {
-		if (result == 0) {
-			// success
-			startMainActivity();
-		} else if (result == 1) {
-			// network error
-			Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
-			endAnimationProgress();
-		}
+		}.execute(username, regID, userID, referral, birth, gender, location);
 	}
 
 	public void GCMRegistrationDone(boolean result) {
