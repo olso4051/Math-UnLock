@@ -80,6 +80,8 @@
     <string name="fragment_login_logging_in">Logging In&#8230;</string>
     <string name="logout_receiver_filter">com.olyware.mathlock.ACTION_LOGOUT</string>
     <string name="user_id_receiver_filter">com.olyware.mathlock.RECEIVE_USERID</string>
+    <string name="login">Log In with Facebook</string>
+    <string name="logout">Log Out</string>
     
     <!-- Friend Activity -->
     <string name="challenge">Challenge!</string>

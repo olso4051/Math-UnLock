@@ -36,7 +36,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 	// Container Activity must implement this interface
 	public interface OnFinishedListener {
-		public void onFinish();
+		public void restart();
 	}
 
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
@@ -53,14 +53,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			onSessionStateChange(session, state, exception, false);
 		}
 	};
-	private Session.StatusCallback loginCallback = new SessionStatusCallback();
-
-	private class SessionStatusCallback implements Session.StatusCallback {
+	private Session.StatusCallback loginCallback = new Session.StatusCallback() {
 		@Override
 		public void call(Session session, SessionState state, Exception exception) {
 			onSessionStateChange(session, state, exception, true);
 		}
-	}
+	};
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -92,13 +90,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		mPrefUserFacebookBirth = ctx.getString(R.string.pref_user_facebook_birth);
 		mPrefUserFacebookGender = ctx.getString(R.string.pref_user_facebook_gender);
 		mPrefUserFacebookLocation = ctx.getString(R.string.pref_user_facebook_location);
-
-		// check if user is logged in
-		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		if (sharedPrefsUserInfo.getBoolean(mPrefUserLoggedIn, false)) {
-			startMainActivity();
-		}
-
 	}
 
 	@Override
@@ -116,7 +107,14 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
 		authButton.setOnClickListener(this);
 		authButton.setFragment(this);
-		// authButton.setReadPermissions(Arrays.asList("public_profile", "user_friends", "user_birthday", "user_location"));
+
+		if (getArguments().getBoolean("facebook_logout")) {
+			Log.d("test", "facebook_logout");
+			Session session = Session.getActiveSession();
+			if (!session.isClosed()) {
+				session.closeAndClearTokenInformation();
+			}
+		}
 
 		setAlpha();
 
@@ -181,19 +179,22 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
+				Log.d("test", "openForRead");
 				session.openForRead(new Session.OpenRequest(this).setPermissions(
-						Arrays.asList("public_profile",/*"user_friends",*/"user_birthday", "user_location")).setCallback(loginCallback));
+						Arrays.asList("public_profile",/* "user_friends",*/"user_birthday", "user_location")).setCallback(loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {
+				Log.d("test", "openActiveSession");
 				Session.openActiveSession(getActivity(), this, true, loginCallback);
 			}
 		}
 	}
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception, boolean fromFacebookButton) {
+		Log.d("test", "onSessionStateChange + fromFacebookButton = " + fromFacebookButton);
 		if (state.isOpened()) {
-			Log.d("GAtest", "Logged in... " + fromFacebookButton);
+			Log.d("test", "Logged in... " + fromFacebookButton);
 			if (fromFacebookButton) {
 				// Request user data and show the results
 				Request.newMeRequest(session, new Request.GraphUserCallback() {
@@ -213,13 +214,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				}).executeAsync();
 			}
 		} else if (state.isClosed()) {
-			Log.d("GAtest", "Logged out... " + fromFacebookButton);
+			Log.d("test", "Logged out... " + fromFacebookButton);
 		}
 	}
 
-	/**
-	 * Saves user info and switches to the main activity
-	 */
 	void logIn() {
 		login.setEnabled(false);
 		skip.setEnabled(false);
@@ -263,7 +261,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	public void GCMRegistrationDone(boolean result) {
-		login.setEnabled(true);
+		if (login != null)
+			login.setEnabled(true);
 	}
 
 	// FOR REFERENCE
@@ -386,11 +385,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
 		editUserInfo.putBoolean(mPrefUserLoggedIn, true).commit();
-		Intent i = new Intent(getActivity(), MainActivity.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		startActivity(i);
-		mCallback.onFinish();
+
+		mCallback.restart();
 	}
 }

@@ -138,10 +138,11 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 
 		// set logout button title depending on logged in setting
 		Preference logoutButton = (PreferenceScreen) findPreference("logout_button");
-		if (!sharedPrefsUsers.getBoolean(mPrefUserSkipped, false))
+		if (!sharedPrefsUsers.getBoolean(mPrefUserSkipped, false)) {
 			logoutButton.setTitle(getString(R.string.settings_logout));
-		else
+		} else {
 			logoutButton.setTitle(getString(R.string.settings_login));
+		}
 		final Intent sIntent = new Intent(this, ScreenService.class);
 		logoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			@Override
@@ -151,9 +152,10 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				ctx.stopService(sIntent);
 				Intent broadcastIntent = new Intent(getString(R.string.logout_receiver_filter));
 				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);
-				Intent loginIntent = new Intent(ctx, LoginActivity.class);
+				Intent loginIntent = new Intent(ctx, MainActivity.class);
 				loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				loginIntent.putExtra("facebook_logout", true);
 				startActivity(loginIntent);
 				finish();
 				return true;

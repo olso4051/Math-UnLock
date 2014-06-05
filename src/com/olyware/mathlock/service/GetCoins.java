@@ -19,10 +19,6 @@ public class GetCoins extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
 	private String coins, error;
 
-	public interface ConfirmIdResponse {
-		void confirmIDResult(int result);
-	}
-
 	public GetCoins(Context ctx) {
 		baseURL = ctx.getString(R.string.service_base_url);
 	}

@@ -20,10 +20,6 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
 	private String success, error;
 
-	public interface RegisterIdResponse {
-		void registrationResult(int result);
-	}
-
 	public RegisterID(Activity act) {
 		baseURL = act.getString(R.string.service_base_url);
 	}

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/LoginTheme"
+    android:orientation="vertical" >
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,18 +31,6 @@
 		        android:id="@+id/authButton"
 		        style="@style/SpanningView.Button"
 		        android:layout_gravity="center_horizontal" />
-		        <!-- android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        
-		        android:layout_marginTop="30dp" />-->
-            
-	        <!-- <Button
-	            android:id="@+id/fragment_login_button_login_facebook"
-	            style="@style/SpanningView.Button"
-	            android:layout_gravity="center_horizontal"
-	            android:enabled="false"
-	            android:gravity="center_vertical|center_horizontal"
-	            android:text="Facebook Login" />-->
 	        
 	        <LinearLayout
 		        style="@style/SpanningView"

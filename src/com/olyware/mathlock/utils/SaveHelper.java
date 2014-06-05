@@ -52,10 +52,10 @@ public class SaveHelper {
 
 	public static Bitmap loadBitmap(Context context, String picName, Bitmap compareBitmap) {
 		Bitmap b = loadBitmap(context, picName);
-		if (compare(b, compareBitmap))
-			return compareBitmap;
-		else
-			return null;
+		if (b != null)
+			if (compare(b, compareBitmap))
+				return compareBitmap;
+		return null;
 	}
 
 	public static boolean SaveTextFilePublic(String txt) {
