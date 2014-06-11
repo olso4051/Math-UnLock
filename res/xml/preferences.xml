@@ -76,6 +76,14 @@
 		        android:title="@string/enable_tracking"
 		        android:summary="@string/enable_tracking_summary"
 		        android:defaultValue="true"/>
+	        <!-- <ListPreference
+		        android:key="sponsored"
+		        android:title="@string/enable_sponsored"
+		        android:summary="@string/enable_sponsored_summary"
+		        android:dialogTitle="@string/enable_sponsored"
+		        android:entries="@array/sponsored_entries"
+		        android:entryValues="@array/sponsored_values"
+		        android:defaultValue="@string/default_sponsored_entry" />-->
 	    </PreferenceScreen>
 	</PreferenceCategory>
 	<PreferenceCategory

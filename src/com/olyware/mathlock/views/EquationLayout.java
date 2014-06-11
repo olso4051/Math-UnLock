@@ -57,10 +57,11 @@ public class EquationLayout {
 	private class Attributes {
 		private Att att;
 		private int bracketGroup;
-		private boolean Shown;
+		private boolean Shown, readable;
 
 		public Attributes(Att att, boolean Shown, int bracketGroup) {
 			this.Shown = Shown;
+			this.readable = Shown;
 			this.bracketGroup = bracketGroup;
 			this.att = att;
 		}
@@ -77,12 +78,17 @@ public class EquationLayout {
 			return Shown;
 		}
 
+		public boolean getShownOrReadable() {
+			return (Shown || readable);
+		}
+
 		public int getBracketGroup() {
 			return bracketGroup;
 		}
 
-		public void setShown(boolean Shown) {
+		public void setShown(boolean Shown, boolean readable) {
 			this.Shown = Shown;
+			this.readable = readable;
 		}
 
 		public void setBracketGroup(int bracketGroup) {
@@ -508,6 +514,15 @@ public class EquationLayout {
 		setSize();
 	}
 
+	public String getReadableText() {
+		String shownString = "";
+		for (int i = 0; i < attributes.size(); i++) {
+			if (attributes.get(i).getShownOrReadable())
+				shownString = shownString + textAttributes.get(i).getText();
+		}
+		return equationText;
+	}
+
 	private void parseEquation() {
 		// find keywords and replace with corresponding characters
 		findKeywords();
@@ -602,7 +617,7 @@ public class EquationLayout {
 			attributes.add(new Attributes(Att.Normal, true, 0));
 			if (currentChar == '\\') {
 				attributes.get(i).setAtt(Att.Bracket);
-				attributes.get(i).setShown(false);
+				attributes.get(i).setShown(false, false);
 				i++;
 				currentChar = equationText.charAt(i);
 				attributes.add(new Attributes(Att.Normal, true, 0));
@@ -629,22 +644,22 @@ public class EquationLayout {
 				bracketGroups.add(new BracketGroup());
 				switch (currentChar) {
 				case '√':
-					attributes.get(i).setShown(false);
+					attributes.get(i).setShown(false, true);
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.SquareRoot);
 					break;
 				case '|':
-					attributes.get(i).setShown(false);
+					attributes.get(i).setShown(false, true);
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.Abs);
 					break;
 				case '≐':
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.Limit);
 					break;
 				case '∀':
-					attributes.get(i).setShown(false);
+					attributes.get(i).setShown(false, false);
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.Simplify);
 					break;
 				case '⊦':
-					attributes.get(i).setShown(false);
+					attributes.get(i).setShown(false, false);
 					bracketGroups.get(bracketGroups.size() - 1).setModifier(Att.Reduce);
 					break;
 				default:
@@ -665,7 +680,7 @@ public class EquationLayout {
 				}
 			} else if (currentChar == ',') {
 				attributes.get(i).setAtt(Att.Bracket);
-				attributes.get(i).setShown(false);
+				attributes.get(i).setShown(false, true);
 				if (subBracket) {
 					closed.add(new Bracket(i - 1, bSet.get(bSet.size() - 1)));
 					bSet.remove(bSet.size() - 1);
@@ -681,7 +696,7 @@ public class EquationLayout {
 			} else if ((currentChar == '(') || (currentChar == '[') || (currentChar == '{')) {
 				set++;
 				attributes.get(i).setAtt(Att.Bracket);
-				attributes.get(i).setShown(false);
+				attributes.get(i).setShown(false, true);
 				opened.add(new Bracket(i, set));
 				bSet.add(set);
 				bracketGroups.add(new BracketGroup());
@@ -689,7 +704,7 @@ public class EquationLayout {
 				attributes.get(i).setBracketGroup(currentSet);
 			} else if ((currentChar == ')') || (currentChar == ']') || (currentChar == '}')) {
 				attributes.get(i).setAtt(Att.Bracket);
-				attributes.get(i).setShown(false);
+				attributes.get(i).setShown(false, true);
 				if (subBracket) {
 					closed.add(new Bracket(i - 1, bSet.get(bSet.size() - 1)));
 					bSet.remove(bSet.size() - 1);
@@ -702,7 +717,7 @@ public class EquationLayout {
 				currentSet = bSet.get(bSet.size() - 1);
 			} else if ((currentChar == '$') || (currentChar == '_') || (currentChar == '^')) {
 				attributes.get(i).setBracketGroup(currentSet);
-				attributes.get(i).setShown(false);
+				attributes.get(i).setShown(false, (currentChar != '$'));
 			} else {
 				attributes.get(i).setBracketGroup(currentSet);
 				if ((i >= 1) && (i <= equationText.length() - 2)) {
@@ -716,7 +731,7 @@ public class EquationLayout {
 					else if ((charAfter == '/') && (equationText.charAt(i + 2) != '/') && (equationText.charAt(i) != '/'))
 						attributes.get(i).setAtt(Att.Numerator);
 					else if ((charAfter == '/') && (equationText.charAt(i) == '/'))
-						attributes.get(i).setShown(false);
+						attributes.get(i).setShown(false, false);
 				}
 			}
 		}

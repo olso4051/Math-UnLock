@@ -6,6 +6,7 @@ import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -41,12 +42,17 @@ import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.LoggingBehavior;
+import com.facebook.Settings;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.FacebookDialog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
@@ -89,6 +95,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
+	// final private String PENDING_ACTION_BUNDLE_KEY = "com.olyware.mathlock:PendingAction";
 
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
@@ -146,6 +153,21 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private List<ApplicationInfo> apps;
 
 	private LoginFragment loginFragment;
+	private UiLifecycleHelper uiHelper;
+	// private PendingAction pendingAction = PendingAction.NONE;
+	private Bitmap HelpQuestionImage;
+	private ProgressDialog progressDialog;
+
+	/*private enum PendingAction {
+		NONE, POST_PHOTO
+	}*/
+
+	/*private Session.StatusCallback callback = new Session.StatusCallback() {
+		@Override
+		public void call(Session session, SessionState state, Exception exception) {
+			onSessionStateChange(session, state, exception);
+		}
+	};*/
 
 	public static Context getContext() {
 		return ctx;
@@ -173,6 +195,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		public void onReceive(Context context, Intent intent) {
 			// screen has come on
 			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
+			startCountdown();
 			showWallpaper();
 		}
 	};
@@ -275,6 +298,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		loggedIn = sharedPrefsUserInfo.getBoolean(getString(R.string.pref_user_logged_in), false);
 		if (!loggedIn) {
+			Settings.addLoggingBehavior(LoggingBehavior.REQUESTS);
 			setTheme(R.style.LoginTheme);
 			if (savedInstanceState == null) {
 				loginFragment = new LoginFragment();
@@ -291,6 +315,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else {
 			setTheme(R.style.AppThemeWall);
 			setContentView(R.layout.activity_main);
+
+			uiHelper = new UiLifecycleHelper(this, null);
+			uiHelper.onCreate(savedInstanceState);
+			/*if (savedInstanceState != null) {
+				String name = savedInstanceState.getString(PENDING_ACTION_BUNDLE_KEY);
+				pendingAction = PendingAction.valueOf(name);
+			}*/
+
 			IntentFilter logoutFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
 			LocalBroadcastManager.getInstance(this).registerReceiver(finishBroadcast, logoutFilter);
 			IntentFilter screenOnFilter = new IntentFilter(getString(R.string.screen_on_receiver_filter));
@@ -398,7 +430,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				@Override
 				public void Ready() {
 					answerView.setAnswers(answersRandom, answerLoc);
-					setImage();
 				}
 			});
 			Display display = getWindowManager().getDefaultDisplay();
@@ -434,6 +465,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							questionWorth = 0;
 							if (attached)
 								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+							HelpQuestionImage = takeScreenShot();
+							joystick.askToShare();
 						} else {
 							timerHandler.postDelayed(this, decreaseRate);
 							if (attached)
@@ -493,6 +526,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			answerIncorrectClick.release();
 			answerCorrectClick.release();
 			buttonClick.release();
+
+			uiHelper.onPause();
 		}
 		super.onPause();
 	}
@@ -505,6 +540,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 			joystick.removeCallbacks();
 			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "end");
+		}
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+			progressDialog = null;
 		}
 		super.onStop();
 	}
@@ -523,8 +562,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			joystick.removeCallbacks();
 			LocalBroadcastManager.getInstance(this).unregisterReceiver(finishBroadcast);
 			LocalBroadcastManager.getInstance(this).unregisterReceiver(screenOnBroadcast);
+
+			uiHelper.onDestroy();
 		}
 		super.onDestroy();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (loggedIn)
+			uiHelper.onSaveInstanceState(outState);
+		// outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
 	}
 
 	@Override
@@ -536,6 +585,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		super.onResume();
 		GCMHelper.checkPlayServices(this);
 		if (loggedIn) {
+			uiHelper.onResume();
 			if (locked && quizMode)
 				quizMode = joystick.setQuizMode(false);
 
@@ -597,8 +647,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// if (changed)
 			if (!unlocking)
 				setProblemAndAnswer();
-			else
-				startCountdown();
 
 			if (!UnlockedPackages)
 				displayInfo(true);
@@ -617,9 +665,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				sharedPrefs.edit().putLong("lastTimeBackup", currentTime).commit();
 				EZ.requestBackup(this);
 			}
-
-			// set image if it was set when the screen was off
-			setImage();
 
 			if (fromSettings) {
 				Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[0], EggMaxValues[0]));
@@ -696,6 +741,38 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (loggedIn) {
+			uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
+				@Override
+				public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
+					if (progressDialog != null) {
+						progressDialog.dismiss();
+						progressDialog = null;
+					}
+					Log.d("test", String.format("Error: %s", error.toString()));
+				}
+
+				@Override
+				public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
+					if (progressDialog != null) {
+						progressDialog.dismiss();
+						progressDialog = null;
+					}
+					boolean didCancel = FacebookDialog.getNativeDialogDidComplete(data);
+					String completionGesture = FacebookDialog.getNativeDialogCompletionGesture(data);
+					String postID = FacebookDialog.getNativeDialogPostId(data);
+					if (didCancel)
+						Log.d("test", "facebook post didCancel");
+					if (completionGesture.equals("post"))
+						Log.d("test", "successful facebook post");
+					if (completionGesture.equals("cancel"))
+						Log.d("test", "facebook cancel");
+					if (postID == null)
+						Log.d("test", "post ID is null (postID==null) = " + (postID == null));
+					else if (postID.equals("null"))
+						Log.d("test", "post ID is null (postID.equals(\"null\") = " + (postID.equals("null")));
+					Log.d("test", "post ID = " + postID);
+				}
+			});
 			if (resultCode == RESULT_OK) {
 				if (requestCode == REQUEST_PICK_APP) {
 					sharedPrefsApps = getSharedPreferences("Apps", 0);
@@ -719,6 +796,57 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else
 			super.onActivityResult(requestCode, resultCode, data);
 	}
+
+	/*private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+		if (pendingAction != PendingAction.NONE
+				&& (exception instanceof FacebookOperationCanceledException || exception instanceof FacebookAuthorizationException)) {
+			new AlertDialog.Builder(this).setTitle(R.string.cancelled).setMessage(R.string.permission_not_granted)
+					.setPositiveButton(R.string.ok, null).show();
+			pendingAction = PendingAction.NONE;
+		} else if (state == SessionState.OPENED_TOKEN_UPDATED) {
+			handlePendingAction();
+		}
+		// updateUI();
+	}
+
+	private void handlePendingAction() {
+		PendingAction previouslyPendingAction = pendingAction;
+		// These actions may re-set pendingAction if they are still pending, but we assume they
+		// will succeed.
+		pendingAction = PendingAction.NONE;
+
+		if (previouslyPendingAction == PendingAction.POST_PHOTO) {
+			postPhoto();
+		}
+	}
+
+	private void postPhoto() {
+		if (hasPublishPermission()) {
+			Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_login);
+			Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
+				@Override
+				public void onCompleted(Response response) {
+					showPublishResult(getString(R.string.successful_photo_post), response.getError());
+				}
+			});
+			request.executeAsync();
+		} else {
+			pendingAction = PendingAction.POST_PHOTO;
+		}
+	}
+
+	private boolean hasPublishPermission() {
+		Session session = Session.getActiveSession();
+		return session != null && session.getPermissions().contains("publish_actions");
+	}
+
+	private void showPublishResult(String message, FacebookRequestError error) {
+		if (error == null) {
+			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(this, getString(R.string.error), Toast.LENGTH_LONG).show();
+		}
+	}*/
 
 	private void setApps() {
 		sharedPrefsApps = getSharedPreferences("Apps", 0);
@@ -800,6 +928,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			int h = sharedPrefs.getInt("layout_height", 0);
 			int statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
 			if (w > 0 && h > 0) {
+				isWallpaperShown = true;
 				// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
 				Bitmap bitmap = background.getBitmap();
 				Bitmap bitmap2 = background.getBitmap();
@@ -820,7 +949,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
 					setLayoutBackground(transitionBackground);
 					transitionBackground.startTransition(1000);
-					isWallpaperShown = true;
 				} else {
 					final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
 
@@ -834,7 +962,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
 								setLayoutBackground(transitionBackground);
 								transitionBackground.startTransition(1000);
-								isWallpaperShown = true;
 							}
 						}
 					}.execute(bitmap);
@@ -1334,6 +1461,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			unlocking = false;
 			startActivity(new Intent(this, FriendActivity.class));
 			break;
+		case 16:	// share was selected
+			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
+			ShareHelper.shareFacebook(this, uiHelper, HelpQuestionImage, problem.getReadableText());
 		}
 	}
 
@@ -1446,6 +1576,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private void displayInfo(boolean first) {
 		if (!dialogOn) {
+
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
 				builder.setTitle(R.string.info_title_first);
@@ -1463,10 +1594,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				builder.setPositiveButton(R.string.share_with_other, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
-						// TODO make this work for images, currently null is passed as the image, like to pass app thumbnail
-						// String fileName = "android.resource://" + MainActivity.this.getPackageName() + "/" + R.drawable.ic_launcher;
-						// String fileName = "content://" + MainActivity.this.getPackageName() + "/ic_launcher.png";
-						// ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
 						ShareHelper.share(ctx, null, null, ctx.getString(R.string.share_message), link);
 						fromShare = true;
 					}
@@ -1484,7 +1611,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				builder.setNegativeButton(R.string.share_with_facebook, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
-						ShareHelper.shareFacebook(ctx);
+						ShareHelper.shareFacebook(ctx, uiHelper, ShareHelper.buildShareURL(ctx));
 						fromShare = true;
 					}
 				});
@@ -1655,5 +1782,36 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void RegisterIDResult(int result) {
 		// TODO Auto-generated method stub
 		Log.d("test", "register id result = " + result);
+		if (result == 0) {
+			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+			prefsGA.edit().putBoolean("reg_uploaded", true).commit();
+		}
+	}
+
+	@SuppressLint("NewApi")
+	private Bitmap takeScreenShot() {
+		View view = this.getWindow().getDecorView();
+		view.setDrawingCacheEnabled(true);
+		view.buildDrawingCache();
+		Bitmap b1 = view.getDrawingCache();
+		/*Display display = getWindowManager().getDefaultDisplay();
+		Rect frame = new Rect();
+		this.getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+		int statusBarHeight = frame.top;
+		int sizeY, sizeX;
+		if (android.os.Build.VERSION.SDK_INT < 13) {
+			sizeY = display.getHeight();
+			sizeX = display.getWidth();
+		} else {
+			Point size = new Point();
+			display.getSize(size);
+			sizeY = size.y;
+			sizeX = size.x;
+		}*/
+
+		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, sizeX, sizeY - statusBarHeight);
+		Bitmap b = Bitmap.createBitmap(b1, 0, 0, b1.getWidth(), b1.getHeight());
+		view.destroyDrawingCache();
+		return b;
 	}
 }

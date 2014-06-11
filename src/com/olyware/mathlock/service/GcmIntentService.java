@@ -52,9 +52,6 @@ public class GcmIntentService extends IntentService {
 				if (!userID.equals("")) {
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 					sharedPrefsUserInfo.edit().putString(getString(R.string.pref_user_userid), userID).commit();
-					/*Intent iUserID = new Intent(LoginActivity.RECEIVE_USERID);
-					iUserID.putExtra("user_id", userID);
-					LocalBroadcastManager.getInstance(this).sendBroadcast(iUserID);*/
 					new ConfirmID(this) {
 						@Override
 						protected void onPostExecute(Integer result) {

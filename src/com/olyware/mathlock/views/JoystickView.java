@@ -2,6 +2,7 @@ package com.olyware.mathlock.views;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -53,7 +54,7 @@ public class JoystickView extends View {
 
 	private int barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP, answerHintSizeSP, Width, Height, dstHeight, diffX1,
 			diffY1, diffX, diffY, spacing, rUnlock, rUnlockChange, rBig, rSmall, rApps, swipeLengthOption, swipeLength1, type = 0,
-			correctLoc, correctGuess, wrongGuess, selectAppDrag, numAnswersDisplayed = 0, appCenterVert, appCenterHorz;
+			correctLoc, shareLoc, correctGuess, wrongGuess, selectAppDrag, numAnswersDisplayed = 0, appCenterVert, appCenterHorz;
 	private int state = 0;// state: direction answers are going (0=up-right, 1=up-left, 2=down-left, 3=down-right)
 	private long tapTimer, lastTime = 0;
 	private float answerSizePix, answerHintSizePix, optionX, optionY, degrees = 0, radians = 0, degreeStep = degreeStepInitial,
@@ -61,6 +62,7 @@ public class JoystickView extends View {
 	private double touchX, touchY, startX, startY, appAngle;
 	private boolean quizMode, quickUnlock, selectUnlock, options = false, selectSideBar = false, showHint = false, problem = true,
 			wrong = false, paused = false, measured = false, isFirstApp = false, isFirstApp2 = false;
+	private String shareOldAnswer;
 
 	private int[] selectLeft = new int[5], selectRight = new int[5];
 	private double[] X = new double[NumAnswers], Y = new double[NumAnswers];
@@ -337,6 +339,7 @@ public class JoystickView extends View {
 		};
 		tapTimer = 0;
 		correctLoc = 0;
+		shareLoc = -1;
 		quickUnlock = false;
 		centerOffset = 0;
 		d = new ArrayList<Drawable>();
@@ -560,8 +563,13 @@ public class JoystickView extends View {
 	}
 
 	public void setAnswers(String answers[], int correctLoc) {
+		setAnswers(answers, correctLoc, -1);
+	}
+
+	public void setAnswers(String answers[], int correctLoc, int shareLoc) {
 		this.answers = new String[] { answers[0], answers[1], answers[2], answers[3], res.getString(R.string.unknown) };
 		this.correctLoc = correctLoc;
+		this.shareLoc = shareLoc;
 		this.quickUnlock = false;
 		centerOffset = 0;
 		if (measured) {
@@ -591,7 +599,29 @@ public class JoystickView extends View {
 		}
 	}
 
+	public void askToShare() {
+		if (shareLoc < 0) {
+			Random rand = new Random();
+			int loc = rand.nextInt(3);
+			if (loc >= correctLoc) {
+				loc++;
+			}
+			shareLoc = loc;
+			shareOldAnswer = answers[loc];
+			answers[loc] = res.getString(R.string.ask_to_share0);
+			setAnswers(answers, correctLoc, shareLoc);
+		}
+	}
+
+	public void resetAskToShare() {
+		if (shareLoc >= 0) {
+			answers[shareLoc] = shareOldAnswer;
+			setAnswers(answers, correctLoc);
+		}
+	}
+
 	public void moveCorrect(int loc) {
+		shareLoc = -1;
 		if (correctLoc != loc) {
 			String temp = answers[loc];
 			answers[loc] = answers[correctLoc];
@@ -1325,9 +1355,12 @@ public class JoystickView extends View {
 										apps.get(selection).setSelect(true);
 							}
 						} else if (select >= 0) {
-							if (send)
-								listener.OnSelect(select, true, 0);
-							else {
+							if (send) {
+								if (select == shareLoc) {
+									listener.OnSelect(16, true, 0);
+								} else
+									listener.OnSelect(select, true, 0);
+							} else {
 								selectAnswers[select] = true;
 							}
 						}

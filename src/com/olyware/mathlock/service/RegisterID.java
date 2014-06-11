@@ -48,6 +48,7 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			endpoint = endpoint + "/update";
 			s[3] = "";
 		}
+
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
 		HttpEntity entity;
 		String fullResult;
@@ -82,6 +83,7 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 				data.put("location", s[6]);
 				Log.d("GAtest", "location:" + s[6]);
 			}
+			Log.d("test", "JSON to register: " + data.toString());
 			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
 			httpput.setHeader("Content-Type", "application/json");
@@ -90,6 +92,9 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			jsonResponse = new JSONObject(fullResult);
+		} catch (JSONException j) {
+			j.printStackTrace();
+			return 1;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 1;
@@ -97,7 +102,10 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		if (entity != null && fullResult != null && jsonResponse != null) {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
-			return 0;
+			if (success.equals("true"))
+				return 0;
+			else
+				return 1;
 		} else {
 			return 1;
 		}

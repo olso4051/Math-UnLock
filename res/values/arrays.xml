@@ -54,6 +54,34 @@
         <item name="day">86400000</item>
     </string-array>
     
+    <string-array name="sponsored_entries">
+        <item name="max">Every time</item>
+        <item name="day10">10 per day</item>
+        <item name="day4">4 per day</item>
+        <item name="day1">1 per day</item>
+        <item name="week1">1 per week</item>
+        <item name="month1">1 per month</item>
+        <item name="never">never</item>
+    </string-array>
+    <string-array name="sponsored_values">
+        <item name="max">0</item>
+        <item name="day10">1</item>
+        <item name="day4">2</item>
+        <item name="day1">3</item>
+        <item name="week1">4</item>
+        <item name="month1">5</item>
+        <item name="never">6</item>
+    </string-array>
+    <string-array name="sponsored_times">
+        <item name="max">0</item>
+        <item name="day10">8640000</item>
+        <item name="day4">21600000</item>
+        <item name="day1">86400000</item>
+        <item name="week1">604800000</item>
+        <item name="month1">2419200000</item>
+        <item name="never">9223372036854775807</item>
+    </string-array>
+    
     <string-array name="times">
         <item>All</item>
         <item>Last Year</item>

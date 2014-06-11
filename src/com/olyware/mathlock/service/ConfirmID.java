@@ -18,7 +18,7 @@ import com.olyware.mathlock.R;
 
 public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
-	private boolean success, error;
+	private String success, error;
 
 	public interface ConfirmIdResponse {
 		void confirmIDResult(int result);
@@ -28,12 +28,18 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
-	public boolean getSuccess() {
-		return success;
+	public String getSuccess() {
+		if (success == null)
+			return "";
+		else
+			return success;
 	}
 
-	public boolean getError() {
-		return error;
+	public String getError() {
+		if (error == null)
+			return "";
+		else
+			return error;
 	}
 
 	@Override
@@ -63,9 +69,9 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			success = getBooleanFromJSON(jsonResponse, "success");
-			error = getBooleanFromJSON(jsonResponse, "error");
-			if (success)
+			success = getStringFromJSON(jsonResponse, "success");
+			error = getStringFromJSON(jsonResponse, "error");
+			if (success.equals("true"))
 				return 0;
 			else
 				return 1;
@@ -80,11 +86,11 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 		// result == 0 success
 	}
 
-	private boolean getBooleanFromJSON(JSONObject json, String key) {
+	private String getStringFromJSON(JSONObject json, String key) {
 		try {
-			return json.getBoolean(key);
+			return json.getString(key);
 		} catch (JSONException e) {
-			return false;
+			return "";
 		}
 	}
 }

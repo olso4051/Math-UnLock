@@ -39,6 +39,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		public void restart();
 	}
 
+	public static String getUserName(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_name), "");
+	}
+
+	public static String getUserID(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_userid), "");
+	}
+
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
 			mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation;
 	private float transY = 0;
@@ -245,9 +255,14 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void attemptLogin(String username, String regID, String userID, String referral, String birth, String gender, String location) {
+		Log.d("test", "attemptLoging username=" + username + "|regID.equals(\"\")=" + regID.equals("") + "|userID=" + userID + "|referral="
+				+ referral + "|birth=" + birth + "|gender=" + gender + "|location=" + location);
 		new RegisterID(getActivity()) {
 			@Override
 			protected void onPostExecute(Integer result) {
+				Log.d("test", "result=" + result);
+				Log.d("test", "success=" + getSuccess());
+				Log.d("test", "error=" + getError());
 				if (result == 0) {
 					// success
 					startMainActivity();

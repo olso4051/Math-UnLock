@@ -18,18 +18,34 @@
     <string name="service_base_url">http://api.learnwithhiq.com/</string>
     
     <!-- Sharing -->
+    <string name="ask_to_share0">Ask for help</string>
+    <string name="ask_to_share1">Challenge friends to answer</string>
+    <string name="ask_to_share2">Share question</string>
+    <string name="ask_to_share3">Share question</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="error">Error</string>
+    <string name="permission_not_granted">Facebook permissions were not granted</string>
+    <string name="successful_photo_post">Photo Post</string>
     <string name="share_link_url_easy">https://play.google.com/store/apps/details?id=com.olyware.mathlock</string>
     <string name="share_link_url">https://play.google.com/store/apps/details?id=com.olyware.mathlock&amp;referrer=utm_source%3Dapp%26utm_medium%3Dshare</string>
-    <string name="share_content_url">%2526utm_content%3D</string>
+    <string name="share_content_url">%26utm_content%3D</string>
     <string name="share_link_url_facebook">https://play.google.com/store/apps/details?id=com.olyware.mathlock%26referrer=utm_source%3Dapp%2526utm_medium%3Dshare%2526utm_content%3D</string>
+    <string name="share_encoded_link_url">https%3A%2f%2fplay.google.com/store/apps/details%3fid%3dcom.olyware.mathlock%2526referrer%3dutm_source%253Dapp%252526utm_medium%253Dshare%252526utm_content%253D</string>
+    <string formatted="false" name="share_encoded_link_url_easy">https%3A%2f%2fplay.google.com/store/apps/details%3fid%3dcom.olyware.mathlock</string>
     <string name="share_base_url_facebook">https://www.facebook.com/dialog/feed?app_id=</string>
     <string name="share_base_url_facebook_link">&amp;link=</string>
     <string name="share_base_url_facebook_base_name">&amp;name=</string>
     <string name="share_base_url_facebook_name">&amp;name=Hiq%20Lockscreen</string>
+    <string name="share_base_url_facebook_name_readable">Hiq Lockscreen</string>
     <string formatted="false" name="share_base_url_facebook_caption">&amp;caption=Unlock%20Your%20IQ%21</string>
+    <string name="share_base_url_facebook_caption_readable">Unlock Your IQ!</string>
     <string formatted="false" name="share_base_url_facebook_base_caption">&amp;caption=</string>
     <string formatted="false" name="share_base_url_facebook_description">&amp;description=Download%20Hiq%20From%20This%20Link%20And%20Get%2040%20Gold%20Coins</string>
+    <string name="share_base_url_facebook_description_readable">Download Hiq Today and Get 40 Gold Coins</string>
+    <string name="share_base_url_facebook_description_readable1">Download Hiq Today and You and</string>
+    <string name="share_base_url_facebook_description_readable2">Will Get 40 Gold Coins</string>
     <string name="share_base_url_facebook_picture">&amp;picture=http://learnwithhiq.com/images/icon3.png</string>
+    <string name="share_base_url_facebook_picture_readable">http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_redirect">&amp;redirect_uri=http://www.facebook.com</string>
     
     <!-- Notifications -->
@@ -49,6 +65,11 @@
     <string name="notification_message_referral1">You\'ve received</string>
     <string name="notification_message_referral2">coins from your referral network</string>
     <string name="notification_message_referral_facebook">Join me and Unlock Your IQ!</string>
+    
+    <!-- Preferences(default) -->
+    <string name="enable_sponsored">Sponsored question frequency</string>
+    <string name="enable_sponsored_summary">4 times a day</string>
+    <string name="default_sponsored_entry">2</string>
     
     <!-- Preferences(users) -->
     <string name="pref_user_info">user_info</string>

@@ -1,19 +1,37 @@
 package com.olyware.mathlock.utils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.facebook.FacebookException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.Session;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.FacebookDialog;
+import com.facebook.widget.WebDialog;
+import com.facebook.widget.WebDialog.OnCompleteListener;
+import com.olyware.mathlock.LoginFragment;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
 
-	public static void share(Context context, String subject, String fileName, String message, String link) {
-		// TODO maybe make this return a result if they actually shared the app
-		context.startActivity(getShareIntent(context, subject, fileName, message, link));
+	public static void share(Context context, String subject, Bitmap bitmap, String message, String link) {
+		context.startActivity(getShareIntent(context, subject, bitmap, message, link));
 	}
 
 	public static void shareFacebook(Context context) {
@@ -24,16 +42,105 @@ public class ShareHelper {
 		context.startActivity(getShareFacebookIntent(context, title, caption));
 	}
 
-	public static Intent getShareIntent(Context context, String subject, String fileName, String message, String link) {
+	public static void shareFacebook(final Context context, UiLifecycleHelper uiHelper, Bitmap image) {
+		shareFacebook(context, uiHelper, image, context.getString(R.string.share_base_url_facebook_name_readable));
+	}
+
+	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, final String title) {
+		final String link = buildShareURL(context);
+		final String userID = LoginFragment.getUserID(context);
+		final String questionID = "";
+		new UploadImage(context, image) {
+			@Override
+			protected void onPostExecute(Integer result) {
+				Log.d("test", "upload image result = " + result);
+				Log.d("test", "success = " + getSuccess());
+				Log.d("test", "url = " + getURL());
+				Log.d("test", "hash = " + getHash());
+				if (result == 0 || getSuccess().equals("true")) {
+					shareFacebook(context, uiHelper, getURL());
+				} else {
+					String share = "http://www.learnwithhiq.com/facebook/question.php";
+					try {
+						String linkEncoded = URLEncoder.encode(link, "utf-8");
+						String titleEncoded = URLEncoder.encode(title, "utf-8");
+						String nameEncoded = URLEncoder.encode(userID, "utf-8");
+						share = share + "?referral=" + linkEncoded;
+						share = share + "&title=" + titleEncoded;
+						share = share + "&name=" + nameEncoded;
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					shareFacebook(context, uiHelper, share);
+				}
+				super.onPostExecute(result);
+			}
+		}.execute(userID, title, link, questionID);
+
+	}
+
+	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, String link) {
+		Activity act = (Activity) context;
+		if (FacebookDialog.canPresentShareDialog(context.getApplicationContext(), FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
+			FacebookDialog.ShareDialogBuilder shareDialogBuilder1 = new FacebookDialog.ShareDialogBuilder(act).setLink(link/*share*/);
+			FacebookDialog shareDialog1 = shareDialogBuilder1.build();
+			uiHelper.trackPendingDialogCall(shareDialog1.present());
+		} else {
+			Bundle params = new Bundle();
+			params.putString("link", link);
+
+			WebDialog feedDialog = (new WebDialog.FeedDialogBuilder(context, Session.getActiveSession(), params)).setOnCompleteListener(
+					new OnCompleteListener() {
+						@Override
+						public void onComplete(Bundle values, FacebookException error) {
+							if (error == null) {
+								// When the story is posted, echo the success
+								// and the post Id.
+								final String postId = values.getString("post_id");
+								if (postId != null) {
+									Toast.makeText(context, "Posted story, id: " + postId, Toast.LENGTH_SHORT).show();
+								} else {
+									// User clicked the Cancel button
+									Toast.makeText(context, "Publish cancelled", Toast.LENGTH_SHORT).show();
+								}
+							} else if (error instanceof FacebookOperationCanceledException) {
+								// User clicked the "x" button
+								Toast.makeText(context, "Publish cancelled", Toast.LENGTH_SHORT).show();
+							} else {
+								// Generic, ex: network error
+								Toast.makeText(context, "Error posting story", Toast.LENGTH_SHORT).show();
+							}
+						}
+					}).build();
+			feedDialog.show();
+		}
+	}
+
+	public static Intent getShareIntent(Context context, String subject, Bitmap bitmap, String message, String link) {
 		Intent i = new Intent(Intent.ACTION_SEND);
-		i.setType("text/plain");
+		i.setType("image/png");
 		if (subject != null) {
 			i.putExtra(Intent.EXTRA_SUBJECT, subject);
 		}
-		if (fileName != null) {
-			// TODO make this work
-			Uri uri = Uri.parse(fileName);
-			i.putExtra(Intent.EXTRA_STREAM, uri);
+		if (bitmap != null) {
+			try {
+				File path = Environment.getExternalStorageDirectory();
+				File imageFile = new File(path, "fileToShare.png");
+				FileOutputStream fileOutPutStream;
+				fileOutPutStream = new FileOutputStream(imageFile);
+				bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutPutStream);
+				fileOutPutStream.flush();
+				fileOutPutStream.close();
+				Uri uri = Uri.parse("file://" + imageFile.getAbsolutePath());
+				i.putExtra(Intent.EXTRA_STREAM, uri);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		if (message != null) {
 			if (link != null)

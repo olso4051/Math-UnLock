@@ -17,6 +17,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.service.ConfirmID;
 import com.olyware.mathlock.service.RegisterID;
 
 public class GCMHelper {
@@ -54,6 +55,8 @@ public class GCMHelper {
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				storeRegistrationId(act, app, regID);
 				sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location);
+			} else if (!sharedPrefsUserInfo.getBoolean(act.getString(R.string.pref_user_confirmed), false) && !userID.equals("")) {
+				confirmID(act, userID);
 			}
 		} else {
 			Toast.makeText(act, "No valid Google Play Services APK found.", Toast.LENGTH_LONG).show();
@@ -199,5 +202,20 @@ public class GCMHelper {
 		} else {
 			Toast.makeText(act, "failed to create file with reg_id", Toast.LENGTH_LONG).show();
 		}*/
+	}
+
+	private static void confirmID(final Context ctx, String userID) {
+		new ConfirmID(ctx) {
+			@Override
+			protected void onPostExecute(Integer result) {
+				SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info),
+						Context.MODE_PRIVATE);
+				if (result == 0)
+					sharedPrefsUserInfo.edit().putBoolean(ctx.getString(R.string.pref_user_confirmed), true).commit();
+				else
+					sharedPrefsUserInfo.edit().putBoolean(ctx.getString(R.string.pref_user_confirmed), false).commit();
+			}
+
+		}.execute(userID);
 	}
 }
