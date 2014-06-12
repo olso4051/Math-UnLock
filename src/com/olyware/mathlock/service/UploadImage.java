@@ -65,7 +65,8 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 	@Override
 	protected Integer doInBackground(String... s) {
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpPost postRequest = new HttpPost(baseURL + "share/fb");
+		// HttpPost postRequest = new HttpPost(baseURL + "share/fb");
+		HttpPost postRequest = new HttpPost("http://dimension9.com/share/fb");
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
@@ -80,25 +81,22 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 			// multipartEntity.addPart("image", inputStreamBody);
 			multipartEntity.addPart("image", new ByteArrayBody(data, "test.png"));
 			// multipartEntity.addBinaryBody("image", data);
-			multipartEntity.addTextBody("user_id", s[0]);
-			multipartEntity.addTextBody("title", s[1]);
+
+			// multipartEntity.addTextBody("user_id", s[0]);
+			multipartEntity.addTextBody("user_id", "asdf");
+			// multipartEntity.addTextBody("title", s[1]);
+			multipartEntity.addTextBody("title", "Can you answer " + s[1] + " to unlock your phone?");
 			multipartEntity.addTextBody("url", s[2]);
-			multipartEntity.addTextBody("extension", "png");
-			multipartEntity.addTextBody("question_id", "blah");
-			multipartEntity.addTextBody("description", "blah");
-			Log.d("test", "multipartEntity = " + multipartEntity.toString());
-			Log.d("test", "HttpEntity = " + multipartEntity.build().toString());
+			// multipartEntity.addTextBody("extension", "png");
+			// multipartEntity.addTextBody("question_id", "blah");
+			multipartEntity.addTextBody("description", "Download Today and Get 40 Gold Coins");
 
 			postRequest.setEntity(multipartEntity.build());
-			Log.d("test", "postRequest = " + postRequest.toString());
 			HttpResponse response = httpClient.execute(postRequest);
-			Log.d("test", "response = " + response.toString());
 			entity = response.getEntity();
-			Log.d("test", "entity = " + entity.toString());
 			fullResult = EntityUtils.toString(entity);
 			Log.d("test", "fullResult = " + fullResult.toString());
 			jsonResponse = new JSONObject(fullResult);
-			Log.d("test", "jsonResponse = " + jsonResponse.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 1;

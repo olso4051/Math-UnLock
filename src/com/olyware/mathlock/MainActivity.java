@@ -95,6 +95,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
+
 	// final private String PENDING_ACTION_BUNDLE_KEY = "com.olyware.mathlock:PendingAction";
 
 	private int dMoney;// change in money after a question is answered
@@ -757,11 +758,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						progressDialog.dismiss();
 						progressDialog = null;
 					}
-					boolean didCancel = FacebookDialog.getNativeDialogDidComplete(data);
+					boolean didFinishNormal = FacebookDialog.getNativeDialogDidComplete(data);
 					String completionGesture = FacebookDialog.getNativeDialogCompletionGesture(data);
 					String postID = FacebookDialog.getNativeDialogPostId(data);
-					if (didCancel)
-						Log.d("test", "facebook post didCancel");
+					if (didFinishNormal)
+						Log.d("test", "facebook post didFinishNormal");
 					if (completionGesture.equals("post"))
 						Log.d("test", "successful facebook post");
 					if (completionGesture.equals("cancel"))
@@ -1790,27 +1791,35 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@SuppressLint("NewApi")
 	private Bitmap takeScreenShot() {
+		// Rect frame = new Rect();
 		View view = this.getWindow().getDecorView();
+		// View view = problem;
+		// view.getWindowVisibleDisplayFrame(frame);
 		view.setDrawingCacheEnabled(true);
 		view.buildDrawingCache();
 		Bitmap b1 = view.getDrawingCache();
-		/*Display display = getWindowManager().getDefaultDisplay();
-		Rect frame = new Rect();
-		this.getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-		int statusBarHeight = frame.top;
-		int sizeY, sizeX;
-		if (android.os.Build.VERSION.SDK_INT < 13) {
-			sizeY = display.getHeight();
-			sizeX = display.getWidth();
-		} else {
-			Point size = new Point();
-			display.getSize(size);
-			sizeY = size.y;
-			sizeX = size.x;
-		}*/
+		// int statusBarHeight = frame.top;
 
-		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, sizeX, sizeY - statusBarHeight);
-		Bitmap b = Bitmap.createBitmap(b1, 0, 0, b1.getWidth(), b1.getHeight());
+		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO)+
+		// statusBarHeight);
+		// Bitmap b = Bitmap.createBitmap(b1, 0, 0, b1.getWidth(), (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO));
+		// Bitmap b = Bitmap.createBitmap(b1, 0, 0, b1.getWidth(), b1.getHeight());
+		Log.d("test", "bitmap Height = " + b1.getHeight());
+		Log.d("test", "layout Height = " + layout.getHeight());
+		Log.d("test", "coins Height = " + coins.getHeight());
+		Log.d("test", "worth Height = " + worth.getHeight());
+		Log.d("test", "problem Height = " + problem.getHeight());
+		Log.d("test", "answerView Height = " + answerView.getHeight());
+		Log.d("test", "Joystick Height = " + joystick.getHeight());
+
+		int statusBarHeight = 0;
+		Log.d("test", "statusBarHeight = " + statusBarHeight);
+		if (layout.getHeight() > 0 && layout.getHeight() < b1.getHeight()) {
+			statusBarHeight += b1.getHeight() - layout.getHeight();
+			Log.d("test", "statusBarHeight = " + statusBarHeight);
+		}
+		Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), statusBarHeight
+				+ (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO));
 		view.destroyDrawingCache();
 		return b;
 	}

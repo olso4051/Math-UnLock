@@ -29,6 +29,7 @@ import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
+	final public static float FACEBOOK_LINK_RATIO = 1.9178082191780821917808219178082f;
 
 	public static void share(Context context, String subject, Bitmap bitmap, String message, String link) {
 		context.startActivity(getShareIntent(context, subject, bitmap, message, link));
@@ -49,6 +50,7 @@ public class ShareHelper {
 	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, final String title) {
 		final String link = buildShareURL(context);
 		final String userID = LoginFragment.getUserID(context);
+		final String name = LoginFragment.getUserName(context);
 		final String questionID = "";
 		new UploadImage(context, image) {
 			@Override
@@ -64,7 +66,7 @@ public class ShareHelper {
 					try {
 						String linkEncoded = URLEncoder.encode(link, "utf-8");
 						String titleEncoded = URLEncoder.encode(title, "utf-8");
-						String nameEncoded = URLEncoder.encode(userID, "utf-8");
+						String nameEncoded = URLEncoder.encode(name, "utf-8");
 						share = share + "?referral=" + linkEncoded;
 						share = share + "&title=" + titleEncoded;
 						share = share + "&name=" + nameEncoded;
@@ -73,8 +75,8 @@ public class ShareHelper {
 						e.printStackTrace();
 					}
 					shareFacebook(context, uiHelper, share);
+					// shareFacebook(context, uiHelper, "http://www.thestreet.com/story/12734024/6/10-most-bikeable-cities-in-the-us.html");
 				}
-				super.onPostExecute(result);
 			}
 		}.execute(userID, title, link, questionID);
 
