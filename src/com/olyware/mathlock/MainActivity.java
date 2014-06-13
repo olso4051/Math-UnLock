@@ -19,10 +19,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Point;
+import android.graphics.Shader;
+import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
+import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -34,10 +39,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v8.renderscript.Allocation;
-import android.support.v8.renderscript.Element;
-import android.support.v8.renderscript.RenderScript;
-import android.support.v8.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -77,14 +78,11 @@ import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.Purchase;
-import com.olyware.mathlock.utils.SaveHelper;
 import com.olyware.mathlock.utils.ShareHelper;
-import com.olyware.mathlock.views.AnswerReadyListener;
-import com.olyware.mathlock.views.AnswerView;
 import com.olyware.mathlock.views.EquationView;
-import com.olyware.mathlock.views.JoystickSelectListener;
-import com.olyware.mathlock.views.JoystickTouchListener;
-import com.olyware.mathlock.views.JoystickView;
+import com.olyware.mathlock.views.JoystickSelect;
+import com.olyware.mathlock.views.JoystickSelectListener2;
+import com.olyware.mathlock.views.JoystickView2;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
 	final private int startingPmoney = 20000, streakToIncrease = 40;
@@ -103,15 +101,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private long startTime = 0;
 	private boolean fromSettings = false, fromPlay = false, fromShare = false;
 
-	private LinearLayout layout;
+	private LinearLayout layout, layoutTop;
 	private Clock clock;
-	private TextView coins, worth;
+	private TextView coins, questionDescription;
 	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500;
 	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
-	private AnswerView answerView;
 	private boolean quizMode = false;
-	private JoystickView joystick;
+	private JoystickView2 joystick;
 	private int defaultTextColor;
 
 	private List<String> customCategories, PackageKeys;
@@ -226,7 +223,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	}
 
-	private class BlurBackground extends AsyncTask<Bitmap, Void, BitmapDrawable> {
+	/*private class BlurBackground extends AsyncTask<Bitmap, Void, BitmapDrawable> {
 		private Context ctx;
 
 		BlurBackground(Context ctx) {
@@ -272,7 +269,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
 			return bDrawable;
 		}
-	}
+	}*/
 
 	@SuppressLint("NewApi")
 	public void restart() {
@@ -315,7 +312,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			GCMHelper.registerGCM(this, getApplicationContext());
 		} else {
 			setTheme(R.style.AppThemeWall);
-			setContentView(R.layout.activity_main);
+			setContentView(R.layout.activity_main2);
 
 			uiHelper = new UiLifecycleHelper(this, null);
 			uiHelper.onCreate(savedInstanceState);
@@ -405,6 +402,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			};
 
 			layout = (LinearLayout) findViewById(R.id.layout);
+			layoutTop = (LinearLayout) findViewById(R.id.layout_top_and_question);
 			typefaces = Typefaces.getInstance(this);
 			EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
@@ -421,18 +419,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
 
 			coins = (TextView) findViewById(R.id.money);
-			worth = (TextView) findViewById(R.id.worth);
+			questionDescription = (TextView) findViewById(R.id.description);
 			problem = (EquationView) findViewById(R.id.problem);
 			defaultTextColor = problem.getTextColors().getDefaultColor();
 
-			answerView = (AnswerView) findViewById(R.id.answers2);
-			answerView.setColor(defaultTextColor);
-			answerView.setReadyListener(new AnswerReadyListener() {
-				@Override
-				public void Ready() {
-					answerView.setAnswers(answersRandom, answerLoc);
-				}
-			});
 			Display display = getWindowManager().getDefaultDisplay();
 			int sizeY, sizeX;
 			if (android.os.Build.VERSION.SDK_INT < 13) {
@@ -445,12 +435,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				sizeX = size.x;
 			}
 			sharedPrefs.edit().putInt("layout_width", sizeX).putInt("layout_height", sizeY).commit();
-			answerView.setParentHeight(sizeY);
 
-			joystick = (JoystickView) findViewById(R.id.joystick);
-			joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
+			joystick = (JoystickView2) findViewById(R.id.joystick);
+			joystick.setOnJostickSelectedListener(new JoystickSelectListener2() {
 				@Override
-				public void OnSelect(int s, boolean vibrate, int Extra) {
+				public void OnSelect(JoystickSelect s, boolean vibrate, int Extra) {
 					JoystickSelected(s, vibrate, Extra);
 				}
 			});
@@ -466,14 +455,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							questionWorth = 0;
 							if (attached)
 								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-							HelpQuestionImage = takeScreenShot();
-							joystick.askToShare();
+							if (!joystick.getQuickUnlock()) {
+								HelpQuestionImage = takeScreenShot();
+								joystick.askToShare();
+							}
 						} else {
 							timerHandler.postDelayed(this, decreaseRate);
 							if (attached)
 								getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 						}
-						worth.setText(String.valueOf(questionWorth));
 					}
 				}
 			};
@@ -481,8 +471,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			apps = new ArrayList<ApplicationInfo>();
 
 			new OpenDatabase().execute();
-
-			setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 
 			MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
@@ -614,9 +602,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 			coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
-
-			// set the unlock type
-			setUnlockType(Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default))));
 
 			// reset attempts to first attempt
 			attempts = 1;
@@ -909,13 +894,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}, delay); // launch home screen after delay time [ms]
 	}
 
-	public void setUnlockType(int type) {
-		joystick.setUnlockType(type);
-		answerView.setUnlockType(type);
-	}
-
 	@SuppressLint("NewApi")
-	private void setLayoutBackground(Drawable background) {
+	private void setLayoutBackground(LinearLayout layout, Drawable background) {
 		if (android.os.Build.VERSION.SDK_INT < 16)
 			layout.setBackgroundDrawable(background);
 		else
@@ -930,6 +910,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			int statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
 			if (w > 0 && h > 0) {
 				isWallpaperShown = true;
+				ShapeDrawable.ShaderFactory sf = new ShapeDrawable.ShaderFactory() {
+					@Override
+					public Shader resize(int width, int height) {
+						return new LinearGradient(0, 0, 0, height, new int[] { Color.argb(230, 0, 0, 0), Color.argb(193, 0, 0, 0),
+								Color.argb(100, 0, 0, 0), Color.argb(100, 0, 0, 0) }, new float[] { 0, 0.3f, .7f, 1 }, TileMode.REPEAT);
+					}
+				};
+				PaintDrawable p = new PaintDrawable();
+				p.setShape(new RectShape());
+				p.setShaderFactory(sf);
+				setLayoutBackground(layout, p);
+				/*
 				// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
 				Bitmap bitmap = background.getBitmap();
 				Bitmap bitmap2 = background.getBitmap();
@@ -948,7 +940,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					BitmapDrawable blurred = new BitmapDrawable(getResources(), SaveHelper.loadBitmap(this,
 							getString(R.string.blurred_background)));
 					TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
-					setLayoutBackground(transitionBackground);
+					setLayoutBackground(layout,transitionBackground);
 					transitionBackground.startTransition(1000);
 				} else {
 					final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
@@ -961,12 +953,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							Log.d("test", "blurred background time end = " + System.currentTimeMillis());
 							if (layout != null) {
 								TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
-								setLayoutBackground(transitionBackground);
+								setLayoutBackground(layout,transitionBackground);
 								transitionBackground.startTransition(1000);
 							}
 						}
 					}.execute(bitmap);
-				}
+				}*/
 			} else {
 				// dims the wallpaper so app has more contrast
 				layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
@@ -1015,13 +1007,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 
 				questionWorth = 0;
-				answerView.resetGuess();
 				joystick.resetGuess();
 				imageLeft = null;
 				problem.setCompoundDrawables(imageLeft, null, null, null);
 				joystick.unPauseSelection();
 				sharedPrefsStats = getSharedPreferences("Stats", 0);
-				joystick.setDegreeStep(sharedPrefsStats.getInt("currentStreak", 0));
 
 				// pick a random enabled package
 				if (totalWeight == 0)
@@ -1086,22 +1076,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						answersRandom[i] = answers[i + offset];
 					}
 				}
-
-				answerView.setAnswers(answersRandom, answerLoc);
 				joystick.setAnswers(answersRandom, answerLoc);
 				problem.setTextColor(defaultTextColor);
 				resetQuestionWorth(questionWorthMax);
 			} else {
-				answerView.resetGuess();
 				joystick.resetGuess();
 				joystick.setProblem(false);
 				problem.setText(R.string.db_loading);
 				answersRandom = answersNone;
-				answerView.setAnswers(answersRandom, 0);
 				joystick.setAnswers(answersRandom, 0);
 			}
 		} else {
-			answerView.resetGuess();
 			joystick.resetGuess();
 			joystick.setProblem(false);
 			if (!UnlockedPackages) {
@@ -1114,7 +1099,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				problem.setText(R.string.none_enabled);
 				answersRandom = answersNone;
 			}
-			answerView.setAnswers(answersRandom, 0);
 			joystick.setAnswers(answersRandom, 0);
 		}
 	}
@@ -1122,7 +1106,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private void resetQuestionWorth(int value) {
 		startTime = System.currentTimeMillis();
 		questionWorth = value;
-		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
@@ -1130,7 +1113,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private void startCountdown() {
 		startTime = System.currentTimeMillis();
 		questionWorth = questionWorthMax;
-		worth.setText(String.valueOf(questionWorth));
 		timerHandler.removeCallbacks(reduceWorth);
 		timerHandler.postDelayed(reduceWorth, decreaseRate);
 	}
@@ -1284,10 +1266,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
 		if (unknown) {
 			sendEvent("question", "question_answered", "unknown", (long) questionWorth);
-			answerView.setCorrectGuess(correctLoc);
 			joystick.setCorrectGuess(correctLoc);
 		} else {
-			answerView.setCorrectGuess(correctLoc);
 			joystick.setCorrectGuess(correctLoc);
 			dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 					.currentTimeMillis(), startTime - System.currentTimeMillis()));
@@ -1303,7 +1283,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			} else {
 				sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
 				playSound(PLAY_WRONG);
-				answerView.setIncorrectGuess(guessLoc);
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
 				dMoney = Money.decreaseMoneyNoDebt(questionWorth);
@@ -1313,8 +1292,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	}
 
-	private void JoystickSelected(int s, boolean vibrate, int Extra) {
+	private void JoystickSelected(JoystickSelect s, boolean vibrate, int Extra) {
 		dialogOn = false;
+		Log.d("test", "s = " + s.toString());
 		if (vibrate) {
 			if (sharedPrefs.getBoolean("vibration", true)
 					&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
@@ -1322,21 +1302,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
 		switch (s) {
-		case 0:		// A was selected
-		case 1:		// B was selected
-		case 2:		// C was selected
-		case 3:		// D was selected
+		case A:		// A was selected
+		case B:		// B was selected
+		case C:		// C was selected
+		case D:		// D was selected
+			int answer = JoystickSelect.fromValue(s);
 			timerHandler.removeCallbacks(reduceWorth);
 			if (EnabledPackages == 0) {
 				this.finish();
-			} else if (attempts >= maxAttempts && !(answerLoc == s) && !quizMode && maxAttempts < 4) {
-				displayCorrectOrNot(answerLoc, s, "Too Many Wrong\n", false, false);
+			} else if (attempts >= maxAttempts && !(answerLoc == answer) && !quizMode && maxAttempts < 4) {
+				displayCorrectOrNot(answerLoc, answer, "Too Many Wrong\n", false, false);
 				if (Extra == 0)
 					updateStats(false);
 				joystick.pauseSelection();
 				launchHomeScreen(1500);
-			} else if ((answerLoc == s) && quizMode) {
-				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
+			} else if ((answerLoc == answer) && quizMode) {
+				displayCorrectOrNot(answerLoc, answer, "Correct!\n", true, false);
 				if (Extra == 0)
 					updateStats(true);
 				joystick.pauseSelection();
@@ -1347,104 +1328,68 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						setProblemAndAnswer();
 					}
 				}, 500);
-			} else if ((answerLoc == s) && !quizMode) {
-				displayCorrectOrNot(answerLoc, s, "Correct!\n", true, false);
+			} else if ((answerLoc == answer) && !quizMode) {
+				displayCorrectOrNot(answerLoc, answer, "Correct!\n", true, false);
 				if (Extra == 0)
 					updateStats(true);
 				joystick.pauseSelection();
 				launchHomeScreen(100);
 			} else {
-				displayCorrectOrNot(answerLoc, s, "Wrong\n", false, false);
+				displayCorrectOrNot(answerLoc, answer, "Wrong\n", false, false);
 				if (Extra == 0)
 					updateStats(false);
 				if (!quizMode)
 					attempts++;
-				joystick.setWrongGuess();
 				joystick.pauseSelection();
-				joystick.setOnTouchedListener(new JoystickTouchListener() {
-					@Override
-					public void OnTouch() {
-						joystick.removeTouchListener();
-						joystick.resetWrongGuess();
-						setProblemAndAnswer();
-					}
-				});
 			}
 			break;
-		case 4:	// question mark(tell me the answer/I don't know) was selected
+		case Friends:		// friends was selected
 			playSound(PLAY_BEEP);
-			resetStreak();
-			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[1], EggMaxValues[1]));
-			displayCorrectOrNot(answerLoc, answerLoc, "", false, true);
-			joystick.setWrongGuess();
-			joystick.pauseSelection();
-			joystick.setOnTouchedListener(new JoystickTouchListener() {
-				@Override
-				public void OnTouch() {
-					joystick.removeTouchListener();
-					joystick.resetWrongGuess();
-					setProblemAndAnswer();
-				}
-			});
-			break;
-		case 5:		// info was selected
-			// sendEvent("ui_action", "settings_selected", "info", null);
-			playSound(PLAY_BEEP);
-			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[2], EggMaxValues[2]));
-			// displayInfo(false);
+			unlocking = false;
 			startActivity(new Intent(this, FriendActivity.class));
 			break;
-		case 6:		// Store was selected
+		case Store:		// Store was selected
 			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
-		case 7:		// progress was selected
+		case Progress:		// progress was selected
 			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
-		case 8:		// quiz Mode was selected
+		case QuizMode:		// quiz Mode was selected
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
 			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
-		case 9:		// settings was selected
+		case Settings:		// settings was selected
 			playSound(PLAY_BEEP);
 			fromSettings = true;
 			unlocking = false;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
-		case 10:	// missed the lock button
+		case Missed:	// missed the lock button
 			if (getSharedPreferences("Stats", 0).getLong("totalTime", 0) == 0) {
 				displayHints(0, true);
 			}
 			break;
-		case 11:	// quickUnlock activated
+		case QuickUnlock:	// quickUnlock activated
 			sendEvent("question", "double_tap", "quick_unlock", null);
 			playSound(PLAY_BEEP);
 			resetStreak();
 			setApps();
 			resetQuestionWorth(0);
-			switch (Integer.parseInt(sharedPrefs.getString("type", getString(R.string.type_default)))) {
-			case 0:
-			case 1:
-				answerLoc = 2;
-				break;
-			case 2:
-				answerLoc = 0;
-				break;
-			}
-			answerView.setQuickUnlock(true, answerLoc);
+			answerLoc = 2;
 			joystick.moveCorrect(answerLoc);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
 			break;
-		case 12:	// add app was selected
+		case AddApp:	// add app was selected
 			playSound(PLAY_BEEP);
 			selectApp();
 			break;
-		case 13:	// app was selected
+		case SelectApp:	// app was selected
 			playSound(PLAY_BEEP);
 			if (Extra < apps.size()) {
 				sendEvent("apps", "launch_app", apps.get(Extra).name, null);
@@ -1452,19 +1397,26 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				finish();
 			}
 			break;
-		case 14:	// remove app was selected
+		case DeleteApp:	// remove app was selected
 			sendEvent("apps", "delete_app", apps.get(Extra).name, null);
 			playSound(PLAY_BEEP);
 			removeAppFromAll(Extra);
 			break;
-		case 15:	// friend was selected
-			playSound(PLAY_BEEP);
-			unlocking = false;
-			startActivity(new Intent(this, FriendActivity.class));
-			break;
-		case 16:	// share was selected
+		case Share:	// share was selected
 			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
 			ShareHelper.shareFacebook(this, uiHelper, HelpQuestionImage, problem.getReadableText());
+			break;
+		case Touch:
+			setProblemAndAnswer();
+			break;
+		case Exit:
+			break;
+		case Question:
+			break;
+		case Vibrate:
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -1761,7 +1713,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (action.equals("question_answered")) {
 			if (quizMode)
 				action = "quiz_mode_" + action;
-			if (answerView.getQuickUnlock())
+			if (joystick.getQuickUnlock())
 				action = "quick_unlock_" + action;
 		}
 		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
@@ -1807,9 +1759,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Log.d("test", "bitmap Height = " + b1.getHeight());
 		Log.d("test", "layout Height = " + layout.getHeight());
 		Log.d("test", "coins Height = " + coins.getHeight());
-		Log.d("test", "worth Height = " + worth.getHeight());
+		Log.d("test", "desc Height = " + questionDescription.getHeight());
 		Log.d("test", "problem Height = " + problem.getHeight());
-		Log.d("test", "answerView Height = " + answerView.getHeight());
 		Log.d("test", "Joystick Height = " + joystick.getHeight());
 
 		int statusBarHeight = 0;

@@ -5,22 +5,21 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     <LinearLayout
+        android:id="@+id/layout_top_and_question"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="7"
+        android:layout_weight="2"
         android:orientation="vertical"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip" >
-        <LinearLayout
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp" >
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
             <TextView
                 android:id="@+id/clock"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:text="@string/clock"
                 android:textColor="#FFF"
@@ -29,40 +28,33 @@
                 android:id="@+id/money"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/coins"
-                android:gravity="center_vertical|right"
+                android:layout_gravity="right|bottom"
                 android:text="@string/default_money"
                 android:textColor="#FFF"
-                android:textSize="40sp" />
-        </LinearLayout>
-        <TextView
-            android:id="@+id/worth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:drawableLeft="@drawable/coin"
-            android:gravity="center_vertical|right"
-            android:text="@string/default_money"
-            android:textSize="25sp" />
+                android:textSize="30sp" />
+		</FrameLayout>
+		<TextView
+			android:id="@+id/description"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="right"
+			android:text="@string/default_question_description"
+			android:textColor="#999"
+			android:textSize="16sp" />
         <com.olyware.mathlock.views.EquationView
             android:id="@+id/problem"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
-            android:textSize="40sp" />
+            android:textSize="30sp" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="13"
+        android:layout_weight="3"
         android:orientation="vertical" >
-        <com.olyware.mathlock.views.AnswerView
-            android:id="@+id/answers2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
         <com.olyware.mathlock.views.JoystickView2
             android:id="@+id/joystick"
-            android:soundEffectsEnabled="true"
             android:layout_width="match_parent"
             android:layout_height="fill_parent" />
     </LinearLayout>

@@ -17,13 +17,13 @@ import com.olyware.mathlock.MathEval;
 
 public class EquationLayout {
 	private int extraPadding = 20;
-	private int textSizeSPDefault = 40;
+	private int textSizeSPDefault = 30;
 	private int maxWidth, maxHeight;
 	private int textSizeSP;
 	private float textSizePix, textSizePixDefault;
 	private String originalEquation, equationText;
 	private Typeface font;
-	private int color;
+	private int color, alpha;
 	private List<BracketGroup> bracketGroups = new ArrayList<BracketGroup>();
 	private List<Attributes> attributes = new ArrayList<Attributes>();
 	private List<Bracket> opened = new ArrayList<Bracket>();
@@ -116,6 +116,7 @@ public class EquationLayout {
 			paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 			paint.setTypeface(font);
 			paint.setColor(color);
+			paint.setAlpha(alpha);
 			paint.setTextSize(SizePix);
 			paint.setTextAlign(Paint.Align.CENTER);
 			bounds = new Rect();
@@ -378,9 +379,11 @@ public class EquationLayout {
 		this.maxHeight = maxHeight;
 		this.font = textPaint.getTypeface();
 		this.color = textPaint.getColor();
+		this.alpha = textPaint.getAlpha();
 
 		testPaintWhite = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		testPaintWhite.setColor(color);
+		testPaintWhite.setAlpha(alpha);
 		testPaintWhite.setStyle(Paint.Style.STROKE);
 		testPaintWhite.setStrokeWidth(3);
 
@@ -393,16 +396,18 @@ public class EquationLayout {
 		setSize();
 	}
 
-	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color, int maxTextSizeSP) {
+	public EquationLayout(String equation, int maxWidth, int maxHeight, Typeface font, int color, int alpha, int maxTextSizeSP) {
 		this.originalEquation = equation;
 		this.equationText = equation;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
 		this.font = font;
 		this.color = color;
+		this.alpha = alpha;
 
 		testPaintWhite = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		testPaintWhite.setColor(color);
+		testPaintWhite.setAlpha(alpha);
 		testPaintWhite.setStyle(Paint.Style.STROKE);
 		testPaintWhite.setStrokeWidth(3);
 
@@ -498,6 +503,14 @@ public class EquationLayout {
 		testPaintWhite.setColor(color);
 		for (int i = 0; i < textAttributes.size(); i++) {
 			textAttributes.get(i).getTextPaint().setColor(color);
+		}
+	}
+
+	public void setAlpha(int alpha) {
+		this.alpha = alpha;
+		testPaintWhite.setAlpha(alpha);
+		for (int i = 0; i < textAttributes.size(); i++) {
+			textAttributes.get(i).getTextPaint().setAlpha(alpha);
 		}
 	}
 

@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.olyware.mathlock.views.AnswerView;
 import com.olyware.mathlock.views.GraphView;
 import com.olyware.mathlock.views.JoystickView;
+import com.olyware.mathlock.views.JoystickView2;
 
 public class EZ {
 	private static final Loggy log = new Loggy(EZ.class);
@@ -68,6 +69,8 @@ public class EZ {
 				((TextView) mChild).setTypeface(font);
 			} else if (mChild instanceof JoystickView) {
 				((JoystickView) mChild).setTypeface(font);
+			} else if (mChild instanceof JoystickView2) {
+				((JoystickView2) mChild).setTypeface(font);
 			} else if (mChild instanceof AnswerView) {
 				((AnswerView) mChild).setTypeface(font);
 			} else if (mChild instanceof GraphView) {

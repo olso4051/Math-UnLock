@@ -8,13 +8,8 @@ import android.util.AttributeSet;
 public class EquationView extends AutoResizeTextView {
 
 	private EquationLayout layout;
-	// private TextPaint TopRightTextPaint;
 	private boolean equation;
-	private int color = Color.WHITE;// , TopRightTextSizeSP, TopRightTextSizePix;
-
-	/*private float TopRightWidth;
-	private String textTopRight;
-	private Drawable dTopRight;*/
+	private int color = Color.WHITE, alpha = 255, textSizeSPDefault = 30;
 
 	// =========================================
 	// Constructors
@@ -42,14 +37,7 @@ public class EquationView extends AutoResizeTextView {
 	private void initView() {
 		equation = false;
 		color = Color.WHITE;
-		/*textTopRight = "0";
-		TopRightTextSizeSP = 25;
-		TopRightTextSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, TopRightTextSizeSP, getResources()
-				.getDisplayMetrics());
-		TopRightTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-		TopRightTextPaint.setTextAlign(Paint.Align.RIGHT);
-		TopRightTextPaint.setColor(Color.WHITE);
-		TopRightTextPaint.setTextSize(TopRightTextSizePix);*/
+		alpha = 255;
 	}
 
 	// =========================================
@@ -67,7 +55,8 @@ public class EquationView extends AutoResizeTextView {
 					else
 						text = text.subSequence(1, text.length());
 		if (equation) {
-			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color, 40);
+			layout = new EquationLayout(String.valueOf(text), getTextAreaWidth(), getTextAreaHeight(), getTypeface(), color, alpha,
+					textSizeSPDefault);
 		} else {
 			layout = null;
 		}
@@ -97,6 +86,7 @@ public class EquationView extends AutoResizeTextView {
 			super.onDraw(canvas);
 		else {
 			canvas.translate(getTextAreaWidth() / 2, getTextAreaHeight() / 2);
+			layout.setAlpha(alpha);
 			layout.draw(canvas);
 		}
 	}
@@ -109,4 +99,14 @@ public class EquationView extends AutoResizeTextView {
 			layout.setColor(color);
 		invalidate();
 	}
+
+	@Override
+	public void setAlpha(float alpha) {
+		this.alpha = (int) (alpha * 255);
+		super.setAlpha(alpha);
+		if (layout != null)
+			layout.setAlpha(this.alpha);
+		invalidate();
+	}
+
 }
