@@ -18,6 +18,7 @@
     <string name="service_base_url">http://api.learnwithhiq.com/</string>
     
     <!-- Sharing -->
+    <string name="deeldat_api_key">1716a4ac3509884eb5cf0245d392be52</string>
     <string name="ask_to_share0">Ask for help</string>
     <string name="ask_to_share1">Challenge friends to answer</string>
     <string name="ask_to_share2">Share question</string>

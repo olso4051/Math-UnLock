@@ -60,7 +60,7 @@
             android:id="@+id/answers2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        <com.olyware.mathlock.views.JoystickView2
+        <com.olyware.mathlock.views.JoystickView
             android:id="@+id/joystick"
             android:soundEffectsEnabled="true"
             android:layout_width="match_parent"

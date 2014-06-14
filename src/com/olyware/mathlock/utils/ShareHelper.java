@@ -47,16 +47,21 @@ public class ShareHelper {
 		shareFacebook(context, uiHelper, image, context.getString(R.string.share_base_url_facebook_name_readable));
 	}
 
-	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, final String title) {
+	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, String question) {
 		final String link = buildShareURL(context);
-		final String userID = LoginFragment.getUserID(context);
-		final String name = LoginFragment.getUserName(context);
+		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
+		final String title = "Can you answer " + question + " to unlock your phone?";
+		String name = LoginFragment.getUserName(context);
+		if (name.equals(""))
+			name = context.getString(R.string.share_base_url_facebook_description_readable);
+		else
+			name = context.getString(R.string.share_base_url_facebook_description_readable1) + " " + name + " "
+					+ context.getString(R.string.share_base_url_facebook_description_readable2);
+		final String description = name;
 		final String questionID = "";
 		new UploadImage(context, image) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				Log.d("test", "upload image result = " + result);
-				Log.d("test", "success = " + getSuccess());
 				Log.d("test", "url = " + getURL());
 				Log.d("test", "hash = " + getHash());
 				if (result == 0 || getSuccess().equals("true")) {
@@ -66,10 +71,10 @@ public class ShareHelper {
 					try {
 						String linkEncoded = URLEncoder.encode(link, "utf-8");
 						String titleEncoded = URLEncoder.encode(title, "utf-8");
-						String nameEncoded = URLEncoder.encode(name, "utf-8");
+						String descriptionEncoded = URLEncoder.encode(description, "utf-8");
 						share = share + "?referral=" + linkEncoded;
 						share = share + "&title=" + titleEncoded;
-						share = share + "&name=" + nameEncoded;
+						share = share + "&name=" + descriptionEncoded;
 					} catch (UnsupportedEncodingException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -78,7 +83,7 @@ public class ShareHelper {
 					// shareFacebook(context, uiHelper, "http://www.thestreet.com/story/12734024/6/10-most-bikeable-cities-in-the-us.html");
 				}
 			}
-		}.execute(userID, title, link, questionID);
+		}.execute(DeelDatApiKey, title, link, description, questionID);
 
 	}
 

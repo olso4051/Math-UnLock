@@ -7,7 +7,6 @@ import java.util.Random;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,15 +18,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Point;
-import android.graphics.Shader;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PaintDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -81,8 +74,8 @@ import com.olyware.mathlock.utils.Purchase;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
-import com.olyware.mathlock.views.JoystickSelectListener2;
-import com.olyware.mathlock.views.JoystickView2;
+import com.olyware.mathlock.views.JoystickSelectListener;
+import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
 	final private int startingPmoney = 20000, streakToIncrease = 40;
@@ -103,12 +96,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private LinearLayout layout, layoutTop;
 	private Clock clock;
-	private TextView coins, questionDescription;
-	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500;
+	private TextView clockTextView, coins, questionDescription;
+	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500, backgroundState = 0;
 	private EquationView problem;
 	private Drawable imageLeft;	// left,top,right,bottom
+	private TransitionDrawable backgroundTransition;
 	private boolean quizMode = false;
-	private JoystickView2 joystick;
+	private JoystickView joystick;
 	private int defaultTextColor;
 
 	private List<String> customCategories, PackageKeys;
@@ -194,7 +188,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// screen has come on
 			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
 			startCountdown();
-			showWallpaper();
+			// showWallpaper();
 		}
 	};
 
@@ -402,6 +396,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			};
 
 			layout = (LinearLayout) findViewById(R.id.layout);
+			backgroundTransition = (TransitionDrawable) layout.getBackground().mutate();
+			/*backgroundTransition.setCrossFadeEnabled(true);
+			backgroundTransition.setCrossFadeEnabled(false);*/
+			// backgroundTransition.startTransition(1000);
+			/*Drawable gradient = getResources().getDrawable(R.drawable.gradient_shape);
+			Drawable dim = getResources().getDrawable(R.drawable.dim_shape);
+			backgroundTransition = new TransitionDrawable(new Drawable[] { gradient, dim });
+			backgroundTransition.setCrossFadeEnabled(true);
+			setLayoutBackground(layout, backgroundTransition);*/
+			// backgroundTransition.startTransition(1000);
+
 			layoutTop = (LinearLayout) findViewById(R.id.layout_top_and_question);
 			typefaces = Typefaces.getInstance(this);
 			EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
@@ -416,9 +421,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 			hints = getResources().getStringArray(R.array.hints);
 
-			clock = new Clock(this, (TextView) findViewById(R.id.clock), (TextView) findViewById(R.id.money));
-
+			clockTextView = (TextView) findViewById(R.id.clock);
 			coins = (TextView) findViewById(R.id.money);
+			clock = new Clock(this, clockTextView, coins);
 			questionDescription = (TextView) findViewById(R.id.description);
 			problem = (EquationView) findViewById(R.id.problem);
 			defaultTextColor = problem.getTextColors().getDefaultColor();
@@ -436,8 +441,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			sharedPrefs.edit().putInt("layout_width", sizeX).putInt("layout_height", sizeY).commit();
 
-			joystick = (JoystickView2) findViewById(R.id.joystick);
-			joystick.setOnJostickSelectedListener(new JoystickSelectListener2() {
+			joystick = (JoystickView) findViewById(R.id.joystick);
+			joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 				@Override
 				public void OnSelect(JoystickSelect s, boolean vibrate, int Extra) {
 					JoystickSelected(s, vibrate, Extra);
@@ -674,7 +679,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (pm.isScreenOn()) {
 				Log.d("test", "onResume Screen is on");
 				MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
-				showWallpaper();
+				// showWallpaper();
 			}
 		}
 	}
@@ -895,14 +900,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	@SuppressLint("NewApi")
-	private void setLayoutBackground(LinearLayout layout, Drawable background) {
+	private void setLayoutBackground(LinearLayout layout, TransitionDrawable background) {
 		if (android.os.Build.VERSION.SDK_INT < 16)
 			layout.setBackgroundDrawable(background);
 		else
 			layout.setBackground(background);
 	}
 
-	private void showWallpaper() {
+	/*private void showWallpaper() {
 		if (!isWallpaperShown) {
 			BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
 			int w = sharedPrefs.getInt("layout_width", 0);
@@ -920,51 +925,51 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				PaintDrawable p = new PaintDrawable();
 				p.setShape(new RectShape());
 				p.setShaderFactory(sf);
-				setLayoutBackground(layout, p);
-				/*
-				// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
-				Bitmap bitmap = background.getBitmap();
-				Bitmap bitmap2 = background.getBitmap();
+				setLayoutBackground(layout, p);*/
+	/*
+	// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
+	Bitmap bitmap = background.getBitmap();
+	Bitmap bitmap2 = background.getBitmap();
 
-				// set scaling factors
-				int left = bitmap.getWidth() / 2 - w / 2;
-				int top = bitmap.getHeight() / 2 - h / 2;
+	// set scaling factors
+	int left = bitmap.getWidth() / 2 - w / 2;
+	int top = bitmap.getHeight() / 2 - h / 2;
 
-				// scale the bitmap to fit on the background
-				bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
-				bitmap2 = Bitmap.createBitmap(bitmap2, left, top + statusBarHeight, w, h - statusBarHeight);
+	// scale the bitmap to fit on the background
+	bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
+	bitmap2 = Bitmap.createBitmap(bitmap2, left, top + statusBarHeight, w, h - statusBarHeight);
 
-				Bitmap wall = SaveHelper.loadBitmap(this, getString(R.string.wallpaper), bitmap2);
-				if (wall != null) {
-					BitmapDrawable wallpaper = new BitmapDrawable(getResources(), wall);
-					BitmapDrawable blurred = new BitmapDrawable(getResources(), SaveHelper.loadBitmap(this,
-							getString(R.string.blurred_background)));
+	Bitmap wall = SaveHelper.loadBitmap(this, getString(R.string.wallpaper), bitmap2);
+	if (wall != null) {
+		BitmapDrawable wallpaper = new BitmapDrawable(getResources(), wall);
+		BitmapDrawable blurred = new BitmapDrawable(getResources(), SaveHelper.loadBitmap(this,
+				getString(R.string.blurred_background)));
+		TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
+		setLayoutBackground(layout,transitionBackground);
+		transitionBackground.startTransition(1000);
+	} else {
+		final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
+
+		// Blur and Dim bitmap
+		Log.d("test", "blurring background time start = " + System.currentTimeMillis());
+		new BlurBackground(this) {
+			@Override
+			protected void onPostExecute(BitmapDrawable blurred) {
+				Log.d("test", "blurred background time end = " + System.currentTimeMillis());
+				if (layout != null) {
 					TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
 					setLayoutBackground(layout,transitionBackground);
 					transitionBackground.startTransition(1000);
-				} else {
-					final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
-
-					// Blur and Dim bitmap
-					Log.d("test", "blurring background time start = " + System.currentTimeMillis());
-					new BlurBackground(this) {
-						@Override
-						protected void onPostExecute(BitmapDrawable blurred) {
-							Log.d("test", "blurred background time end = " + System.currentTimeMillis());
-							if (layout != null) {
-								TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
-								setLayoutBackground(layout,transitionBackground);
-								transitionBackground.startTransition(1000);
-							}
-						}
-					}.execute(bitmap);
-				}*/
-			} else {
-				// dims the wallpaper so app has more contrast
-				layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
+				}
 			}
-		}
+		}.execute(bitmap);
+	}*/
+	/*} else {
+		// dims the wallpaper so app has more contrast
+		layout.setBackgroundColor(Color.argb(150, 0, 0, 0));
 	}
+	}
+	}*/
 
 	private void setImage() {
 		// use the image height and width to set the bounds and not stretch the image
@@ -1415,6 +1420,16 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Vibrate:
 			break;
+		case ReturnToDefault:
+			if (backgroundState == 1) {
+				backgroundState = 0;
+				backgroundTransition.reverseTransition(JoystickView.IN_OUT_DURATION);
+			}
+			break;
+		case SelectLock:
+			backgroundState = 1;
+			backgroundTransition.startTransition(JoystickView.IN_OUT_DURATION);
+			break;
 		default:
 			break;
 		}
@@ -1612,8 +1627,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					editorPrefsMoney = sharedPrefsMoney.edit();
 					editorPrefsMoney.putBoolean("dontShowLastTime", dontShow).commit();
 					dialogOn = false;
-					// TODO make this work for images, currently null is passed as the image
-					// ShareHelper.share(ctx, null, null, getString(R.string.share_message), link);
 					ShareHelper.shareFacebook(ctx);
 					fromShare = true;
 				}
@@ -1674,10 +1687,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void selectApp() {
-		// List<ApplicationInfo> packages = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
-		// packages.get(0).loadIcon(pm);//this gets a drawable
-		// packages.get(0).packageName;//this gets the package name
-		// pm.getLaunchIntentForPackage(packages.get(0).packageName);//this gets an intent to start activity
 		Intent mainIntent = new Intent(android.content.Intent.ACTION_MAIN);
 		mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 		Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
@@ -1722,7 +1731,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public void GCMResult(boolean result) {
 		Log.d("test", "GCMResult()");
-		// LoginFragment loginFrag = (LoginFragment) getSupportFragmentManager().findFragmentById(android.R.id.content);
 		if (loginFragment != null) {
 			Log.d("test", "loginFrag != null");
 			loginFragment.GCMRegistrationDone(result);
@@ -1733,7 +1741,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@Override
 	public void RegisterIDResult(int result) {
-		// TODO Auto-generated method stub
 		Log.d("test", "register id result = " + result);
 		if (result == 0) {
 			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
@@ -1743,34 +1750,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@SuppressLint("NewApi")
 	private Bitmap takeScreenShot() {
-		// Rect frame = new Rect();
 		View view = this.getWindow().getDecorView();
-		// View view = problem;
-		// view.getWindowVisibleDisplayFrame(frame);
 		view.setDrawingCacheEnabled(true);
 		view.buildDrawingCache();
 		Bitmap b1 = view.getDrawingCache();
-		// int statusBarHeight = frame.top;
 
-		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO)+
-		// statusBarHeight);
-		// Bitmap b = Bitmap.createBitmap(b1, 0, 0, b1.getWidth(), (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO));
-		// Bitmap b = Bitmap.createBitmap(b1, 0, 0, b1.getWidth(), b1.getHeight());
-		Log.d("test", "bitmap Height = " + b1.getHeight());
-		Log.d("test", "layout Height = " + layout.getHeight());
-		Log.d("test", "coins Height = " + coins.getHeight());
-		Log.d("test", "desc Height = " + questionDescription.getHeight());
-		Log.d("test", "problem Height = " + problem.getHeight());
-		Log.d("test", "Joystick Height = " + joystick.getHeight());
-
+		int cH = clockTextView.getHeight();
 		int statusBarHeight = 0;
-		Log.d("test", "statusBarHeight = " + statusBarHeight);
 		if (layout.getHeight() > 0 && layout.getHeight() < b1.getHeight()) {
 			statusBarHeight += b1.getHeight() - layout.getHeight();
-			Log.d("test", "statusBarHeight = " + statusBarHeight);
+			statusBarHeight += cH;
 		}
-		Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), statusBarHeight
-				+ (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO));
+
+		int height = questionDescription.getHeight() + problem.getHeight();
+		int minHeight = (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO);
+		int maxHeight = b1.getHeight() - statusBarHeight;
+		height = (height < minHeight) ? minHeight : height;
+		height = (height > maxHeight) ? maxHeight : height;
+		Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO));
 		view.destroyDrawingCache();
 		return b;
 	}

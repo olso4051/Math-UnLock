@@ -1,6 +1,5 @@
 package com.olyware.mathlock.service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.apache.http.HttpEntity;
@@ -10,7 +9,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -20,17 +18,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
-import android.util.Log;
-
-import com.olyware.mathlock.R;
 
 public class UploadImage extends AsyncTask<String, Integer, Integer> {
-	private String baseURL;
+	private final String BASE_URL = "http://deeldat.com/share/fb";
 	private String success, hash, url, error;
 	private Bitmap image;
 
 	public UploadImage(Context ctx, Bitmap b) {
-		baseURL = ctx.getString(R.string.service_base_url);
 		image = b;
 	}
 
@@ -65,37 +59,40 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 	@Override
 	protected Integer doInBackground(String... s) {
 		HttpClient httpClient = new DefaultHttpClient();
-		// HttpPost postRequest = new HttpPost(baseURL + "share/fb");
-		HttpPost postRequest = new HttpPost("http://dimension9.com/share/fb");
+		HttpPost postRequest = new HttpPost(BASE_URL);
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			image.compress(CompressFormat.PNG, 100, bos);
+			image.compress(CompressFormat.JPEG, 50, bos);
+			// image.compress(CompressFormat.PNG, 100, bos);
 			byte[] data = bos.toByteArray();
-			InputStreamBody inputStreamBody = new InputStreamBody(new ByteArrayInputStream(data), "abc.png");
 
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
 			multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-			// multipartEntity.addPart("image", inputStreamBody);
-			multipartEntity.addPart("image", new ByteArrayBody(data, "test.png"));
-			// multipartEntity.addBinaryBody("image", data);
+			multipartEntity.addPart("image", new ByteArrayBody(data, "test.jpeg"));
+			// multipartEntity.addPart("image", new ByteArrayBody(data, "test.png"));
 
-			// multipartEntity.addTextBody("user_id", s[0]);
-			multipartEntity.addTextBody("user_id", "asdf");
-			// multipartEntity.addTextBody("title", s[1]);
-			multipartEntity.addTextBody("title", "Can you answer " + s[1] + " to unlock your phone?");
-			multipartEntity.addTextBody("url", s[2]);
-			// multipartEntity.addTextBody("extension", "png");
-			// multipartEntity.addTextBody("question_id", "blah");
-			multipartEntity.addTextBody("description", "Download Today and Get 40 Gold Coins");
+			if (s[0] != null)
+				if (s[0].length() > 0)
+					multipartEntity.addTextBody("user_id", s[0]);
+			if (s[1] != null)
+				if (s[1].length() > 0)
+					multipartEntity.addTextBody("title", s[1]);
+			if (s[2] != null)
+				if (s[2].length() > 0)
+					multipartEntity.addTextBody("url", s[2]);
+			if (s[3] != null)
+				if (s[3].length() > 0)
+					multipartEntity.addTextBody("description", s[3]);
+			// multipartEntity.addTextBody("question_id", s[4]);
+			multipartEntity.addTextBody("extension", "jpeg");
 
 			postRequest.setEntity(multipartEntity.build());
 			HttpResponse response = httpClient.execute(postRequest);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
-			Log.d("test", "fullResult = " + fullResult.toString());
 			jsonResponse = new JSONObject(fullResult);
 		} catch (Exception e) {
 			e.printStackTrace();
