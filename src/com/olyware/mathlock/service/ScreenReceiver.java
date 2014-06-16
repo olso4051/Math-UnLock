@@ -1,8 +1,11 @@
 package com.olyware.mathlock.service;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -78,7 +81,14 @@ public class ScreenReceiver extends BroadcastReceiver {
 	}
 
 	private void startMainActivity(Context ctx, boolean lockscreen) {
-		if (lockscreen) {
+		boolean navigation = false;
+		ActivityManager activityManager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningServiceInfo> procInfos = activityManager.getRunningServices(Integer.MAX_VALUE);
+		for (int idx = 0; idx < procInfos.size(); idx++) {
+			if (procInfos.get(idx).service.getClassName().equals("com.google.android.apps.gmm.navigation.base.NavigationService"))
+				navigation = true;
+		}
+		if (lockscreen && !navigation) {
 			Intent i = new Intent(ctx, MainActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

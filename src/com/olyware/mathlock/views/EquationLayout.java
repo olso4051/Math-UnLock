@@ -104,15 +104,16 @@ public class EquationLayout {
 		private int X, Y, padHorz = 10;
 		private float SizePix, Width, Height;
 		private float HeightA, HeightB, HeightAg, Top, Bottom;
-		private String text;
+		private String text, internetFriendlyText;
 		private TextPaint paint;
 		private Rect bounds;
 
-		public TextAttributes(String text, int X, int Y, float SizePix) {
+		public TextAttributes(String text, String internetFriendlyText, int X, int Y, float SizePix) {
 			this.X = X;
 			this.Y = Y;
 			this.SizePix = SizePix;
 			this.text = text;
+			this.internetFriendlyText = internetFriendlyText;
 			paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 			paint.setTypeface(font);
 			paint.setColor(color);
@@ -153,6 +154,10 @@ public class EquationLayout {
 
 		public String getText() {
 			return text;
+		}
+
+		public String getInternetFriendlyText() {
+			return internetFriendlyText;
 		}
 
 		public float getHeight() {
@@ -531,9 +536,13 @@ public class EquationLayout {
 		String shownString = "";
 		for (int i = 0; i < attributes.size(); i++) {
 			if (attributes.get(i).getShownOrReadable())
-				shownString = shownString + textAttributes.get(i).getText();
+				shownString = shownString + textAttributes.get(i).getInternetFriendlyText();
 		}
-		return equationText;
+		return shownString;
+	}
+
+	public String getOriginalText() {
+		return originalEquation;
 	}
 
 	private void parseEquation() {
@@ -610,6 +619,84 @@ public class EquationLayout {
 		equationText = equationText.replaceAll("Simplify", "∀");
 		equationText = equationText.replaceAll("Reduce", "⊦");
 		equationText = equationText.replaceAll("NewLine", "¶");
+	}
+
+	private String getInternetFriendlyStringFromCharacter(char c) {
+		switch (c) {
+		case 'α':
+			return "Alpha";
+		case 'β':
+			return "Beta";
+		case 'Δ':
+			return "Delta";
+		case '▽':
+			return "Del";
+		case 'ε':
+			return "Epsilon";
+		case 'ɣ':
+			return "Gamma";
+		case 'ħ':
+			return "hbar";
+		case '∞':
+			return "Infinity";
+		case 'λ':
+			return "Lambda";
+		case 'μ':
+			return "Mu";
+		case 'ν':
+			return "Nu";
+		case 'ω':
+			return "Omega";
+		case '∂':
+			return "Partial";
+		case 'ɸ':
+			return "Phi";
+		case 'π':
+			return "Pi";
+		case 'Ψ':
+			return "Psi";
+		case 'ρ':
+			return "Rho";
+		case 'σ':
+			return "Sigma";
+		case 'Τ':
+			return "Tau";
+		case 'θ':
+			return "Theta";
+
+		case '∫':
+			return "Integrate";
+		case '∑':
+			return "Sum";
+		case '∏':
+			return "Product";
+		case '√':
+			return "Sqrt";
+		case '|':
+			return "Abs";
+		case '≐':
+			return "Limit";
+
+		case '→':
+			return "->";
+		case '←':
+			return "<-";
+		case '↔':
+			return "<->";
+		case '±':
+			return "+OR-";
+		case '·':
+			return "*";
+
+		case '∀':
+			return "";
+		case '⊦':
+			return "";
+		case '¶':
+			return "";
+		default:
+			return String.valueOf(c);
+		}
 	}
 
 	private void findBrackets() {
@@ -885,11 +972,12 @@ public class EquationLayout {
 		for (int i = 0; i < equationText.length(); i++) {
 			if (attributes.get(i).getShown()) {
 				String character = String.valueOf(equationText.charAt(i));
+				String internetFriendly = getInternetFriendlyStringFromCharacter(equationText.charAt(i));
 				if (equationText.charAt(i) == '≐')
 					character = "lim";
 				float currentSizePix = bracketGroups.get(attributes.get(i).getBracketGroup()).getSizePix();
-				textAttributes.add(new TextAttributes(character, maxWidth / 2, bracketGroups.get(attributes.get(i).getBracketGroup())
-						.getY(), currentSizePix));
+				textAttributes.add(new TextAttributes(character, internetFriendly, maxWidth / 2, bracketGroups.get(
+						attributes.get(i).getBracketGroup()).getY(), currentSizePix));
 				Att att = attributes.get(i).getAtt();
 				if (att.equals(Att.Subscript)) {
 					currentSizePix = currentSizePix / 2;
@@ -911,7 +999,9 @@ public class EquationLayout {
 				}
 				textAttributes.get(i).setWidthAndHeight();
 			} else {
-				textAttributes.add(new TextAttributes(String.valueOf(equationText.charAt(i)), maxWidth / 2, bracketGroups.get(
+				String character = String.valueOf(equationText.charAt(i));
+				String internetFriendly = getInternetFriendlyStringFromCharacter(equationText.charAt(i));
+				textAttributes.add(new TextAttributes(character, internetFriendly, maxWidth / 2, bracketGroups.get(
 						attributes.get(i).getBracketGroup()).getY(), 0));
 				textAttributes.get(i).setWidth(0);
 			}

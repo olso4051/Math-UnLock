@@ -191,7 +191,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			if (!session.isOpened() && !session.isClosed()) {
 				Log.d("test", "openForRead");
 				session.openForRead(new Session.OpenRequest(this).setPermissions(
-						Arrays.asList("public_profile",/* "user_friends",*/"user_birthday", "user_location")).setCallback(loginCallback));
+						Arrays.asList("public_profile", "user_friends", "user_birthday", "user_location")).setCallback(loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {

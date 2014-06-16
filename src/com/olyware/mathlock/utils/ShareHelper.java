@@ -25,6 +25,7 @@ import com.facebook.widget.FacebookDialog;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 import com.olyware.mathlock.LoginFragment;
+import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.UploadImage;
 
@@ -44,10 +45,10 @@ public class ShareHelper {
 	}
 
 	public static void shareFacebook(final Context context, UiLifecycleHelper uiHelper, Bitmap image) {
-		shareFacebook(context, uiHelper, image, context.getString(R.string.share_base_url_facebook_name_readable));
+		shareFacebook(context, uiHelper, image, context.getString(R.string.share_base_url_facebook_name_readable), "");
 	}
 
-	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, String question) {
+	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, String question, String deepLink) {
 		final String link = buildShareURL(context);
 		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
 		final String title = "Can you answer " + question + " to unlock your phone?";
@@ -58,10 +59,15 @@ public class ShareHelper {
 			name = context.getString(R.string.share_base_url_facebook_description_readable1) + " " + name + " "
 					+ context.getString(R.string.share_base_url_facebook_description_readable2);
 		final String description = name;
-		final String questionID = "";
+		String siteName = "Hiq Lockscreen";
+		String appName = context.getString(R.string.app_name);
+		String appPackage = MyApplication.getPackageString();
+		String appClass = "MainActivity";
 		new UploadImage(context, image) {
 			@Override
 			protected void onPostExecute(Integer result) {
+				Log.d("test", "success = " + getSuccess());
+				Log.d("test", "error = " + getError());
 				Log.d("test", "url = " + getURL());
 				Log.d("test", "hash = " + getHash());
 				if (result == 0 || getSuccess().equals("true")) {
@@ -83,7 +89,7 @@ public class ShareHelper {
 					// shareFacebook(context, uiHelper, "http://www.thestreet.com/story/12734024/6/10-most-bikeable-cities-in-the-us.html");
 				}
 			}
-		}.execute(DeelDatApiKey, title, link, description, questionID);
+		}.execute(DeelDatApiKey, title, description, siteName, link, appName, appPackage, appClass, deepLink);
 
 	}
 

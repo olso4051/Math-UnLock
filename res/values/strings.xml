@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools"
 	tools:ignore="TypographyDashes">
 
-    <string name="app_name">Hiq</string>
+    <string name="app_name">Hiq Lockscreen</string>
     <string name="app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
     
@@ -116,7 +116,7 @@
     
     
     <!-- Questions -->
-    <string name="default_question_description">Hiq Lockscreen</string>
+    <string name="question_description_prefix">Hiq Lockscreen</string>
     
     <!-- Saving Bitmaps -->
     <string name="blurred_background">blurred_background</string>

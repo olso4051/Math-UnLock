@@ -3,8 +3,6 @@ package com.olyware.mathlock;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -36,12 +34,12 @@ public class ShowStoreActivity extends Activity {
 	private int[] Cost;
 	private String[] SKU;
 	private ImageButton back;
-	private TextView moneyText, packsTitle, extrasTitle, testPrepTitle, costSmall, costLarge, costAll;
+	private TextView moneyText, packsTitle, costSmall, costLarge, costAll;
 	private Button buttonCoins1, buttonCoins2, buttonCoins3;
 	private Button[] buy;
 	private TextView[] cost;
 	// private Button custom;
-	private String[] unlockPackageKeys, unlockAllKeys, PackageKeys, packageInfo, EggKeys;
+	private String[] unlockPackageKeys, PackageKeys, packageInfo, EggKeys;
 	private int[] unlockCost, EggMaxValues;
 	private boolean firstPack;
 	private Drawable price;
@@ -186,7 +184,6 @@ public class ShowStoreActivity extends Activity {
 
 		PackageKeys = getResources().getStringArray(R.array.enable_package_keys);
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		unlockCost = getResources().getIntArray(R.array.unlock_cost);
 		packageInfo = getResources().getStringArray(R.array.package_info);
 
@@ -205,8 +202,8 @@ public class ShowStoreActivity extends Activity {
 
 		for (int a = 0; a < buy.length; a++) {
 			final int loc = a;
-			int idButton = getResources().getIdentifier(unlockAllKeys[a], "id", getPackageName());
-			int idText = getResources().getIdentifier(unlockAllKeys[a].substring(7) + "_cost", "id", getPackageName());
+			int idButton = getResources().getIdentifier(unlockPackageKeys[a], "id", getPackageName());
+			int idText = getResources().getIdentifier(unlockPackageKeys[a].substring(7) + "_cost", "id", getPackageName());
 			cost[a] = (TextView) findViewById(idText);
 			buy[a] = (Button) findViewById(idButton);
 			buy[a].setOnClickListener(new OnClickListener() {
@@ -215,21 +212,6 @@ public class ShowStoreActivity extends Activity {
 				}
 			});
 		}
-
-		extrasTitle = ((TextView) findViewById(R.id.extras));
-		extrasTitle.setPaintFlags(extrasTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-
-		/*custom = (Button) findViewById(R.id.custom);
-		final Intent i = new Intent(this, ShowProgressActivity.class);
-		custom.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				buyProduct(String.valueOf(custom.getText()), packageInfo.length - 1, 0, i);
-				// TODO start build question pack activity
-			}
-		});*/
-
-		testPrepTitle = ((TextView) findViewById(R.id.test_prep));
-		testPrepTitle.setPaintFlags(testPrepTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
 	@Override
@@ -348,7 +330,7 @@ public class ShowStoreActivity extends Activity {
 		Money.decreaseMoneyAndPaidWithDebt(amount);
 		editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
 		editorPrefsMoney.putInt("money", Money.getMoney());
-		editorPrefsMoney.putBoolean(unlockAllKeys[product], true);		// unlocks the product
+		editorPrefsMoney.putBoolean(unlockPackageKeys[product], true);		// unlocks the product
 		editorPrefsMoney.commit();
 		// enables all the question packs
 		if (product == 0) {												// 0 is unlock_all
@@ -360,17 +342,6 @@ public class ShowStoreActivity extends Activity {
 		else if (product <= unlockPackageKeys.length - 2) {				// if false then product is custom or an extra
 			sendEvent("store", "unlocked_pack", PackageKeys[product - 1], (long) amount);
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
-			// enables the rotating slide extra
-		} else if (product == 7) {
-			sendEvent("store", "unlocked_extra", "rotating_slide", (long) amount);
-			editorPrefs.putString("type", "1");
-			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
-		}
-		// enables the dynamic slide extra
-		else if (product == 8) {
-			sendEvent("store", "unlocked_extra", "dynamic_slide", (long) amount);
-			editorPrefs.putString("type", "2");
-			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[7], EggMaxValues[7]));
 		}
 		editorPrefs.commit();
 		setCost();
@@ -388,7 +359,7 @@ public class ShowStoreActivity extends Activity {
 			cost[0].setText(String.valueOf(unlockCost[0]));
 
 		for (int i = 1; i < buy.length; i++) {
-			if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false)) {
+			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
 				cost[i].setText(getString(R.string.purchased));
 				buy[i].setEnabled(false);
 			} else

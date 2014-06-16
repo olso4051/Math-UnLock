@@ -2,8 +2,6 @@ package com.olyware.mathlock;
 
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,14 +21,12 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.service.ScreenService;
-import com.olyware.mathlock.utils.EggHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	final private static String SCREEN_LABEL = "Settings Screen";
 	private String mPrefUserInfo, mPrefUserSkipped, mPrefUserLoggedIn;
-	private String[] unlockPackageKeys, unlockAllKeys, settingsPackageKeys, EggKeys;
+	private String[] unlockPackageKeys, settingsPackageKeys;
 	private List<String> categories;
-	private int[] EggMaxValues;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff, lockscreen2;
 	private DatabaseManager dbManager;
@@ -66,10 +62,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
-		unlockAllKeys = ArrayUtils.addAll(unlockPackageKeys, getResources().getStringArray(R.array.unlock_extra_keys));
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
-		EggKeys = getResources().getStringArray(R.array.egg_keys);
-		EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
 		mPrefUserInfo = getString(R.string.pref_user_info);
 		mPrefUserSkipped = getString(R.string.pref_user_skipped);
 		mPrefUserLoggedIn = getString(R.string.pref_user_logged_in);
@@ -100,35 +93,16 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		lockscreen2 = (ListPreference) findPreference("lockscreen2");
 		lockscreen2.setSummary(lockscreen2.getEntry());
 
-		// Set the available entries and values in the "type" setting
-		ListPreference Pref_type = (ListPreference) findPreference("type");
-		if (sharedPrefsMoney.getBoolean("unlock_rotating_slide", false))
-			if (sharedPrefsMoney.getBoolean("unlock_dynamic_slide", false)) {
-				Pref_type.setEntries(getResources().getStringArray(R.array.type_entries012));
-				Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values012));
-			} else {
-				Pref_type.setEntries(getResources().getStringArray(R.array.type_entries01));
-				Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values01));
-			}
-		else if (sharedPrefsMoney.getBoolean("unlock_dynamic_slide", false)) {
-			Pref_type.setEntries(getResources().getStringArray(R.array.type_entries02));
-			Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values02));
-		} else {
-			Pref_type.setEntries(getResources().getStringArray(R.array.type_entries012));
-			Pref_type.setEntryValues(getResources().getStringArray(R.array.type_values012));
-		}
-		Pref_type.setSummary(typeIntToString(sharedPrefs.getString("type", "0")));
-
 		// enable settings for unlocked packages
-		for (int i = 1; i < unlockAllKeys.length; i++) {
+		for (int i = 1; i < unlockPackageKeys.length; i++) {
 			Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
 			boolean set = false;
 			if (i < unlockPackageKeys.length)
-				if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
+				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
 					set = true;
 				else
 					set = Pref_Packages.isEnabled();
-			else if (sharedPrefsMoney.getBoolean(unlockAllKeys[i], false))
+			else if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
 				set = true;
 			else
 				set = Pref_Packages.isEnabled();
@@ -197,11 +171,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			String summary = ((sharedPrefs.getString(key, "1").equals("4")) ? "Unlimited" : (sharedPrefs.getString(key, "1")));
 			sendEvent("settings", "max_tries_changed", summary, null);
 			connectionPref.setSummary(summary);
-		} else if (key.equals("type")) {
-			EggHelper.unlockEgg(this, EggKeys[7], EggMaxValues[7]);
-			String type = typeIntToString(sharedPrefs.getString(key, "0"));
-			sendEvent("settings", "unlock_type_changed", type, null);
-			connectionPref.setSummary(type);
 		} else if (key.equals("from_language")) {
 			sendEvent("settings", "language_changed", fromLanguage.getEntry().toString(), null);
 			// if you changed from_language to the same as to_language then swap to_language to old from_language
@@ -290,17 +259,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				prefCat.addPreference(pref);
 			}
 		}
-	}
-
-	private String typeIntToString(String key) {
-		int diffNum = 0;
-		try {
-			diffNum = Integer.parseInt(key);
-		} catch (NumberFormatException nfe) {
-			System.out.println("Could not parse " + nfe);
-		}
-		String[] s = getResources().getStringArray(R.array.type_entries012);
-		return s[diffNum];
 	}
 
 	private void setLanguageSummaries() {

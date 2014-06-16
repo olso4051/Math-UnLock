@@ -1,5 +1,7 @@
 package com.olyware.mathlock;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +24,6 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -83,7 +84,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
 	final private String[] answersNone = { "", "", "", "" };
-	final private int PLAY_CORRECT = 0, PLAY_WRONG = 1, PLAY_BEEP = 2;
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
 
@@ -94,7 +94,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private long startTime = 0;
 	private boolean fromSettings = false, fromPlay = false, fromShare = false;
 
-	private LinearLayout layout, layoutTop;
+	private LinearLayout layout;
 	private Clock clock;
 	private TextView clockTextView, coins, questionDescription;
 	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500, backgroundState = 0;
@@ -122,7 +122,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
 	private int attempts = 1;
 
-	MediaPlayer answerIncorrectClick, answerCorrectClick, buttonClick;
 	private Vibrator vib;
 	private Random rand = new Random(); // Ideally just create one instance globally
 
@@ -286,6 +285,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
+		getDeepLinkData(getIntent().getData());
+
+		/*AppLinkData appLinkData = AppLinkData.createFromActivity(this);
+		if (appLinkData != null) {
+			Log.d("test", "Target URL: " + appLinkData.toString());
+			Bundle arguments = appLinkData.getArgumentBundle();
+			if (arguments != null) {
+				Log.d("test", "arguments: " + arguments.toString());
+				String targetUrl = arguments.getString("target_url");
+				if (targetUrl != null) {
+					Log.d("test", "Target URL: " + targetUrl);
+				}
+			}
+		}*/
 		// check if user is logged in, if not display loginscreen
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		loggedIn = sharedPrefsUserInfo.getBoolean(getString(R.string.pref_user_logged_in), false);
@@ -306,7 +319,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			GCMHelper.registerGCM(this, getApplicationContext());
 		} else {
 			setTheme(R.style.AppThemeWall);
-			setContentView(R.layout.activity_main2);
+			setContentView(R.layout.activity_main);
 
 			uiHelper = new UiLifecycleHelper(this, null);
 			uiHelper.onCreate(savedInstanceState);
@@ -407,7 +420,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			setLayoutBackground(layout, backgroundTransition);*/
 			// backgroundTransition.startTransition(1000);
 
-			layoutTop = (LinearLayout) findViewById(R.id.layout_top_and_question);
 			typefaces = Typefaces.getInstance(this);
 			EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
@@ -514,13 +526,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			joystick.removeCallbacks();
 
-			answerIncorrectClick.reset();
-			answerCorrectClick.reset();
-			buttonClick.reset();
-			answerIncorrectClick.release();
-			answerCorrectClick.release();
-			buttonClick.release();
-
 			uiHelper.onPause();
 		}
 		super.onPause();
@@ -582,11 +587,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			uiHelper.onResume();
 			if (locked && quizMode)
 				quizMode = joystick.setQuizMode(false);
-
-			// load the sound files
-			answerIncorrectClick = MediaPlayer.create(this, R.raw.answer_incorrect);
-			answerCorrectClick = MediaPlayer.create(this, R.raw.answer_correct);
-			buttonClick = MediaPlayer.create(this, R.raw.button_click);
 
 			// get settings
 			sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1083,11 +1083,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 				joystick.setAnswers(answersRandom, answerLoc);
 				problem.setTextColor(defaultTextColor);
+				questionDescription.setText(getString(R.string.question_description_prefix) + " | " + currentPack);
 				resetQuestionWorth(questionWorthMax);
 			} else {
 				joystick.resetGuess();
 				joystick.setProblem(false);
 				problem.setText(R.string.db_loading);
+				questionDescription.setText(getString(R.string.question_description_prefix));
 				answersRandom = answersNone;
 				joystick.setAnswers(answersRandom, 0);
 			}
@@ -1104,6 +1106,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				problem.setText(R.string.none_enabled);
 				answersRandom = answersNone;
 			}
+			questionDescription.setText(getString(R.string.question_description_prefix));
 			joystick.setAnswers(answersRandom, 0);
 		}
 	}
@@ -1278,16 +1281,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					.currentTimeMillis(), startTime - System.currentTimeMillis()));
 			if (correct) {
 				sendEvent("question", "question_answered", "correct", (long) questionWorth);
-				if (questionWorth > 0)
-					playSound(PLAY_CORRECT);
-				else
-					playSound(PLAY_BEEP);
 				problem.setTextColor(Color.GREEN);
 				dMoney = Money.increaseMoney(questionWorth);
 				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
 			} else {
 				sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
-				playSound(PLAY_WRONG);
 				joystick.setIncorrectGuess(guessLoc);
 				problem.setTextColor(Color.RED);
 				dMoney = Money.decreaseMoneyNoDebt(questionWorth);
@@ -1349,28 +1347,23 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			break;
 		case Friends:		// friends was selected
-			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, FriendActivity.class));
 			break;
 		case Store:		// Store was selected
-			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, ShowStoreActivity.class));
 			break;
 		case Progress:		// progress was selected
-			playSound(PLAY_BEEP);
 			unlocking = false;
 			startActivity(new Intent(this, ShowProgressActivity.class));
 			break;
 		case QuizMode:		// quiz Mode was selected
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
-			playSound(PLAY_BEEP);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case Settings:		// settings was selected
-			playSound(PLAY_BEEP);
 			fromSettings = true;
 			unlocking = false;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
@@ -1382,7 +1375,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case QuickUnlock:	// quickUnlock activated
 			sendEvent("question", "double_tap", "quick_unlock", null);
-			playSound(PLAY_BEEP);
 			resetStreak();
 			setApps();
 			resetQuestionWorth(0);
@@ -1391,11 +1383,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
 			break;
 		case AddApp:	// add app was selected
-			playSound(PLAY_BEEP);
 			selectApp();
 			break;
 		case SelectApp:	// app was selected
-			playSound(PLAY_BEEP);
 			if (Extra < apps.size()) {
 				sendEvent("apps", "launch_app", apps.get(Extra).name, null);
 				startActivity(getPackageManager().getLaunchIntentForPackage(apps.get(Extra).packageName));
@@ -1404,12 +1394,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case DeleteApp:	// remove app was selected
 			sendEvent("apps", "delete_app", apps.get(Extra).name, null);
-			playSound(PLAY_BEEP);
 			removeAppFromAll(Extra);
 			break;
 		case Share:	// share was selected
 			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
-			ShareHelper.shareFacebook(this, uiHelper, HelpQuestionImage, problem.getReadableText());
+			ShareHelper.shareFacebook(this, uiHelper, HelpQuestionImage, problem.getReadableText(), getDeepLinkToShare());
 			break;
 		case Touch:
 			setProblemAndAnswer();
@@ -1426,12 +1415,49 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				backgroundTransition.reverseTransition(JoystickView.IN_OUT_DURATION);
 			}
 			break;
-		case SelectLock:
+		case ShouldDimScreen:
 			backgroundState = 1;
 			backgroundTransition.startTransition(JoystickView.IN_OUT_DURATION);
 			break;
 		default:
 			break;
+		}
+	}
+
+	private String getDeepLinkToShare() {
+		try {
+			String deepLink = "sharequestion://";
+			deepLink += URLEncoder.encode(problem.getOriginalText(), "utf-8");
+			for (int i = 0; i < answers.length; i++) {
+				deepLink += "/" + URLEncoder.encode(answers[i], "utf-8");
+			}
+			Log.d("test", "deep link = " + deepLink);
+			return deepLink;
+		} catch (UnsupportedEncodingException e) {
+			return "";
+		}
+	}
+
+	private void getDeepLinkData(Uri data) {
+		if (data != null) {
+			String scheme = "sharequestion";
+			Log.d("test", "data.getScheme() =" + data.getScheme() + " | scheme = " + scheme);
+			if (data.getScheme().equals(scheme)) {
+				boolean deepLink = true;
+				String dataString = data.toString();
+				Log.d("test", "dataString = " + dataString);
+				int start = scheme.length() + 2;
+				int end = dataString.indexOf('/', start);
+				String questionFromDeepLink = dataString.substring(start, end);
+				Log.d("test", "questionFromDeepLink = " + questionFromDeepLink);
+				String[] answersFromDeepLink = new String[answers.length];
+				for (int i = 0; i < answers.length; i++) {
+					start = end + 1;
+					end = dataString.indexOf('/', start);
+					answersFromDeepLink[i] = dataString.substring(start, end);
+					Log.d("test", "answersFromDeepLink[" + i + "]" + answersFromDeepLink[i]);
+				}
+			}
 		}
 	}
 
@@ -1692,30 +1718,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
 		pickIntent.putExtra(Intent.EXTRA_INTENT, mainIntent);
 		startActivityForResult(pickIntent, REQUEST_PICK_APP);
-	}
-
-	private void playSound(int ID) {
-		if (!locked) {
-			if (ID == PLAY_CORRECT) {
-				if (answerCorrectClick.isPlaying()) {
-					answerCorrectClick.reset();
-					answerCorrectClick = MediaPlayer.create(this, R.raw.answer_correct);
-				}
-				answerCorrectClick.start();
-			} else if (ID == PLAY_WRONG) {
-				if (answerIncorrectClick.isPlaying()) {
-					answerIncorrectClick.reset();
-					answerIncorrectClick = MediaPlayer.create(this, R.raw.answer_incorrect);
-				}
-				answerIncorrectClick.start();
-			} else if (ID == PLAY_BEEP) {
-				if (buttonClick.isPlaying()) {
-					buttonClick.reset();
-					buttonClick = MediaPlayer.create(this, R.raw.button_click);
-				}
-				buttonClick.start();
-			}
-		}
 	}
 
 	private void sendEvent(String category, String action, String label, Long value) {

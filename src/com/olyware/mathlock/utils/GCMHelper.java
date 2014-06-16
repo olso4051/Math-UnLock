@@ -71,10 +71,13 @@ public class GCMHelper {
 			throw new ClassCastException(act.toString() + " must implement GCMResponse");
 		}
 		if (checkPlayServices(act)) {
+			SharedPreferences prefsGA = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 			regID = getRegistrationId(app);
 			Log.d("GAtest", "regID = " + regID);
 			if (regID.equals("")) {
 				Log.d("GAtest", "registerInBackground");
+				SharedPreferences.Editor editorGA = prefsGA.edit();
+				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(act, app, false);
 			} else {
 				mCallback.GCMResult(true);
@@ -110,6 +113,7 @@ public class GCMHelper {
 		int registeredVersion = prefs.getInt(context.getString(R.string.gcm_app_version_property), Integer.MIN_VALUE);
 		int currentVersion = getAppVersion(context);
 		if (registeredVersion != currentVersion) {
+			// if (true) {
 			Log.d("GAtest", "App version changed");
 			return "";
 		}

@@ -71,6 +71,13 @@ public class EquationView extends AutoResizeTextView {
 			return getText().toString();
 	}
 
+	public String getOriginalText() {
+		if (equation)
+			return layout.getOriginalText();
+		else
+			return getText().toString();
+	}
+
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);

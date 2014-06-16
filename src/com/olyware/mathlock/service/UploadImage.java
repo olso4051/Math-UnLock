@@ -65,14 +65,14 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 		JSONObject jsonResponse;
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			image.compress(CompressFormat.JPEG, 50, bos);
-			// image.compress(CompressFormat.PNG, 100, bos);
+			// image.compress(CompressFormat.JPEG, 50, bos);
+			image.compress(CompressFormat.PNG, 100, bos);
 			byte[] data = bos.toByteArray();
 
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
 			multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-			multipartEntity.addPart("image", new ByteArrayBody(data, "test.jpeg"));
-			// multipartEntity.addPart("image", new ByteArrayBody(data, "test.png"));
+			// multipartEntity.addPart("image", new ByteArrayBody(data, "test.jpeg"));
+			multipartEntity.addPart("image", new ByteArrayBody(data, "test.png"));
 
 			if (s[0] != null)
 				if (s[0].length() > 0)
@@ -82,12 +82,26 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 					multipartEntity.addTextBody("title", s[1]);
 			if (s[2] != null)
 				if (s[2].length() > 0)
-					multipartEntity.addTextBody("url", s[2]);
+					multipartEntity.addTextBody("description", s[2]);
 			if (s[3] != null)
 				if (s[3].length() > 0)
-					multipartEntity.addTextBody("description", s[3]);
-			// multipartEntity.addTextBody("question_id", s[4]);
-			multipartEntity.addTextBody("extension", "jpeg");
+					multipartEntity.addTextBody("site_name", s[3]);
+			if (s[4] != null)
+				if (s[4].length() > 0)
+					multipartEntity.addTextBody("url", s[4]);
+			if (s[5] != null)
+				if (s[5].length() > 0)
+					multipartEntity.addTextBody("app_name", s[5]);
+			if (s[6] != null)
+				if (s[6].length() > 0)
+					multipartEntity.addTextBody("package", s[6]);
+			if (s[7] != null)
+				if (s[7].length() > 0)
+					multipartEntity.addTextBody("app_class", s[7]);
+			if (s[8] != null)
+				if (s[8].length() > 0)
+					multipartEntity.addTextBody("deeplink", s[8]);
+			multipartEntity.addTextBody("extension", "png");
 
 			postRequest.setEntity(multipartEntity.build());
 			HttpResponse response = httpClient.execute(postRequest);
