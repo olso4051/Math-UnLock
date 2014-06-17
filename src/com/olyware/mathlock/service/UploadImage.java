@@ -65,14 +65,12 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 		JSONObject jsonResponse;
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			// image.compress(CompressFormat.JPEG, 50, bos);
-			image.compress(CompressFormat.PNG, 100, bos);
+			image.compress(CompressFormat.JPEG, 75, bos);
 			byte[] data = bos.toByteArray();
 
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
 			multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-			// multipartEntity.addPart("image", new ByteArrayBody(data, "test.jpeg"));
-			multipartEntity.addPart("image", new ByteArrayBody(data, "test.png"));
+			multipartEntity.addPart("image", new ByteArrayBody(data, "test.jpeg"));
 
 			if (s[0] != null)
 				if (s[0].length() > 0)
@@ -101,7 +99,7 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 			if (s[8] != null)
 				if (s[8].length() > 0)
 					multipartEntity.addTextBody("deeplink", s[8]);
-			multipartEntity.addTextBody("extension", "png");
+			multipartEntity.addTextBody("extension", "jpeg");
 
 			postRequest.setEntity(multipartEntity.build());
 			HttpResponse response = httpClient.execute(postRequest);

@@ -1,6 +1,7 @@
 package com.olyware.mathlock;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Random;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,8 +21,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
@@ -44,6 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AppLinkData;
 import com.facebook.LoggingBehavior;
 import com.facebook.Settings;
 import com.facebook.UiLifecycleHelper;
@@ -79,7 +88,7 @@ import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
-	final private int startingPmoney = 20000, streakToIncrease = 40;
+	final private int startingPmoney = 10000, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -92,7 +101,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
-	private boolean fromSettings = false, fromPlay = false, fromShare = false;
+	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false;
 
 	private LinearLayout layout;
 	private Clock clock;
@@ -109,7 +118,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private List<Integer> streakToNotify, totalToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
-	private String currentPack, currentTableName, fromLanguage, toLanguage;
+	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink;
 	private long ID = 0;
 
 	private int EnabledPackages = 0;
@@ -119,6 +128,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private int answerLoc = 0;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
+	private String[] answersFromDeepLink = new String[4];
 	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
 	private int attempts = 1;
 
@@ -145,20 +155,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private LoginFragment loginFragment;
 	private UiLifecycleHelper uiHelper;
-	// private PendingAction pendingAction = PendingAction.NONE;
 	private Bitmap HelpQuestionImage;
 	private ProgressDialog progressDialog;
-
-	/*private enum PendingAction {
-		NONE, POST_PHOTO
-	}*/
-
-	/*private Session.StatusCallback callback = new Session.StatusCallback() {
-		@Override
-		public void call(Session session, SessionState state, Exception exception) {
-			onSessionStateChange(session, state, exception);
-		}
-	};*/
 
 	public static Context getContext() {
 		return ctx;
@@ -287,18 +285,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
 
-		/*AppLinkData appLinkData = AppLinkData.createFromActivity(this);
+		AppLinkData appLinkData = AppLinkData.createFromActivity(this);
 		if (appLinkData != null) {
-			Log.d("test", "Target URL: " + appLinkData.toString());
+			Log.d("test", "targeturi: " + appLinkData.getTargetUri().toString());
 			Bundle arguments = appLinkData.getArgumentBundle();
 			if (arguments != null) {
-				Log.d("test", "arguments: " + arguments.toString());
+				Log.d("test", "argumentsbundle: " + arguments.toString());
 				String targetUrl = arguments.getString("target_url");
 				if (targetUrl != null) {
 					Log.d("test", "Target URL: " + targetUrl);
 				}
 			}
-		}*/
+		}
 		// check if user is logged in, if not display loginscreen
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		loggedIn = sharedPrefsUserInfo.getBoolean(getString(R.string.pref_user_logged_in), false);
@@ -323,10 +321,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			uiHelper = new UiLifecycleHelper(this, null);
 			uiHelper.onCreate(savedInstanceState);
-			/*if (savedInstanceState != null) {
-				String name = savedInstanceState.getString(PENDING_ACTION_BUNDLE_KEY);
-				pendingAction = PendingAction.valueOf(name);
-			}*/
 
 			IntentFilter logoutFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
 			LocalBroadcastManager.getInstance(this).registerReceiver(finishBroadcast, logoutFilter);
@@ -356,6 +350,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			totalToNotify = new ArrayList<Integer>();
 			for (int i : getResources().getIntArray(R.array.notify_total_questions))
 				totalToNotify.add(i);
+
+			Display display = getWindowManager().getDefaultDisplay();
+			int sizeY, sizeX;
+			if (android.os.Build.VERSION.SDK_INT < 13) {
+				sizeY = display.getHeight();
+				sizeX = display.getWidth();
+			} else {
+				Point size = new Point();
+				display.getSize(size);
+				sizeY = size.y;
+				sizeX = size.x;
+			}
+			sharedPrefs.edit().putInt("layout_width", sizeX).putInt("layout_height", sizeY).commit();
 
 			String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 			mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -409,16 +416,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			};
 
 			layout = (LinearLayout) findViewById(R.id.layout);
-			backgroundTransition = (TransitionDrawable) layout.getBackground().mutate();
-			/*backgroundTransition.setCrossFadeEnabled(true);
-			backgroundTransition.setCrossFadeEnabled(false);*/
-			// backgroundTransition.startTransition(1000);
-			/*Drawable gradient = getResources().getDrawable(R.drawable.gradient_shape);
-			Drawable dim = getResources().getDrawable(R.drawable.dim_shape);
+			BitmapDrawable gradient = new BitmapDrawable(getResources(), getWallpaperImage(false));
+			BitmapDrawable dim = new BitmapDrawable(getResources(), getWallpaperImage(true));
 			backgroundTransition = new TransitionDrawable(new Drawable[] { gradient, dim });
-			backgroundTransition.setCrossFadeEnabled(true);
-			setLayoutBackground(layout, backgroundTransition);*/
-			// backgroundTransition.startTransition(1000);
+			setLayoutBackground(layout, backgroundTransition);
 
 			typefaces = Typefaces.getInstance(this);
 			EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
@@ -439,19 +440,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			questionDescription = (TextView) findViewById(R.id.description);
 			problem = (EquationView) findViewById(R.id.problem);
 			defaultTextColor = problem.getTextColors().getDefaultColor();
-
-			Display display = getWindowManager().getDefaultDisplay();
-			int sizeY, sizeX;
-			if (android.os.Build.VERSION.SDK_INT < 13) {
-				sizeY = display.getHeight();
-				sizeX = display.getWidth();
-			} else {
-				Point size = new Point();
-				display.getSize(size);
-				sizeY = size.y;
-				sizeX = size.x;
-			}
-			sharedPrefs.edit().putInt("layout_width", sizeX).putInt("layout_height", sizeY).commit();
 
 			joystick = (JoystickView) findViewById(R.id.joystick);
 			joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
@@ -788,57 +776,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	/*private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-		if (pendingAction != PendingAction.NONE
-				&& (exception instanceof FacebookOperationCanceledException || exception instanceof FacebookAuthorizationException)) {
-			new AlertDialog.Builder(this).setTitle(R.string.cancelled).setMessage(R.string.permission_not_granted)
-					.setPositiveButton(R.string.ok, null).show();
-			pendingAction = PendingAction.NONE;
-		} else if (state == SessionState.OPENED_TOKEN_UPDATED) {
-			handlePendingAction();
-		}
-		// updateUI();
-	}
-
-	private void handlePendingAction() {
-		PendingAction previouslyPendingAction = pendingAction;
-		// These actions may re-set pendingAction if they are still pending, but we assume they
-		// will succeed.
-		pendingAction = PendingAction.NONE;
-
-		if (previouslyPendingAction == PendingAction.POST_PHOTO) {
-			postPhoto();
-		}
-	}
-
-	private void postPhoto() {
-		if (hasPublishPermission()) {
-			Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_login);
-			Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
-				@Override
-				public void onCompleted(Response response) {
-					showPublishResult(getString(R.string.successful_photo_post), response.getError());
-				}
-			});
-			request.executeAsync();
-		} else {
-			pendingAction = PendingAction.POST_PHOTO;
-		}
-	}
-
-	private boolean hasPublishPermission() {
-		Session session = Session.getActiveSession();
-		return session != null && session.getPermissions().contains("publish_actions");
-	}
-
-	private void showPublishResult(String message, FacebookRequestError error) {
-		if (error == null) {
-			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-		} else {
-			Toast.makeText(this, getString(R.string.error), Toast.LENGTH_LONG).show();
-		}
-	}*/
-
 	private void setApps() {
 		sharedPrefsApps = getSharedPreferences("Apps", 0);
 		if (sharedPrefsApps.getInt("size", 0) != apps.size()) {
@@ -905,6 +842,44 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			layout.setBackgroundDrawable(background);
 		else
 			layout.setBackground(background);
+	}
+
+	private Bitmap getWallpaperImage(boolean dimOrGradient) {
+		int w = sharedPrefs.getInt("layout_width", -1);
+		int h = sharedPrefs.getInt("layout_height", -1);
+		int statusBarHeight = sharedPrefs.getInt("layout_status_bar_height", -1);
+		if (statusBarHeight < 0)
+			statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
+
+		if (w > 0 && h > 0 && statusBarHeight >= 0) {
+			BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
+
+			// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
+			Bitmap bitmap = background.getBitmap();
+
+			// set scaling factors
+			int left = bitmap.getWidth() / 2 - w / 2;
+			int top = bitmap.getHeight() / 2 - h / 2;
+
+			// scale the bitmap to fit on the background
+			bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
+
+			Canvas canvas = new Canvas(bitmap);
+			canvas.drawBitmap(bitmap, 0, 0, null);
+			Rect dstRectForOpt = new Rect();
+			dstRectForOpt.set(0, 0, w, h);
+			Paint optPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			optPaint.setStyle(Paint.Style.FILL);
+			if (dimOrGradient) {
+				canvas.drawARGB(150, 0, 0, 0);
+			} else {
+				optPaint.setShader(new LinearGradient(0, 0, 0, h, new int[] { Color.argb(150, 0, 0, 0), Color.argb(150, 0, 0, 0),
+						Color.argb(0, 0, 0, 0) }, new float[] { 0, 0.3f, 1 }, TileMode.MIRROR));
+				canvas.drawRect(dstRectForOpt, optPaint);
+			}
+			return bitmap;
+		}
+		return null;
 	}
 
 	/*private void showWallpaper() {
@@ -985,8 +960,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void setProblemAndAnswer() {
-		Log.d("test", "setProblemAndAnswer()");
-		if ((EnabledPackages > 0) && (dbManager != null)) {
+		if (fromDeepLink) {
+			questionWorth = 0;
+			questionWorthMax = 0;
+			joystick.resetGuess();
+			joystick.setProblem(true);
+			problem.setText(questionFromDeepLink);
+			problem.setTextColor(defaultTextColor);
+			questionDescription.setText(getString(R.string.question_description_prefix) + " | "
+					+ getString(R.string.question_description_share));
+			answers = answersFromDeepLink;
+			setRandomAnswers();
+			joystick.setAnswers(answersRandom, answerLoc);
+			resetQuestionWorth(questionWorthMax);
+		} else if ((EnabledPackages > 0) && (dbManager != null)) {
 			if (!dbManager.isDestroyed()) {
 				joystick.setProblem(true);
 				final String EnabledPackageKeys[] = new String[EnabledPackages];
@@ -1071,16 +1058,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						return;
 				}
 
-				answerLoc = rand.nextInt(4);			// set a random location for the correct answer
-				int offset = 1;
-				for (int i = 0; i < 4; i++) {
-					if (i == answerLoc) {
-						answersRandom[i] = answers[0];
-						offset = 0;
-					} else {
-						answersRandom[i] = answers[i + offset];
-					}
-				}
+				setRandomAnswers();
+
 				joystick.setAnswers(answersRandom, answerLoc);
 				problem.setTextColor(defaultTextColor);
 				questionDescription.setText(getString(R.string.question_description_prefix) + " | " + currentPack);
@@ -1108,6 +1087,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			questionDescription.setText(getString(R.string.question_description_prefix));
 			joystick.setAnswers(answersRandom, 0);
+		}
+	}
+
+	private void setRandomAnswers() {
+		answerLoc = rand.nextInt(4);			// set a random location for the correct answer
+		int offset = 1;
+		for (int i = 0; i < 4; i++) {
+			if (i == answerLoc) {
+				answersRandom[i] = answers[0];
+				offset = 0;
+			} else {
+				answersRandom[i] = answers[i + offset];
+			}
 		}
 	}
 
@@ -1309,6 +1301,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case B:		// B was selected
 		case C:		// C was selected
 		case D:		// D was selected
+			if (fromDeepLink)
+				fromDeepLink = false;
 			int answer = JoystickSelect.fromValue(s);
 			timerHandler.removeCallbacks(reduceWorth);
 			if (EnabledPackages == 0) {
@@ -1426,10 +1420,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private String getDeepLinkToShare() {
 		try {
-			String deepLink = "sharequestion://";
+			// String deepLink = "sharequestion://";
+			String deepLink = "";
 			deepLink += URLEncoder.encode(problem.getOriginalText(), "utf-8");
 			for (int i = 0; i < answers.length; i++) {
-				deepLink += "/" + URLEncoder.encode(answers[i], "utf-8");
+				deepLink += "-" + URLEncoder.encode(answers[i], "utf-8");
 			}
 			Log.d("test", "deep link = " + deepLink);
 			return deepLink;
@@ -1440,22 +1435,28 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private void getDeepLinkData(Uri data) {
 		if (data != null) {
-			String scheme = "sharequestion";
-			Log.d("test", "data.getScheme() =" + data.getScheme() + " | scheme = " + scheme);
-			if (data.getScheme().equals(scheme)) {
-				boolean deepLink = true;
-				String dataString = data.toString();
-				Log.d("test", "dataString = " + dataString);
-				int start = scheme.length() + 2;
-				int end = dataString.indexOf('/', start);
-				String questionFromDeepLink = dataString.substring(start, end);
-				Log.d("test", "questionFromDeepLink = " + questionFromDeepLink);
-				String[] answersFromDeepLink = new String[answers.length];
-				for (int i = 0; i < answers.length; i++) {
-					start = end + 1;
-					end = dataString.indexOf('/', start);
-					answersFromDeepLink[i] = dataString.substring(start, end);
-					Log.d("test", "answersFromDeepLink[" + i + "]" + answersFromDeepLink[i]);
+			// String scheme = "sharequestion";
+			String target = "http://deeldat.com/f/";
+			String url = data.toString();
+			Log.d("test", "url = " + url);
+			int start = url.indexOf(target);
+			if (start >= 0) {
+				try {
+					fromDeepLink = true;
+					start = url.indexOf('/', target.length()) + 1;
+					int end = url.indexOf('-', start);
+					questionFromDeepLink = URLDecoder.decode(url.substring(start, end), "utf-8");
+					for (int i = 0; i < answers.length; i++) {
+						start = end + 1;
+						end = url.indexOf('-', start);
+						Log.d("test", "start = " + start + " | end = " + end);
+						if (end > 0)
+							answersFromDeepLink[i] = URLDecoder.decode(url.substring(start, end), "utf-8");
+						else
+							answersFromDeepLink[i] = URLDecoder.decode(url.substring(start), "utf-8");
+					}
+				} catch (UnsupportedEncodingException e) {
+					fromDeepLink = false;
 				}
 			}
 		}
@@ -1769,7 +1770,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		int maxHeight = b1.getHeight() - statusBarHeight;
 		height = (height < minHeight) ? minHeight : height;
 		height = (height > maxHeight) ? maxHeight : height;
-		Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO));
+		Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), height);
+		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), b1.getHeight() - statusBarHeight);
 		view.destroyDrawingCache();
 		return b;
 	}

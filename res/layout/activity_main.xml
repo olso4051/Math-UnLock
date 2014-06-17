@@ -3,7 +3,6 @@
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/transition_shape"
     android:orientation="vertical" >
     <LinearLayout
         android:id="@+id/layout_top_and_question"

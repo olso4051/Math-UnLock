@@ -2,16 +2,21 @@ package com.olyware.mathlock;
 
 import java.util.Arrays;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -175,8 +180,26 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		uiHelper.onSaveInstanceState(outState);
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onClick(View view) {
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		if (sharedPrefs.getInt("layout_status_bar_height", -1) < 0) {
+			Display display = getActivity().getWindowManager().getDefaultDisplay();
+			int sizeY;
+			if (android.os.Build.VERSION.SDK_INT < 13) {
+				sizeY = display.getHeight();
+			} else {
+				Point size = new Point();
+				display.getSize(size);
+				sizeY = size.y;
+			}
+			View content = getActivity().getWindow().findViewById(Window.ID_ANDROID_CONTENT);
+			int statusBarHeight = sizeY - content.getHeight();
+			Log.d("test", "sizeY = " + sizeY + " | content.getHeight() = " + content.getHeight() + " | statusBarHeight = "
+					+ statusBarHeight);
+			sharedPrefs.edit().putInt("layout_status_bar_height", statusBarHeight).commit();
+		}
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
 		if (view.getId() == R.id.fragment_login_button_login) {
@@ -219,6 +242,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 									.putBoolean(mPrefUserSkipped, false).commit();
 							Log.d("GAtest", user.toString());
 							logIn();
+						} else {
+							Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
 						}
 					}
 				}).executeAsync();

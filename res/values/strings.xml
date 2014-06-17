@@ -114,9 +114,9 @@
     <string name="settings_login">Login</string>
     <string name="settings_info">Info</string>
     
-    
     <!-- Questions -->
     <string name="question_description_prefix">Hiq Lockscreen</string>
+    <string name="question_description_share">Shared Question</string>
     
     <!-- Saving Bitmaps -->
     <string name="blurred_background">blurred_background</string>

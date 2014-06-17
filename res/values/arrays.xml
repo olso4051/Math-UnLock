@@ -288,10 +288,10 @@
     </string-array>
     
     <integer-array name="notify_streaks">
-        <item>5</item>
+        <item>20</item>
+        <item>50</item>
         <item>100</item>
-        <item>250</item>
-        <item>500</item>
+        <item>200</item>
     </integer-array>
     <integer-array name="notify_total_questions">
         <item>500</item>
