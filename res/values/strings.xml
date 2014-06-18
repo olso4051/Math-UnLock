@@ -85,6 +85,7 @@
     <string name="pref_user_facebook_birth">facebook_birth</string>
     <string name="pref_user_facebook_gender">facebook_gender</string>
     <string name="pref_user_facebook_location">facebook_location</string>
+    <string name="pref_user_facebook_email">facebook_email</string>
     
     <!-- Preferences(money) -->
     <string name="pref_money">Packages</string>

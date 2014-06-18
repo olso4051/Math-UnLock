@@ -55,7 +55,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
-			mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation;
+			mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation, mPrefUserFacebookEmail;
 	private float transY = 0;
 	private EditText username;
 	private Button login, skip;
@@ -105,6 +105,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		mPrefUserFacebookBirth = ctx.getString(R.string.pref_user_facebook_birth);
 		mPrefUserFacebookGender = ctx.getString(R.string.pref_user_facebook_gender);
 		mPrefUserFacebookLocation = ctx.getString(R.string.pref_user_facebook_location);
+		mPrefUserFacebookEmail = ctx.getString(R.string.pref_user_facebook_email);
 	}
 
 	@Override
@@ -184,7 +185,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	@Override
 	public void onClick(View view) {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		if (sharedPrefs.getInt("layout_status_bar_height", -1) < 0) {
+		// if (sharedPrefs.getInt("layout_status_bar_height", -1) < 0) {
+		if (true) {
 			Display display = getActivity().getWindowManager().getDefaultDisplay();
 			int sizeY;
 			if (android.os.Build.VERSION.SDK_INT < 13) {
@@ -214,7 +216,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			if (!session.isOpened() && !session.isClosed()) {
 				Log.d("test", "openForRead");
 				session.openForRead(new Session.OpenRequest(this).setPermissions(
-						Arrays.asList("public_profile", "user_friends", "user_birthday", "user_location")).setCallback(loginCallback));
+						Arrays.asList("email", "public_profile", "user_friends"/*, "user_birthday", "user_location"*/)).setCallback(
+						loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {
@@ -234,11 +237,19 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					@Override
 					public void onCompleted(GraphUser user, Response response) {
 						if (user != null) {
+							String gender = "", birthday = "", location = "", email = "";
+							if (user.getProperty("gender") != null)
+								gender = user.getProperty("gender").toString();
+							if (user.getBirthday() != null)
+								birthday = user.getBirthday();
+							if (user.getLocation() != null)
+								location = user.getLocation().getProperty("name").toString();
+							if (user.getProperty("email") != null)
+								email = user.getProperty("email").toString();
 							SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
-									.putString(mPrefUserFacebookBirth, user.getBirthday())
-									.putString(mPrefUserFacebookGender, user.getProperty("gender").toString())
-									.putString(mPrefUserFacebookLocation, user.getLocation().getProperty("name").toString())
+									.putString(mPrefUserFacebookBirth, birthday).putString(mPrefUserFacebookGender, gender)
+									.putString(mPrefUserFacebookLocation, location).putString(mPrefUserFacebookEmail, email)
 									.putBoolean(mPrefUserSkipped, false).commit();
 							Log.d("GAtest", user.toString());
 							logIn();
@@ -264,6 +275,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		String birth = sharedPrefsUserInfo.getString(mPrefUserFacebookBirth, "");
 		String gender = sharedPrefsUserInfo.getString(mPrefUserFacebookGender, "");
 		String location = sharedPrefsUserInfo.getString(mPrefUserFacebookLocation, "");
+		String email = sharedPrefsUserInfo.getString(mPrefUserFacebookEmail, "");
 		String uName = sharedPrefsUserInfo.getString(mPrefUserFacebookName, "");
 		if (uName.equals(""))
 			uName = username.getText().toString();
@@ -274,14 +286,15 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		if (imm != null && focus != null) {
 			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
-		attemptLogin(uName, regID, userID, referrer, birth, gender, location);
+		attemptLogin(uName, regID, userID, referrer, birth, gender, location, email);
 
 		startAnimationProgress();
 	}
 
-	private void attemptLogin(String username, String regID, String userID, String referral, String birth, String gender, String location) {
+	private void attemptLogin(String username, String regID, String userID, String referral, String birth, String gender, String location,
+			String email) {
 		Log.d("test", "attemptLoging username=" + username + "|regID.equals(\"\")=" + regID.equals("") + "|userID=" + userID + "|referral="
-				+ referral + "|birth=" + birth + "|gender=" + gender + "|location=" + location);
+				+ referral + "|birth=" + birth + "|gender=" + gender + "|location=" + location + "|email=" + email);
 		new RegisterID(getActivity()) {
 			@Override
 			protected void onPostExecute(Integer result) {
@@ -297,7 +310,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					endAnimationProgress();
 				}
 			}
-		}.execute(username, regID, userID, referral, birth, gender, location);
+		}.execute(username, regID, userID, referral, birth, gender, location, email);
 	}
 
 	public void GCMRegistrationDone(boolean result) {

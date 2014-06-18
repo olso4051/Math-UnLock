@@ -83,6 +83,10 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 				data.put("location", s[6]);
 				Log.d("GAtest", "location:" + s[6]);
 			}
+			if (s[7].length() > 0) {
+				data.put("email", s[7]);
+				Log.d("GAtest", "email:" + s[7]);
+			}
 			Log.d("test", "JSON to register: " + data.toString());
 			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
