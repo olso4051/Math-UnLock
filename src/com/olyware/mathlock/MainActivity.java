@@ -3,6 +3,8 @@ package com.olyware.mathlock;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,8 +20,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -41,6 +45,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -284,6 +289,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Log.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
+
+		// Add code to print out the key hash
+		try {
+			PackageInfo info = getPackageManager().getPackageInfo("com.olyware.mathlock", PackageManager.GET_SIGNATURES);
+			for (Signature signature : info.signatures) {
+				MessageDigest md = MessageDigest.getInstance("SHA");
+				md.update(signature.toByteArray());
+				Log.d("test", "keyhash = " + Base64.encodeToString(md.digest(), Base64.DEFAULT));
+			}
+		} catch (NameNotFoundException e) {
+
+		} catch (NoSuchAlgorithmException e) {
+
+		}
 
 		AppLinkData appLinkData = AppLinkData.createFromActivity(this);
 		if (appLinkData != null) {

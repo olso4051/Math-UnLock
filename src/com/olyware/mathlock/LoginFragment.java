@@ -61,6 +61,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	private Button login, skip;
 	private LinearLayout inputs, progress;
 	private UiLifecycleHelper uiHelper;
+	private boolean facebookButtonClicked;
 
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 		@Override
@@ -106,6 +107,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		mPrefUserFacebookGender = ctx.getString(R.string.pref_user_facebook_gender);
 		mPrefUserFacebookLocation = ctx.getString(R.string.pref_user_facebook_location);
 		mPrefUserFacebookEmail = ctx.getString(R.string.pref_user_facebook_email);
+
+		facebookButtonClicked = false;
 	}
 
 	@Override
@@ -185,8 +188,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	@Override
 	public void onClick(View view) {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		// if (sharedPrefs.getInt("layout_status_bar_height", -1) < 0) {
-		if (true) {
+		if (sharedPrefs.getInt("layout_status_bar_height", -1) < 0) {
 			Display display = getActivity().getWindowManager().getDefaultDisplay();
 			int sizeY;
 			if (android.os.Build.VERSION.SDK_INT < 13) {
@@ -211,6 +213,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			editUserInfo.putBoolean(mPrefUserSkipped, true).commit();
 			startMainActivity();
 		} else if (view.getId() == R.id.authButton) {
+			facebookButtonClicked = true;
 			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
@@ -228,10 +231,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception, boolean fromFacebookButton) {
-		Log.d("test", "onSessionStateChange + fromFacebookButton = " + fromFacebookButton);
+		Log.d("test", "onSessionStateChange + fromFacebookButton = " + (fromFacebookButton || facebookButtonClicked));
 		if (state.isOpened()) {
 			Log.d("test", "Logged in... " + fromFacebookButton);
-			if (fromFacebookButton) {
+			if (fromFacebookButton || facebookButtonClicked) {
+				facebookButtonClicked = false;
 				// Request user data and show the results
 				Request.newMeRequest(session, new Request.GraphUserCallback() {
 					@Override
