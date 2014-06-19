@@ -1577,7 +1577,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private void displayInfo(boolean first) {
 		if (!dialogOn) {
-
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
 				builder.setTitle(R.string.info_title_first);
