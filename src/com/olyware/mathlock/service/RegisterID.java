@@ -40,14 +40,18 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(String... s) {
-		// POST to API with old and new registration, also referral's registration
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		String endpoint = "register";
 		if (s[2].length() > 0) {
 			endpoint = endpoint + "/update";
 			s[3] = "";
 		}
+		if (s[1].length() <= 0) {
+			return 1;
+		}
+
+		// POST to API with old and new registration, also referral's registration
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
 
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
 		HttpEntity entity;

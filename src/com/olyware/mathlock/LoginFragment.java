@@ -232,48 +232,46 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		}
 	}
 
-	private void onSessionStateChange(Session session, SessionState state, Exception exception, boolean fromFacebookButton) {
+	private void onSessionStateChange(Session session, SessionState state, Exception exception, final boolean fromFacebookButton) {
 		Log.d("test", "onSessionStateChange + fromFacebookButton = " + (fromFacebookButton || facebookButtonClicked));
 		if (state.isOpened()) {
 			Log.d("test", "Logged in... " + fromFacebookButton);
-			if (fromFacebookButton || facebookButtonClicked) {
-				facebookButtonClicked = false;
-				// Request user data and show the results
-				Request.newMeRequest(session, new Request.GraphUserCallback() {
-					@Override
-					public void onCompleted(GraphUser user, Response response) {
-						if (user != null) {
-							String gender = "", birthday = "", location = "", email = "";
-							if (user.getProperty("gender") != null)
-								gender = user.getProperty("gender").toString();
-							if (user.getBirthday() != null)
-								birthday = user.getBirthday();
-							if (user.getLocation() != null)
-								location = user.getLocation().getProperty("name").toString();
-							if (user.getProperty("email") != null)
-								email = user.getProperty("email").toString();
-							SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
-									.putString(mPrefUserFacebookBirth, birthday).putString(mPrefUserFacebookGender, gender)
-									.putString(mPrefUserFacebookLocation, location).putString(mPrefUserFacebookEmail, email)
-									.putBoolean(mPrefUserSkipped, false).commit();
-							Log.d("GAtest", user.toString());
+			// Request user data and show the results
+			Request.newMeRequest(session, new Request.GraphUserCallback() {
+
+				@Override
+				public void onCompleted(GraphUser user, Response response) {
+					if (user != null) {
+						String gender = "", birthday = "", location = "", email = "";
+						if (user.getProperty("gender") != null)
+							gender = user.getProperty("gender").toString();
+						if (user.getBirthday() != null)
+							birthday = user.getBirthday();
+						if (user.getLocation() != null)
+							location = user.getLocation().getProperty("name").toString();
+						if (user.getProperty("email") != null)
+							email = user.getProperty("email").toString();
+						SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+						sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
+								.putString(mPrefUserFacebookBirth, birthday).putString(mPrefUserFacebookGender, gender)
+								.putString(mPrefUserFacebookLocation, location).putString(mPrefUserFacebookEmail, email)
+								.putBoolean(mPrefUserSkipped, false).commit();
+						Log.d("GAtest", user.toString());
+						if (fromFacebookButton || facebookButtonClicked) {
+							facebookButtonClicked = false;
 							logIn();
-						} else {
-							Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
 						}
+					} else {
+						Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
 					}
-				}).executeAsync();
-			}
+				}
+			}).executeAsync();
 		} else if (state.isClosed()) {
 			Log.d("test", "Logged out... " + fromFacebookButton);
 		}
 	}
 
 	void logIn() {
-		login.setEnabled(false);
-		skip.setEnabled(false);
-
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
 		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
@@ -292,7 +290,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		if (imm != null && focus != null) {
 			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
-		attemptLogin(uName, regID, userID, referrer, birth, gender, location, email);
+		if (login.isEnabled() && !regID.equals(""))
+			attemptLogin(uName, regID, userID, referrer, birth, gender, location, email);
+		else
+			startMainActivity();
 
 		startAnimationProgress();
 	}
@@ -312,8 +313,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					startMainActivity();
 				} else if (result == 1) {
 					// network error
-					Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
-					endAnimationProgress();
+					startMainActivity();
 				}
 			}
 		}.execute(username, regID, userID, referral, birth, gender, location, email);
@@ -376,6 +376,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void startAnimationProgress() {
+		login.setEnabled(false);
+		skip.setEnabled(false);
 		AnimatorSet animSet = setupStartAnimation();
 		animSet.start();
 	}

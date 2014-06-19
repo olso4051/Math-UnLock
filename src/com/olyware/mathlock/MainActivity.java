@@ -86,6 +86,7 @@ import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.Purchase;
+import com.olyware.mathlock.utils.SaveHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
@@ -93,7 +94,7 @@ import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
-	final private int startingPmoney = 10000, streakToIncrease = 40;
+	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -189,7 +190,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// screen has come on
-			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
+			trackerGA.set(Fields.SESSION_CONTROL, "start");
+			trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
+			trackerGA.send(MapBuilder.createAppView().build());
 			startCountdown();
 			// showWallpaper();
 		}
@@ -298,7 +301,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			for (Signature signature : info.signatures) {
 				MessageDigest md = MessageDigest.getInstance("SHA");
 				md.update(signature.toByteArray());
-				Log.d("test", "keyhash = " + Base64.encodeToString(md.digest(), Base64.DEFAULT));
+				SaveHelper.SaveTextFilePublic("KeyHash.txt", "keyhash = " + Base64.encodeToString(md.digest(), Base64.DEFAULT));
 			}
 		} catch (NameNotFoundException e) {
 
@@ -532,7 +535,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (attached)
 				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 			joystick.removeCallbacks();
-			MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "end");
 		}
 		if (progressDialog != null) {
 			progressDialog.dismiss();
@@ -672,7 +674,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			if (pm.isScreenOn()) {
 				Log.d("test", "onResume Screen is on");
-				MyApplication.getGaTracker().set(Fields.SESSION_CONTROL, "start");
+				trackerGA.set(Fields.SESSION_CONTROL, "start");
+				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
+				trackerGA.send(MapBuilder.createAppView().build());
 				// showWallpaper();
 			}
 		}
@@ -1180,6 +1184,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			else if (LanguageValues[i].equals(toLanguage))
 				toLanguageLocal = LanguageEntries[i];
 		}
+		currentPack = fromLanguageLocal + " → " + toLanguageLocal;
 		List<LanguageQuestion> questions = dbManager.getLanguageQuestions(min, max, answers.length, fromLanguage, toLanguage, ID);
 		if (questions == null)
 			return false;
@@ -1197,7 +1202,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			decreaseRate += answers[i].length();
 		}
 		decreaseRate = decreaseRate * 10;
-		problem.setText(fromLanguageLocal + " → " + toLanguageLocal + "\n" + questions.get(0).getQuestionText());
+		problem.setText(questions.get(0).getQuestionText());
 		return true;
 	}
 
@@ -1596,7 +1601,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 						sendEvent("store", "unlocked_pack", PackageKeys.get(which), 0l);
 						editorPrefs.putBoolean(PackageKeys.get(which), true).commit();			// enables the question pack
-						editorPrefsMoney.putBoolean(unlockPackageKeys[which], true).commit();	// unlocks the question pack
+						editorPrefsMoney.putBoolean(unlockPackageKeys[which + 1], true).commit();	// unlocks the question pack
 
 						UnlockedPackages = getUnlockedPackages();
 						EnabledPackages = getEnabledPackages();
@@ -1750,7 +1755,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (joystick.getQuickUnlock())
 				action = "quick_unlock_" + action;
 		}
-		trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 		trackerGA.send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 

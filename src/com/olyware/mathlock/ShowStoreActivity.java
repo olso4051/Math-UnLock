@@ -339,7 +339,7 @@ public class ShowStoreActivity extends Activity {
 				editorPrefs.putBoolean(PackageKeys[i], true);
 		}
 		// enables the question pack that was unlocked
-		else {
+		else if (product <= unlockPackageKeys.length - 2) {
 			sendEvent("store", "unlocked_pack", PackageKeys[product - 1], (long) amount);
 			editorPrefs.putBoolean(PackageKeys[product - 1], true);
 		}

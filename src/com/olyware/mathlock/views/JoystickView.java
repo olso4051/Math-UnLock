@@ -608,7 +608,7 @@ public class JoystickView extends View {
 			if (!quickUnlock || (i == correctLoc)) {
 				canvas.save();
 				// Draw the background for selected answers
-				unlockPaint.setAlpha(answerAlpha);
+				unlockPaint.setAlpha((wrongGuess < 0) ? answerAlpha : 255);
 				if (selectAnswers[i])
 					canvas.drawBitmap(bmpBack[0], srcRectForBack, RectForAnswers[i], unlockPaint);
 				else if (i == correctGuess)
@@ -620,7 +620,7 @@ public class JoystickView extends View {
 				if (equation[i]) {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
 							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
-					layoutE[i].setAlpha(answerAlpha);
+					layoutE[i].setAlpha((wrongGuess < 0) ? answerAlpha : 255);
 					layoutE[i].draw(canvas);
 				} else {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
@@ -654,7 +654,7 @@ public class JoystickView extends View {
 				if (!apps.get(i - start).getSelectDrag()) {
 					canvas.save();
 					canvas.translate(apps.get(i - start).getX(), apps.get(i - start).getY());
-					d.get(i).setAlpha(answerAlpha);
+					d.get(i).setAlpha((wrongGuess < 0) ? answerAlpha : 255);
 					d.get(i).draw(canvas);
 					canvas.restore();
 				}
@@ -662,7 +662,7 @@ public class JoystickView extends View {
 			if (selectAppDrag >= 0) {
 				canvas.save();
 				canvas.translate(apps.get(selectAppDrag).getX() + appDragX, apps.get(selectAppDrag).getY() + appDragY);
-				d.get(selectAppDrag + start).setAlpha(answerAlpha);
+				d.get(selectAppDrag + start).setAlpha((wrongGuess < 0) ? answerAlpha : 255);
 				d.get(selectAppDrag + start).draw(canvas);
 				canvas.restore();
 			}
@@ -763,13 +763,15 @@ public class JoystickView extends View {
 				checkSelection(false, false);
 				invalidate();
 			} else if (actionType == MotionEvent.ACTION_UP) {
-				Log.d("test", "action_up");
 				tapTimer = System.currentTimeMillis();
 				checkSelection(true, false);
 				returnToDefault();
 			}
 
 		} else if (actionType == MotionEvent.ACTION_UP) {
+			resetGuess();
+			setAlpha(0);
+			invalidate();
 			if (listener != null && paused)
 				listener.OnSelect(JoystickSelect.Touch, false, -1);
 		}
@@ -1068,13 +1070,11 @@ public class JoystickView extends View {
 				lastTimeRevealOrHide = System.currentTimeMillis();
 				float percent = (lastTimeRevealOrHide - startTimeRevealOrHide) / (float) IN_OUT_DURATION;
 				if (percent <= 1) {
-					answerAlpha = Math.max(answerAlpha, (int) (percent * 255));
-					setAlpha(answerAlpha);
+					setAlpha(Math.max(answerAlpha, (int) (percent * 255)));
 					invalidate();
 					animateHandler.postDelayed(revealAnswers, frameTimeReveal);
 				} else {
-					answerAlpha = 255;
-					setAlpha(answerAlpha);
+					setAlpha(255);
 					invalidate();
 				}
 			}
@@ -1087,13 +1087,11 @@ public class JoystickView extends View {
 				lastTimeRevealOrHide = System.currentTimeMillis();
 				float percent = (lastTimeRevealOrHide - startTimeRevealOrHide) / (float) IN_OUT_DURATION;
 				if (percent <= 1) {
-					answerAlpha = Math.min(answerAlpha, (int) ((1 - percent) * 255));
-					setAlpha(answerAlpha);
+					setAlpha(Math.min(answerAlpha, (int) ((1 - percent) * 255)));
 					invalidate();
 					animateHandler.postDelayed(hideAnswers, frameTimeReveal);
 				} else {
-					answerAlpha = 0;
-					setAlpha(answerAlpha);
+					setAlpha(0);
 					invalidate();
 				}
 			}
@@ -1226,8 +1224,9 @@ public class JoystickView extends View {
 	}
 
 	private void setAlpha(int alpha) {
+		answerAlpha = alpha;// (wrongGuess < 0) ? alpha : 255;
 		for (int i = 0; i < NumAnswers; i++) {
-			answerTextPaint[i].setAlpha(alpha);
+			answerTextPaint[i].setAlpha((wrongGuess < 0) ? alpha : 255);
 			if (!equation[i]) {
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
 						false);

@@ -58,10 +58,10 @@ public class SaveHelper {
 		return null;
 	}
 
-	public static boolean SaveTextFilePublic(String txt) {
+	public static boolean SaveTextFilePublic(String filename, String txt) {
 		if (isExternalStorageWritable()) {
 			try {
-				File file = getStorageDir("HiqGCMRegistration.txt");
+				File file = getStorageDir(filename);
 				FileOutputStream stream = new FileOutputStream(file);
 				stream.write(txt.getBytes());
 				stream.close();
