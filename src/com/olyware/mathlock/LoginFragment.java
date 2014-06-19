@@ -1,6 +1,7 @@
 package com.olyware.mathlock;
 
 import java.util.Arrays;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -53,6 +54,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_userid), "");
 	}
+
+	public static List<String> PERMISSIONS = Arrays
+			.asList("email", "public_profile", "user_friends"/*, "user_birthday", "user_location"*/);
 
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
 			mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation, mPrefUserFacebookEmail;
@@ -218,14 +222,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
 				Log.d("test", "openForRead");
-				session.openForRead(new Session.OpenRequest(this).setPermissions(
-						Arrays.asList("email", "public_profile", "user_friends"/*, "user_birthday", "user_location"*/)).setCallback(
-						loginCallback));
+				session.openForRead(new Session.OpenRequest(this).setPermissions(PERMISSIONS).setCallback(loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {
 				Log.d("test", "openActiveSession");
-				Session.openActiveSession(getActivity(), this, true, loginCallback);
+				Session.openActiveSession(getActivity(), this, true, PERMISSIONS, loginCallback);
 			}
 		}
 	}

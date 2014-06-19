@@ -536,8 +536,10 @@ public class JoystickView extends View {
 	}
 
 	public void startAnimations() {
+		startTimePulse = 0;
 		animateHandler.removeCallbacksAndMessages(null);
 		animateHandler.post(finishAnimate);
+		animateHandler.postDelayed(pulseLock, PULSE_PAUSE);
 	}
 
 	public void removeCallbacks() {
@@ -552,9 +554,6 @@ public class JoystickView extends View {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		measured = true;
 		setDimensions();
-		startTimePulse = 0;
-		animateHandler.removeCallbacks(pulseLock);
-		animateHandler.postDelayed(pulseLock, PULSE_PAUSE);
 		super.onLayout(changed, left, top, right, bottom);
 	}
 

@@ -989,7 +989,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				boolean success;
 
 				// get the difficulty
-				difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
+				difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "1"));
 				difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
 				difficulty = difficultyMax;
 
@@ -1509,7 +1509,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			else
 				editorPrefsStats.putInt("currentStreak", 1);
 			if ((currentStreak + 1) >= sharedPrefsStats.getInt("streakToIncrease", streakToIncrease)) {
-				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "0"));
+				int currentMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "1"));
 				if ((currentMax < 5) && (sharedPrefs.getBoolean("algorithm", true))) {
 					int max = Math.min(5, currentMax + 1);
 					editorPrefs.putString("difficulty_max", String.valueOf(max)).commit();
@@ -1579,12 +1579,29 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (!dialogOn) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
-				builder.setTitle(R.string.info_title_first);
+				/*builder.setTitle(R.string.info_title_first);
 				builder.setMessage(getString(R.string.info_message_first)).setCancelable(false);
 				builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
 						startActivity(new Intent(getApplicationContext(), ShowStoreActivity.class));
+					}
+				});*/
+				builder.setTitle(R.string.question_types_title).setItems(R.array.starting_packages, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialogOn = false;
+						SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+						SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
+						SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+						SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+						sendEvent("store", "unlocked_pack", PackageKeys.get(which), 0l);
+						editorPrefs.putBoolean(PackageKeys.get(which), true).commit();			// enables the question pack
+						editorPrefsMoney.putBoolean(unlockPackageKeys[which], true).commit();	// unlocks the question pack
+
+						UnlockedPackages = getUnlockedPackages();
+						EnabledPackages = getEnabledPackages();
+						setProblemAndAnswer();
+						displayHints(0, false);
 					}
 				});
 			} else {

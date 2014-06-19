@@ -14,19 +14,19 @@
         <ListPreference
 	        android:key="difficulty_min"
 	        android:title="@string/difficulty_min"
-	        android:summary="@string/difficulty_summary"
+	        android:summary="@string/difficulty_min_summary"
 	        android:dialogTitle="@string/difficulty_min"
 	        android:entries="@array/difficulty_entries"
 	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
+	        android:defaultValue="@string/difficulty_min_default" />
         <ListPreference
 	        android:key="difficulty_max"
 	        android:title="@string/difficulty_max"
-	        android:summary="@string/difficulty_summary"
+	        android:summary="@string/difficulty_max_summary"
 	        android:dialogTitle="@string/difficulty_max"
 	        android:entries="@array/difficulty_entries"
 	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_default" />
+	        android:defaultValue="@string/difficulty_max_default" />
         <ListPreference
       		android:key="max_tries"
       		android:title="@string/max_tries_title"

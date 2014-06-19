@@ -121,6 +121,7 @@
     <!-- Questions -->
     <string name="question_description_prefix">Hiq Lockscreen</string>
     <string name="question_description_share">Shared Question</string>
+    <string name="question_types_title">What Types of Questions Would You Like to Start With</string>
     
     <!-- Saving Bitmaps -->
     <string name="blurred_background">blurred_background</string>
@@ -157,7 +158,8 @@
     <string name="delete">Delete</string>
     <string name="delete_question">Delete Question!</string>
     <string name="difficulty">Difficulty</string>
-    <string name="difficulty_default">0</string>
+    <string name="difficulty_min_default">0</string>
+    <string name="difficulty_max_default">1</string>
     <string name="difficulty_increase0">You\'re pretty good, increase the difficulty in settings</string>
     <string name="difficulty_increase1">Wow you\'re getting better, try a higher difficulty</string>
     <string name="difficulty_increase2">Not too shabby, there\'s more difficulty settings though</string>
@@ -167,7 +169,8 @@
     <string name="difficulty_increased">Difficulty Increased!</string>
     <string name="difficulty_max">Max Difficulty</string>
     <string name="difficulty_min">Min Difficulty</string>
-    <string name="difficulty_summary">Very Easy</string>
+    <string name="difficulty_max_summary">Easy</string>
+    <string name="difficulty_min_summary">Very Easy</string>
     <string name="download">Download</string>
     <string name="dynamic_slide">Dynamic Slide</string>
     <string name="edit">Edit</string>

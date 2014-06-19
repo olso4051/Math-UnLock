@@ -15,11 +15,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.Session;
+import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
 import com.facebook.widget.WebDialog;
@@ -31,6 +31,8 @@ import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
 	final public static float FACEBOOK_LINK_RATIO = 1.9178082191780821917808219178082f;
+	private static String staticLink;
+	private static Context staticContext;
 
 	public static void share(Context context, String subject, Bitmap bitmap, String message, String link) {
 		context.startActivity(getShareIntent(context, subject, bitmap, message, link));
@@ -93,6 +95,19 @@ public class ShareHelper {
 
 	}
 
+	private static Session.StatusCallback loginCallback = new Session.StatusCallback() {
+		@Override
+		public void call(Session session, SessionState state, Exception exception) {
+			onSessionStateChange(session, state, exception);
+		}
+	};
+
+	private static void onSessionStateChange(Session session, SessionState state, Exception exception) {
+		if (state.isOpened()) {
+			showFeedDialog(staticContext, staticLink);
+		}
+	}
+
 	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, String link) {
 		Activity act = (Activity) context;
 		if (FacebookDialog.canPresentShareDialog(context.getApplicationContext(), FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
@@ -100,34 +115,49 @@ public class ShareHelper {
 			FacebookDialog shareDialog1 = shareDialogBuilder1.build();
 			uiHelper.trackPendingDialogCall(shareDialog1.present());
 		} else {
-			Bundle params = new Bundle();
-			params.putString("link", link);
+			staticLink = link;
+			staticContext = context;
+			Session session = Session.getActiveSession();
+			if (!session.isOpened() && !session.isClosed()) {
+				Log.d("test", "openForRead");
+				session.openForRead(new Session.OpenRequest(act).setPermissions(LoginFragment.PERMISSIONS).setCallback(loginCallback));
+			} else if (session.isOpened()) {
+				showFeedDialog(context, link);
+			} else {
+				Log.d("test", "openActiveSession");
+				Session.openActiveSession(act, true, LoginFragment.PERMISSIONS, loginCallback);
+			}
 
-			WebDialog feedDialog = (new WebDialog.FeedDialogBuilder(context, Session.getActiveSession(), params)).setOnCompleteListener(
-					new OnCompleteListener() {
-						@Override
-						public void onComplete(Bundle values, FacebookException error) {
-							if (error == null) {
-								// When the story is posted, echo the success
-								// and the post Id.
-								final String postId = values.getString("post_id");
-								if (postId != null) {
-									Toast.makeText(context, "Posted story, id: " + postId, Toast.LENGTH_SHORT).show();
-								} else {
-									// User clicked the Cancel button
-									Toast.makeText(context, "Publish cancelled", Toast.LENGTH_SHORT).show();
-								}
-							} else if (error instanceof FacebookOperationCanceledException) {
-								// User clicked the "x" button
-								Toast.makeText(context, "Publish cancelled", Toast.LENGTH_SHORT).show();
-							} else {
-								// Generic, ex: network error
-								Toast.makeText(context, "Error posting story", Toast.LENGTH_SHORT).show();
-							}
-						}
-					}).build();
-			feedDialog.show();
 		}
+	}
+
+	private static void showFeedDialog(final Context context, String link) {
+		Bundle params = new Bundle();
+		params.putString("link", link);
+		WebDialog feedDialog = (new WebDialog.FeedDialogBuilder(context, Session.getActiveSession(), params)).setOnCompleteListener(
+				new OnCompleteListener() {
+					@Override
+					public void onComplete(Bundle values, FacebookException error) {
+						if (error == null) {
+							// When the story is posted, echo the success
+							// and the post Id.
+							final String postId = values.getString("post_id");
+							if (postId != null) {
+								Log.d("test", "Posted story, id: " + postId);
+							} else {
+								// User clicked the Cancel button
+								Log.d("test", "Publish cancelled");
+							}
+						} else if (error instanceof FacebookOperationCanceledException) {
+							// User clicked the "x" button
+							Log.d("test", "Publish cancelled");
+						} else {
+							// Generic, ex: network error
+							Log.d("test", "Error posting story");
+						}
+					}
+				}).build();
+		feedDialog.show();
 	}
 
 	public static Intent getShareIntent(Context context, String subject, Bitmap bitmap, String message, String link) {

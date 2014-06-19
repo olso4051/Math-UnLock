@@ -158,8 +158,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Preference connectionPref = findPreference(key);
 
 		if (key.equals("difficulty_max") || key.equals("difficulty_min")) {
-			int max = Math.max(Integer.parseInt(sharedPrefs.getString(key, "0")),
-					Integer.parseInt(sharedPrefs.getString("difficulty_max", "0")));
+			int max = Math.max(Integer.parseInt(sharedPrefs.getString(key, "1")),
+					Integer.parseInt(sharedPrefs.getString("difficulty_max", "1")));
 			int min = Math.min(Integer.parseInt(sharedPrefs.getString(key, "0")),
 					Integer.parseInt(sharedPrefs.getString("difficulty_min", "0")));
 			if (key.equals("difficulty_max"))
