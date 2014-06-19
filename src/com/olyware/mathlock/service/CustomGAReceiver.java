@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -79,30 +80,31 @@ public class CustomGAReceiver extends BroadcastReceiver {
 				Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorUserInfo = sharedPrefsUserInfo.edit();
 
-		boolean referralData = true;
 		for (String key : EXPECTED_PARAMETERS) {
 			String value = params.get(key);
 			if (value != null) {
-				if (key.equals("utm_source")) {
-					if (!value.equals("app"))
-						referralData = false;
-				} else if (key.equals("utm_medium")) {
-					if (!value.equals("share"))
-						referralData = false;
-				}
-				if (referralData && key.equals("utm_content")) {
-					value = new EncryptionHelper().decryptForURL(value);
-					// TODO add a check that this content is a user
-					MoneyHelper.increasePaidMoney(context, 40);
-					editorUserInfo.putString(context.getString(R.string.pref_user_referrer), value);
-					Log.d("GAtest", "referral key = " + value);
-				}
 				editor.putString(key, value);
 				Log.d("GAtest", "key = " + value);
-			} else
-				referralData = false;
+			}
+		}
+		editor.commit();
+
+		// is this a referral link
+		if (storage.getString("utm_source", "").equals("app") && storage.getString("utm_medium", "").equals("share")) {
+			String referral = new EncryptionHelper().decryptForURL(params.get("utm_content"));
+			MoneyHelper.increasePaidMoney(context, 40);
+			editorUserInfo.putString(context.getString(R.string.pref_user_referrer), referral).commit();
+			Log.d("GAtest", "referral key = " + referral);
+		} else if (storage.getString("utm_source", "").equals("chirpads")) {
+			String clickGuid = params.get("utm_content");
+			String action = "install";
+			String os = "Android";
+			String osVersion = Build.VERSION.RELEASE;
+			String appPackageName = "com.olyware.mathlock";
+			String externalAdId = "com.olyware.mathlock";
+			Log.d("test", "clickGuid = " + clickGuid);
+			new PostChirpAds(context).execute(action, clickGuid, os, osVersion, appPackageName, externalAdId);
 		}
 
-		editor.commit();
 	}
 }

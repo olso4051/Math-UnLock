@@ -57,13 +57,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.AppLinkData;
 import com.facebook.LoggingBehavior;
 import com.facebook.Settings;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
@@ -143,6 +143,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private SharedPreferences sharedPrefs, sharedPrefsMoney, sharedPrefsStats, sharedPrefsApps;
 	private SharedPreferences.Editor editorPrefsMoney, editorPrefsStats;
 
+	private Tracker trackerGA;
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
 	private boolean attached = false;
@@ -289,6 +290,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Log.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
+		trackerGA = MyApplication.getGaTracker();
 
 		// Add code to print out the key hash
 		try {
@@ -304,18 +306,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		}
 
-		AppLinkData appLinkData = AppLinkData.createFromActivity(this);
-		if (appLinkData != null) {
-			Log.d("test", "targeturi: " + appLinkData.getTargetUri().toString());
-			Bundle arguments = appLinkData.getArgumentBundle();
-			if (arguments != null) {
-				Log.d("test", "argumentsbundle: " + arguments.toString());
-				String targetUrl = arguments.getString("target_url");
-				if (targetUrl != null) {
-					Log.d("test", "Target URL: " + targetUrl);
-				}
-			}
-		}
 		// check if user is logged in, if not display loginscreen
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		loggedIn = sharedPrefsUserInfo.getBoolean(getString(R.string.pref_user_logged_in), false);
@@ -332,7 +322,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				// Or set the fragment from restored state info
 				loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentById(android.R.id.content);
 			}
-			MyApplication.getGaTracker().set(Fields.SCREEN_NAME, LOGIN_LABEL);
 			GCMHelper.registerGCM(this, getApplicationContext());
 		} else {
 			setTheme(R.style.AppThemeWall);
@@ -495,8 +484,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			apps = new ArrayList<ApplicationInfo>();
 
 			new OpenDatabase().execute();
-
-			MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
 			// Check device for Play Services APK. If check succeeds, proceed with GCM registration.
 			GCMHelper.registerAndStoreGCM(this, getApplicationContext());
@@ -1747,23 +1734,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (joystick.getQuickUnlock())
 				action = "quick_unlock_" + action;
 		}
-		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+		trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
+		trackerGA.send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
 	@Override
 	public void GCMResult(boolean result) {
-		Log.d("test", "GCMResult()");
 		if (loginFragment != null) {
-			Log.d("test", "loginFrag != null");
 			loginFragment.GCMRegistrationDone(result);
-		} else {
-			Log.d("test", "loginFrag == null");
 		}
 	}
 
 	@Override
 	public void RegisterIDResult(int result) {
-		Log.d("test", "register id result = " + result);
 		if (result == 0) {
 			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 			prefsGA.edit().putBoolean("reg_uploaded", true).commit();

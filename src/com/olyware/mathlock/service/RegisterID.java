@@ -95,6 +95,7 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			HttpResponse response = httpclient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
+			Log.d("test", fullResult);
 			jsonResponse = new JSONObject(fullResult);
 		} catch (JSONException j) {
 			j.printStackTrace();
