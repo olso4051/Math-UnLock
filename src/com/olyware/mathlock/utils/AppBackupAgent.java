@@ -1,7 +1,11 @@
 package com.olyware.mathlock.utils;
 
+import java.io.IOException;
+
 import android.app.backup.BackupAgentHelper;
+import android.app.backup.BackupDataInput;
 import android.app.backup.SharedPreferencesBackupHelper;
+import android.os.ParcelFileDescriptor;
 
 public class AppBackupAgent extends BackupAgentHelper {
 	// The names of the SharedPreferences groups that the application maintains. These
@@ -21,4 +25,11 @@ public class AppBackupAgent extends BackupAgentHelper {
 		SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, PREFS_PACKAGES, PREFS_STATS, PREFS_EGGS, PREFS_APPS);
 		addHelper(MY_PREFS_BACKUP_KEY, helper);
 	}
+
+	@Override
+	public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState) throws IOException {
+		// TODO Auto-generated method stub
+		super.onRestore(data, appVersionCode, newState);
+	}
+
 }
