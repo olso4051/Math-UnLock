@@ -608,7 +608,7 @@ public class JoystickView extends View {
 			if (!quickUnlock || (i == correctLoc)) {
 				canvas.save();
 				// Draw the background for selected answers
-				unlockPaint.setAlpha((wrongGuess < 0) ? answerAlpha : 255);
+				unlockPaint.setAlpha((wrongGuess < 0 && !quickUnlock) ? answerAlpha : 255);
 				if (selectAnswers[i])
 					canvas.drawBitmap(bmpBack[0], srcRectForBack, RectForAnswers[i], unlockPaint);
 				else if (i == correctGuess)
@@ -620,7 +620,7 @@ public class JoystickView extends View {
 				if (equation[i]) {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
 							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
-					layoutE[i].setAlpha((wrongGuess < 0) ? answerAlpha : 255);
+					layoutE[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? answerAlpha : 255);
 					layoutE[i].draw(canvas);
 				} else {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
@@ -654,7 +654,7 @@ public class JoystickView extends View {
 				if (!apps.get(i - start).getSelectDrag()) {
 					canvas.save();
 					canvas.translate(apps.get(i - start).getX(), apps.get(i - start).getY());
-					d.get(i).setAlpha((wrongGuess < 0) ? answerAlpha : 255);
+					// d.get(i).setAlpha((wrongGuess < 0&&!quickUnlock) ? answerAlpha : 255);
 					d.get(i).draw(canvas);
 					canvas.restore();
 				}
@@ -662,7 +662,7 @@ public class JoystickView extends View {
 			if (selectAppDrag >= 0) {
 				canvas.save();
 				canvas.translate(apps.get(selectAppDrag).getX() + appDragX, apps.get(selectAppDrag).getY() + appDragY);
-				d.get(selectAppDrag + start).setAlpha((wrongGuess < 0) ? answerAlpha : 255);
+				// d.get(selectAppDrag + start).setAlpha((wrongGuess < 0&&!quickUnlock) ? answerAlpha : 255);
 				d.get(selectAppDrag + start).draw(canvas);
 				canvas.restore();
 			}
@@ -1226,7 +1226,7 @@ public class JoystickView extends View {
 	private void setAlpha(int alpha) {
 		answerAlpha = alpha;// (wrongGuess < 0) ? alpha : 255;
 		for (int i = 0; i < NumAnswers; i++) {
-			answerTextPaint[i].setAlpha((wrongGuess < 0) ? alpha : 255);
+			answerTextPaint[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alpha : 255);
 			if (!equation[i]) {
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
 						false);
