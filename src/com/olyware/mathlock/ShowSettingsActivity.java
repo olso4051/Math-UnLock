@@ -114,8 +114,10 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		Preference logoutButton = (PreferenceScreen) findPreference("logout_button");
 		if (!sharedPrefsUsers.getBoolean(mPrefUserSkipped, false)) {
 			logoutButton.setTitle(getString(R.string.settings_logout));
+			// logoutButton.setSummary(getString(R.string.settings_logout));
 		} else {
 			logoutButton.setTitle(getString(R.string.settings_login));
+			// logoutButton.setSumamry(getString(R.string.settings_login));
 		}
 		final Intent sIntent = new Intent(this, ScreenService.class);
 		logoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -246,12 +248,14 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			prefCat.removeAll();
 			Preference customEdit = new Preference(this);
 			customEdit.setTitle(getString(R.string.custom_pack_edit));
+			// customEdit.setSummary(getString(R.string.custom_pack_edit));
 			customEdit.setKey("settings_custom2");
 			customEdit.setIntent(new Intent(this, ShowCustomEditActivity.class));
 			prefCat.addPreference(customEdit);
 			categories = dbManager.getAllCustomCategories();
 			for (String cat : categories) {
 				CheckBoxPreference pref = new CheckBoxPreference(this);
+				pref.setLayoutResource(R.layout.preference_layout);
 				pref.setKey(getString(R.string.custom_enable) + cat);
 				pref.setTitle(getString(R.string.enable));
 				pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);

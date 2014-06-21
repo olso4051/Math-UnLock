@@ -6,7 +6,9 @@
     <color name="supporting_text_highlight">#e1e1e1</color>
     <color name="white">#ffffff</color>
     <color name="grey">#9a9a9a</color>
+    <color name="light_grey">#cccccc</color>
     <color name="blue">#0099cc</color>
+    <color name="dark_blue">#002d5f</color>
     <color name="transparent">#00000000</color>
     
     <color name="button_background_default">#005cb5</color>

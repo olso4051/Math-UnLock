@@ -10,12 +10,12 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.ui.Typefaces;
 
-public class CustomArrayAdapter<T> extends ArrayAdapter<String> {
+public class CustomArrayAdapter<T> extends ArrayAdapter<T> {
 
 	private int id;
 	private Typefaces fonts;
 
-	public CustomArrayAdapter(Context context, int resource, int textViewResourceId, List<String> list) {
+	public CustomArrayAdapter(Context context, int resource, int textViewResourceId, List<T> list) {
 		super(context, resource, textViewResourceId, list);
 		id = textViewResourceId;
 		fonts = Typefaces.getInstance(context);

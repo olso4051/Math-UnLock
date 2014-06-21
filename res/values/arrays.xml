@@ -184,7 +184,6 @@
         <item>unlock_language</item>
 		<item>unlock_engineer</item>
 		<item>unlock_hiqh_trivia</item>
-		<item>unlock_custom</item>
     </string-array>
     <integer-array name="unlock_cost">
         <item>10000</item>
@@ -193,7 +192,6 @@
         <item>5000</item>
 		<item>1500</item>
 		<item>1500</item>
-		<item>100</item>
     </integer-array>
     <string name="custom_enable">enable_custom_</string>
     <string-array name="enable_package_keys">
@@ -242,7 +240,6 @@
         <item>Learn a new language by translating the thousands of words and sentences in 17 different languages</item>
 		<item>Complete science and engineering related equations to keep fresh</item>
 		<item>Fun trivia questions</item>
-		<item>Build your own questions, study for a test, or whatever you want, it\'s up to you!</item>
     </string-array>
     
     <string-array name="egg_keys">

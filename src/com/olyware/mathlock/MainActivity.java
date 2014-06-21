@@ -273,6 +273,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@SuppressLint("NewApi")
 	public void restart() {
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPrefs.edit().putBoolean("from_login", true).commit();
 		if (loginFragment != null)
 			getSupportFragmentManager().beginTransaction().remove(loginFragment).commit();
 		if (android.os.Build.VERSION.SDK_INT < 11) {
@@ -459,7 +461,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					JoystickSelected(s, vibrate, Extra);
 				}
 			});
-			quizMode = joystick.setQuizMode(!locked);
+			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
+			quizMode = joystick.setQuizMode(!locked && !fromLogin);
+			if (fromLogin)
+				sharedPrefs.edit().putBoolean("from_login", false).commit();
 
 			timerHandler = new Handler();
 			reduceWorth = new Runnable() {

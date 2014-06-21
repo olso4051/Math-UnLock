@@ -212,6 +212,12 @@ public class ShowStoreActivity extends Activity {
 				}
 			});
 		}
+		Button customPacks = (Button) findViewById(R.id.unlock_custom);
+		customPacks.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				startActivity(new Intent(ShowStoreActivity.this, SearchableCustomPackActivity.class));
+			}
+		});
 	}
 
 	@Override
@@ -286,7 +292,7 @@ public class ShowStoreActivity extends Activity {
 		firstPack = !isPackageUnlocked();
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(title).setCancelable(false);
-		if (((product >= unlockPackageKeys.length - 1) || (product == 0)) && (firstPack)) {
+		if ((product == 0) && (firstPack)) {
 			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first));
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {

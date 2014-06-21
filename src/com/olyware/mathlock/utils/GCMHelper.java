@@ -48,13 +48,14 @@ public class GCMHelper {
 			String birth = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_birth), "");
 			String gender = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_gender), "");
 			String location = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_location), "");
+			String email = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_email), "");
 			if (regID.equals("")) {
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(act, app, true);
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				storeRegistrationId(act, app, regID);
-				sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location);
+				sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location, email);
 			} else if (!sharedPrefsUserInfo.getBoolean(act.getString(R.string.pref_user_confirmed), false) && !userID.equals("")) {
 				confirmID(act, userID);
 			}
@@ -137,13 +138,14 @@ public class GCMHelper {
 	}
 
 	private static void registerInBackground(final Activity act, final Context app, final boolean sendToBackend) {
-		SharedPreferences sharedPrefs = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-		final String username = sharedPrefs.getString(act.getString(R.string.pref_user_username), "");
-		final String userID = sharedPrefs.getString(act.getString(R.string.pref_user_userid), "");
-		final String referral = sharedPrefs.getString(act.getString(R.string.pref_user_referrer), "");
-		final String birth = sharedPrefs.getString(act.getString(R.string.pref_user_facebook_birth), "");
-		final String gender = sharedPrefs.getString(act.getString(R.string.pref_user_facebook_gender), "");
-		final String location = sharedPrefs.getString(act.getString(R.string.pref_user_facebook_location), "");
+		SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		final String username = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_username), "");
+		final String userID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_userid), "");
+		final String referral = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_referrer), "");
+		final String birth = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_birth), "");
+		final String gender = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_gender), "");
+		final String location = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_location), "");
+		final String email = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_email), "");
 
 		new AsyncTask<Void, Integer, Boolean>() {
 			@Override
@@ -156,7 +158,7 @@ public class GCMHelper {
 					// send the registration ID to the server
 					if (sendToBackend) {
 						Log.d("GAtest", "sendRegistrationIdToBackend");
-						sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location);
+						sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location, email);
 					}
 					// else
 					// mCallback.GCMResult(true);
@@ -184,13 +186,13 @@ public class GCMHelper {
 	}
 
 	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral,
-			String birth, String gender, String location) {
+			String birth, String gender, String location, String email) {
 		new RegisterID(act) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				mCallback.RegisterIDResult(result);
 			}
-		}.execute(username, regId, userID, referral, birth, gender, location);
+		}.execute(username, regId, userID, referral, birth, gender, location, email);
 	}
 
 	private static void storeRegistrationId(Context act, Context context, String regId) {
