@@ -1,78 +1,63 @@
 package com.olyware.mathlock;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import com.olyware.mathlock.service.CustomPackData;
+import com.olyware.mathlock.service.DownloadCustomPack;
 import com.olyware.mathlock.service.GetCustomPacks;
-import com.olyware.mathlock.utils.CustomArrayAdapter;
+import com.olyware.mathlock.utils.QuestionPackArrayAdapter;
 
 public class SearchableCustomPackActivity extends Activity {
 	private ListView lv;
-	CustomArrayAdapter<String> adapter;
-	List<String> products;
-	EditText inputSearch;
+	private QuestionPackArrayAdapter adapter;
+	private ArrayList<CustomPackData> products, allProducts;
+	private ArrayList<String> downloadedPackIDs;
+	private EditText inputSearch;
 	private ProgressDialog progressDialog;
+	private int lastLength = 0;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_custom_pack);
 
-		progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
-		new GetCustomPacks(this) {
-			@Override
-			protected void onPostExecute(Integer result) {
-				ArrayList<CustomPackData> customPackData = getCustomPackList();
-				products.clear();
-				for (int i = 0; i < customPackData.size(); i++) {
-					products.add(customPackData.get(i).getName());
-				}
-				adapter = new CustomArrayAdapter<String>(SearchableCustomPackActivity.this, R.layout.list_custom_pack_item, R.id.pack_name,
-						products);
-				adapter.notifyDataSetChanged();
-				if (progressDialog != null) {
-					progressDialog.dismiss();
-					progressDialog = null;
-				}
-			}
-		}.execute();
+		progressDialog = ProgressDialog.show(this, "", "Retreiving Available Question Packs", true);
 
-		// Listview Data
-		products = new ArrayList<String>();
-		products.clear();
-		products.add("Finding Available Packs");
-
-		lv = (ListView) findViewById(R.id.list_view);
+		// search box
 		inputSearch = (EditText) findViewById(R.id.custom_pack_search);
-
-		// Adding items to listview
-		adapter = new CustomArrayAdapter<String>(this, R.layout.list_custom_pack_item, R.id.pack_name, products);
-		lv.setAdapter(adapter);
-
-		/**
-		 * Enabling Search Filter
-		 * */
+		inputSearch.setEnabled(false);
 		inputSearch.addTextChangedListener(new TextWatcher() {
-
 			@Override
 			public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
 				// When user changed the Text
-				adapter.getFilter().filter(cs);
+				if (cs.length() > lastLength) {
+					lastLength = cs.length();
+					adapter.getFilter().filter(cs);
+				} else {
+					lastLength = cs.length();
+					products.clear();
+					products.addAll(allProducts);
+					adapter.getFilter().filter(cs);
+				}
 			}
 
 			@Override
 			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 				// TODO Auto-generated method stub
-
 			}
 
 			@Override
@@ -80,6 +65,83 @@ public class SearchableCustomPackActivity extends Activity {
 				// TODO Auto-generated method stub
 			}
 		});
+
+		// Question Pack ListView
+		lv = (ListView) findViewById(R.id.list_view);
+		lv.setEnabled(false);
+
+		View header = (View) getLayoutInflater().inflate(R.layout.list_custom_pack_header_item, null);
+		lv.addHeaderView(header);
+
+		// Listview Data
+		products = new ArrayList<CustomPackData>();
+		products.add(new CustomPackData("Finding Available Packs", "-1", "-1"));
+		allProducts = new ArrayList<CustomPackData>();
+		allProducts.addAll(products);
+		downloadedPackIDs = new ArrayList<String>();
+		downloadedPackIDs.addAll(getInstalledCustomPacks());
+
+		// Adding items to listview
+		adapter = new QuestionPackArrayAdapter(this, R.layout.list_custom_pack_item, products);
+		lv.setAdapter(adapter);
+		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+				final CustomPackData data = products.get(pos - lv.getHeaderViewsCount());
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(SearchableCustomPackActivity.this);
+				builder.setTitle("").setCancelable(false);
+				builder.setMessage(getString(R.string.search_custom_packs_download_message) + data.getName());
+				builder.setPositiveButton(R.string.search_custom_packs_download_ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						lv.setEnabled(false);
+						progressDialog = ProgressDialog.show(SearchableCustomPackActivity.this, "", "Downloading " + data.getName(), true);
+						new DownloadCustomPack(SearchableCustomPackActivity.this) {
+							@Override
+							protected void onPostExecute(Integer result) {
+								lv.setEnabled(true);
+								if (progressDialog != null) {
+									progressDialog.dismiss();
+									progressDialog = null;
+								}
+								if (result == 0) {
+									addInstalledCustomPackID(data.getID());
+								}
+							}
+						}.execute(data.getID(), data.getUserID(), data.getName());
+						dialog.cancel();
+					}
+				});
+				builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+				builder.create().show();
+			}
+		});
+
+		new GetCustomPacks(this) {
+			@Override
+			protected void onPostExecute(Integer result) {
+				inputSearch.setEnabled(true);
+				lv.setEnabled(true);
+				products.clear();
+				ArrayList<CustomPackData> GlobalProducts = new ArrayList<CustomPackData>(getCustomPackList());
+				for (int i = 0; i < GlobalProducts.size(); i++) {
+					if (!downloadedPackIDs.contains(GlobalProducts.get(i).getID()))
+						products.add(GlobalProducts.get(i));
+				}
+				allProducts.clear();
+				allProducts.addAll(products);
+				// adapter = new QuestionPackArrayAdapter(SearchableCustomPackActivity.this, R.layout.list_custom_pack_item, products);
+				adapter.notifyDataSetChanged();
+				if (progressDialog != null) {
+					progressDialog.dismiss();
+					progressDialog = null;
+				}
+			}
+		}.execute();
 	}
 
 	@Override
@@ -89,5 +151,29 @@ public class SearchableCustomPackActivity extends Activity {
 			progressDialog = null;
 		}
 		super.onStop();
+	}
+
+	private ArrayList<String> getInstalledCustomPacks() {
+		ArrayList<String> downloaded = new ArrayList<String>();
+		SharedPreferences sharedPrefs = getSharedPreferences("downloads", Context.MODE_PRIVATE);
+		String list = sharedPrefs.getString("list_of_downloaded", null);
+		if (list != null) {
+			String[] test = list.split(",");
+			for (int i = 0; i < test.length; i++) {
+				downloaded.add(test[i]);
+			}
+		}
+		return downloaded;
+	}
+
+	private void addInstalledCustomPackID(String ID) {
+		downloadedPackIDs.add(ID);
+		SharedPreferences sharedPrefs = getSharedPreferences("downloads", Context.MODE_PRIVATE);
+		String list = "";
+		list = downloadedPackIDs.get(0);
+		for (int i = 1; i < downloadedPackIDs.size(); i++) {
+			list += "," + downloadedPackIDs.get(i);
+		}
+		sharedPrefs.edit().putString("list_of_downloaded", list).commit();
 	}
 }

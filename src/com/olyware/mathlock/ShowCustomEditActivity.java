@@ -58,7 +58,7 @@ public class ShowCustomEditActivity extends Activity {
 
 	private final String FTYPE = ".csv";
 	final private static String SCREEN_LABEL = "Custom Screen";
-	private final int MAX_LENGTH = 50;
+	public final static int MAX_LENGTH = 50;
 	private File sdFilePath;
 	private FileDialog fileDialog;
 	private int layoutID;

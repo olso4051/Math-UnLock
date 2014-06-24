@@ -41,8 +41,10 @@ public class DatabaseManager {
 	public void destroy() {
 		if (db.isOpen()) {
 			db.close();
-			cursor.close();
-			dbHelper.close();
+			if (cursor != null)
+				cursor.close();
+			if (dbHelper != null)
+				dbHelper.close();
 		}
 	}
 

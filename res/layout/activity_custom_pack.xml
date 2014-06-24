@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_margin="@dimen/login_horizontal_margin_half"
     android:orientation="vertical" >
      
     <!-- Editext for Search -->
@@ -12,9 +13,11 @@
         android:inputType="textVisiblePassword"/>
   
     <!-- List View -->
+
     <ListView
         android:id="@+id/list_view"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" >
+    </ListView>
   
 </LinearLayout>
