@@ -15,7 +15,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 @ReportsCrashes(formKey = "", // will not be used
 mailTo = "olso4051@umn.edu", mode = ReportingInteractionMode.TOAST, resToastText = R.string.crash_toast_text)
 public class MyApplication extends Application {
-	private static MyApplication instance;
+	// private static MyApplication instance;
 	private static GoogleCloudMessaging mGcm;
 	private static GoogleAnalytics mGa;
 	private static Tracker mTracker;
@@ -29,14 +29,14 @@ public class MyApplication extends Application {
 	// Key used to store a user's tracking preferences in SharedPreferences.
 	private static final String TRACKING_PREF_KEY = "analytics_tracking";
 
-	public static String getPackageString() {
+	/*public static String getPackageString() {
 		return instance.getApplicationContext().getPackageName();
-	}
+	}*/
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		instance = this;
+		// instance = this;
 
 		// The following line triggers the initialization of ACRA
 		// ACRA.init(this);

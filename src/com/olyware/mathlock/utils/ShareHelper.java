@@ -25,7 +25,6 @@ import com.facebook.widget.FacebookDialog;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 import com.olyware.mathlock.LoginFragment;
-import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.UploadImage;
 
@@ -63,7 +62,7 @@ public class ShareHelper {
 		final String description = name;
 		String siteName = "Hiq Lockscreen";
 		String appName = context.getString(R.string.app_name);
-		String appPackage = MyApplication.getPackageString();
+		String appPackage = context.getApplicationContext().getPackageName();
 		String appClass = "MainActivity";
 		new UploadImage(context, image) {
 			@Override

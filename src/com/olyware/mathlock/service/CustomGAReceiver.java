@@ -60,7 +60,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 
 		// Parse the query string, extracting the relevant data
 		Log.d("GAtest", "referrer = " + referrer);
-		String[] params = referrer.split("&"); // $NON-NLS-1$
+		String[] params = referrer.split("\\&"); // $NON-NLS-1$
 		for (String param : params) {
 			Log.d("GAtest", "param = " + param);
 			String[] pair = param.split("="); // $NON-NLS-1$

@@ -860,6 +860,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private Bitmap getWallpaperImage(boolean dimOrGradient) {
+
 		int w = sharedPrefs.getInt("layout_width", -1);
 		int h = sharedPrefs.getInt("layout_height", -1);
 		int statusBarHeight = sharedPrefs.getInt("layout_status_bar_height", -1);
