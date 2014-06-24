@@ -170,7 +170,7 @@
 			</PreferenceCategory>
 			<PreferenceCategory
 		        android:title="@string/settings_custom_title"
-		        android:enabled="false"
+		        android:enabled="true"
 		        android:key="settings_custom">
 			</PreferenceCategory>
 		</PreferenceScreen>

@@ -255,7 +255,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			categories = dbManager.getAllCustomCategories();
 			for (String cat : categories) {
 				CheckBoxPreference pref = new CheckBoxPreference(this);
-				pref.setLayoutResource(R.layout.preference_layout);
+				// pref.setLayoutResource(R.layout.preference_layout);
 				pref.setKey(getString(R.string.custom_enable) + cat);
 				pref.setTitle(getString(R.string.enable));
 				pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);

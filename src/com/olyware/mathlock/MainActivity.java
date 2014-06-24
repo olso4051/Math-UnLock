@@ -530,6 +530,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			uiHelper.onPause();
 		}
+		System.gc();
 		super.onPause();
 	}
 
@@ -1358,8 +1359,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			break;
 		case Friends:		// friends was selected
-			unlocking = false;
-			startActivity(new Intent(this, FriendActivity.class));
+			/*unlocking = false;
+			startActivity(new Intent(this, FriendActivity.class));*/
+			if (!dialogOn) {
+				dialogOn = true;
+				final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.coming_soon_title);
+				builder.setMessage(R.string.coming_soon_message).setCancelable(false);
+				builder.setPositiveButton(R.string.coming_soon_ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialogOn = false;
+					}
+				});
+				builder.create().show();
+			}
 			break;
 		case Store:		// Store was selected
 			unlocking = false;
