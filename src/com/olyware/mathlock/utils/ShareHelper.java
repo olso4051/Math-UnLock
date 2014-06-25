@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -32,6 +33,7 @@ public class ShareHelper {
 	final public static float FACEBOOK_LINK_RATIO = 1.9178082191780821917808219178082f;
 	private static String staticLink;
 	private static Context staticContext;
+	private static ProgressDialog staticProgressDialog;
 
 	public static void share(Context context, String subject, Bitmap bitmap, String message, String link) {
 		context.startActivity(getShareIntent(context, subject, bitmap, message, link));
@@ -45,11 +47,12 @@ public class ShareHelper {
 		context.startActivity(getShareFacebookIntent(context, title, caption));
 	}
 
-	public static void shareFacebook(final Context context, UiLifecycleHelper uiHelper, Bitmap image) {
-		shareFacebook(context, uiHelper, image, context.getString(R.string.share_base_url_facebook_name_readable), "");
+	public static void shareFacebook(final Context context, UiLifecycleHelper uiHelper, ProgressDialog pDialog, Bitmap image) {
+		shareFacebook(context, uiHelper, pDialog, image, context.getString(R.string.share_base_url_facebook_name_readable), "");
 	}
 
-	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, Bitmap image, String question, String deepLink) {
+	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, final ProgressDialog pDialog, Bitmap image,
+			String question, String deepLink) {
 		final String link = buildShareURL(context);
 		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
 		final String title = "Can you answer " + question + " to unlock your phone?";
@@ -72,7 +75,7 @@ public class ShareHelper {
 				Log.d("test", "url = " + getURL());
 				Log.d("test", "hash = " + getHash());
 				if (result == 0 || getSuccess().equals("true")) {
-					shareFacebook(context, uiHelper, getURL());
+					shareFacebook(context, uiHelper, pDialog, getURL());
 				} else {
 					String share = "http://www.learnwithhiq.com/facebook/question.php";
 					try {
@@ -86,7 +89,7 @@ public class ShareHelper {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					shareFacebook(context, uiHelper, share);
+					shareFacebook(context, uiHelper, pDialog, share);
 					// shareFacebook(context, uiHelper, "http://www.thestreet.com/story/12734024/6/10-most-bikeable-cities-in-the-us.html");
 				}
 			}
@@ -107,7 +110,7 @@ public class ShareHelper {
 		}
 	}
 
-	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, String link) {
+	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, ProgressDialog pDialog, String link) {
 		Activity act = (Activity) context;
 		if (FacebookDialog.canPresentShareDialog(context.getApplicationContext(), FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
 			FacebookDialog.ShareDialogBuilder shareDialogBuilder1 = new FacebookDialog.ShareDialogBuilder(act).setLink(link/*share*/);
@@ -116,6 +119,7 @@ public class ShareHelper {
 		} else {
 			staticLink = link;
 			staticContext = context;
+			staticProgressDialog = pDialog;
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
 				Log.d("test", "openForRead");
@@ -130,10 +134,11 @@ public class ShareHelper {
 		}
 	}
 
-	private static void showFeedDialog(final Context context, String link) {
+	private static void showFeedDialog(Context context, String link) {
 		Bundle params = new Bundle();
 		params.putString("link", link);
 		WebDialog feedDialog = (new WebDialog.FeedDialogBuilder(context, Session.getActiveSession(), params)).setOnCompleteListener(
+		// feedDialogCallback
 				new OnCompleteListener() {
 					@Override
 					public void onComplete(Bundle values, FacebookException error) {
@@ -153,6 +158,10 @@ public class ShareHelper {
 						} else {
 							// Generic, ex: network error
 							Log.d("test", "Error posting story");
+						}
+						if (staticProgressDialog != null) {
+							staticProgressDialog.dismiss();
+							staticProgressDialog = null;
 						}
 					}
 				}).build();

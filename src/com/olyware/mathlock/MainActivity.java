@@ -3,8 +3,6 @@ package com.olyware.mathlock;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -20,10 +18,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -45,7 +41,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -86,7 +81,6 @@ import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.Purchase;
-import com.olyware.mathlock.utils.SaveHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
@@ -298,7 +292,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		trackerGA = MyApplication.getGaTracker();
 
 		// Add code to print out the key hash
-		try {
+		/*try {
 			PackageInfo info = getPackageManager().getPackageInfo("com.olyware.mathlock", PackageManager.GET_SIGNATURES);
 			for (Signature signature : info.signatures) {
 				MessageDigest md = MessageDigest.getInstance("SHA");
@@ -309,7 +303,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		} catch (NoSuchAlgorithmException e) {
 
-		}
+		}*/
 
 		// check if user is logged in, if not display loginscreen
 		SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
@@ -582,9 +576,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Log.d("GAtest", "onResume");
 		long currentTime = System.currentTimeMillis();
 		paused = false;
-
 		super.onResume();
 		GCMHelper.checkPlayServices(this);
+
 		if (loggedIn) {
 			uiHelper.onResume();
 			if (locked && quizMode)
@@ -1422,7 +1416,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Share:	// share was selected
 			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
-			ShareHelper.shareFacebook(this, uiHelper, HelpQuestionImage, problem.getReadableText(), getDeepLinkToShare());
+			ShareHelper.shareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, problem.getReadableText(), getDeepLinkToShare());
 			break;
 		case Touch:
 			setProblemAndAnswer();
@@ -1652,7 +1646,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				builder.setNegativeButton(R.string.share_with_facebook, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
-						ShareHelper.shareFacebook(ctx, uiHelper, ShareHelper.buildShareURL(ctx));
+						ShareHelper.shareFacebook(ctx, uiHelper, progressDialog, ShareHelper.buildShareURL(ctx));
 						fromShare = true;
 					}
 				});
