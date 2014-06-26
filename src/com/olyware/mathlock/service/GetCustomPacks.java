@@ -72,7 +72,8 @@ public class GetCustomPacks extends AsyncTask<String, Integer, Integer> {
 			try {
 				for (int i = 0; i < json.length(); i++) {
 					JSONObject obj = (JSONObject) json.get(i);
-					list.add(new CustomPackData(obj.getString("filename"), obj.getString("id"), obj.getString("user_id")));
+					list.add(new CustomPackData(getStringFromJSON(obj, "filename"), getStringFromJSON(obj, "name"), getStringFromJSON(obj,
+							"id"), getStringFromJSON(obj, "user_id"), getStringFromJSON(obj, "downloads")));
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();

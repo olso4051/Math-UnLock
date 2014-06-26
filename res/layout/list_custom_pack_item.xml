@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
-     
-    <!-- Single ListItem -->
-     
-    <!-- Product Name -->
-    <TextView 
-        android:id="@+id/pack_name"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:textSize="@dimen/text_size_normal" />    
- 
+    android:id="@+id/pack_background"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	android:background="@color/light_light_blue"
+	android:paddingLeft="@dimen/login_vertical_margin_half"
+	android:paddingRight="@dimen/login_vertical_margin_half"
+	android:paddingTop="@dimen/login_vertical_margin_quarter"
+	android:paddingBottom="@dimen/login_vertical_margin_quarter" >
+	
+	<TextView 
+		android:id="@+id/pack_name"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="2"
+		android:gravity="center_vertical|left"
+		android:ellipsize="end"
+		android:textSize="@dimen/text_size_normal_plus"
+		android:textColor="@color/blue_on_white" />
+	
+	<TextView 
+		android:id="@+id/pack_downloads"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:gravity="center_vertical|right"
+		android:textSize="@dimen/text_size_normal_plus"
+		android:textColor="@color/blue_on_white" />
+	
 </LinearLayout>

@@ -2,18 +2,55 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:layout_margin="@dimen/login_horizontal_margin_half"
+    android:background="@color/white"
+    android:padding="@dimen/login_horizontal_margin_half"
     android:orientation="vertical" >
-     
-    <!-- Editext for Search -->
-    <EditText android:id="@+id/custom_pack_search"
+    
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/search_custom_packs_header"
+        android:textColor="@color/blue_on_white"
+        android:textSize="@dimen/text_size_large"
+        android:paddingBottom="8dp" />
+    
+    <EditText
+        android:id="@+id/custom_pack_search"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint="@string/search_custom_packs_hint"
+        android:textSize="@dimen/text_size_normal_plus"
+        android:textColor="@color/blue_on_white"
+        android:textColorHint="@color/light_grey"
+        android:paddingLeft="@dimen/login_vertical_margin"
+        android:background="@drawable/search_edittext_rounded"
+        android:drawableRight="@drawable/search"
         android:inputType="textVisiblePassword"/>
   
-    <!-- List View -->
-
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/login_vertical_margin_half" >
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="@string/search_custom_packs_detail"
+            android:textColor="@color/light_blue"
+            android:textSize="@dimen/text_size_normal" />
+        
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="@string/search_custom_packs_value"
+            android:textColor="@color/light_blue"
+            android:textSize="@dimen/text_size_normal" />
+        
+    </LinearLayout>
     <ListView
         android:id="@+id/list_view"
         android:layout_width="fill_parent"

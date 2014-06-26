@@ -137,7 +137,9 @@
     
     <!-- Custom Pack Downloads -->
     <string name="search_custom_packs_hint">Search Question Packs</string>
-    <string name="search_custom_packs_header">Available Question Packs</string>
+    <string name="search_custom_packs_header">Question Packs</string>
+    <string name="search_custom_packs_detail">Name</string>
+    <string name="search_custom_packs_value">Downloads</string>
     <string name="search_custom_packs_download_title">Download</string>
     <string name="search_custom_packs_download_message">Are you sure you want to download the question pack\n\n</string>
     <string name="search_custom_packs_download_ok">Download</string>

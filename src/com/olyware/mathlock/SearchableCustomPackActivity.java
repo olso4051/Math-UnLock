@@ -70,12 +70,9 @@ public class SearchableCustomPackActivity extends Activity {
 		lv = (ListView) findViewById(R.id.list_view);
 		lv.setEnabled(false);
 
-		View header = (View) getLayoutInflater().inflate(R.layout.list_custom_pack_header_item, null);
-		lv.addHeaderView(header);
-
 		// Listview Data
 		products = new ArrayList<CustomPackData>();
-		products.add(new CustomPackData("Finding Available Packs", "-1", "-1"));
+		products.add(new CustomPackData("null", "Finding Available Packs", "-1", "-1", "0"));
 		allProducts = new ArrayList<CustomPackData>();
 		allProducts.addAll(products);
 		downloadedPackIDs = new ArrayList<String>();
@@ -87,7 +84,7 @@ public class SearchableCustomPackActivity extends Activity {
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-				final CustomPackData data = products.get(pos - lv.getHeaderViewsCount());
+				final CustomPackData data = products.get(pos);
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(SearchableCustomPackActivity.this);
 				builder.setTitle("").setCancelable(false);
@@ -134,7 +131,6 @@ public class SearchableCustomPackActivity extends Activity {
 				}
 				allProducts.clear();
 				allProducts.addAll(products);
-				// adapter = new QuestionPackArrayAdapter(SearchableCustomPackActivity.this, R.layout.list_custom_pack_item, products);
 				adapter.notifyDataSetChanged();
 				if (progressDialog != null) {
 					progressDialog.dismiss();

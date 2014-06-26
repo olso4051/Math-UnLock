@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.olyware.mathlock.R;
@@ -39,14 +40,20 @@ public class QuestionPackArrayAdapter extends ArrayAdapter<CustomPackData> {
 
 		View row = convertView;
 		CustomPackDataHolder holder = null;
+		int color = (position % 2 == 0) ? ctx.getResources().getColor(R.color.light_light_blue) : ctx.getResources()
+				.getColor(R.color.white);
 
 		if (row == null) {
 			LayoutInflater inflater = ((Activity) ctx).getLayoutInflater();
 			row = inflater.inflate(layoutResourceId, parent, false);
 
 			holder = new CustomPackDataHolder();
-			holder.txtTitle = (TextView) row.findViewById(R.id.pack_name);
-			holder.txtTitle.setTypeface(fonts.robotoLight);
+			holder.layout = (LinearLayout) row.findViewById(R.id.pack_background);
+			holder.layout.setBackgroundColor(color);
+			holder.txtName = (TextView) row.findViewById(R.id.pack_name);
+			holder.txtName.setTypeface(fonts.robotoLight);
+			holder.txtDownloads = (TextView) row.findViewById(R.id.pack_downloads);
+			holder.txtDownloads.setTypeface(fonts.robotoLight);
 
 			row.setTag(holder);
 		} else {
@@ -54,13 +61,17 @@ public class QuestionPackArrayAdapter extends ArrayAdapter<CustomPackData> {
 		}
 
 		CustomPackData customPackData = data.get(position);
-		holder.txtTitle.setText(customPackData.getName());
+		holder.layout.setBackgroundColor(color);
+		holder.txtName.setText(customPackData.getName());
+		holder.txtDownloads.setText(customPackData.getDownloads());
 
 		return row;
 	}
 
 	static class CustomPackDataHolder {
-		public TextView txtTitle;
+		public LinearLayout layout;
+		public TextView txtName;
+		public TextView txtDownloads;
 	}
 
 	@Override

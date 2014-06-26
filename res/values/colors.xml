@@ -8,7 +8,10 @@
     <color name="grey">#9a9a9a</color>
     <color name="light_grey">#cccccc</color>
     <color name="blue">#0099cc</color>
+    <color name="blue_on_white">#005cb5</color>
     <color name="dark_blue">#002d5f</color>
+    <color name="light_blue">#6b9dcf</color>
+    <color name="light_light_blue">#e6f2fe</color>
     <color name="transparent">#00000000</color>
     
     <color name="button_background_default">#005cb5</color>
