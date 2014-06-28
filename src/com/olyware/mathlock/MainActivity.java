@@ -1416,7 +1416,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Share:	// share was selected
 			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
-			ShareHelper.shareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, problem.getReadableText(), getDeepLinkToShare());
+			ShareHelper.getLinkAndShareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, problem.getReadableText(), getDeepLinkToShare());
 			break;
 		case Touch:
 			setProblemAndAnswer();
@@ -1646,7 +1646,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				builder.setNegativeButton(R.string.share_with_facebook, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
-						ShareHelper.shareFacebook(ctx, uiHelper, progressDialog, ShareHelper.buildShareURL(ctx));
+						ShareHelper.loginOrShareFacebook(ctx, uiHelper, progressDialog, ShareHelper.buildShareURL(ctx));
 						fromShare = true;
 					}
 				});

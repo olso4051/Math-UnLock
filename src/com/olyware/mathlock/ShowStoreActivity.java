@@ -213,14 +213,14 @@ public class ShowStoreActivity extends Activity {
 			});
 		}
 		Button customPacks = (Button) findViewById(R.id.unlock_custom);
-		// customPacks.setEnabled(false);
+		customPacks.setEnabled(false);
 		customPacks.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				startActivity(new Intent(ShowStoreActivity.this, SearchableCustomPackActivity.class));
 			}
 		});
-		/*TextView customPacksCost = (TextView) findViewById(R.id.custom_cost);
-		customPacksCost.setText("Soon");*/
+		TextView customPacksCost = (TextView) findViewById(R.id.custom_cost);
+		customPacksCost.setText("Soon");
 	}
 
 	@Override

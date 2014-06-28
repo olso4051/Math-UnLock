@@ -33,7 +33,9 @@ public class ShareHelper {
 	final public static float FACEBOOK_LINK_RATIO = 1.9178082191780821917808219178082f;
 	private static String staticLink;
 	private static Context staticContext;
+	private static Activity staticActivity;
 	private static ProgressDialog staticProgressDialog;
+	private static UiLifecycleHelper staticUiHelper;
 
 	public static void share(Context context, String subject, Bitmap bitmap, String message, String link) {
 		context.startActivity(getShareIntent(context, subject, bitmap, message, link));
@@ -47,11 +49,11 @@ public class ShareHelper {
 		context.startActivity(getShareFacebookIntent(context, title, caption));
 	}
 
-	public static void shareFacebook(final Context context, UiLifecycleHelper uiHelper, ProgressDialog pDialog, Bitmap image) {
-		shareFacebook(context, uiHelper, pDialog, image, context.getString(R.string.share_base_url_facebook_name_readable), "");
+	public static void getLinkAndShareFacebook(final Context context, UiLifecycleHelper uiHelper, ProgressDialog pDialog, Bitmap image) {
+		getLinkAndShareFacebook(context, uiHelper, pDialog, image, context.getString(R.string.share_base_url_facebook_name_readable), "");
 	}
 
-	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, final ProgressDialog pDialog, Bitmap image,
+	public static void getLinkAndShareFacebook(final Context context, final UiLifecycleHelper uiHelper, final ProgressDialog pDialog, Bitmap image,
 			String question, String deepLink) {
 		final String link = buildShareURL(context);
 		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
@@ -75,7 +77,7 @@ public class ShareHelper {
 				Log.d("test", "url = " + getURL());
 				Log.d("test", "hash = " + getHash());
 				if (result == 0 || getSuccess().equals("true")) {
-					shareFacebook(context, uiHelper, pDialog, getURL());
+					loginOrShareFacebook(context, uiHelper, pDialog, getURL());
 				} else {
 					String share = "http://www.learnwithhiq.com/facebook/question.php";
 					try {
@@ -86,11 +88,9 @@ public class ShareHelper {
 						share = share + "&title=" + titleEncoded;
 						share = share + "&name=" + descriptionEncoded;
 					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					shareFacebook(context, uiHelper, pDialog, share);
-					// shareFacebook(context, uiHelper, "http://www.thestreet.com/story/12734024/6/10-most-bikeable-cities-in-the-us.html");
+					loginOrShareFacebook(context, uiHelper, pDialog, share);
 				}
 			}
 		}.execute(DeelDatApiKey, title, description, siteName, link, appName, appPackage, appClass, deepLink);
@@ -106,31 +106,37 @@ public class ShareHelper {
 
 	private static void onSessionStateChange(Session session, SessionState state, Exception exception) {
 		if (state.isOpened()) {
-			showFeedDialog(staticContext, staticLink);
+			shareFacebook();
 		}
 	}
 
-	public static void shareFacebook(final Context context, final UiLifecycleHelper uiHelper, ProgressDialog pDialog, String link) {
-		Activity act = (Activity) context;
-		if (FacebookDialog.canPresentShareDialog(context.getApplicationContext(), FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
-			FacebookDialog.ShareDialogBuilder shareDialogBuilder1 = new FacebookDialog.ShareDialogBuilder(act).setLink(link/*share*/);
-			FacebookDialog shareDialog1 = shareDialogBuilder1.build();
-			uiHelper.trackPendingDialogCall(shareDialog1.present());
+	public static void loginOrShareFacebook(final Context context, final UiLifecycleHelper uiHelper, ProgressDialog pDialog, String link) {
+		staticLink = link;
+		staticContext = context;
+		staticActivity = (Activity) context;
+		staticUiHelper = uiHelper;
+		staticProgressDialog = pDialog;
+		Session session = Session.getActiveSession();
+		if (!session.isOpened() && !session.isClosed()) {
+			Log.d("test", "openForRead");
+			session.openForRead(new Session.OpenRequest(staticActivity).setPermissions(LoginFragment.PERMISSIONS)
+					.setCallback(loginCallback));
+		} else if (session.isOpened()) {
+			shareFacebook();
 		} else {
-			staticLink = link;
-			staticContext = context;
-			staticProgressDialog = pDialog;
-			Session session = Session.getActiveSession();
-			if (!session.isOpened() && !session.isClosed()) {
-				Log.d("test", "openForRead");
-				session.openForRead(new Session.OpenRequest(act).setPermissions(LoginFragment.PERMISSIONS).setCallback(loginCallback));
-			} else if (session.isOpened()) {
-				showFeedDialog(context, link);
-			} else {
-				Log.d("test", "openActiveSession");
-				Session.openActiveSession(act, true, LoginFragment.PERMISSIONS, loginCallback);
-			}
+			Log.d("test", "openActiveSession");
+			Session.openActiveSession(staticActivity, true, LoginFragment.PERMISSIONS, loginCallback);
+		}
+	}
 
+	private static void shareFacebook() {
+		if (FacebookDialog.canPresentShareDialog(staticContext.getApplicationContext(), FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
+			FacebookDialog.ShareDialogBuilder shareDialogBuilder1 = new FacebookDialog.ShareDialogBuilder(staticActivity)
+					.setLink(staticLink);
+			FacebookDialog shareDialog1 = shareDialogBuilder1.build();
+			staticUiHelper.trackPendingDialogCall(shareDialog1.present());
+		} else {
+			showFeedDialog(staticContext, staticLink);
 		}
 	}
 
