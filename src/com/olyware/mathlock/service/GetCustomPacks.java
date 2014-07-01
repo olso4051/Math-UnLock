@@ -1,6 +1,7 @@
 package com.olyware.mathlock.service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -73,7 +74,8 @@ public class GetCustomPacks extends AsyncTask<String, Integer, Integer> {
 				for (int i = 0; i < json.length(); i++) {
 					JSONObject obj = (JSONObject) json.get(i);
 					list.add(new CustomPackData(getStringFromJSON(obj, "filename"), getStringFromJSON(obj, "name"), getStringFromJSON(obj,
-							"id"), getStringFromJSON(obj, "user_id"), getStringFromJSON(obj, "downloads")));
+							"id"), getStringFromJSON(obj, "user_id"), getStringFromJSON(obj, "downloads"), getStringListFromJSON(obj,
+							"tags")));
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -90,16 +92,12 @@ public class GetCustomPacks extends AsyncTask<String, Integer, Integer> {
 		}
 	}
 
-	private String[] getStringArrayFromJSON(JSONObject json, String key) {
-		String[] strings = { "", "", "", "" };
+	private List<String> getStringListFromJSON(JSONObject json, String key) {
+		List<String> strings = new ArrayList<String>();
 		try {
-			JSONObject array = json.getJSONObject(key);
-			/*for (int i=0;i<NumAnswers;i++)
-				strings[i]=array.getString(""+i);*/
-			strings[0] = array.getString("a");
-			strings[1] = array.getString("b");
-			strings[2] = array.getString("c");
-			strings[3] = array.getString("d");
+			JSONArray array = json.getJSONArray(key);
+			for (int i = 0; i < array.length(); i++)
+				strings.add(array.getString(i));
 			return strings;
 		} catch (JSONException e) {
 			return strings;

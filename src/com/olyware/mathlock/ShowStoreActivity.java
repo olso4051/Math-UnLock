@@ -219,8 +219,8 @@ public class ShowStoreActivity extends Activity {
 				startActivity(new Intent(ShowStoreActivity.this, SearchableCustomPackActivity.class));
 			}
 		});
-		/*TextView customPacksCost = (TextView) findViewById(R.id.custom_cost);
-		customPacksCost.setText("Soon");*/
+		// TextView customPacksCost = (TextView) findViewById(R.id.custom_cost);
+		// customPacksCost.setText("Soon");
 	}
 
 	@Override
