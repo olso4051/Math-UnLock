@@ -1106,7 +1106,7 @@ public class JoystickView extends View {
 						startTimePulse = System.currentTimeMillis();
 					lastTimePulse = System.currentTimeMillis();
 					percent = (lastTimePulse - startTimePulse) / (float) PULSE_DURATION;
-					if (percent < 1) {
+					if (percent < 1 && percent > 0) {
 						pulseFrame = (int) (percent * pulseFrames);
 						/*int size = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
 						//int change = (int) (rUnlockChange * easingFunctionSize[pulseFrame] + rUnlock - size);

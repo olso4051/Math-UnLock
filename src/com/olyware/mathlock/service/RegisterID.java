@@ -11,16 +11,33 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.EncryptionHelper;
 
 public class RegisterID extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
 	private String success, error;
+	private String phoneNumberEncrypted;
 
 	public RegisterID(Activity act) {
+		TelephonyManager telephonyManager = (TelephonyManager) act.getSystemService(Context.TELEPHONY_SERVICE);
+		String number = telephonyManager.getLine1Number();
+		number = number.replaceAll("[^\\d]", "");
+		if (number != null && number.length() == 10) {
+			phoneNumberEncrypted = number;
+		} else if (number.length() > 10) {
+			phoneNumberEncrypted = number.substring(number.length() - 10);
+		} else {
+			phoneNumberEncrypted = "";
+		}
+		if (!phoneNumberEncrypted.equals("")) {
+			phoneNumberEncrypted = new EncryptionHelper().encryptForURL(phoneNumberEncrypted);
+		}
 		baseURL = act.getString(R.string.service_base_url);
 	}
 
@@ -91,6 +108,10 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 				data.put("email", s[7]);
 				Log.d("GAtest", "email:" + s[7]);
 			}
+			if (!phoneNumberEncrypted.equals("")) {
+				data.put("phone_hash", phoneNumberEncrypted);
+			}
+
 			Log.d("test", "JSON to register: " + data.toString());
 			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
 			httpput.setEntity(new StringEntity(data.toString()));
