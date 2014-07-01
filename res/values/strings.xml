@@ -10,6 +10,14 @@
     <string name="coming_soon_message">Short quiz challenges between friends will be coming soon in a future update.</string>
     <string name="coming_soon_ok">OK</string>
     
+    <!-- Challenge Dialog -->
+    <string name="fragment_challenge_title">Challenge!</string>
+    <string name="fragment_challenge_invite">Invite</string>
+    <string name="fragment_challenge_start">Start</string>
+    <string name="fragment_challenge_next">Next</string>
+    <string name="fragment_challenge_search_contacts_hint">Search Friends</string>
+    <string name="fragment_challenge_search_packs_hint">Search Packs</string>
+    
     <!-- Google Analytics Tracking strings -->
     <string name="google_analytics_tracking_id">UA-48722021-1</string>
 	<string name="enable_tracking">Google Analytics</string>
