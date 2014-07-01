@@ -22,7 +22,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -233,41 +232,38 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception, final boolean fromFacebookButton) {
-		Log.d("test", "onSessionStateChange + fromFacebookButton = " + (fromFacebookButton || facebookButtonClicked));
+		Log.d("test", "onSessionStateChange + facebookButtonClicked = " + (facebookButtonClicked));
 		if (state.isOpened()) {
-			Log.d("test", "Logged in... " + fromFacebookButton);
-			// Request user data and show the results
-			Request.newMeRequest(session, new Request.GraphUserCallback() {
-
-				@Override
-				public void onCompleted(GraphUser user, Response response) {
-					if (user != null) {
-						String gender = "", birthday = "", location = "", email = "";
-						if (user.getProperty("gender") != null)
-							gender = user.getProperty("gender").toString();
-						if (user.getBirthday() != null)
-							birthday = user.getBirthday();
-						if (user.getLocation() != null)
-							location = user.getLocation().getProperty("name").toString();
-						if (user.getProperty("email") != null)
-							email = user.getProperty("email").toString();
-						SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-						sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
-								.putString(mPrefUserFacebookBirth, birthday).putString(mPrefUserFacebookGender, gender)
-								.putString(mPrefUserFacebookLocation, location).putString(mPrefUserFacebookEmail, email)
-								.putBoolean(mPrefUserSkipped, false).commit();
-						Log.d("GAtest", user.toString());
-						if (fromFacebookButton || facebookButtonClicked) {
-							facebookButtonClicked = false;
-							logIn();
+			Log.d("test", "Logged in... " + facebookButtonClicked);
+			if (facebookButtonClicked) {
+				facebookButtonClicked = false;
+				// Request user data and show the results
+				Request.newMeRequest(session, new Request.GraphUserCallback() {
+					@Override
+					public void onCompleted(GraphUser user, Response response) {
+						if (user != null) {
+							String gender = "", birthday = "", location = "", email = "";
+							if (user.getProperty("gender") != null)
+								gender = user.getProperty("gender").toString();
+							if (user.getBirthday() != null)
+								birthday = user.getBirthday();
+							if (user.getLocation() != null)
+								location = user.getLocation().getProperty("name").toString();
+							if (user.getProperty("email") != null)
+								email = user.getProperty("email").toString();
+							SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
+									.putString(mPrefUserFacebookBirth, birthday).putString(mPrefUserFacebookGender, gender)
+									.putString(mPrefUserFacebookLocation, location).putString(mPrefUserFacebookEmail, email)
+									.putBoolean(mPrefUserSkipped, false).commit();
+							Log.d("GAtest", user.toString());
 						}
-					} else {
-						Toast.makeText(getActivity(), "network error", Toast.LENGTH_LONG).show();
+						logIn();
 					}
-				}
-			}).executeAsync();
+				}).executeAsync();
+			}
 		} else if (state.isClosed()) {
-			Log.d("test", "Logged out... " + fromFacebookButton);
+			Log.d("test", "Logged out... " + facebookButtonClicked);
 		}
 	}
 
@@ -309,7 +305,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				Log.d("test", "success=" + getSuccess());
 				Log.d("test", "error=" + getError());
 				if (result == 0) {
-					// success
+					SharedPreferences prefsGA = getActivity().getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+					prefsGA.edit().putBoolean("reg_uploaded", true).commit();
 					startMainActivity();
 				} else if (result == 1) {
 					// network error

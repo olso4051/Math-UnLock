@@ -157,7 +157,6 @@ public class GCMHelper {
 
 					// send the registration ID to the server
 					if (sendToBackend) {
-						Log.d("GAtest", "sendRegistrationIdToBackend");
 						sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location, email);
 					}
 					// else
@@ -187,6 +186,7 @@ public class GCMHelper {
 
 	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral,
 			String birth, String gender, String location, String email) {
+		Log.d("test", "sendRegistrationIdToBackend");
 		new RegisterID(act) {
 			@Override
 			protected void onPostExecute(Integer result) {

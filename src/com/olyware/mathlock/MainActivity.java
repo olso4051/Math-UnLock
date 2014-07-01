@@ -141,7 +141,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private Tracker trackerGA;
 	private Handler mHandler, timerHandler;
 	private Runnable reduceWorth;
-	private boolean attached = false;
+	private boolean attached = false, screenViewed = false;
 
 	private DatabaseManager dbManager;
 	private static Context ctx;
@@ -186,7 +186,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// screen has come on
 			trackerGA.set(Fields.SESSION_CONTROL, "start");
 			trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
-			trackerGA.send(MapBuilder.createAppView().build());
 			startCountdown();
 			// showWallpaper();
 		}
@@ -504,6 +503,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@Override
 	protected void onPause() {
+		screenViewed = false;
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		if (loggedIn) {
@@ -676,7 +676,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				Log.d("test", "onResume Screen is on");
 				trackerGA.set(Fields.SESSION_CONTROL, "start");
 				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
-				trackerGA.send(MapBuilder.createAppView().build());
 				// showWallpaper();
 			}
 		}
@@ -1767,6 +1766,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				action = "quiz_mode_" + action;
 			if (joystick.getQuickUnlock())
 				action = "quick_unlock_" + action;
+		}
+		if (!screenViewed) {
+			trackerGA.send(MapBuilder.createAppView().build());
+			screenViewed = true;
 		}
 		trackerGA.send(MapBuilder.createEvent(category, action, label, value).build());
 	}
