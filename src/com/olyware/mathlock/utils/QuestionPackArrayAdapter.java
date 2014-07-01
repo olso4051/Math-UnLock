@@ -1,6 +1,7 @@
 package com.olyware.mathlock.utils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
@@ -100,10 +101,18 @@ public class QuestionPackArrayAdapter extends ArrayAdapter<CustomPackData> {
 
 				for (int i = 0; i < count; i++) {
 					final CustomPackData customPack = list.get(i);
-					final String value = customPack.getName().toLowerCase(Locale.ENGLISH);
+					final String valueName = customPack.getName().toLowerCase(Locale.ENGLISH);
+					final List<String> valueTags = new ArrayList<String>();
+					valueTags.addAll(customPack.getTags());
 
-					if (value.contains(prefix)) {
+					if (valueName.contains(prefix)) {
 						newList.add(customPack);
+					} else {
+						for (String tag : valueTags) {
+							if (tag.contains(prefix)) {
+								newList.add(customPack);
+							}
+						}
 					}
 				}
 				results.values = newList;

@@ -271,7 +271,7 @@
     <string name="same_entries">All questions and answers must be different</string>
     <string name="security_title">Security</string>
     <string name="settings">Settings</string>
-    <string name="settings_advanced">Avanced Settings</string>
+    <string name="settings_advanced">Advanced Settings</string>
     <string name="settings_questions">Question Packs</string>
     <string name="settings_question_pack">Question Pack Settings</string>
     <string name="settings_engineer_title">Engineering Questions</string>

@@ -72,7 +72,7 @@ public class SearchableCustomPackActivity extends Activity {
 
 		// Listview Data
 		products = new ArrayList<CustomPackData>();
-		products.add(new CustomPackData("null", "Finding Available Packs", "-1", "-1", "0"));
+		products.add(new CustomPackData("null", "Finding Available Packs", "-1", "-1", "0", new ArrayList<String>(0)));
 		allProducts = new ArrayList<CustomPackData>();
 		allProducts.addAll(products);
 		downloadedPackIDs = new ArrayList<String>();
