@@ -1,7 +1,6 @@
 package com.olyware.mathlock.utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -15,6 +14,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.util.Log;
 
 import com.olyware.mathlock.service.CustomContactData;
 
@@ -23,13 +23,15 @@ public class ContactHelper {
 	final public static String CONTACTS = "contacts";
 
 	public interface contactDataListener {
-		public void onReceived(List<CustomContactData> contactData);
+		public void onNewContactFound(int replaceID, CustomContactData contactData);
+
+		public void onDoneFindingContacts();
 	}
 
 	public static void getCustomContactDataAsync(final Context ctx, final contactDataListener listener) {
-		new AsyncTask<Void, Void, List<CustomContactData>>() {
+		new AsyncTask<Void, CustomContactData, Void>() {
 			@Override
-			protected List<CustomContactData> doInBackground(Void... params) {
+			protected Void doInBackground(Void... params) {
 				ContentResolver cr = ctx.getContentResolver();
 				Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 				List<String> phoneNumbers = new ArrayList<String>();
@@ -39,9 +41,7 @@ public class ContactHelper {
 				boolean isPerson = false;
 				String name, id;
 				List<String> allNames = new ArrayList<String>();
-				int replaceID = 0;
-				List<CustomContactData> contacts = new ArrayList<CustomContactData>();
-				contacts.clear();
+				int replaceID = -1;
 				phoneNumbers.clear();
 				emails.clear();
 				if (cur.getCount() > 0) {
@@ -60,10 +60,10 @@ public class ContactHelper {
 											.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
 									if (number.length() >= 7 && !allPhoneNumbers.contains(number)) {
 										isPerson = true;
-										if (replaceID < 0)
-											phoneNumbers.add(number);
-										else
-											contacts.get(replaceID).getPhoneNumbers().add(number);
+										// if (replaceID < 0)
+										phoneNumbers.add(number);
+										// else
+										// contacts.get(replaceID).getPhoneNumbers().add(number);
 										allPhoneNumbers.add(number);
 									}
 								}
@@ -73,20 +73,27 @@ public class ContactHelper {
 								while (emailCur.moveToNext()) {
 									String email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
 									if (email.length() >= 5 && !allEmails.contains(email)) {
-										if (replaceID < 0)
-											emails.add(email);
-										else
-											contacts.get(replaceID).getEmails().add(email);
+										isPerson = true;
+										// if (replaceID < 0)
+										emails.add(email);
+										// else
+										// contacts.get(replaceID).getEmails().add(email);
 										allEmails.add(email);
 										// emailType =
 										// emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
 									}
 								}
 								emailCur.close();
-								if (isPerson && replaceID < 0) {
+								if (isPerson) {
+									if (replaceID >= 0)
+										allNames.add(nameLo);
+									emails.add(String.valueOf(replaceID));
+									this.publishProgress(new CustomContactData(name, emails, phoneNumbers));
+								}
+								/*if (isPerson && replaceID < 0) {
 									allNames.add(name.toLowerCase(Locale.ENGLISH));
 									contacts.add(new CustomContactData(name, emails, phoneNumbers));
-								}
+								}*/
 								replaceID = -1;
 								isPerson = false;
 								emails.clear();
@@ -95,14 +102,24 @@ public class ContactHelper {
 						}
 					}
 				}
-				Collections.sort(contacts);
+				/*Collections.sort(contacts);
 				storeContacts(ctx, contacts);
-				return contacts;
+				return contacts;*/
+				return null;
 			}
 
 			@Override
-			protected void onPostExecute(List<CustomContactData> result) {
-				listener.onReceived(result);
+			protected void onProgressUpdate(CustomContactData... values) {
+				List<String> emailsTemp = new ArrayList<String>();
+				emailsTemp.addAll(values[0].getEmails());
+				int replaceID = Integer.parseInt(values[0].getEmails().get(emailsTemp.size() - 1));
+				values[0].getEmails().remove(emailsTemp.size() - 1);
+				listener.onNewContactFound(replaceID, values[0]);
+			}
+
+			@Override
+			protected void onPostExecute(Void v) {
+				listener.onDoneFindingContacts();
 			}
 
 		}.execute();
@@ -113,12 +130,14 @@ public class ContactHelper {
 		String contactsJSON = "[";
 		boolean first = true;
 		for (CustomContactData contact : contacts) {
-			if (first)
+			if (first) {
 				contactsJSON += contact.getJSON();
-			else
+				first = false;
+			} else
 				contactsJSON += "," + contact.getJSON();
 		}
 		contactsJSON += "]";
+		Log.d("test", "json to save contacts = " + contactsJSON);
 		editSharedPrefs.putString(CONTACTS, contactsJSON).commit();
 	}
 

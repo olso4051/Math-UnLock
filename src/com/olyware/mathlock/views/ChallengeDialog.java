@@ -1,6 +1,7 @@
 package com.olyware.mathlock.views;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.CustomContactData;
@@ -29,7 +29,7 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 	private ContactArrayAdapter adapter;
 	private ArrayList<CustomContactData> contacts, allContacts;
 	private EditText inputSearch;
-	private ProgressBar progress;
+	// private ProgressBar progress;
 	private int lastLength = 0;
 
 	public interface ChallengeDialogListener {
@@ -87,7 +87,7 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 		});
 
 		// progress bar
-		progress = (ProgressBar) v.findViewById(R.id.challenge_progress);
+		// progress = (ProgressBar) v.findViewById(R.id.challenge_progress);
 
 		// Contacts ListView
 		lv = (ListView) v.findViewById(R.id.challenge_list_view);
@@ -143,18 +143,32 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 	}
 
 	private void refreshContacts() {
-		progress.setVisibility(View.VISIBLE);
+		// progress.setVisibility(View.VISIBLE);
+		contacts.clear();
+		allContacts.clear();
 		ContactHelper.getCustomContactDataAsync(getActivity(), new ContactHelper.contactDataListener() {
 			@Override
-			public void onReceived(List<CustomContactData> contactData) {
-				if (progress != null && contacts != null && allContacts != null && adapter != null) {
-					contacts.clear();
-					contacts.addAll(contactData);
-					allContacts.clear();
-					allContacts.addAll(contactData);
+			public void onNewContactFound(int replaceID, CustomContactData contactData) {
+				if (contacts != null && allContacts != null && adapter != null) {
+					if (replaceID < 0) {
+						contacts.add(contactData);
+						allContacts.add(contactData);
+					} else {
+						contacts.get(replaceID).addEmails(contactData.getEmails());
+						contacts.get(replaceID).addPhoneNumbers(contactData.getPhoneNumbers());
+						allContacts.get(replaceID).addEmails(contactData.getEmails());
+						allContacts.get(replaceID).addPhoneNumbers(contactData.getPhoneNumbers());
+					}
+					Collections.sort(contacts);
+					Collections.sort(allContacts);
 					adapter.notifyDataSetChanged();
-					progress.setVisibility(View.INVISIBLE);
 				}
+			}
+
+			@Override
+			public void onDoneFindingContacts() {
+				// progress.setVisibility(View.INVISIBLE);
+				ContactHelper.storeContacts(getActivity(), allContacts);
 			}
 		});
 	}

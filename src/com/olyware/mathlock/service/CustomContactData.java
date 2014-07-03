@@ -3,8 +3,6 @@ package com.olyware.mathlock.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.Log;
-
 import com.olyware.mathlock.utils.EncryptionHelper;
 
 public class CustomContactData implements Comparable<CustomContactData> {
@@ -68,27 +66,40 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	public String getJSON() {
 		String json = "{";
 		json += "\"name\":\"" + name + "\",";
-		json += "\"phone\":[\"";
+		json += "\"phone\":[";
 		boolean first = true;
-		for (int i = 0; i < phoneNumbers.size(); i++) {
-			if (first) {
-				json += phoneNumbers.get(i) + "\"";
-				first = false;
-			} else
-				json += ",\"" + phoneNumbers.get(i) + "\"";
+		if (phoneNumbers.size() > 0) {
+			json += "\"";
+			for (int i = 0; i < phoneNumbers.size(); i++) {
+				if (first) {
+					json += phoneNumbers.get(i) + "\"";
+					first = false;
+				} else
+					json += ",\"" + phoneNumbers.get(i) + "\"";
+			}
 		}
-		json += "],\"email\":[\"";
+		json += "],\"email\":[";
 		first = true;
-		for (int i = 0; i < emails.size(); i++) {
-			if (first) {
-				json += emails.get(i) + "\"";
-				first = false;
-			} else
-				json += ",\"" + emails.get(i) + "\"";
+		if (emails.size() > 0) {
+			json += "\"";
+			for (int i = 0; i < emails.size(); i++) {
+				if (first) {
+					json += emails.get(i) + "\"";
+					first = false;
+				} else
+					json += ",\"" + emails.get(i) + "\"";
+			}
 		}
 		json += "]}";
-		Log.d("test", "json of contact = " + json);
 		return json;
+	}
+
+	public void addPhoneNumbers(List<String> phoneNumbers) {
+		this.phoneNumbers.addAll(phoneNumbers);
+	}
+
+	public void addEmails(List<String> emails) {
+		this.emails.addAll(emails);
 	}
 
 	@Override
