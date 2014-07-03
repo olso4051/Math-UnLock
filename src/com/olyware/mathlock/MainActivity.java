@@ -82,12 +82,14 @@ import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.Purchase;
 import com.olyware.mathlock.utils.ShareHelper;
+import com.olyware.mathlock.views.ChallengeDialog;
 import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
 
-public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
+public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse,
+		ChallengeDialog.ChallengeDialogListener {
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
@@ -1354,7 +1356,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case Friends:		// friends was selected
 			/*unlocking = false;
 			startActivity(new Intent(this, FriendActivity.class));*/
-			if (!dialogOn) {
+			/*if (!dialogOn) {
 				dialogOn = true;
 				final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.coming_soon_title);
@@ -1365,7 +1367,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					}
 				});
 				builder.create().show();
-			}
+			}*/
+			ChallengeDialog mCall = new ChallengeDialog();
+			mCall.setCancelable(true);
+			mCall.show(getSupportFragmentManager(), "fragment_challenge");
+			/*unlocking = false;
+			startActivity(new Intent(this,ChallengeActivity.class));*/
 			break;
 		case Store:		// Store was selected
 			unlocking = false;
@@ -1415,7 +1422,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Share:	// share was selected
 			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
-			ShareHelper.getLinkAndShareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, problem.getReadableText(), getDeepLinkToShare());
+			ShareHelper.getLinkAndShareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, problem.getReadableText(),
+					getDeepLinkToShare());
 			break;
 		case Touch:
 			setProblemAndAnswer();
@@ -1774,21 +1782,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		trackerGA.send(MapBuilder.createEvent(category, action, label, value).build());
 	}
 
-	@Override
-	public void GCMResult(boolean result) {
-		if (loginFragment != null) {
-			loginFragment.GCMRegistrationDone(result);
-		}
-	}
-
-	@Override
-	public void RegisterIDResult(int result) {
-		if (result == 0) {
-			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
-			prefsGA.edit().putBoolean("reg_uploaded", true).commit();
-		}
-	}
-
 	@SuppressLint("NewApi")
 	private Bitmap takeScreenShot() {
 		View view = this.getWindow().getDecorView();
@@ -1812,5 +1805,38 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), b1.getHeight() - statusBarHeight);
 		view.destroyDrawingCache();
 		return b;
+	}
+
+	@Override
+	public void GCMResult(boolean result) {
+		if (loginFragment != null) {
+			loginFragment.GCMRegistrationDone(result);
+		}
+	}
+
+	@Override
+	public void RegisterIDResult(int result) {
+		if (result == 0) {
+			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+			prefsGA.edit().putBoolean("reg_uploaded", true).commit();
+		}
+	}
+
+	@Override
+	public void onInvitePressed() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStartPressed() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onNextPressed() {
+		// TODO Auto-generated method stub
+
 	}
 }

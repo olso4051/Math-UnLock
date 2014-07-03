@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/challenge_layout"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="@dimen/login_vertical_margin"
     android:layout_gravity="center"
     android:orientation="vertical">
 
-    <LinearLayout
+    <!-- <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -41,7 +41,7 @@
             android:text="@string/fragment_challenge_next"
             android:textSize="@dimen/text_size_normal"/>
 
-    </LinearLayout>
+    </LinearLayout>-->
     
     <EditText
         android:id="@+id/challenge_search"
@@ -57,8 +57,19 @@
         android:drawableRight="@drawable/search"
         android:inputType="text"/>
     
+    <ProgressBar
+        android:id="@+id/challenge_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="visible" />
+    
     <ListView
-        android:id="@+id/list_view"
+        android:id="@+id/challenge_list_view"
+        android:dividerHeight="0dp"
+        android:divider="@color/light_light_blue"
+        android:overScrollMode="ifContentScrolls"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
     </ListView>

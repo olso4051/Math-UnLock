@@ -1,38 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal" >
-    
-    <ImageView
-        android:id="@+id/image"
-        android:layout_margin="@dimen/login_vertical_margin_half"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="fill_parent"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_friend" />
-
-    <TextView 
-        android:id="@+id/text"
-        android:layout_margin="@dimen/login_vertical_margin_half"
-        android:layout_width="0dp"
-        android:layout_weight="8"
-        android:layout_height="wrap_content"
-        android:gravity="left"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Kyle Olson"
-        android:textColor="@color/white"
-        android:textSize="@dimen/text_size_extra_large" />
-    
+    android:id="@+id/contact_background"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	android:background="@color/light_light_blue"
+	android:paddingLeft="@dimen/login_vertical_margin_half"
+	android:paddingRight="@dimen/login_vertical_margin_half"
+	android:paddingTop="@dimen/login_vertical_margin_quarter"
+	android:paddingBottom="@dimen/login_vertical_margin_quarter" >
+	
     <CheckBox
-        android:id="@+id/challenge"
+        android:id="@+id/contact_challenge"
         android:layout_marginRight="@dimen/login_vertical_margin_half"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:checked="false"
-        android:button="@drawable/btn_check"/>
+        android:layout_gravity="center"
+        android:button="@drawable/custom_checkbox" />
     
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        
+		<TextView
+			android:id="@+id/contact_name"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical|left"
+			android:ellipsize="end"
+			android:textSize="@dimen/text_size_large"
+			android:textColor="@color/blue_on_white" />
+	
+		<TextView
+			android:id="@+id/contact_phone"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical|left"
+			android:ellipsize="end"
+			android:textSize="@dimen/text_size_normal"
+			android:textColor="@color/blue_on_white" />
+	
+	</LinearLayout>
 </LinearLayout>

@@ -28,10 +28,8 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		TelephonyManager telephonyManager = (TelephonyManager) act.getSystemService(Context.TELEPHONY_SERVICE);
 		String number = telephonyManager.getLine1Number();
 		number = number.replaceAll("[^\\d]", "");
-		if (number != null && number.length() == 10) {
+		if (number != null && number.length() > 0) {
 			phoneNumberEncrypted = number;
-		} else if (number.length() > 10) {
-			phoneNumberEncrypted = number.substring(number.length() - 10);
 		} else {
 			phoneNumberEncrypted = "";
 		}
