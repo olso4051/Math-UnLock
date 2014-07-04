@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,9 +19,6 @@ import android.util.Log;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.model.GraphObject;
-import com.facebook.model.GraphObjectList;
-import com.facebook.model.GraphUser;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
 
@@ -62,19 +60,21 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 				// Get the user's list of friends
 				Request friendsRequest = new Request(session, "/me/friends");
 				Response response = friendsRequest.executeAndWait();
-				GraphObjectList<GraphObject> list = response.getGraphObjectList();
-				if (list != null) {
-					for (int i = 0; i < list.size(); i++) {
-						GraphUser friend = (GraphUser) list.get(i);
-						if (friend != null) {
-							name = friend.getName();
+				try {
+					JSONObject responseJSON = new JSONObject(response.getRawResponse());
+					JSONArray data = responseJSON.getJSONArray("data");
+					if (data.length() > 0) {
+						for (int i = 0; i < data.length(); i++) {
+							name = ((JSONObject) data.get(i)).getString("name");
 							String nameLo = name.toLowerCase(Locale.ENGLISH);
-							friend.getId();
 							allNames.add(nameLo);
-							allContacts.add(new CustomContactData(name, friend.getId()));
-							publishProgress(new CustomContactData(name, friend.getId()));
+							String facebookID = ((JSONObject) data.get(i)).getString("id");
+							allContacts.add(new CustomContactData(name, facebookID));
+							publishProgress(new CustomContactData(name, facebookID));
 						}
 					}
+				} catch (JSONException e) {
+					e.printStackTrace();
 				}
 			}
 		}

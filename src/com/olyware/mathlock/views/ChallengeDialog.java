@@ -114,8 +114,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 		if (contactsTemp.size() == 0)
 			refreshContacts();
 		else {
-			// refreshContacts();
-			/**/contacts.clear();
+			refreshContacts();
+			/*contacts.clear();
 			contacts.add(new CustomContactData("Friends", "0/0", 0));
 			contacts.add(new CustomContactData("Friends to invite", "0/0", 1));
 			contacts.addAll(contactsTemp);

@@ -62,8 +62,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public CustomContactData(String facebookName, String facebookID) {
 		this.name = facebookName;
-		this.emails = new ArrayList<String>(emails.size());
-		this.phoneNumbers = new ArrayList<String>(phoneNumbers.size());
+		this.emails = new ArrayList<String>();
+		this.phoneNumbers = new ArrayList<String>();
 		isFriend = true;
 		isContact = true;
 		contact = -1;
