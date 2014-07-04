@@ -161,6 +161,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 							numFriends++;
 						contacts.add(contactData);
 						allContacts.add(contactData);
+						contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
+						contacts.get(1 + numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
 					} else {
 						int replaceAddition = 1 + ((replaceID > numFriends) ? 1 : 0);
 						contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
@@ -176,6 +178,9 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 
 			@Override
 			public void onFriendContactFound(int id, String userID) {
+				numFriends++;
+				contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
+				contacts.get(numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
 				contacts.get(id + 2).setIsFriend(true);
 				contacts.get(id + 2).setUserID(userID);
 				Collections.sort(contacts);

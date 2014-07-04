@@ -176,6 +176,10 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.hiqUserID = userID;
 	}
 
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public void addPhoneNumbers(List<String> phoneNumbers) {
 		this.phoneNumbers.addAll(phoneNumbers);
 	}
