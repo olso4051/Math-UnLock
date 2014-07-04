@@ -21,15 +21,16 @@ import com.olyware.mathlock.ui.Typefaces;
 public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 
 	private Context ctx;
-	private int layoutResourceId;
+	private int contactLayoutResourceId, sectionLayoutResourceId;
 	private ArrayList<CustomContactData> data, fitems;
 	private Filter filter;
 	private Typefaces fonts;
 
-	public ContactArrayAdapter(Context context, int layoutResourceId, ArrayList<CustomContactData> data) {
-		super(context, layoutResourceId, data);
+	public ContactArrayAdapter(Context context, int contactLayoutResourceId, int sectionLayoutResourceId, ArrayList<CustomContactData> data) {
+		super(context, 0, data);
 		ctx = context;
-		this.layoutResourceId = layoutResourceId;
+		this.contactLayoutResourceId = contactLayoutResourceId;
+		this.sectionLayoutResourceId = sectionLayoutResourceId;
 		this.data = data;
 		this.fitems = data;
 		filter = new QuestionPackFilter();
@@ -40,31 +41,72 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 
 		View row = convertView;
-		CustomContactDataHolder holder = null;
+		CustomContactDataHolder contactHolder = null;
+		CustomSectionDataHolder sectionHolder = null;
 		int color = (position % 2 == 0) ? ctx.getResources().getColor(R.color.light_light_blue) : ctx.getResources()
 				.getColor(R.color.white);
+		CustomContactData customContactData = data.get(position);
+		boolean isContact = customContactData.isContact();
 
+		LayoutInflater inflater = ((Activity) ctx).getLayoutInflater();
 		if (row == null) {
-			LayoutInflater inflater = ((Activity) ctx).getLayoutInflater();
-			row = inflater.inflate(layoutResourceId, parent, false);
-
-			holder = new CustomContactDataHolder();
-			holder.layout = (LinearLayout) row.findViewById(R.id.contact_background);
-			holder.layout.setBackgroundColor(color);
-			holder.txtName = (TextView) row.findViewById(R.id.contact_name);
-			holder.txtName.setTypeface(fonts.robotoLight);
-			holder.txtSub = (TextView) row.findViewById(R.id.contact_phone);
-			holder.txtSub.setTypeface(fonts.robotoLight);
-
-			row.setTag(holder);
+			if (isContact) {
+				row = inflater.inflate(contactLayoutResourceId, parent, false);
+				contactHolder = new CustomContactDataHolder();
+				contactHolder.layout = (LinearLayout) row.findViewById(R.id.contact_background);
+				contactHolder.layout.setBackgroundColor(color);
+				contactHolder.txtName = (TextView) row.findViewById(R.id.contact_name);
+				contactHolder.txtName.setTypeface(fonts.robotoLight);
+				contactHolder.txtSub = (TextView) row.findViewById(R.id.contact_phone);
+				contactHolder.txtSub.setTypeface(fonts.robotoLight);
+				row.setTag(contactHolder);
+			} else {
+				row = inflater.inflate(sectionLayoutResourceId, parent, false);
+				sectionHolder = new CustomSectionDataHolder();
+				sectionHolder.title = (TextView) row.findViewById(R.id.section_title);
+				sectionHolder.title.setTypeface(fonts.robotoLight);
+				sectionHolder.description = (TextView) row.findViewById(R.id.section_description);
+				sectionHolder.description.setTypeface(fonts.robotoLight);
+				row.setTag(sectionHolder);
+			}
 		} else {
-			holder = (CustomContactDataHolder) row.getTag();
+			if (isContact) {
+				if (row.getTag() instanceof CustomContactDataHolder)
+					contactHolder = (CustomContactDataHolder) row.getTag();
+				else {
+					row = inflater.inflate(contactLayoutResourceId, parent, false);
+					contactHolder = new CustomContactDataHolder();
+					contactHolder.layout = (LinearLayout) row.findViewById(R.id.contact_background);
+					contactHolder.layout.setBackgroundColor(color);
+					contactHolder.txtName = (TextView) row.findViewById(R.id.contact_name);
+					contactHolder.txtName.setTypeface(fonts.robotoLight);
+					contactHolder.txtSub = (TextView) row.findViewById(R.id.contact_phone);
+					contactHolder.txtSub.setTypeface(fonts.robotoLight);
+					row.setTag(contactHolder);
+				}
+			} else {
+				if (row.getTag() instanceof CustomSectionDataHolder)
+					sectionHolder = (CustomSectionDataHolder) row.getTag();
+				else {
+					row = inflater.inflate(sectionLayoutResourceId, parent, false);
+					sectionHolder = new CustomSectionDataHolder();
+					sectionHolder.title = (TextView) row.findViewById(R.id.section_title);
+					sectionHolder.title.setTypeface(fonts.robotoLight);
+					sectionHolder.description = (TextView) row.findViewById(R.id.section_description);
+					sectionHolder.description.setTypeface(fonts.robotoLight);
+					row.setTag(sectionHolder);
+				}
+			}
 		}
 
-		CustomContactData customContactData = data.get(position);
-		holder.layout.setBackgroundColor(color);
-		holder.txtName.setText(customContactData.getName());
-		holder.txtSub.setText(customContactData.getPhone());
+		if (isContact) {
+			contactHolder.layout.setBackgroundColor(color);
+			contactHolder.txtName.setText(customContactData.getName());
+			contactHolder.txtSub.setText(customContactData.getPhone());
+		} else {
+			sectionHolder.title.setText(customContactData.getName());
+			sectionHolder.description.setText(customContactData.getDescription());
+		}
 
 		return row;
 	}
@@ -72,6 +114,10 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 	static class CustomContactDataHolder {
 		public LinearLayout layout;
 		public TextView txtName, txtSub;
+	}
+
+	static class CustomSectionDataHolder {
+		public TextView title, description;
 	}
 
 	@Override
