@@ -2,6 +2,7 @@ package com.olyware.mathlock.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,20 +31,16 @@ public class ContactHelper {
 		public void onFriendContactFound(int contact, int id);
 	}
 
-	public static void getCustomContactDataAsync(final Context ctx, final contactDataListener listener) {
-		new GetContacts(ctx) {
+	public static void getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts, final contactDataListener listener) {
+		new GetContacts(ctx, contacts) {
 			@Override
 			protected void onProgressUpdate(CustomContactData... values) {
 				if (values[0].isContact()) {
-					if (values[0].isFriend()) {
-						listener.onNewContactFound(-1, values[0]);
-					} else {
-						List<String> emailsTemp = new ArrayList<String>();
-						emailsTemp.addAll(values[0].getEmails());
-						int replaceID = Integer.parseInt(values[0].getEmails().get(emailsTemp.size() - 1));
-						values[0].getEmails().remove(emailsTemp.size() - 1);
-						listener.onNewContactFound(replaceID, values[0]);
-					}
+					List<String> emailsTemp = new ArrayList<String>();
+					emailsTemp.addAll(values[0].getEmails());
+					int replaceID = Integer.parseInt(values[0].getEmails().get(emailsTemp.size() - 1));
+					values[0].getEmails().remove(emailsTemp.size() - 1);
+					listener.onNewContactFound(replaceID, values[0]);
 				} else {
 					Log.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID());
 					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID());
@@ -95,6 +92,30 @@ public class ContactHelper {
 			}
 		} else
 			return new ArrayList<CustomContactData>();
+	}
+
+	public static List<String> getNamesFromContacts(List<CustomContactData> contacts) {
+		List<String> names = new ArrayList<String>(contacts.size());
+		for (CustomContactData contact : contacts) {
+			names.add(contact.getName());
+		}
+		return names;
+	}
+
+	public static List<String> getNamesLowercaseFromContacts(List<CustomContactData> contacts) {
+		List<String> names = new ArrayList<String>(contacts.size());
+		for (CustomContactData contact : contacts) {
+			names.add(contact.getName().toLowerCase(Locale.ENGLISH));
+		}
+		return names;
+	}
+
+	public static int getNumberOfFriendsFromContacts(List<CustomContactData> contacts) {
+		int friends = 0;
+		for (CustomContactData contact : contacts) {
+			friends += (contact.isFriend() ? 1 : 0);
+		}
+		return friends;
 	}
 
 	public static List<String> getPhoneHashes(List<String> phoneNumbers) {

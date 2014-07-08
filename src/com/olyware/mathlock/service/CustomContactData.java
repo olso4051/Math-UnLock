@@ -26,6 +26,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		isFriend = false;
 		isContact = true;
 		contact = -1;
+		section = -1;
 		hiqUserID = "";
 		facebookUserID = "";
 	}
@@ -41,6 +42,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.isFriend = isFriend;
 		isContact = true;
 		contact = -1;
+		section = -1;
 		hiqUserID = "";
 		facebookUserID = "";
 	}
@@ -56,6 +58,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		isFriend = false;
 		isContact = true;
 		contact = -1;
+		section = -1;
 		hiqUserID = "";
 		facebookUserID = "";
 	}
@@ -67,6 +70,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		isFriend = true;
 		isContact = true;
 		contact = -1;
+		section = -1;
 		hiqUserID = "";
 		facebookUserID = facebookID;
 	}
@@ -130,6 +134,10 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public int getSection() {
 		return section;
+	}
+
+	public String getScore() {
+		return "0";
 	}
 
 	public List<String> getPhoneHashs() {

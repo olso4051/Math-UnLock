@@ -71,6 +71,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 					lastLength = cs.length();
 					contacts.clear();
 					contacts.addAll(allContacts);
+					contacts.add(new CustomContactData("Friends", "Score", 0));
+					contacts.add(new CustomContactData("Friends to invite", "", 1));
 					adapter.getFilter().filter(cs);
 				}
 			}
@@ -95,8 +97,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 		// Listview Data
 		contacts = new ArrayList<CustomContactData>();
 		allContacts = new ArrayList<CustomContactData>();
-		contacts.add(new CustomContactData("Friends", "0/0", 0));
-		contacts.add(new CustomContactData("Friends to invite", "0/0", 1));
+		contacts.add(new CustomContactData("Friends", "Score", 0));
+		contacts.add(new CustomContactData("Friends to invite", "", 1));
 
 		// Adding items to listview
 		adapter = new ContactArrayAdapter(getActivity(), R.layout.list_friend_item, R.layout.list_section_item, contacts);
@@ -104,8 +106,14 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-				// final CustomContactData data = contacts.get(pos);
-				// TODO start challenge or go to select pack dialog
+				CustomContactData selectedContact = contacts.get(pos);
+				if (selectedContact.isContact()) {
+					if (selectedContact.isFriend()) {
+						// TODO challenge!
+					} else {
+						// TODO invite
+					}
+				}
 			}
 		});
 
@@ -122,6 +130,9 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			Collections.sort(contacts);
 			allContacts.clear();
 			allContacts.addAll(contactsTemp);
+			Collections.sort(allContacts);
+			allNames.clear();
+			allNames.addAll(ContactHelper.getNamesFromContacts(allContacts));
 			adapter.notifyDataSetChanged();/**/
 		}
 
@@ -147,12 +158,13 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 
 	private void refreshContacts() {
 		// progress.setVisibility(View.VISIBLE);
-		contacts.clear();
-		contacts.add(new CustomContactData("Friends", "0/0", 0));
-		contacts.add(new CustomContactData("Friends to invite", "0/0", 1));
-		allContacts.clear();
-		numFriends = 0;
-		ContactHelper.getCustomContactDataAsync(getActivity(), new ContactHelper.contactDataListener() {
+		// contacts.clear();
+		// contacts.add(new CustomContactData("Friends", "Score", 0));
+		// contacts.add(new CustomContactData("Friends to invite", "", 1));
+		// allContacts.clear();
+		// numFriends = 0;
+		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
+		ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, new ContactHelper.contactDataListener() {
 			@Override
 			public void onNewContactFound(int replaceID, CustomContactData contactData) {
 				if (contacts != null && allContacts != null && adapter != null) {
@@ -161,8 +173,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 							numFriends++;
 						contacts.add(contactData);
 						allContacts.add(contactData);
-						contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
-						contacts.get(1 + numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
+						// contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
+						// contacts.get(1 + numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
 					} else {
 						int replaceAddition = 1 + ((replaceID > numFriends) ? 1 : 0);
 						contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
@@ -179,8 +191,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			@Override
 			public void onFriendContactFound(int id, String userID) {
 				numFriends++;
-				contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
-				contacts.get(numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
+				// contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
+				// contacts.get(numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
 				contacts.get(id + 2).setIsFriend(true);
 				contacts.get(id + 2).setUserID(userID);
 				Collections.sort(contacts);

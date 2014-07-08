@@ -25,11 +25,17 @@ import com.olyware.mathlock.utils.ContactHelper;
 public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 	private List<String> userPhoneHashes = new ArrayList<String>();
 	private List<String> userIDHashes = new ArrayList<String>();
+	private List<String> allNames = new ArrayList<String>();
+	private List<CustomContactData> allContacts = new ArrayList<CustomContactData>();
 	private String baseURL;
 	private Context ctx;
 
-	public GetContacts(Context ctx) {
+	public GetContacts(Context ctx, List<CustomContactData> contacts) {
 		this.ctx = ctx;
+		allContacts.clear();
+		allContacts.addAll(contacts);
+		allNames.clear();
+		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
@@ -44,7 +50,6 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 	@Override
 	protected Integer doInBackground(String... s) {
 		// Get Contacts from user's facebook
-		List<CustomContactData> allContacts = new ArrayList<CustomContactData>();
 		List<String> phoneNumbers = new ArrayList<String>();
 		List<String> allPhoneNumbers = new ArrayList<String>();
 		List<String> allEncryptedPhoneNumbers = new ArrayList<String>();
@@ -52,7 +57,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		List<String> allEmails = new ArrayList<String>();
 		boolean isPerson = false;
 		String name, id;
-		List<String> allNames = new ArrayList<String>();
+		// List<String> allNames = new ArrayList<String>();
 		int replaceID = -1;
 		final Session session = Session.getActiveSession();
 		if (session != null && session.isOpened()) {
@@ -67,16 +72,27 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 						for (int i = 0; i < data.length(); i++) {
 							name = ((JSONObject) data.get(i)).getString("name");
 							String nameLo = name.toLowerCase(Locale.ENGLISH);
-							allNames.add(nameLo);
+							if (allNames.contains(nameLo)) {
+								replaceID = allNames.indexOf(nameLo);
+							}
 							String facebookID = ((JSONObject) data.get(i)).getString("id");
-							allContacts.add(new CustomContactData(name, facebookID));
-							publishProgress(new CustomContactData(name, facebookID));
+							CustomContactData contact = new CustomContactData(name, facebookID);
+							if (replaceID == -1) {
+								allContacts.add(contact);
+								Collections.sort(allContacts);
+								allNames.clear();
+								allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
+							}
+							contact.getEmails().add(String.valueOf(replaceID));
+							publishProgress(contact);
 						}
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
 			}
+		} else {
+			// TODO tell the user login to facebook to get more friends
 		}
 		// Get contacts from user's contacts
 		ContentResolver cr = ctx.getContentResolver();
@@ -91,9 +107,12 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 					// add info to names that we've already found
 					if (allNames.contains(nameLo)) {
 						replaceID = allNames.indexOf(nameLo);
+						Log.d("test", "name = " + name + " |nameLo = " + nameLo + " |replaceID = " + replaceID + " |allNames.get("
+								+ replaceID + ") = " + allNames.get(replaceID));
 					}
 					// only add a contact if they have a phone number
-					if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+					if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0
+							|| replaceID >= 0) {
 						Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
 								ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] { id }, null);
 						while (pCur.moveToNext()) {
@@ -121,20 +140,31 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 							}
 						}
 						emailCur.close();
-						if (isPerson) {
+						if (isPerson || replaceID >= 0) {
 							if (replaceID == -1) {
-								allNames.add(nameLo);
 								allContacts.add(new CustomContactData(name, emails, phoneNumbers));
+								Collections.sort(allContacts);
+								allNames.clear();
+								allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
+							} else {
+								String email = "";
+								String phoneNumber = "";
+								if (emails.size() > 0)
+									email = emails.get(0);
+								if (phoneNumbers.size() > 0)
+									phoneNumber = phoneNumbers.get(0);
+								Log.d("test", "replaceID = " + replaceID + " |name = " + name + " |email = " + email + " |phoneNumber = "
+										+ phoneNumber);
 							}
 							emails.add(String.valueOf(replaceID));
 							publishProgress(new CustomContactData(name, emails, phoneNumbers));
 						}
-						replaceID = -1;
-						isPerson = false;
-						emails.clear();
-						phoneNumbers.clear();
 					}
 				}
+				replaceID = -1;
+				isPerson = false;
+				emails.clear();
+				phoneNumbers.clear();
 			}
 		}
 		allEncryptedPhoneNumbers.addAll(ContactHelper.getPhoneHashes(allPhoneNumbers));
@@ -174,11 +204,9 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 			userIDHashes.add("test" + i);
 		}
 		Collections.sort(allContacts);
-		Log.d("test", "findContact");
 		ContactHelper.findContact(ContactHelper.FindType.PHONEHASH, allContacts, userPhoneHashes, new ContactHelper.friendDataListener() {
 			@Override
 			public void onFriendContactFound(int contact, int id) {
-				Log.d("test", "new friend contact found contact = " + contact + " id = " + id);
 				publishProgress(new CustomContactData(contact, userIDHashes.get(id)));
 			}
 		});

@@ -4,43 +4,47 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="horizontal"
-	android:background="@color/light_light_blue"
+	android:background="@drawable/lv_dark"
 	android:paddingLeft="@dimen/login_vertical_margin_half"
 	android:paddingRight="@dimen/login_vertical_margin_half"
 	android:paddingTop="@dimen/login_vertical_margin_quarter"
 	android:paddingBottom="@dimen/login_vertical_margin_quarter" >
-	
-    <CheckBox
-        android:id="@+id/contact_challenge"
-        android:layout_marginRight="@dimen/login_vertical_margin_half"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:checked="false"
-        android:layout_gravity="center"
-        android:button="@drawable/custom_checkbox" />
     
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3" >
         
 		<TextView
 			android:id="@+id/contact_name"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center_vertical|left"
+			android:maxLines="1"
 			android:ellipsize="end"
 			android:textSize="@dimen/text_size_large"
-			android:textColor="@color/blue_on_white" />
+			android:textColor="@color/lv_txt"/>
 	
 		<TextView
 			android:id="@+id/contact_phone"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center_vertical|left"
+			android:maxLines="1"
 			android:ellipsize="end"
 			android:textSize="@dimen/text_size_normal"
-			android:textColor="@color/blue_on_white" />
+			android:textColor="@color/lv_txt" />
 	
 	</LinearLayout>
+	
+    <TextView
+		android:id="@+id/contact_win_loss"
+		android:layout_width="0dp"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:maxLines="1"
+		android:gravity="center_vertical|right"
+		android:textSize="@dimen/text_size_normal_plus"
+		android:textColor="@color/lv_txt" />
 </LinearLayout>
