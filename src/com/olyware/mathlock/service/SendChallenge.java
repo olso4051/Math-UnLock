@@ -1,5 +1,8 @@
 package com.olyware.mathlock.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPut;
@@ -7,40 +10,45 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
 
-public class RegisterID extends AsyncTask<String, Integer, Integer> {
+public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
-	private String success, error;
-	private String phoneNumberEncrypted;
+	private String success, error, challengeID;
+	private String userID, challengerType, challenger;
+	private List<String> questions;
+	private List<String[]> answers;
+	private int bet;
 
-	public RegisterID(Activity act) {
-		TelephonyManager telephonyManager = (TelephonyManager) act.getSystemService(Context.TELEPHONY_SERVICE);
-		String number = telephonyManager.getLine1Number();
-		if (number != null && number.length() > 0) {
-			phoneNumberEncrypted = ContactHelper.getPhoneHashFromString(number);
-		} else {
-			phoneNumberEncrypted = "";
+	public static enum FriendType {
+		UserID, Facebook;
+	}
+
+	public SendChallenge(Activity act, FriendType type, String challenger, List<String> questions, List<String[]> answers, int bet) {
+		userID = ContactHelper.getUserID(act);
+		switch (type) {
+		case UserID:
+			challengerType = "o_user_id";
+			break;
+		case Facebook:
+			challengerType = "o_facebook_hash";
+			break;
 		}
-		/*number = number.replaceAll("[^\\d]", "");
-		if (number != null && number.length() > 0) {
-			phoneNumberEncrypted = number;
-		} else {
-			phoneNumberEncrypted = "";
-		}
-		if (!phoneNumberEncrypted.equals("")) {
-			phoneNumberEncrypted = new EncryptionHelper().encryptForURL(phoneNumberEncrypted);
-		}*/
+		this.challenger = challenger;
+		this.questions = new ArrayList<String>(questions.size());
+		this.questions.addAll(questions);
+		this.answers = new ArrayList<String[]>(answers.size());
+		this.answers.addAll(answers);
+		this.bet = bet;
 		baseURL = act.getString(R.string.service_base_url);
 	}
 
@@ -58,16 +66,18 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 			return "";
 	}
 
+	public String getChallengeID() {
+		if (challengeID != null)
+			return challengeID;
+		else
+			return "";
+	}
+
 	@Override
 	protected Integer doInBackground(String... s) {
-		String endpoint = "register";
-		if (s[2].length() > 0) {
-			endpoint = endpoint + "/update";
-			s[3] = "";
-		}
-		if (s[1].length() <= 0) {
+		if (questions.size() != answers.size() || questions.size() <= 0 || answers.size() <= 0)
 			return 1;
-		}
+		String endpoint = "challenge";
 
 		// POST to API with old and new registration, also referral's registration
 		DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -79,36 +89,23 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		JSONObject jsonResponse;
 		try {
 			JSONObject data = new JSONObject();
-			if (s[0].length() > 0) {
-				data.put("username", s[0]);
+			data.put(challengerType, challenger);
+			data.put("c_user_id", userID);
+			JSONArray questionArray = new JSONArray();
+			for (String question : questions) {
+				questionArray.put(question);
 			}
-			if (s[1].length() > 0) {
-				data.put("registration_id", s[1]);
+			data.put("questions", questionArray);
+			JSONArray answerArray = new JSONArray();
+			for (String[] answerSet : answers) {
+				JSONArray answerSetArray = new JSONArray();
+				for (int i = 0; i < answerSet.length; i++) {
+					answerSetArray.put(answerSet[i]);
+				}
+				answerArray.put(answerSetArray);
 			}
-			if (s[2].length() > 0) {
-				data.put("user_id", s[2]);
-			}
-			if (s[3].length() > 0) {
-				data.put("referral", s[3]);
-			}
-			if (s[4].length() > 0) {
-				data.put("birthday", s[4]);
-			}
-			if (s[5].length() > 0) {
-				data.put("gender", s[5]);
-			}
-			if (s[6].length() > 0) {
-				data.put("location", s[6]);
-			}
-			if (s[7].length() > 0) {
-				data.put("email", s[7]);
-			}
-			if (s[8].length() > 0) {
-				data.put("facebook_hash", s[8]);
-			}
-			if (!phoneNumberEncrypted.equals("")) {
-				data.put("phone_hash", phoneNumberEncrypted);
-			}
+			data.put("answers", answerArray);
+			data.put("bet", bet);
 
 			Log.d("test", "JSON to register: " + data.toString());
 			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
@@ -130,9 +127,11 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		if (entity != null && fullResult != null && jsonResponse != null) {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
-			if (success.equals("true"))
+			challengeID = getStringFromJSON(jsonResponse, "challenge_id");
+			if (success.equals("true")) {
+				storeChallenge();
 				return 0;
-			else
+			} else
 				return 1;
 		} else {
 			return 1;
@@ -159,5 +158,9 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		} catch (JSONException e) {
 			return false;
 		}
+	}
+
+	private void storeChallenge() {
+		// TODO store challenge in challenge DB table
 	}
 }

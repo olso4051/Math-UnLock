@@ -61,7 +61,7 @@ public enum Difficulty {
 		return difficulty;
 	}
 
-	public static String fromValueString(int value) {
+	public static String fromValueToString(int value) {
 		String difficulty = null;
 		switch (value) {
 		case 0:

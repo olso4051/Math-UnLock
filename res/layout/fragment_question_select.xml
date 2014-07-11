@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.olyware.mathlock.views.VerticalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        
+	<LinearLayout  
+	    android:id="@+id/question_select_layout"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:padding="@dimen/login_vertical_margin"
+	    android:orientation="vertical">
+    
+	    <TextView
+	        android:id="@+id/question_select_bet_text" 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:paddingTop="@dimen/login_vertical_margin"
+	        android:text="@string/question_selector_bet"
+	        android:textColor="@color/blue_on_white"
+	        android:textSize="@dimen/text_size_large" />
+	
+	    <SeekBar
+	        android:id="@+id/question_select_bet"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:padding="@dimen/login_vertical_margin_half"
+			android:progressDrawable="@drawable/custom_progress"
+	        android:thumb="@drawable/custom_progress_thumb" />
+	    
+	    <TextView
+	        android:id="@+id/question_select_number_text" 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:paddingTop="@dimen/login_vertical_margin"
+	        android:text="@string/question_selector_number"
+	        android:textColor="@color/blue_on_white"
+	        android:textSize="@dimen/text_size_large" />
+	
+	    <SeekBar
+	        android:id="@+id/question_select_number"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:padding="@dimen/login_vertical_margin_half"
+	        android:max="4"
+	        android:progressDrawable="@drawable/custom_progress"
+	        android:thumb="@drawable/custom_progress_thumb" />
+	    
+	    <TextView
+	        android:id="@+id/question_select_difficulty_text" 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:paddingTop="@dimen/login_vertical_margin"
+	        android:text="@string/question_selector_difficulty"
+	        android:textColor="@color/blue_on_white"
+	        android:textSize="@dimen/text_size_large" />
+	    
+	    <com.olyware.mathlock.views.RangeSeekBar
+	            android:id="@+id/question_select_difficulty"
+	            android:layout_width="match_parent"
+	            android:layout_height="fill_parent"
+	            android:padding="@dimen/login_vertical_margin_half" />
+	    
+	    <TextView 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:paddingTop="@dimen/login_vertical_margin"
+	        android:text="@string/question_selector_question_packs"
+	        android:textColor="@color/blue_on_white"
+	        android:textSize="@dimen/text_size_large" />
+	    
+	    <ListView
+	        android:id="@+id/question_select_list_view"
+	        android:dividerHeight="0dp"
+	        android:divider="@color/light_light_blue"
+	        android:overScrollMode="ifContentScrolls"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	    </ListView>
+	    
+	    <Button
+	        android:id="@+id/question_select_button"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:text="Try Me" />
+    
+    </LinearLayout>
+    
+</com.olyware.mathlock.views.VerticalScrollView>
+
+

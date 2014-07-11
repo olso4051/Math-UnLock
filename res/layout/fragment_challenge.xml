@@ -21,13 +21,20 @@
         android:drawableRight="@drawable/search"
         android:inputType="text"/>
     
-    <ListView
-        android:id="@+id/challenge_list_view"
-        android:dividerHeight="0dp"
-        android:divider="@color/light_light_blue"
-        android:overScrollMode="ifContentScrolls"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/challenge_swipe"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-    </ListView>
+	    
+	    <ListView
+	        android:id="@+id/challenge_list_view"
+	        android:dividerHeight="0dp"
+	        android:divider="@color/light_light_blue"
+	        android:overScrollMode="ifContentScrolls"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" >
+	    </ListView>
+	    
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

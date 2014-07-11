@@ -163,7 +163,7 @@ public class ShowProgressActivity extends Activity {
 		packages = getUnlockedPackages();
 		difficulties[0] = getString(R.string.all);
 		for (int i = 1; i < difficulties.length; i++) {
-			difficulties[i] = Difficulty.fromValueString(i - 1);
+			difficulties[i] = Difficulty.fromValueToString(i - 1);
 		}
 		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times) {
 			public View getView(int position, View convertView, ViewGroup parent) {

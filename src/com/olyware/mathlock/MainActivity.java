@@ -60,6 +60,8 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.dialog.ChallengeDialog;
+import com.olyware.mathlock.dialog.QuestionDialog;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
@@ -70,6 +72,7 @@ import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
@@ -80,16 +83,15 @@ import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
+import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.Purchase;
 import com.olyware.mathlock.utils.ShareHelper;
-import com.olyware.mathlock.views.ChallengeDialog;
 import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
 
-public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse,
-		ChallengeDialog.ChallengeDialogListener {
+public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
@@ -116,7 +118,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private JoystickView joystick;
 	private int defaultTextColor;
 
-	private List<String> customCategories, PackageKeys;
+	private List<String> customCategories, PackageKeys, displayAllPackageKeys;
 	private List<Integer> streakToNotify, totalToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
@@ -199,9 +201,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			dbManager = new DatabaseManager(getApplicationContext());
 			customCategories = dbManager.getAllCustomCategories();
 			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-			for (String cat : customCategories)
+			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
+			for (String cat : customCategories) {
 				PackageKeys.add(getString(R.string.custom_enable) + cat);
-			UnlockedPackages = getUnlockedPackages();
+				displayAllPackageKeys.add(cat);
+			}
+			UnlockedPackages = isAnyPackageUnlocked();
 			EnabledPackages = getEnabledPackages();
 			return null;
 		}
@@ -435,6 +440,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			mHandler = new Handler();
 
 			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
 			LanguageEntries = getResources().getStringArray(R.array.language_entries);
 			unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 			LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
@@ -604,7 +610,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				new NotificationHelper(this).clearCoinNotification();
 			}
 			Money.setMoney(sharedPrefsMoney.getInt("money", 0));
-			coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
+			coins.setText(String.valueOf(Money.getTotalMoney()));
 
 			// reset attempts to first attempt
 			attempts = 1;
@@ -618,7 +624,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 
 			// get unlocked and enabled item changes
-			UnlockedPackages = getUnlockedPackages();
+			UnlockedPackages = isAnyPackageUnlocked();
 			EnabledPackages = getEnabledPackages();
 
 			// start background service to wait for screen to turn off. if service is already running startService does nothing
@@ -1259,7 +1265,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		return true;
 	}
 
-	private boolean getUnlockedPackages() {
+	private boolean isAnyPackageUnlocked() {
 		for (int i = 0; i < unlockPackageKeys.length; i++)
 			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
 				return true;
@@ -1280,23 +1286,25 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (unknown) {
 			sendEvent("question", "question_answered", "unknown", (long) questionWorth);
 			joystick.setCorrectGuess(correctLoc);
-		} else {
-			joystick.setCorrectGuess(correctLoc);
-			dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
-					.currentTimeMillis(), startTime - System.currentTimeMillis()));
-			if (correct) {
-				sendEvent("question", "question_answered", "correct", (long) questionWorth);
-				problem.setTextColor(Color.GREEN);
-				dMoney = Money.increaseMoney(questionWorth);
-				dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
-			} else {
-				sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
-				joystick.setIncorrectGuess(guessLoc);
-				problem.setTextColor(Color.RED);
-				dMoney = Money.decreaseMoneyNoDebt(questionWorth);
-				dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
+		} else if (dbManager != null) {
+			if (!dbManager.isDestroyed()) {
+				joystick.setCorrectGuess(correctLoc);
+				dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
+						.currentTimeMillis(), startTime - System.currentTimeMillis()));
+				if (correct) {
+					sendEvent("question", "question_answered", "correct", (long) questionWorth);
+					problem.setTextColor(Color.GREEN);
+					dMoney = Money.increaseMoney(questionWorth);
+					dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
+				} else {
+					sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
+					joystick.setIncorrectGuess(guessLoc);
+					problem.setTextColor(Color.RED);
+					dMoney = Money.decreaseMoneyNoDebt(questionWorth);
+					dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
+				}
+				MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 			}
-			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 		}
 	}
 
@@ -1368,9 +1376,30 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				});
 				builder.create().show();
 			}*/
-			ChallengeDialog mCall = new ChallengeDialog();
-			mCall.setCancelable(true);
-			mCall.show(getSupportFragmentManager(), "fragment_challenge");
+			final ChallengeDialog challengeDialog = new ChallengeDialog();
+			challengeDialog.setCancelable(true);
+			challengeDialog.setChallengeDialogListener(new ChallengeDialog.ChallengeDialogListener() {
+				@Override
+				public void onInviteSelected(String address) {
+					challengeDialog.dismiss();
+					String uri = "smsto:" + address;
+					Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
+					intent.putExtra("sms_body", ShareHelper.getInvite(MainActivity.this));
+					intent.putExtra("compose_mode", true);
+					startActivity(intent);
+				}
+
+				@Override
+				public void onFriendSelected(ChallengeBuilder builder) {
+					challengeDialog.dismiss();
+					final QuestionDialog questionDialog = QuestionDialog.newInstance(ctx,
+							PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager), Money.getTotalMoney() / 2);
+					questionDialog.setBuilder(builder);
+					questionDialog.setCancelable(true);
+					questionDialog.show(getSupportFragmentManager(), "fragment_question_select");
+				}
+			});
+			challengeDialog.show(getSupportFragmentManager(), "fragment_challenge");
 			/*unlocking = false;
 			startActivity(new Intent(this,ChallengeActivity.class));*/
 			break;
@@ -1623,7 +1652,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						editorPrefs.putBoolean(PackageKeys.get(which), true).commit();			// enables the question pack
 						editorPrefsMoney.putBoolean(unlockPackageKeys[which + 1], true).commit();	// unlocks the question pack
 
-						UnlockedPackages = getUnlockedPackages();
+						UnlockedPackages = isAnyPackageUnlocked();
 						EnabledPackages = getEnabledPackages();
 						setProblemAndAnswer();
 						displayHints(0, false);
@@ -1820,23 +1849,5 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 			prefsGA.edit().putBoolean("reg_uploaded", true).commit();
 		}
-	}
-
-	@Override
-	public void onInvitePressed() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onStartPressed() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onNextPressed() {
-		// TODO Auto-generated method stub
-
 	}
 }

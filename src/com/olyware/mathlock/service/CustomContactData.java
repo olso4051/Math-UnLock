@@ -76,10 +76,16 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	}
 
 	public CustomContactData(String title, String description, int section) {
+		this.emails = new ArrayList<String>();
+		this.phoneNumbers = new ArrayList<String>();
+		this.isFriend = false;
 		this.isContact = false;
 		this.section = section;
 		name = title;
 		this.description = description;
+		contact = -1;
+		hiqUserID = "";
+		facebookUserID = "";
 	}
 
 	public String getName() {
@@ -192,8 +198,28 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers.addAll(phoneNumbers);
 	}
 
+	public void addEmail(String email) {
+		emails.add(email);
+	}
+
 	public void addEmails(List<String> emails) {
 		this.emails.addAll(emails);
+	}
+
+	@Override
+	public String toString() {
+		String s = "name:" + name + ",email:[";
+		if (emails != null) {
+			for (String email : emails)
+				s += email + ",";
+		}
+		s += "],phone:[";
+		if (phoneNumbers != null) {
+			for (String phone : phoneNumbers)
+				s += phone + ",";
+		}
+		s += "]";
+		return s;
 	}
 
 	@Override

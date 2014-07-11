@@ -5,6 +5,8 @@ import java.util.Random;
 
 import android.database.Cursor;
 
+import com.olyware.mathlock.database.contracts.BaseContract;
+import com.olyware.mathlock.database.contracts.ChallengeQuestionContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
 import com.olyware.mathlock.database.contracts.HiqTriviaQuestionContract;
@@ -12,6 +14,7 @@ import com.olyware.mathlock.database.contracts.LanguageQuestionContract;
 import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
+import com.olyware.mathlock.model.ChallengeQuestion;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
@@ -327,5 +330,23 @@ public class DatabaseModelFactory {
 			cursorHelper.destroy();
 		}
 		return categories;
+	}
+
+	public static ChallengeQuestion buildChallengeQuestion(Cursor cursor) {
+		cursor.moveToFirst();
+		CursorHelper cursorHelper = new CursorHelper(cursor);
+		cursorHelper.setCursor(cursor);
+		long id = cursorHelper.getLong(BaseContract._ID);
+		String challengeID = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_ID);
+		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
+		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
+		String incorrectAnswer1 = cursorHelper.getString(ChallengeQuestionContract.ANSWER_INCORRECT1);
+		String incorrectAnswer2 = cursorHelper.getString(ChallengeQuestionContract.ANSWER_INCORRECT2);
+		String incorrectAnswer3 = cursorHelper.getString(ChallengeQuestionContract.ANSWER_INCORRECT3);
+		String userName = cursorHelper.getString(ChallengeQuestionContract.USER_NAME);
+		String[] answers = new String[] { correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
+		cursor.close();
+		cursorHelper.destroy();
+		return new ChallengeQuestion(id, challengeID, questionText, answers, userName);
 	}
 }

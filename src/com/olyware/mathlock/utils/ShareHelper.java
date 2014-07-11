@@ -53,8 +53,8 @@ public class ShareHelper {
 		getLinkAndShareFacebook(context, uiHelper, pDialog, image, context.getString(R.string.share_base_url_facebook_name_readable), "");
 	}
 
-	public static void getLinkAndShareFacebook(final Context context, final UiLifecycleHelper uiHelper, final ProgressDialog pDialog, Bitmap image,
-			String question, String deepLink) {
+	public static void getLinkAndShareFacebook(final Context context, final UiLifecycleHelper uiHelper, final ProgressDialog pDialog,
+			Bitmap image, String question, String deepLink) {
 		final String link = buildShareURL(context);
 		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
 		final String title = "Can you answer " + question + " to unlock your phone?";
@@ -217,6 +217,10 @@ public class ShareHelper {
 
 	public static Intent getShareFacebookIntent(Context context, String title, String caption) {
 		return new Intent(Intent.ACTION_VIEW, Uri.parse(buildShareFacebookURL(context, title, caption)));
+	}
+
+	public static String getInvite(Context context) {
+		return context.getString(R.string.share_message) + buildShareURL(context);
 	}
 
 	public static String buildShareURL(Context context) {

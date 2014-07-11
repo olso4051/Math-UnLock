@@ -1,4 +1,4 @@
-package com.olyware.mathlock.views;
+package com.olyware.mathlock.dialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,11 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +19,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.adapter.ContactArrayAdapter;
 import com.olyware.mathlock.service.CustomContactData;
-import com.olyware.mathlock.utils.ContactArrayAdapter;
+import com.olyware.mathlock.service.SendChallenge;
+import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
 
 /**
@@ -26,18 +31,21 @@ import com.olyware.mathlock.utils.ContactHelper;
 public class ChallengeDialog extends DialogFragment implements View.OnClickListener {
 
 	private ListView lv;
+	private SwipeRefreshLayout swipeLayout;
 	private ContactArrayAdapter adapter;
 	private ArrayList<CustomContactData> contacts, allContacts;
 	private EditText inputSearch;
-	// private ProgressBar progress;
 	private int lastLength = 0, numFriends = 0;
+	private ChallengeDialogListener listener;
 
 	public interface ChallengeDialogListener {
-		void onInvitePressed();
+		void onFriendSelected(ChallengeBuilder builder);
 
-		void onStartPressed();
+		void onInviteSelected(String address);
+	}
 
-		void onNextPressed();
+	public void setChallengeDialogListener(ChallengeDialogListener listener) {
+		this.listener = listener;
 	}
 
 	@Override
@@ -60,6 +68,7 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 
 		// search box
 		inputSearch = (EditText) v.findViewById(R.id.challenge_search);
+		inputSearch.setEnabled(false);
 		inputSearch.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
@@ -70,9 +79,10 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 				} else {
 					lastLength = cs.length();
 					contacts.clear();
-					contacts.addAll(allContacts);
 					contacts.add(new CustomContactData("Friends", "Score", 0));
 					contacts.add(new CustomContactData("Friends to invite", "", 1));
+					contacts.addAll(allContacts);
+					Collections.sort(contacts);
 					adapter.getFilter().filter(cs);
 				}
 			}
@@ -110,20 +120,42 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 				if (selectedContact.isContact()) {
 					if (selectedContact.isFriend()) {
 						// TODO challenge!
+						if (selectedContact.getFacebookUserID().equals("")) {
+							// contact user
+							listener.onFriendSelected(new ChallengeBuilder(SendChallenge.FriendType.UserID, selectedContact.getHiqUserID()));
+						} else {
+							// facebook friend
+							listener.onFriendSelected(new ChallengeBuilder(SendChallenge.FriendType.Facebook, selectedContact
+									.getFacebookUserID()));
+						}
 					} else {
 						// TODO invite
+						String addresses = "";
+						for (String address : selectedContact.getPhoneNumbers()) {
+							addresses += address + ",";
+						}
+						listener.onInviteSelected(addresses);
 					}
 				}
 			}
 		});
+
+		swipeLayout = (SwipeRefreshLayout) v.findViewById(R.id.challenge_swipe);
+		swipeLayout.setOnRefreshListener(new OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				refreshContacts();
+			}
+		});
+		swipeLayout.setColorScheme(R.color.white, R.color.light_blue, R.color.blue_on_white, R.color.light_blue);
 
 		List<CustomContactData> contactsTemp = new ArrayList<CustomContactData>();
 		contactsTemp.addAll(ContactHelper.getStoredContacts(getActivity()));
 		if (contactsTemp.size() == 0)
 			refreshContacts();
 		else {
-			refreshContacts();
-			/*contacts.clear();
+			// refreshContacts();
+			contacts.clear();
 			contacts.add(new CustomContactData("Friends", "0/0", 0));
 			contacts.add(new CustomContactData("Friends to invite", "0/0", 1));
 			contacts.addAll(contactsTemp);
@@ -131,9 +163,9 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			allContacts.clear();
 			allContacts.addAll(contactsTemp);
 			Collections.sort(allContacts);
-			allNames.clear();
-			allNames.addAll(ContactHelper.getNamesFromContacts(allContacts));
-			adapter.notifyDataSetChanged();/**/
+			// allNames.clear();
+			// allNames.addAll(ContactHelper.getNamesFromContacts(allContacts));
+			adapter.notifyDataSetChanged();
 		}
 
 		return v;
@@ -163,7 +195,9 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 		// contacts.add(new CustomContactData("Friends to invite", "", 1));
 		// allContacts.clear();
 		// numFriends = 0;
+		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
+		Log.d("test", "numFriends = " + numFriends);
 		ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, new ContactHelper.contactDataListener() {
 			@Override
 			public void onNewContactFound(int replaceID, CustomContactData contactData) {
@@ -217,6 +251,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 				allContacts.clear();
 				allContacts.addAll(contacts);*/
 				ContactHelper.storeContacts(getActivity(), allContacts);
+				inputSearch.setEnabled(true);
+				swipeLayout.setRefreshing(false);
 			}
 		});
 	}

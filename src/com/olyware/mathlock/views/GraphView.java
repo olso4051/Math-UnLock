@@ -152,7 +152,7 @@ public class GraphView extends View {
 
 	public void setStats(int difficultyAve, int correct, int wrong, int coins, long totalTime, int streakBest, int streakCurrent,
 			long answerTimeFast, long answerTimeAve, String eggs) {
-		StatsValues[0] = Difficulty.fromValueString(difficultyAve);
+		StatsValues[0] = Difficulty.fromValueToString(difficultyAve);
 		StatsValues[1] = correct + "";
 		StatsValues[2] = wrong + "";
 		StatsValues[3] = coins + "";

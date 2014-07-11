@@ -40,6 +40,7 @@ import android.widget.Toast;
 
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.olyware.mathlock.adapter.CustomArrayAdapter;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
@@ -48,7 +49,6 @@ import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
-import com.olyware.mathlock.utils.CustomArrayAdapter;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.FileDialog;
@@ -179,7 +179,7 @@ public class ShowCustomEditActivity extends Activity {
 		fonts = Typefaces.getInstance(this);
 
 		for (int i = 0; i < difficulties.length; i++) {
-			difficulties[i] = Difficulty.fromValueString(i);
+			difficulties[i] = Difficulty.fromValueToString(i);
 		}
 		adapterDifficulties = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficulties) {
 			public View getView(int position, View convertView, ViewGroup parent) {

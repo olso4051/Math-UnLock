@@ -1,4 +1,4 @@
-package com.olyware.mathlock.utils;
+package com.olyware.mathlock.adapter;
 
 import java.util.List;
 

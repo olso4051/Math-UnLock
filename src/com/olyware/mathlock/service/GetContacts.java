@@ -14,7 +14,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
-import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -26,6 +26,8 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 	private List<String> userPhoneHashes = new ArrayList<String>();
 	private List<String> userIDHashes = new ArrayList<String>();
 	private List<String> allNames = new ArrayList<String>();
+	private List<String> allPhoneNumbers = new ArrayList<String>();
+	private List<String> allEmails = new ArrayList<String>();
 	private List<CustomContactData> allContacts = new ArrayList<CustomContactData>();
 	private String baseURL;
 	private Context ctx;
@@ -36,6 +38,10 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		allContacts.addAll(contacts);
 		allNames.clear();
 		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
+		allPhoneNumbers.clear();
+		allPhoneNumbers.addAll(ContactHelper.getPhoneNumbersFromContacts(allContacts));
+		allEmails.clear();
+		allEmails.addAll(ContactHelper.getEmailsFromContacts(allContacts));
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
@@ -51,10 +57,8 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 	protected Integer doInBackground(String... s) {
 		// Get Contacts from user's facebook
 		List<String> phoneNumbers = new ArrayList<String>();
-		List<String> allPhoneNumbers = new ArrayList<String>();
 		List<String> allEncryptedPhoneNumbers = new ArrayList<String>();
 		List<String> emails = new ArrayList<String>();
-		List<String> allEmails = new ArrayList<String>();
 		boolean isPerson = false;
 		String name, id;
 		// List<String> allNames = new ArrayList<String>();
@@ -92,7 +96,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 				}
 			}
 		} else {
-			// TODO tell the user login to facebook to get more friends
+			Toast.makeText(ctx, "Login with Facebook", Toast.LENGTH_LONG).show();
 		}
 		// Get contacts from user's contacts
 		ContentResolver cr = ctx.getContentResolver();
@@ -107,8 +111,6 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 					// add info to names that we've already found
 					if (allNames.contains(nameLo)) {
 						replaceID = allNames.indexOf(nameLo);
-						Log.d("test", "name = " + name + " |nameLo = " + nameLo + " |replaceID = " + replaceID + " |allNames.get("
-								+ replaceID + ") = " + allNames.get(replaceID));
 					}
 					// only add a contact if they have a phone number
 					if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0
@@ -141,23 +143,15 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 						}
 						emailCur.close();
 						if (isPerson || replaceID >= 0) {
+							CustomContactData contact = new CustomContactData(name, emails, phoneNumbers);
 							if (replaceID == -1) {
-								allContacts.add(new CustomContactData(name, emails, phoneNumbers));
+								allContacts.add(contact);
 								Collections.sort(allContacts);
 								allNames.clear();
 								allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
-							} else {
-								String email = "";
-								String phoneNumber = "";
-								if (emails.size() > 0)
-									email = emails.get(0);
-								if (phoneNumbers.size() > 0)
-									phoneNumber = phoneNumbers.get(0);
-								Log.d("test", "replaceID = " + replaceID + " |name = " + name + " |email = " + email + " |phoneNumber = "
-										+ phoneNumber);
 							}
-							emails.add(String.valueOf(replaceID));
-							publishProgress(new CustomContactData(name, emails, phoneNumbers));
+							contact.addEmail(String.valueOf(replaceID));
+							publishProgress(contact);
 						}
 					}
 				}
@@ -173,7 +167,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		// PUT to API with user_id
 		/*DefaultHttpClient httpclient = new DefaultHttpClient();
 		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		HttpPut httpput = new HttpPut(baseURL + "friend");
+		HttpPost httppost = new HttpPost(baseURL + "friend");
 		HttpEntity entity;
 		String fullResult;
 		JSONArray jsonResponse;
@@ -182,9 +176,9 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 			for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
 				data.put(encryptedPhoneNumber);
 			}
-			httpput.setEntity(new StringEntity(data.toString()));
-			httpput.setHeader("Content-Type", "application/json");
-			HttpResponse response = httpclient.execute(httpput);
+			httppost.setEntity(new StringEntity(data.toString()));
+			httppost.setHeader("Content-Type", "application/json");
+			HttpResponse response = httpclient.execute(httppost);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			jsonResponse = new JSONArray(fullResult);
@@ -199,7 +193,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		}*/
 
 		// for testing we'll assume we got 5 random contacts back from the service
-		for (int i = 0; i < 5; i++) {
+		for (int i = 2; i < 10; i++) {
 			userPhoneHashes.add(allEncryptedPhoneNumbers.get(i));
 			userIDHashes.add("test" + i);
 		}
@@ -207,7 +201,8 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		ContactHelper.findContact(ContactHelper.FindType.PHONEHASH, allContacts, userPhoneHashes, new ContactHelper.friendDataListener() {
 			@Override
 			public void onFriendContactFound(int contact, int id) {
-				publishProgress(new CustomContactData(contact, userIDHashes.get(id)));
+				CustomContactData contactData = new CustomContactData(contact, userIDHashes.get(id));
+				publishProgress(contactData);
 			}
 		});
 		return 0;
@@ -227,7 +222,6 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 			} catch (JSONException e) {
 				userPhoneHashes.clear();
 				userIDHashes.clear();
-				e.printStackTrace();
 				return 1;
 			}
 		}

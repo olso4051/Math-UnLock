@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.service.GetContacts;
 
@@ -110,12 +111,36 @@ public class ContactHelper {
 		return names;
 	}
 
+	public static List<String> getPhoneNumbersFromContacts(List<CustomContactData> contacts) {
+		List<String> phones = new ArrayList<String>(contacts.size());
+		for (CustomContactData contact : contacts) {
+			phones.add(contact.getPhone());
+		}
+		return phones;
+	}
+
+	public static List<String> getEmailsFromContacts(List<CustomContactData> contacts) {
+		List<String> emails = new ArrayList<String>(contacts.size());
+		for (CustomContactData contact : contacts) {
+			emails.add(contact.getEmail());
+		}
+		return emails;
+	}
+
 	public static int getNumberOfFriendsFromContacts(List<CustomContactData> contacts) {
 		int friends = 0;
 		for (CustomContactData contact : contacts) {
 			friends += (contact.isFriend() ? 1 : 0);
 		}
 		return friends;
+	}
+
+	public static String getPhoneNumberFromString(String phoneNumber) {
+		return phoneNumber.replaceAll("[^\\d]", "");
+	}
+
+	public static String getPhoneHashFromString(String phoneNumber) {
+		return new EncryptionHelper().encryptForURL(getPhoneNumberFromString(phoneNumber));
 	}
 
 	public static List<String> getPhoneHashes(List<String> phoneNumbers) {
@@ -140,15 +165,17 @@ public class ContactHelper {
 			Log.d("test", "searches.size() = " + searches.size());
 			for (int i = 0; i < contacts.size(); i++) {
 				CustomContactData contact = contacts.get(i);
-				List<String> phoneHashes = new ArrayList<String>();
-				phoneHashes.addAll(contact.getPhoneHashs());
-				for (String phoneHash : phoneHashes) {
-					for (int location = 0; location < searches.size(); location++) {
-						String search = searches.get(location);
-						if (phoneHash != null && phoneHash.equals(search)) {
-							// matchingIndex.get(location).add(i);
-							Log.d("test", "sending friend to listener");
-							listener.onFriendContactFound(i, location);
+				if (!contact.isFriend()) {
+					List<String> phoneHashes = new ArrayList<String>();
+					phoneHashes.addAll(contact.getPhoneHashs());
+					for (String phoneHash : phoneHashes) {
+						for (int location = 0; location < searches.size(); location++) {
+							String search = searches.get(location);
+							if (phoneHash != null && phoneHash.equals(search)) {
+								// matchingIndex.get(location).add(i);
+								Log.d("test", "sending friend to listener");
+								listener.onFriendContactFound(i, location);
+							}
 						}
 					}
 				}
@@ -160,8 +187,72 @@ public class ContactHelper {
 		// return matchingIndex;
 	}
 
-	public static String getPhoneNumberFromString(String phoneNumber) {
-		return phoneNumber.replaceAll("[^\\d]", "");
+	public static CustomContactData findContact(Context ctx, FindType findType, String search) {
+		List<CustomContactData> contacts = new ArrayList<CustomContactData>();
+		contacts.addAll(getStoredContacts(ctx));
+		switch (findType) {
+		case NAME:
+			break;
+		case PHONEHASH:
+			for (int i = 0; i < contacts.size(); i++) {
+				CustomContactData contact = contacts.get(i);
+				List<String> phoneHashes = new ArrayList<String>();
+				phoneHashes.addAll(contact.getPhoneHashs());
+				for (String phoneHash : phoneHashes) {
+					if (phoneHash != null && phoneHash.equals(search)) {
+						return contact;
+					}
+				}
+			}
+			break;
+		case EMAIL:
+			break;
+		}
+		return null;
+	}
+
+	public static String getGCMID(Context ctx) {
+		return GCMHelper.getRegistrationId(ctx.getApplicationContext());
+	}
+
+	public static String getUserID(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_userid), "");
+	}
+
+	public static String getFaceID(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_id), "");
+	}
+
+	public static String getReferrer(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_referrer), "");
+	}
+
+	public static String getBirthday(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_birth), "");
+	}
+
+	public static String getGender(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_gender), "");
+	}
+
+	public static String getLocation(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_location), "");
+	}
+
+	public static String getEmail(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_email), "");
+	}
+
+	public static String getUserName(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_username), "");
 	}
 
 	private static List<String> getStringListFromJSONArray(JSONArray array) {

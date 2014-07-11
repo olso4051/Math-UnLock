@@ -17,6 +17,10 @@ public class Coins {
 		return moneyPaid;
 	}
 
+	public int getTotalMoney() {
+		return money + moneyPaid;
+	}
+
 	public void setMoney(int money) {
 		this.money = money;
 	}

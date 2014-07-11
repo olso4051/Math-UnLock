@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.database.contracts.BaseContract;
+import com.olyware.mathlock.database.contracts.ChallengeQuestionContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
 import com.olyware.mathlock.database.contracts.HiqTriviaQuestionContract;
@@ -18,6 +19,7 @@ import com.olyware.mathlock.database.contracts.MathQuestionContract;
 import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.database.contracts.StatisticContract;
 import com.olyware.mathlock.database.contracts.VocabQuestionContract;
+import com.olyware.mathlock.model.ChallengeQuestion;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
@@ -359,6 +361,38 @@ public class DatabaseManager {
 			return db.update(CustomQuestionContract.TABLE_NAME, values, where, null);
 		} else
 			return 0;
+	}
+
+	public ChallengeQuestion getChallengeQuestion(String challengeID) {
+		if (db.isOpen()) {
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+			return DatabaseModelFactory.buildChallengeQuestion(cursor);
+		} else
+			return null;
+	}
+
+	public int removeChallengeQuestion(long ID) {
+		if (db.isOpen()) {
+			String where = BaseContract._ID + " = " + ID;
+			return db.delete(CustomQuestionContract.TABLE_NAME, where, null);
+		} else
+			return 0;
+	}
+
+	public long addChallengeQuestion(String[] question) {
+		if (db.isOpen()) {
+			ContentValues values = new ContentValues();
+			values.put(ChallengeQuestionContract.CHALLENGE_ID, question[0]);
+			values.put(QuestionContract.QUESTION_TEXT, question[1]);
+			values.put(QuestionContract.ANSWER_CORRECT, question[2]);
+			values.put(ChallengeQuestionContract.ANSWER_INCORRECT1, question[3]);
+			values.put(ChallengeQuestionContract.ANSWER_INCORRECT2, question[4]);
+			values.put(ChallengeQuestionContract.ANSWER_INCORRECT3, question[5]);
+			values.put(ChallengeQuestionContract.USER_NAME, question[6]);
+			return db.insert(ChallengeQuestionContract.TABLE_NAME, null, values);
+		} else
+			return -1;
 	}
 
 	public long getTotalDifficulty() {

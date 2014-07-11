@@ -16,10 +16,10 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.olyware.mathlock.adapter.QuestionPackArrayAdapter;
 import com.olyware.mathlock.service.CustomPackData;
 import com.olyware.mathlock.service.DownloadCustomPack;
 import com.olyware.mathlock.service.GetCustomPacks;
-import com.olyware.mathlock.utils.QuestionPackArrayAdapter;
 
 public class SearchableCustomPackActivity extends Activity {
 	private ListView lv;

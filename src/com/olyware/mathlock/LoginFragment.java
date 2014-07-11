@@ -58,7 +58,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			.asList("email", "public_profile", "user_friends"/*, "user_birthday", "user_location"*/);
 
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
-			mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation, mPrefUserFacebookEmail;
+			mPrefUserFacebookID, mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation,
+			mPrefUserFacebookEmail;
 	private float transY = 0;
 	private EditText username;
 	private Button login, skip;
@@ -105,6 +106,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		mPrefUserReferrer = ctx.getString(R.string.pref_user_referrer);
 		mPrefUserLoggedIn = ctx.getString(R.string.pref_user_logged_in);
 		mPrefUserSkipped = ctx.getString(R.string.pref_user_skipped);
+		mPrefUserFacebookID = ctx.getString(R.string.pref_user_facebook_id);
 		mPrefUserFacebookName = ctx.getString(R.string.pref_user_facebook_name);
 		mPrefUserFacebookBirth = ctx.getString(R.string.pref_user_facebook_birth);
 		mPrefUserFacebookGender = ctx.getString(R.string.pref_user_facebook_gender);
@@ -252,10 +254,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 							if (user.getProperty("email") != null)
 								email = user.getProperty("email").toString();
 							SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookName, user.getName())
-									.putString(mPrefUserFacebookBirth, birthday).putString(mPrefUserFacebookGender, gender)
-									.putString(mPrefUserFacebookLocation, location).putString(mPrefUserFacebookEmail, email)
-									.putBoolean(mPrefUserSkipped, false).commit();
+							sharedPrefsUserInfo.edit().putString(mPrefUserFacebookID, user.getId())
+									.putString(mPrefUserFacebookName, user.getName()).putString(mPrefUserFacebookBirth, birthday)
+									.putString(mPrefUserFacebookGender, gender).putString(mPrefUserFacebookLocation, location)
+									.putString(mPrefUserFacebookEmail, email).putBoolean(mPrefUserSkipped, false).commit();
 							Log.d("GAtest", user.toString());
 						}
 						logIn();
@@ -271,6 +273,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
 		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
+		String faceID = sharedPrefsUserInfo.getString(mPrefUserFacebookID, "");
 		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
 		String birth = sharedPrefsUserInfo.getString(mPrefUserFacebookBirth, "");
 		String gender = sharedPrefsUserInfo.getString(mPrefUserFacebookGender, "");
@@ -287,7 +290,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
 		if (login.isEnabled() && !regID.equals(""))
-			attemptLogin(uName, regID, userID, referrer, birth, gender, location, email);
+			attemptLogin(uName, regID, userID, referrer, birth, gender, location, email, faceID);
 		else
 			startMainActivity();
 
@@ -295,9 +298,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void attemptLogin(String username, String regID, String userID, String referral, String birth, String gender, String location,
-			String email) {
-		Log.d("test", "attemptLoging username=" + username + "|regID.equals(\"\")=" + regID.equals("") + "|userID=" + userID + "|referral="
-				+ referral + "|birth=" + birth + "|gender=" + gender + "|location=" + location + "|email=" + email);
+			String email, String faceID) {
 		new RegisterID(getActivity()) {
 			@Override
 			protected void onPostExecute(Integer result) {
@@ -313,7 +314,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					startMainActivity();
 				}
 			}
-		}.execute(username, regID, userID, referral, birth, gender, location, email);
+		}.execute(username, regID, userID, referral, birth, gender, location, email, faceID);
 	}
 
 	public void GCMRegistrationDone(boolean result) {

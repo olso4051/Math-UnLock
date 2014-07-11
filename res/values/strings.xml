@@ -97,6 +97,7 @@
     <string name="pref_user_referrer">referrer</string>
     <string name="pref_user_skipped">skipped</string>
     <string name="pref_user_confirmed">confirmed</string>
+    <string name="pref_user_facebook_id">facebook_id</string>
     <string name="pref_user_facebook_name">facebook_name</string>
     <string name="pref_user_facebook_birth">facebook_birth</string>
     <string name="pref_user_facebook_gender">facebook_gender</string>
@@ -152,6 +153,12 @@
     <string name="search_custom_packs_download_message">Are you sure you want to download the question pack\n\n</string>
     <string name="search_custom_packs_download_ok">Download</string>
     <string name="search_custom_packs_download_cancel">Cancel</string>
+    
+    <!-- Question Pack selector -->
+    <string name="question_selector_bet">Bet:\u0020</string>
+    <string name="question_selector_difficulty">\u0020Difficulty\u0020</string>
+    <string name="question_selector_number">Questions:\u0020</string>
+    <string name="question_selector_question_packs">Question Packs</string>
     
     <string name="add">Add</string>
     <string name="add_new">New Question</string>
@@ -289,7 +296,7 @@
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_custom_title">Custom Questions</string>
     <string name="settings_vocab_title">Vocabulary Questions</string>
-    <string name="share_message">I\'m unlocking my IQ, Try Hiq today and you can too!</string>
+    <string name="share_message">I\'m unlocking my IQ, Download Hiq so we can challenge each other.\n\n</string>
     <string name="share_subject">@string/app_name</string>
     <string name="share_with">Share with…</string>
     <string name="share_with_facebook">Share on Facebook</string>

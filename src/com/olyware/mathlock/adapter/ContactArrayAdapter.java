@@ -1,4 +1,4 @@
-package com.olyware.mathlock.utils;
+package com.olyware.mathlock.adapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +44,6 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 		CustomContactDataHolder contactHolder = null;
 		CustomSectionDataHolder sectionHolder = null;
 		int backgroundResourceID = (position % 2 == 0) ? (R.drawable.lv_dark) : (R.drawable.lv_light);
-		// int color = (position % 2 == 0) ? ctx.getResources().getColor(R.color.light_light_blue) :
-		// ctx.getResources().getColor(R.color.white);
 		CustomContactData customContactData = data.get(position);
 		boolean isContact = customContactData.isContact();
 
@@ -55,7 +53,6 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 				row = inflater.inflate(contactLayoutResourceId, parent, false);
 				contactHolder = new CustomContactDataHolder();
 				contactHolder.layout = (LinearLayout) row.findViewById(R.id.contact_background);
-				// contactHolder.layout.setBackgroundColor(color);
 				contactHolder.layout.setBackgroundResource(backgroundResourceID);
 				contactHolder.txtName = (TextView) row.findViewById(R.id.contact_name);
 				contactHolder.txtName.setTypeface(fonts.robotoLight);
@@ -81,7 +78,6 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 					row = inflater.inflate(contactLayoutResourceId, parent, false);
 					contactHolder = new CustomContactDataHolder();
 					contactHolder.layout = (LinearLayout) row.findViewById(R.id.contact_background);
-					// contactHolder.layout.setBackgroundColor(color);
 					contactHolder.layout.setBackgroundResource(backgroundResourceID);
 					contactHolder.txtName = (TextView) row.findViewById(R.id.contact_name);
 					contactHolder.txtName.setTypeface(fonts.robotoLight);
@@ -107,7 +103,6 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 		}
 
 		if (isContact) {
-			// contactHolder.layout.setBackgroundColor(color);
 			contactHolder.layout.setBackgroundResource(backgroundResourceID);
 			contactHolder.txtName.setText(customContactData.getName());
 			contactHolder.txtSub.setText(customContactData.getPhone());
