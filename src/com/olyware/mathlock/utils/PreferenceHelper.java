@@ -45,6 +45,35 @@ public class PreferenceHelper {
 		return list;
 	}
 
+	public static ArrayList<Integer> getDisplayableUnlockedPackageIDs(Context ctx, DatabaseManager dbManager) {
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		String[] unlockPackageKeys = ctx.getResources().getStringArray(R.array.unlock_package_keys);
+		List<String> displayPackageKeys = EZ.list(ctx.getResources().getStringArray(R.array.display_packages));
+		displayPackageKeys.addAll(dbManager.getAllCustomCategories());
+		List<Integer> displayPackageIDs = new ArrayList<Integer>(displayPackageKeys.size());
+		for (int i = 0; i < displayPackageKeys.size(); i++)
+			displayPackageIDs.add(i);
+
+		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
+			list.addAll(displayPackageIDs);
+		} else {
+			// list.add(displayPackageIDs.get(0)); // All
+			for (int i = 1; i < displayPackageKeys.size(); i++) {
+				if (i < unlockPackageKeys.length) {
+					if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
+						list.add(displayPackageIDs.get(i));
+					}
+				} else {
+					list.add(displayPackageIDs.get(i));
+				}
+			}
+			if (list.size() > 1)
+				list.add(0, displayPackageIDs.get(0));
+		}
+		return list;
+	}
+
 	public static boolean[] getChallengePacksChecked(Context ctx, ArrayList<String> questionPacks) {
 		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
 		boolean[] checked = new boolean[questionPacks.size()];
@@ -102,5 +131,30 @@ public class PreferenceHelper {
 		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
 		sharedPrefsChallengeEdit.putFloat(BET_DEFAULT, percent);
 		sharedPrefsChallengeEdit.commit();
+	}
+
+	public static void storeChallengeAccepted(Context ctx, String challengeID, boolean accepted) {
+		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		sharedPrefsChallengeEdit.putBoolean(challengeID, accepted);
+		sharedPrefsChallengeEdit.commit();
+	}
+
+	public static void increaseMoney(Context ctx, int amount) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
+		editorPrefsMoney.commit();
+	}
+
+	public static void decreaseMoneyNoDebt(Context ctx, int amount) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+		int initMoney = sharedPrefsMoney.getInt("money", 0);
+		int money = initMoney - amount;
+		if (money < 0)
+			money = 0;
+		int newAmount = initMoney - money;
+		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) - newAmount);
+		editorPrefsMoney.commit();
 	}
 }

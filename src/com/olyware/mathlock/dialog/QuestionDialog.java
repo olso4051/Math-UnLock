@@ -44,6 +44,7 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 	private float betPercent, questionsPercent;
 	private QuestionSelectAdapter adapter;
 	private List<String> questionPackNames;
+	private List<Integer> questionPackIDs;
 	private boolean[] questionPacksChecked;
 	private ArrayList<QuestionSelectData> questionPacks;
 	private ChallengeBuilder builder;
@@ -57,7 +58,7 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		this.listener = listener;
 	}
 
-	public static QuestionDialog newInstance(Context ctx, ArrayList<String> questionPacks, long maxBet) {
+	public static QuestionDialog newInstance(Context ctx, ArrayList<String> questionPacks, ArrayList<Integer> questionPackIDs, long maxBet) {
 		QuestionDialog f = new QuestionDialog();
 
 		Bundle settings = PreferenceHelper.getChallengeSettings(ctx);
@@ -73,6 +74,7 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		args.putInt(PreferenceHelper.DIFFICULTY_MIN, settings.getInt(PreferenceHelper.DIFFICULTY_MIN));
 		args.putInt(PreferenceHelper.DIFFICULTY_MAX, settings.getInt(PreferenceHelper.DIFFICULTY_MAX));
 		args.putStringArrayList("question_packs", questionPacks);
+		args.putIntegerArrayList("question_pack_ids", questionPackIDs);
 		args.putBooleanArray("questions_is_checked", checked);
 		if (maxBet >= Integer.MAX_VALUE)
 			args.putInt("max_bet", Integer.MAX_VALUE);
@@ -189,10 +191,12 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		// ListView Data
 		questionPackNames = new ArrayList<String>();
 		questionPackNames.addAll(arg.getStringArrayList("question_packs"));
+		questionPackIDs = new ArrayList<Integer>();
+		questionPackIDs.addAll(arg.getIntegerArrayList("question_pack_ids"));
 		questionPacksChecked = arg.getBooleanArray("questions_is_checked");
 		questionPacks = new ArrayList<QuestionSelectData>(questionPackNames.size());
 		for (int i = 0; i < questionPackNames.size(); i++) {
-			questionPacks.add(new QuestionSelectData(questionPackNames.get(i), questionPacksChecked[i], i));
+			questionPacks.add(new QuestionSelectData(questionPackNames.get(i), questionPacksChecked[i], questionPackIDs.get(i)));
 		}
 
 		// Adding items to ListView
@@ -224,13 +228,19 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 				toast += "Number of Questions = " + questionsValue + "\n";
 				toast += "Min Difficulty = " + difficultyMin + "\n";
 				toast += "Max Difficulty = " + difficultyMax + "\n";
-				for (QuestionSelectData questionPack : questionPacks)
-					if (questionPack.isChecked())
+				List<QuestionSelectData> selectedQuestionPacks = new ArrayList<QuestionSelectData>(questionPackNames.size());
+				for (QuestionSelectData questionPack : questionPacks) {
+					if (questionPack.isChecked()) {
 						toast += questionPack.getName() + " is checked\n";
+						selectedQuestionPacks.add(questionPack);
+					}
+				}
 				Toast.makeText(getActivity(), toast, Toast.LENGTH_LONG).show();
 				PreferenceHelper.storeChallengePacks(getActivity(), questionPacks);
 				PreferenceHelper.storeChallengeSettings(getActivity(), betPercent, questionsValue, difficultyMinValue, difficultyMaxValue);
-				dismiss();
+				builder.setQuestionSettings(betValue, questionsValue, difficultyMinValue, difficultyMaxValue);
+				builder.setSelectedQuestionPacks(selectedQuestionPacks);
+				listener.onChallenge(builder);
 			}
 
 		});

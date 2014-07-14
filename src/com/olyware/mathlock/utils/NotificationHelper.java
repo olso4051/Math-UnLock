@@ -9,9 +9,11 @@ import android.support.v4.app.NotificationCompat;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.service.NotificationBroadcastReceiver;
 
 public class NotificationHelper {
-	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3;
+	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3, CHALLENGE_ID = 4, CHALLENGE_RESULT_ID = 5;
 	private NotificationManager mNotificationManager;
 	NotificationCompat.Builder builder;
 	private Context ctx;
@@ -92,5 +94,82 @@ public class NotificationHelper {
 	public void clearCoinNotification() {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(COIN_ID);
+	}
+
+	public void sendChallengeNotification(String challengeID, String userName, int questions, int difficultyMin, int difficultyMax, int bet) {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		String title = ctx.getString(R.string.notification_title_challenge) + userName;
+		String diff = Difficulty.fromValueToString(difficultyMin);
+		if (difficultyMin != difficultyMax)
+			diff += " To " + Difficulty.fromValueToString(difficultyMax);
+		String msg = questions + ctx.getString(R.string.notification_message_challenge1) + diff
+				+ ctx.getString(R.string.notification_message_challenge2) + bet + ctx.getString(R.string.notification_message_challenge3);
+
+		// intent to accept notification
+		/*Intent iMain = new Intent(ctx, MainActivity.class);
+		iMain.putExtra("challenge_accepted", true);
+		iMain.putExtra("challenge_id", challengeID);
+		PendingIntent mainIntent = PendingIntent.getActivity(ctx, 0, iMain, 0);*/
+		Intent iMain = new Intent(ctx, NotificationBroadcastReceiver.class);
+		iMain.setAction(NotificationBroadcastReceiver.ACTION_CHALLENGE_ACCEPTED);
+		iMain.putExtra(NotificationBroadcastReceiver.CHALLENGE_ID, challengeID);
+		PendingIntent mainIntent = PendingIntent.getBroadcast(ctx, 0, iMain, PendingIntent.FLAG_CANCEL_CURRENT);
+
+		// intent when notification cleared
+		Intent iDelete = new Intent(ctx, NotificationBroadcastReceiver.class);
+		iDelete.setAction(NotificationBroadcastReceiver.ACTION_CHALLENGE_DENIED);
+		iMain.putExtra(NotificationBroadcastReceiver.CHALLENGE_ID, challengeID);
+		PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, iDelete, PendingIntent.FLAG_CANCEL_CURRENT);
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small);
+		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
+		mBuilder.setContentTitle(title);
+		mBuilder.setContentText(msg);
+		mBuilder.setAutoCancel(true);
+		mBuilder.setContentIntent(mainIntent);
+		mBuilder.setDeleteIntent(deleteIntent);
+		mNotificationManager.notify(CHALLENGE_ID, mBuilder.build());
+	}
+
+	public void clearChallengeNotification() {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.cancel(CHALLENGE_ID);
+	}
+
+	public void sendChallengeResultNotification(String userName, int scoreYou, int scoreThem, int bet) {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		String title = "";
+		String msg = "";
+		if (scoreYou == scoreThem) {
+			// Tie
+			title = ctx.getString(R.string.notification_title_challenge_result_tie);
+			msg = userName + ctx.getString(R.string.notification_message_challenge_result_tie);
+		} else if (scoreYou > scoreThem) {
+			// Win
+			title = ctx.getString(R.string.notification_title_challenge_result_won);
+			msg = ctx.getString(R.string.notification_message_challenge_result_won1) + userName
+					+ ctx.getString(R.string.notification_message_challenge_result2) + bet
+					+ ctx.getString(R.string.notification_message_challenge_result3);
+		} else {
+			// Loss
+			title = ctx.getString(R.string.notification_title_challenge_result_loss);
+			msg = ctx.getString(R.string.notification_message_challenge_result_loss1) + userName
+					+ ctx.getString(R.string.notification_message_challenge_result2) + bet
+					+ ctx.getString(R.string.notification_message_challenge_result3);
+		}
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small);
+		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
+		mBuilder.setContentTitle(title);
+		mBuilder.setContentText(msg);
+		mBuilder.setAutoCancel(true);
+		mNotificationManager.notify(CHALLENGE_RESULT_ID, mBuilder.build());
+	}
+
+	public void clearChallengeResultNotification() {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.cancel(CHALLENGE_RESULT_ID);
 	}
 }

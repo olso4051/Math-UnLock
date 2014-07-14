@@ -3,31 +3,40 @@ package com.olyware.mathlock.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.olyware.mathlock.service.SendChallenge;
+import com.olyware.mathlock.adapter.QuestionSelectData;
 
 public class ChallengeBuilder {
-	private SendChallenge.FriendType friendType;
 	private String userHash;
-	private List<String> selectedQuestionPacks = new ArrayList<String>();
+	private int bet, numQuestions, difficultyMin, difficultyMax;
+	private List<Integer> selectedQuestionPackIDs = new ArrayList<Integer>();
 	private List<String> questions = new ArrayList<String>();
 	private List<String[]> answers = new ArrayList<String[]>();
 
-	public ChallengeBuilder(SendChallenge.FriendType friendType, String userHash) {
-		this.friendType = friendType;
+	public ChallengeBuilder(String userHash) {
 		this.userHash = userHash;
-	}
-
-	public void setFriendType(SendChallenge.FriendType friendType) {
-		this.friendType = friendType;
 	}
 
 	public void setUserHash(String userHash) {
 		this.userHash = userHash;
 	}
 
-	public void setSelectedQuestionPacks(List<String> selectedQuestionPacks) {
-		this.selectedQuestionPacks.clear();
-		this.selectedQuestionPacks.addAll(selectedQuestionPacks);
+	public void setQuestionSettings(int bet, int numQuestions, int difficultyMin, int difficultyMax) {
+		this.bet = bet;
+		this.numQuestions = numQuestions;
+		this.difficultyMin = difficultyMin;
+		this.difficultyMax = difficultyMax;
+	}
+
+	public void setSelectedQuestionPacks(List<QuestionSelectData> selectedQuestionPacks) {
+		this.selectedQuestionPackIDs.clear();
+		for (QuestionSelectData pack : selectedQuestionPacks) {
+			this.selectedQuestionPackIDs.add(pack.getID());
+		}
+	}
+
+	public void setSelectedQuestionPackIDs(List<Integer> selectedQuestionPackIDs) {
+		this.selectedQuestionPackIDs.clear();
+		this.selectedQuestionPackIDs.addAll(selectedQuestionPackIDs);
 	}
 
 	public void setQuestions(List<String> questions) {
@@ -40,16 +49,28 @@ public class ChallengeBuilder {
 		this.answers.addAll(answers);
 	}
 
-	public SendChallenge.FriendType getFriendType() {
-		return friendType;
-	}
-
 	public String getUserHash() {
 		return userHash;
 	}
 
-	public List<String> getSelectedQuestionPacks() {
-		return selectedQuestionPacks;
+	public int getBet() {
+		return bet;
+	}
+
+	public int getNumberOfQuestions() {
+		return numQuestions;
+	}
+
+	public int getDifficultyMin() {
+		return difficultyMin;
+	}
+
+	public int getDifficultyMax() {
+		return difficultyMax;
+	}
+
+	public List<Integer> getSelectedQuestionPackIDs() {
+		return selectedQuestionPackIDs;
 	}
 
 	public List<String> getQuestions() {

@@ -21,7 +21,6 @@ import android.widget.ListView;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactArrayAdapter;
 import com.olyware.mathlock.service.CustomContactData;
-import com.olyware.mathlock.service.SendChallenge;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
 
@@ -118,16 +117,8 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
-					if (selectedContact.isFriend()) {
-						// TODO challenge!
-						if (selectedContact.getFacebookUserID().equals("")) {
-							// contact user
-							listener.onFriendSelected(new ChallengeBuilder(SendChallenge.FriendType.UserID, selectedContact.getHiqUserID()));
-						} else {
-							// facebook friend
-							listener.onFriendSelected(new ChallengeBuilder(SendChallenge.FriendType.Facebook, selectedContact
-									.getFacebookUserID()));
-						}
+					if (selectedContact.hasHiqUserID()) {
+						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getHiqUserID()));
 					} else {
 						// TODO invite
 						String addresses = "";
@@ -223,33 +214,29 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			}
 
 			@Override
-			public void onFriendContactFound(int id, String userID) {
-				numFriends++;
+			public void onFriendContactFound(int id, String userID, String userName) {
+				int replaceAddition = 1;
+				if (contacts.get(id + 1).isFriend()) {
+
+				} else {
+					numFriends++;
+					replaceAddition += 1;
+				}
 				// contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
 				// contacts.get(numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
-				contacts.get(id + 2).setIsFriend(true);
-				contacts.get(id + 2).setUserID(userID);
+				contacts.get(id + replaceAddition).setIsFriend(true);
+				contacts.get(id + replaceAddition).setUserID(userID);
+				contacts.get(id + replaceAddition).setHiqUserName(userName);
 				Collections.sort(contacts);
 				allContacts.get(id).setIsFriend(true);
 				allContacts.get(id).setUserID(userID);
+				allContacts.get(id).setHiqUserName(userName);
 				Collections.sort(allContacts);
 				adapter.notifyDataSetChanged();
 			}
 
 			@Override
-			public void onDoneFindingContacts(List<String> userPhoneHashes, List<String> userIDHashes) {
-				// progress.setVisibility(View.INVISIBLE);
-				/*List<ArrayList<Integer>> matchingIndex = ContactHelper.findContact(ContactHelper.FindType.PHONEHASH, allContacts,
-						userPhoneHashes);
-				for (int i = 0; i < userPhoneHashes.size(); i++) {
-					for (int j = 0; j < matchingIndex.get(i).size(); j++) {
-						contacts.get(matchingIndex.get(i).get(j)).setIsFriend(true);
-						contacts.get(matchingIndex.get(i).get(j)).setUserID(userIDHashes.get(i));
-					}
-				}
-				Collections.sort(contacts);
-				allContacts.clear();
-				allContacts.addAll(contacts);*/
+			public void onDoneFindingContacts() {
 				ContactHelper.storeContacts(getActivity(), allContacts);
 				inputSearch.setEnabled(true);
 				swipeLayout.setRefreshing(false);

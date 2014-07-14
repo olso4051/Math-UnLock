@@ -13,19 +13,25 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.service.GetContacts;
 
 public class ContactHelper {
 	final public static String CONTACT_PREFS = "contact_prefs";
 	final public static String CONTACTS = "contacts";
+	final public static String CONTACT_IS_FRIEND = "is_friend";
+	final public static String CONTACT_USER_ID = "user_id";
+	final public static String CONTACT_NAME = "name";
+	final public static String CONTACT_PHONE = "phone";
+	final public static String CONTACT_EMAIL = "email";
 
 	public interface contactDataListener {
 		public void onNewContactFound(int replaceID, CustomContactData contactData);
 
-		public void onFriendContactFound(int id, String userID);
+		public void onFriendContactFound(int id, String userID, String userName);
 
-		public void onDoneFindingContacts(List<String> userPhoneHashes, List<String> userIDHashes);
+		public void onDoneFindingContacts();
 	}
 
 	public interface friendDataListener {
@@ -44,13 +50,13 @@ public class ContactHelper {
 					listener.onNewContactFound(replaceID, values[0]);
 				} else {
 					Log.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID());
-					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID());
+					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getName());
 				}
 			}
 
 			@Override
 			protected void onPostExecute(Integer result) {
-				listener.onDoneFindingContacts(getUserPhoneHashes(), getUserIDHashes());
+				listener.onDoneFindingContacts();
 			}
 
 		}.execute();
@@ -80,10 +86,11 @@ public class ContactHelper {
 				JSONArray contactsJSONArray = new JSONArray(contactsJSON);
 				for (int i = 0; i < contactsJSONArray.length(); i++) {
 					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
-					boolean isFriend = contactJSONObject.getBoolean("is_friend");
-					String name = contactJSONObject.getString("name");
-					JSONArray contactPhoneNumbers = contactJSONObject.getJSONArray("phone");
-					JSONArray contactEmails = contactJSONObject.getJSONArray("email");
+					boolean isFriend = contactJSONObject.getBoolean(CONTACT_IS_FRIEND);
+					String userID = contactJSONObject.getString(CONTACT_USER_ID);
+					String name = contactJSONObject.getString(CONTACT_NAME);
+					JSONArray contactPhoneNumbers = contactJSONObject.getJSONArray(CONTACT_PHONE);
+					JSONArray contactEmails = contactJSONObject.getJSONArray(CONTACT_EMAIL);
 					contacts.add(new CustomContactData(name, getStringListFromJSONArray(contactEmails),
 							getStringListFromJSONArray(contactPhoneNumbers), isFriend));
 				}
@@ -136,7 +143,9 @@ public class ContactHelper {
 	}
 
 	public static String getPhoneNumberFromString(String phoneNumber) {
-		return phoneNumber.replaceAll("[^\\d]", "");
+		phoneNumber = phoneNumber.replaceAll("[^\\d]", "");
+		phoneNumber = (phoneNumber.charAt(0) == '1') ? phoneNumber.substring(1) : phoneNumber;
+		return phoneNumber;
 	}
 
 	public static String getPhoneHashFromString(String phoneNumber) {
@@ -153,30 +162,48 @@ public class ContactHelper {
 		return phoneNumberEncrypted;
 	}
 
-	public static void findContact(FindType findType, List<CustomContactData> contacts, List<String> searches,
+	public static void findContact(FindType findType, List<CustomContactData> contacts, List<ContactHashes> searches,
 			final friendDataListener listener) {
 		// List<ArrayList<Integer>> matchingIndex = new ArrayList<ArrayList<Integer>>(searches.size());
 		switch (findType) {
 		case NAME:
 			break;
-		case PHONEHASH:
+		case PhoneAndFacebookHASH:
 			Log.d("test", "searching contacts");
 			Log.d("test", "contacts.size() = " + contacts.size());
 			Log.d("test", "searches.size() = " + searches.size());
 			for (int i = 0; i < contacts.size(); i++) {
+				boolean found = false;
 				CustomContactData contact = contacts.get(i);
-				if (!contact.isFriend()) {
+				// Search contacts facebook hashes
+				for (int location = 0; location < searches.size(); location++) {
+					String search = searches.get(location).getFacebookHash();
+					if (contact.getFacebookHash() != null && contact.getFacebookHash().equals(search)) {
+						// matchingIndex.get(location).add(i);
+						Log.d("test", "sending facebook friend to listener");
+						listener.onFriendContactFound(i, location);
+						found = true;
+						break;
+					}
+				}
+
+				// Search contacts phone hashes
+				if (!found) {
 					List<String> phoneHashes = new ArrayList<String>();
 					phoneHashes.addAll(contact.getPhoneHashs());
 					for (String phoneHash : phoneHashes) {
 						for (int location = 0; location < searches.size(); location++) {
-							String search = searches.get(location);
+							String search = searches.get(location).getPhoneHash();
 							if (phoneHash != null && phoneHash.equals(search)) {
 								// matchingIndex.get(location).add(i);
-								Log.d("test", "sending friend to listener");
+								Log.d("test", "sending contacts friend to listener");
 								listener.onFriendContactFound(i, location);
+								found = true;
+								break;
 							}
 						}
+						if (found)
+							break;
 					}
 				}
 			}
@@ -187,20 +214,32 @@ public class ContactHelper {
 		// return matchingIndex;
 	}
 
-	public static CustomContactData findContact(Context ctx, FindType findType, String search) {
+	public static CustomContactData findContact(Context ctx, FindType findType, ContactHashes search) {
 		List<CustomContactData> contacts = new ArrayList<CustomContactData>();
 		contacts.addAll(getStoredContacts(ctx));
 		switch (findType) {
 		case NAME:
 			break;
-		case PHONEHASH:
+		case PhoneAndFacebookHASH:
 			for (int i = 0; i < contacts.size(); i++) {
 				CustomContactData contact = contacts.get(i);
+				// Search facebook hashes
+				if (contact.getFacebookHash() != null && !contact.getFacebookHash().equals("") && search.getFacebookHash() != null
+						&& !search.getFacebookHash().equals("")) {
+					if (contact.getFacebookHash().equals(search.getFacebookHash())) {
+						// matchingIndex.get(location).add(i);
+						return contact;
+					}
+				}
+
+				// Search phone hashes
 				List<String> phoneHashes = new ArrayList<String>();
 				phoneHashes.addAll(contact.getPhoneHashs());
-				for (String phoneHash : phoneHashes) {
-					if (phoneHash != null && phoneHash.equals(search)) {
-						return contact;
+				if (search.getPhoneHash() != null && !search.getPhoneHash().equals("")) {
+					for (String phoneHash : phoneHashes) {
+						if (phoneHash != null && phoneHash.equals(search.getPhoneHash())) {
+							return contact;
+						}
 					}
 				}
 			}
@@ -208,7 +247,7 @@ public class ContactHelper {
 		case EMAIL:
 			break;
 		}
-		return null;
+		return new CustomContactData();
 	}
 
 	public static String getGCMID(Context ctx) {
@@ -268,6 +307,6 @@ public class ContactHelper {
 	}
 
 	public static enum FindType {
-		NAME, PHONEHASH, EMAIL;
+		NAME, PhoneAndFacebookHASH, EMAIL;
 	}
 }

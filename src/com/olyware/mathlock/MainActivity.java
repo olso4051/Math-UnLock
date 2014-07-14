@@ -62,15 +62,18 @@ import com.google.analytics.tracking.android.Tracker;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.dialog.ChallengeDialog;
 import com.olyware.mathlock.dialog.QuestionDialog;
+import com.olyware.mathlock.dialog.QuestionDialog.QuestionDialogListener;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
+import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.model.HiqTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.service.ScreenService;
+import com.olyware.mathlock.service.SendChallenge;
 import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.Clock;
@@ -99,6 +102,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
+	final private static int INVITE_SENT = 142;
 
 	// final private String PENDING_ACTION_BUNDLE_KEY = "com.olyware.mathlock:PendingAction";
 
@@ -787,6 +791,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							}
 						}
 					}
+				} else if (requestCode == INVITE_SENT) {
+					Log.d("test", "invite sent");
 				}
 			}
 		} else
@@ -1383,19 +1389,36 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				public void onInviteSelected(String address) {
 					challengeDialog.dismiss();
 					String uri = "smsto:" + address;
-					Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
-					intent.putExtra("sms_body", ShareHelper.getInvite(MainActivity.this));
-					intent.putExtra("compose_mode", true);
-					startActivity(intent);
+					Intent intentSMS = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
+					intentSMS.putExtra("sms_body", ShareHelper.getInvite(MainActivity.this));
+					intentSMS.putExtra("compose_mode", true);
+					intentSMS.putExtra("exit_on_sent", true);
+					startActivityForResult(intentSMS, INVITE_SENT);
 				}
 
 				@Override
 				public void onFriendSelected(ChallengeBuilder builder) {
 					challengeDialog.dismiss();
 					final QuestionDialog questionDialog = QuestionDialog.newInstance(ctx,
-							PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager), Money.getTotalMoney() / 2);
+							PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager),
+							PreferenceHelper.getDisplayableUnlockedPackageIDs(ctx, dbManager), Money.getTotalMoney() / 2);
 					questionDialog.setBuilder(builder);
 					questionDialog.setCancelable(true);
+					questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
+						@Override
+						public void onChallenge(ChallengeBuilder builder) {
+							// TODO get questions from database
+							// TODO send questions to api
+							questionDialog.dismiss();
+							List<GenericQuestion> questions = dbManager.getChallengeQuestions(builder);
+							new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet()) {
+								@Override
+								protected void onPostExecute(Integer result) {
+									super.onPostExecute(result);
+								}
+							};
+						}
+					});
 					questionDialog.show(getSupportFragmentManager(), "fragment_question_select");
 				}
 			});

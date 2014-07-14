@@ -1,11 +1,15 @@
 package com.olyware.mathlock.database;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
@@ -23,11 +27,13 @@ import com.olyware.mathlock.model.ChallengeQuestion;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
+import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.model.HiqTriviaQuestion;
 import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.utils.ChallengeBuilder;
 
 public class DatabaseManager {
 
@@ -363,6 +369,92 @@ public class DatabaseManager {
 			return 0;
 	}
 
+	public List<GenericQuestion> getChallengeQuestions(ChallengeBuilder builder) {
+		if (db.isOpen()) {
+			int questions = builder.getNumberOfQuestions();
+			List<Integer> packIDs = builder.getSelectedQuestionPackIDs();
+			// remove the id for all packs if it exists
+			if (packIDs.get(0) == 0) {
+				packIDs.remove(0);
+			}
+			int packs = packIDs.size();
+			Random rand = new Random();
+			List<GenericQuestion> challengeQuestions = new ArrayList<GenericQuestion>(questions);
+			for (int i = 0; i < questions; i++) {
+				int pack = packIDs.get(rand.nextInt(packs)) - 1;
+				switch (pack) {
+				case 0:	// Math
+					challengeQuestions.add(getGenericQuestion(getMathQuestion(Difficulty.fromValue(builder.getDifficultyMin()),
+							Difficulty.fromValue(builder.getDifficultyMax()), -1)));
+					break;
+				case 1: // Vocab
+					challengeQuestions.add(getGenericQuestionFromVocab(getVocabQuestions(Difficulty.fromValue(builder.getDifficultyMin()),
+							Difficulty.fromValue(builder.getDifficultyMax()), 4, -1)));
+					break;
+				case 2:	// Language
+					Context ctx = MainActivity.getContext();
+					SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+					String fromLanguage = sharedPrefs.getString("from_language", ctx.getString(R.string.language_from_default));
+					String toLanguage = sharedPrefs.getString("to_language", ctx.getString(R.string.language_to_default));
+					challengeQuestions.add(getGenericQuestionFromLanguage(
+							getLanguageQuestions(Difficulty.fromValue(builder.getDifficultyMin()),
+									Difficulty.fromValue(builder.getDifficultyMax()), 4, fromLanguage, toLanguage, -1), fromLanguage,
+							toLanguage));
+					break;
+				case 3: // Engineer
+					challengeQuestions.add(getGenericQuestion(getEngineerQuestion(Difficulty.fromValue(builder.getDifficultyMin()),
+							Difficulty.fromValue(builder.getDifficultyMax()), -1)));
+					break;
+				case 4:	// Hiq Trivia
+					challengeQuestions.add(getGenericQuestion(getHiqTriviaQuestion(Difficulty.fromValue(builder.getDifficultyMin()),
+							Difficulty.fromValue(builder.getDifficultyMax()), -1)));
+					break;
+				default:
+					// custom question
+					challengeQuestions.add(getGenericQuestion(getCustomQuestion(this.getAllCustomCategories().get(pack - 5),
+							Difficulty.fromValue(builder.getDifficultyMin()), Difficulty.fromValue(builder.getDifficultyMax()), -1)));
+					break;
+				}
+
+			}
+			return challengeQuestions;
+		} else
+			return null;
+	}
+
+	private GenericQuestion getGenericQuestion(MathQuestion question) {
+		return new GenericQuestion("Math", question.getQuestionText(), question.getAnswers());
+	}
+
+	private GenericQuestion getGenericQuestionFromVocab(List<VocabQuestion> question) {
+		String[] answers = new String[4];
+		for (int i = 0; i < answers.length; i++) {
+			answers[i] = question.get(i).getCorrectAnswer();
+		}
+		return new GenericQuestion("Vocab", question.get(0).getQuestionText(), answers);
+	}
+
+	private GenericQuestion getGenericQuestionFromLanguage(List<LanguageQuestion> question, String fromLanguage, String toLanguage) {
+		String description = fromLanguage + " → " + toLanguage;
+		String[] answers = new String[4];
+		for (int i = 0; i < answers.length; i++) {
+			answers[i] = question.get(i).getCorrectAnswer();
+		}
+		return new GenericQuestion(description, question.get(0).getQuestionText(), answers);
+	}
+
+	private GenericQuestion getGenericQuestion(EngineerQuestion question) {
+		return new GenericQuestion("Engineer", question.getQuestionText(), question.getAnswers());
+	}
+
+	private GenericQuestion getGenericQuestion(HiqTriviaQuestion question) {
+		return new GenericQuestion("Hiq Trivia", question.getQuestionText(), question.getAnswers());
+	}
+
+	private GenericQuestion getGenericQuestion(CustomQuestion question) {
+		return new GenericQuestion(question.getCategory(), question.getQuestionText(), question.getAnswers());
+	}
+
 	public ChallengeQuestion getChallengeQuestion(String challengeID) {
 		if (db.isOpen()) {
 			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
@@ -380,16 +472,18 @@ public class DatabaseManager {
 			return 0;
 	}
 
-	public long addChallengeQuestion(String[] question) {
+	public long addChallengeQuestion(String challengeID, String description, String question, String[] answers, String userName) {
 		if (db.isOpen()) {
 			ContentValues values = new ContentValues();
-			values.put(ChallengeQuestionContract.CHALLENGE_ID, question[0]);
-			values.put(QuestionContract.QUESTION_TEXT, question[1]);
-			values.put(QuestionContract.ANSWER_CORRECT, question[2]);
-			values.put(ChallengeQuestionContract.ANSWER_INCORRECT1, question[3]);
-			values.put(ChallengeQuestionContract.ANSWER_INCORRECT2, question[4]);
-			values.put(ChallengeQuestionContract.ANSWER_INCORRECT3, question[5]);
-			values.put(ChallengeQuestionContract.USER_NAME, question[6]);
+			values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
+			values.put(QuestionContract.QUESTION_TEXT, question);
+			values.put(QuestionContract.ANSWER_CORRECT, answers[0]);
+			values.put(ChallengeQuestionContract.ANSWER_INCORRECT1, answers[1]);
+			values.put(ChallengeQuestionContract.ANSWER_INCORRECT2, answers[2]);
+			values.put(ChallengeQuestionContract.ANSWER_INCORRECT3, answers[3]);
+			values.put(ChallengeQuestionContract.USER_NAME, userName);
+			values.put(ChallengeQuestionContract.CHALLENGE_DESCRIPTION, description);
+			values.put(ChallengeQuestionContract.SCORE, -1);
 			return db.insert(ChallengeQuestionContract.TABLE_NAME, null, values);
 		} else
 			return -1;
