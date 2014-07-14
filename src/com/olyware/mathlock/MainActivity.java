@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
@@ -63,6 +64,7 @@ import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.dialog.ChallengeDialog;
 import com.olyware.mathlock.dialog.QuestionDialog;
 import com.olyware.mathlock.dialog.QuestionDialog.QuestionDialogListener;
+import com.olyware.mathlock.model.ChallengeQuestion;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.EngineerQuestion;
@@ -72,6 +74,7 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.service.CompleteChallenge;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.service.SendChallenge;
 import com.olyware.mathlock.ui.Typefaces;
@@ -87,6 +90,7 @@ import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
+import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 import com.olyware.mathlock.utils.Purchase;
 import com.olyware.mathlock.utils.ShareHelper;
 import com.olyware.mathlock.views.EquationView;
@@ -109,7 +113,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
-	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false;
+	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false;
 
 	private LinearLayout layout;
 	private Clock clock;
@@ -126,7 +130,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private List<Integer> streakToNotify, totalToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys, hints;
 	private int[] EggMaxValues;
-	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink;
+	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink, challengeIDToDisplay;
 	private long ID = 0;
 
 	private int EnabledPackages = 0;
@@ -997,121 +1001,167 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			setRandomAnswers();
 			joystick.setAnswers(answersRandom, answerLoc);
 			resetQuestionWorth(questionWorthMax);
-		} else if ((EnabledPackages > 0) && (dbManager != null)) {
+		} else if (dbManager != null) {
 			if (!dbManager.isDestroyed()) {
-				joystick.setProblem(true);
-				final String EnabledPackageKeys[] = new String[EnabledPackages];
-				final int location[] = new int[EnabledPackages];
-				double weights[] = new double[EnabledPackages], totalWeight = 0;
-				int count = 0;
-				boolean success;
-
-				// get the difficulty
-				difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "1"));
-				difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
-				difficulty = difficultyMax;
-
-				for (int i = 0; i < PackageKeys.size(); i++) {
-					if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
-						EnabledPackageKeys[count] = PackageKeys.get(i);
-						location[count] = i;
-						weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
-								Difficulty.fromValue(difficultyMax), ID);
-						totalWeight += weights[count];
-						count++;
-					}
-				}
-
-				questionWorth = 0;
-				joystick.resetGuess();
-				imageLeft = null;
-				problem.setCompoundDrawables(imageLeft, null, null, null);
-				joystick.unPauseSelection();
-				sharedPrefsStats = getSharedPreferences("Stats", 0);
-
-				// pick a random enabled package
-				if (totalWeight == 0)
-					count = 0;
-				else {
-					int randPack = rand.nextInt((int) Math.floor(totalWeight));
-					count = 0;
-					double cumulativeWeight = 0;
-					while (count < EnabledPackages) {
-						cumulativeWeight += weights[count];
-						if (cumulativeWeight > randPack) {
-							break;
+				fromChallenge = false;
+				challengeIDToDisplay = "";
+				Map<String, Integer> challengeIDs = dbManager.getChallengeIDs();
+				for (Map.Entry<String, Integer> entry : challengeIDs.entrySet()) {
+					String challengeID = entry.getKey();
+					int questionsToAnswer = entry.getValue();
+					ChallengeStatus status = PreferenceHelper.getChallengeStatus(this, challengeID);
+					if (status.equals(ChallengeStatus.Accepted) && challengeIDToDisplay.equals("")) {
+						if (questionsToAnswer > 0) {
+							// display challenge Question
+							challengeIDToDisplay = challengeID;
+						} else {
+							// send challenge complete to the api
+							sendChallengeComplete(challengeID);
 						}
-						count++;
+					} else if (status.equals(ChallengeStatus.Denied) || status.equals(ChallengeStatus.Done)) {
+						// delete questions from database
+						dbManager.removeChallengeQuestions(challengeID);
 					}
 				}
+				if (!challengeIDToDisplay.equals("")) {
+					ChallengeQuestion question = dbManager.getChallengeQuestion(challengeIDToDisplay);
+					if (question != null) {
+						fromChallenge = true;
+						ID = question.getID();
+						String description = question.getDescription();
+						String userName = question.getUserName();
 
-				switch (location[count]) {
-				case 0:			// math question
-					currentPack = getString(R.string.math);
-					success = setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-					break;
-				case 1:			// vocabulary question
-					currentPack = getString(R.string.vocab);
-					success = setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-					break;
-				case 2:			// language question
-					currentPack = getString(R.string.language);
-					success = setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-					break;
-				case 3:			// engineer question
-					currentPack = getString(R.string.engineer);
-					success = setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-					break;
-				case 4:			// HiqH Trivia question
-					currentPack = getString(R.string.hiqh_trivia);
-					success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
-					break;
-				default:
-					success = false;
-					break;
-				}
-				if (!success) {
-					// custom question
-					if ((location[count] > 4) && (location[count] < PackageKeys.size())) {
-						currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 5);
-						success = setCustomProblem(customCategories.get(location[count] - 5), Difficulty.fromValue(difficultyMin),
-								Difficulty.fromValue(difficultyMax));
+						questionWorthMax = 0;
+						decreaseRate = 0;
+
+						answers = question.getAnswers();
+						problem.setText(question.getQuestionText());
+
+						joystick.resetGuess();
+						joystick.setProblem(true);
+						problem.setText(questionFromDeepLink);
+						problem.setTextColor(defaultTextColor);
+						questionDescription.setText(getString(R.string.question_description_challenge_prefix) + userName + " | "
+								+ description);
+						answers = answersFromDeepLink;
+						setRandomAnswers();
+						joystick.setAnswers(answersRandom, answerLoc);
+						resetQuestionWorth(questionWorthMax);
 					}
-					// failed to load a question
-					if (!success)
-						return;
+				} else if (EnabledPackages > 0) {
+					joystick.setProblem(true);
+					final String EnabledPackageKeys[] = new String[EnabledPackages];
+					final int location[] = new int[EnabledPackages];
+					double weights[] = new double[EnabledPackages], totalWeight = 0;
+					int count = 0;
+					boolean success;
+
+					// get the difficulty
+					difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "1"));
+					difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
+					difficulty = difficultyMax;
+
+					for (int i = 0; i < PackageKeys.size(); i++) {
+						if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
+							EnabledPackageKeys[count] = PackageKeys.get(i);
+							location[count] = i;
+							weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
+									Difficulty.fromValue(difficultyMax), ID);
+							totalWeight += weights[count];
+							count++;
+						}
+					}
+
+					questionWorth = 0;
+					joystick.resetGuess();
+					imageLeft = null;
+					problem.setCompoundDrawables(imageLeft, null, null, null);
+					joystick.unPauseSelection();
+					sharedPrefsStats = getSharedPreferences("Stats", 0);
+
+					// pick a random enabled package
+					if (totalWeight == 0)
+						count = 0;
+					else {
+						int randPack = rand.nextInt((int) Math.floor(totalWeight));
+						count = 0;
+						double cumulativeWeight = 0;
+						while (count < EnabledPackages) {
+							cumulativeWeight += weights[count];
+							if (cumulativeWeight > randPack) {
+								break;
+							}
+							count++;
+						}
+					}
+
+					switch (location[count]) {
+					case 0:			// math question
+						currentPack = getString(R.string.math);
+						success = setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						break;
+					case 1:			// vocabulary question
+						currentPack = getString(R.string.vocab);
+						success = setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						break;
+					case 2:			// language question
+						currentPack = getString(R.string.language);
+						success = setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						break;
+					case 3:			// engineer question
+						currentPack = getString(R.string.engineer);
+						success = setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						break;
+					case 4:			// HiqH Trivia question
+						currentPack = getString(R.string.hiqh_trivia);
+						success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
+						break;
+					default:
+						success = false;
+						break;
+					}
+					if (!success) {
+						// custom question
+						if ((location[count] > 4) && (location[count] < PackageKeys.size())) {
+							currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 5);
+							success = setCustomProblem(customCategories.get(location[count] - 5), Difficulty.fromValue(difficultyMin),
+									Difficulty.fromValue(difficultyMax));
+						}
+						// failed to load a question
+						if (!success)
+							return;
+					}
+
+					setRandomAnswers();
+
+					joystick.setAnswers(answersRandom, answerLoc);
+					problem.setTextColor(defaultTextColor);
+					questionDescription.setText(getString(R.string.question_description_prefix) + " | " + currentPack);
+					resetQuestionWorth(questionWorthMax);
 				}
-
-				setRandomAnswers();
-
-				joystick.setAnswers(answersRandom, answerLoc);
-				problem.setTextColor(defaultTextColor);
-				questionDescription.setText(getString(R.string.question_description_prefix) + " | " + currentPack);
-				resetQuestionWorth(questionWorthMax);
 			} else {
-				joystick.resetGuess();
-				joystick.setProblem(false);
-				problem.setText(R.string.db_loading);
-				questionDescription.setText(getString(R.string.question_description_prefix));
-				answersRandom = answersNone;
-				joystick.setAnswers(answersRandom, 0);
+				setDefaultQuestion();
 			}
 		} else {
-			joystick.resetGuess();
-			joystick.setProblem(false);
-			if (!UnlockedPackages) {
-				problem.setText(R.string.none_unlocked);
-				answersRandom = answersNone;
-			} else if (dbManager == null) {
-				problem.setText(R.string.db_loading);
-				answersRandom = answersNone;
-			} else {
-				problem.setText(R.string.none_enabled);
-				answersRandom = answersNone;
-			}
-			questionDescription.setText(getString(R.string.question_description_prefix));
-			joystick.setAnswers(answersRandom, 0);
+			setDefaultQuestion();
 		}
+	}
+
+	private void setDefaultQuestion() {
+		joystick.resetGuess();
+		joystick.setProblem(false);
+		if (!UnlockedPackages) {
+			problem.setText(R.string.none_unlocked);
+			answersRandom = answersNone;
+		} else if (dbManager == null) {
+			problem.setText(R.string.db_loading);
+			answersRandom = answersNone;
+		} else {
+			problem.setText(R.string.none_enabled);
+			answersRandom = answersNone;
+		}
+		questionDescription.setText(getString(R.string.question_description_prefix));
+		joystick.setAnswers(answersRandom, 0);
 	}
 
 	private void setRandomAnswers() {
@@ -1288,6 +1338,23 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		return count;
 	}
 
+	private int getChallengeScore(long startTime) {
+		int timeToAnswer = (int) Math.min(System.currentTimeMillis() - startTime, ChallengeQuestion.MAX_SCORE);
+		return ChallengeQuestion.MAX_SCORE - timeToAnswer;
+
+	}
+
+	private void sendChallengeComplete(long ID) {
+		sendChallengeComplete(dbManager.getChallengeID(ID));
+	}
+
+	private void sendChallengeComplete(String challengeID) {
+		int score = dbManager.getChallengeScore(challengeID);
+		if (score >= 0) {
+			new CompleteChallenge(this, challengeID, score, MoneyHelper.getMaxBet(this)).execute();
+		}
+	}
+
 	private void displayCorrectOrNot(int correctLoc, int guessLoc, String description, boolean correct, boolean unknown) {
 		if (unknown) {
 			sendEvent("question", "question_answered", "unknown", (long) questionWorth);
@@ -1295,21 +1362,27 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else if (dbManager != null) {
 			if (!dbManager.isDestroyed()) {
 				joystick.setCorrectGuess(correctLoc);
-				dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
-						.currentTimeMillis(), startTime - System.currentTimeMillis()));
-				if (correct) {
-					sendEvent("question", "question_answered", "correct", (long) questionWorth);
-					problem.setTextColor(Color.GREEN);
-					dMoney = Money.increaseMoney(questionWorth);
-					dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
+				if (fromChallenge) {
+					if (dbManager.addChallengeStat(ID, getChallengeScore(startTime))) {
+						sendChallengeComplete(ID);
+					}
 				} else {
-					sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
-					joystick.setIncorrectGuess(guessLoc);
-					problem.setTextColor(Color.RED);
-					dMoney = Money.decreaseMoneyNoDebt(questionWorth);
-					dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
+					dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
+							.currentTimeMillis(), startTime - System.currentTimeMillis()));
+					if (correct) {
+						sendEvent("question", "question_answered", "correct", (long) questionWorth);
+						problem.setTextColor(Color.GREEN);
+						dMoney = Money.increaseMoney(questionWorth);
+						dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
+					} else {
+						sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
+						joystick.setIncorrectGuess(guessLoc);
+						problem.setTextColor(Color.RED);
+						dMoney = Money.decreaseMoneyNoDebt(questionWorth);
+						dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
+					}
+					MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 				}
-				MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 			}
 		}
 	}
@@ -1401,14 +1474,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					challengeDialog.dismiss();
 					final QuestionDialog questionDialog = QuestionDialog.newInstance(ctx,
 							PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager),
-							PreferenceHelper.getDisplayableUnlockedPackageIDs(ctx, dbManager), Money.getTotalMoney() / 2);
+							PreferenceHelper.getDisplayableUnlockedPackageIDs(ctx, dbManager), MoneyHelper.getMaxBet(MainActivity.this));
 					questionDialog.setBuilder(builder);
 					questionDialog.setCancelable(true);
 					questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
 						@Override
 						public void onChallenge(ChallengeBuilder builder) {
-							// TODO get questions from database
-							// TODO send questions to api
 							questionDialog.dismiss();
 							List<GenericQuestion> questions = dbManager.getChallengeQuestions(builder);
 							new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet()) {

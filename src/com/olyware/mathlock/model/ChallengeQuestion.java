@@ -2,13 +2,15 @@ package com.olyware.mathlock.model;
 
 public class ChallengeQuestion {
 
-	private String challengeID, question, userName;
+	final public static int MAX_SCORE = 10000;
+	private String challengeID, description, question, userName;
 	private String[] answers = new String[4];
 	private long id;
 
-	public ChallengeQuestion(long id, String challengeID, String question, String[] answers, String userName) {
+	public ChallengeQuestion(long id, String challengeID, String description, String question, String[] answers, String userName) {
 		this.id = id;
 		this.challengeID = challengeID;
+		this.description = description;
 		this.question = question;
 		this.answers = answers;
 		this.userName = userName;
@@ -20,6 +22,10 @@ public class ChallengeQuestion {
 
 	public String getChallengeID() {
 		return challengeID;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public String getQuestionText() {

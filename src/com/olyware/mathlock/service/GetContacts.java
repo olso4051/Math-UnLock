@@ -5,6 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +97,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 				}
 			}
 		} else {
-			Toast.makeText(ctx, "Login with Facebook", Toast.LENGTH_LONG).show();
+			Toast.makeText(ctx, ctx.getString(R.string.fragment_challenge_facebook_prompt), Toast.LENGTH_LONG).show();
 		}
 		// Get contacts from user's contacts
 		ContentResolver cr = ctx.getContentResolver();
@@ -159,7 +166,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		cur.close();
 
 		// POST to API to get user_ids of contacts and facebook friends
-		/*DefaultHttpClient httpclient = new DefaultHttpClient();
+		DefaultHttpClient httpclient = new DefaultHttpClient();
 		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		HttpPost httppost = new HttpPost(baseURL + "friend");
 		HttpEntity entity;
@@ -171,39 +178,43 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 			for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
 				phoneHashes.put(encryptedPhoneNumber);
 			}
-			data.put("phone_hashes",phoneHashes);
+			data.put("phone_hashes", phoneHashes);
 			JSONArray facebookHashes = new JSONArray();
-			for (String facebookID : userFacebookHashes) {
-				facebookHashes.put(encryptedPhoneNumber);
+			for (String facebookID : allFacebookHashes) {
+				facebookHashes.put(facebookID);
 			}
-			data.put("facebook_hashes",facebookHashes);
+			data.put("facebook_hashes", facebookHashes);
+
 			httppost.setEntity(new StringEntity(data.toString()));
 			httppost.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httppost);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			jsonResponse = new JSONArray(fullResult);
+			if (entity != null && fullResult != null && jsonResponse != null) {
+				getFriendsFromJSON(jsonResponse);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (entity != null && fullResult != null && jsonResponse != null) {
-			getFriendsFromJSON(jsonResponse);
-		}*/
 
 		// for testing we'll assume we got 5 random contacts back from the service
-		for (int i = 2; i < 10; i++) {
+		/*for (int i = 2; i < 10; i++) {
 			userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(i), "facebook" + i, "test" + i, "userName" + i));
-		}
+		}*/
+
 		Collections.sort(allContacts);
-		ContactHelper.findContact(ContactHelper.FindType.PhoneAndFacebookHASH, allContacts, userHashes,
-				new ContactHelper.friendDataListener() {
-					@Override
-					public void onFriendContactFound(int contact, int id) {
-						CustomContactData contactData = new CustomContactData(contact, userHashes.get(id).getHiqUserHash(), userHashes.get(
-								id).getHiqUserName());
-						publishProgress(contactData);
-					}
-				});
+		if (userHashes.size() > 0) {
+			ContactHelper.findContact(ContactHelper.FindType.PhoneAndFacebookHASH, allContacts, userHashes,
+					new ContactHelper.friendDataListener() {
+						@Override
+						public void onFriendContactFound(int contact, int id) {
+							CustomContactData contactData = new CustomContactData(contact, userHashes.get(id).getHiqUserHash(), userHashes
+									.get(id).getHiqUserName());
+							publishProgress(contactData);
+						}
+					});
+		}
 		return 0;
 	}
 

@@ -18,7 +18,6 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.QuestionSelectAdapter;
@@ -224,18 +223,12 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 
 			@Override
 			public void onClick(View v) {
-				String toast = "Bet value = " + betValue + "\n";
-				toast += "Number of Questions = " + questionsValue + "\n";
-				toast += "Min Difficulty = " + difficultyMin + "\n";
-				toast += "Max Difficulty = " + difficultyMax + "\n";
 				List<QuestionSelectData> selectedQuestionPacks = new ArrayList<QuestionSelectData>(questionPackNames.size());
 				for (QuestionSelectData questionPack : questionPacks) {
 					if (questionPack.isChecked()) {
-						toast += questionPack.getName() + " is checked\n";
 						selectedQuestionPacks.add(questionPack);
 					}
 				}
-				Toast.makeText(getActivity(), toast, Toast.LENGTH_LONG).show();
 				PreferenceHelper.storeChallengePacks(getActivity(), questionPacks);
 				PreferenceHelper.storeChallengeSettings(getActivity(), betPercent, questionsValue, difficultyMinValue, difficultyMaxValue);
 				builder.setQuestionSettings(betValue, questionsValue, difficultyMinValue, difficultyMaxValue);

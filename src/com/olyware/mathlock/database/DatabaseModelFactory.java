@@ -1,6 +1,8 @@
 package com.olyware.mathlock.database;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import android.database.Cursor;
@@ -338,6 +340,7 @@ public class DatabaseModelFactory {
 		cursorHelper.setCursor(cursor);
 		long id = cursorHelper.getLong(BaseContract._ID);
 		String challengeID = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_ID);
+		String description = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_DESCRIPTION);
 		String questionText = cursorHelper.getString(QuestionContract.QUESTION_TEXT);
 		String correctAnswer = cursorHelper.getString(QuestionContract.ANSWER_CORRECT);
 		String incorrectAnswer1 = cursorHelper.getString(ChallengeQuestionContract.ANSWER_INCORRECT1);
@@ -347,6 +350,34 @@ public class DatabaseModelFactory {
 		String[] answers = new String[] { correctAnswer, incorrectAnswer1, incorrectAnswer2, incorrectAnswer3 };
 		cursor.close();
 		cursorHelper.destroy();
-		return new ChallengeQuestion(id, challengeID, questionText, answers, userName);
+		return new ChallengeQuestion(id, challengeID, description, questionText, answers, userName);
+	}
+
+	public static Map<String, Integer> buildChallengeIDs(Cursor cursor) {
+		Map<String, Integer> challengeIDs = new HashMap<String, Integer>();
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			String challengeID, lastChallengeID = "";
+			int questionsToDo = 0;
+			while (!cursor.isAfterLast()) {
+				cursorHelper.setCursor(cursor);
+				challengeID = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_ID);
+				if (!challengeID.equals(lastChallengeID)) {
+					if (!lastChallengeID.equals("")) {
+						challengeIDs.put(lastChallengeID, questionsToDo);
+					}
+					lastChallengeID = challengeID;
+					questionsToDo = 0;
+				}
+				int score = cursorHelper.getInteger(ChallengeQuestionContract.SCORE);
+				if (score < 0)
+					questionsToDo++;
+				cursor.moveToNext();
+			}
+			cursor.close();
+			cursorHelper.destroy();
+		}
+		return challengeIDs;
 	}
 }

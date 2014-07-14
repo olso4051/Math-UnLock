@@ -27,7 +27,7 @@ import com.olyware.mathlock.utils.ContactHelper;
 /**
  * Created by Kyle on 2/11/14.
  */
-public class ChallengeDialog extends DialogFragment implements View.OnClickListener {
+public class ChallengeDialog extends DialogFragment {
 
 	private ListView lv;
 	private SwipeRefreshLayout swipeLayout;
@@ -61,10 +61,6 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 		View v = inflater.inflate(R.layout.fragment_challenge, container, false);
 		getDialog().setTitle(getString(R.string.fragment_challenge_title));
 
-		// ((Button) v.findViewById(R.id.fragment_challenge_button_invite)).setOnClickListener(this);
-		// ((Button) v.findViewById(R.id.fragment_challenge_button_start)).setOnClickListener(this);
-		// ((Button) v.findViewById(R.id.fragment_challenge_button_next)).setOnClickListener(this);
-
 		// search box
 		inputSearch = (EditText) v.findViewById(R.id.challenge_search);
 		inputSearch.setEnabled(false);
@@ -97,9 +93,6 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			}
 		});
 
-		// progress bar
-		// progress = (ProgressBar) v.findViewById(R.id.challenge_progress);
-
 		// Contacts ListView
 		lv = (ListView) v.findViewById(R.id.challenge_list_view);
 
@@ -120,7 +113,6 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 					if (selectedContact.hasHiqUserID()) {
 						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getHiqUserID()));
 					} else {
-						// TODO invite
 						String addresses = "";
 						for (String address : selectedContact.getPhoneNumbers()) {
 							addresses += address + ",";
@@ -154,38 +146,13 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			allContacts.clear();
 			allContacts.addAll(contactsTemp);
 			Collections.sort(allContacts);
-			// allNames.clear();
-			// allNames.addAll(ContactHelper.getNamesFromContacts(allContacts));
 			adapter.notifyDataSetChanged();
 		}
 
 		return v;
 	}
 
-	@Override
-	public void onClick(View view) {
-		/*if (view.getId() == R.id.fragment_challenge_button_invite) {
-			ChallengeDialogListener activity = (ChallengeDialogListener) getActivity();
-			activity.onInvitePressed();
-			this.dismiss();
-		} else if (view.getId() == R.id.fragment_challenge_button_start) {
-			ChallengeDialogListener activity = (ChallengeDialogListener) getActivity();
-			activity.onStartPressed();
-			this.dismiss();
-		} else if (view.getId() == R.id.fragment_challenge_button_next) {
-			ChallengeDialogListener activity = (ChallengeDialogListener) getActivity();
-			activity.onNextPressed();
-			this.dismiss();
-		}*/
-	}
-
 	private void refreshContacts() {
-		// progress.setVisibility(View.VISIBLE);
-		// contacts.clear();
-		// contacts.add(new CustomContactData("Friends", "Score", 0));
-		// contacts.add(new CustomContactData("Friends to invite", "", 1));
-		// allContacts.clear();
-		// numFriends = 0;
 		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
 		Log.d("test", "numFriends = " + numFriends);
@@ -198,8 +165,6 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 							numFriends++;
 						contacts.add(contactData);
 						allContacts.add(contactData);
-						// contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
-						// contacts.get(1 + numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
 					} else {
 						int replaceAddition = 1 + ((replaceID > numFriends) ? 1 : 0);
 						contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
@@ -216,14 +181,10 @@ public class ChallengeDialog extends DialogFragment implements View.OnClickListe
 			@Override
 			public void onFriendContactFound(int id, String userID, String userName) {
 				int replaceAddition = 1;
-				if (contacts.get(id + 1).isFriend()) {
-
-				} else {
+				if (!contacts.get(id + 1).isFriend()) {
 					numFriends++;
 					replaceAddition += 1;
 				}
-				// contacts.get(0).setDescription(numFriends + "/" + allContacts.size());
-				// contacts.get(numFriends).setDescription((allContacts.size() - numFriends) + "/" + allContacts.size());
 				contacts.get(id + replaceAddition).setIsFriend(true);
 				contacts.get(id + replaceAddition).setUserID(userID);
 				contacts.get(id + replaceAddition).setHiqUserName(userName);

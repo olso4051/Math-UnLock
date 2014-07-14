@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.olyware.mathlock.utils.PreferenceHelper;
+import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
@@ -24,7 +25,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 				@Override
 				protected void onPostExecute(Integer result) {
 					if (result == 0) {
-						PreferenceHelper.storeChallengeAccepted(context, challengeID, true);
+						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Accepted);
 						Toast.makeText(context, "Challenge Accepted", Toast.LENGTH_LONG).show();
 					}
 				}
@@ -37,7 +38,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 				@Override
 				protected void onPostExecute(Integer result) {
 					if (result == 0) {
-						PreferenceHelper.storeChallengeAccepted(context, challengeID, false);
+						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Denied);
 						Toast.makeText(context, "Challenge Denied", Toast.LENGTH_LONG).show();
 					}
 				}

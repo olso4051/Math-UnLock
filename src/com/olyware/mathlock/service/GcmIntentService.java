@@ -8,16 +8,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.database.DatabaseManager;
@@ -25,6 +21,7 @@ import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
+import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class GcmIntentService extends IntentService {
 	public static final int NOTIFICATION_ID = 999;
@@ -33,8 +30,6 @@ public class GcmIntentService extends IntentService {
 	final private static String CHALLENGE = "CHALLENGE";
 	final private static String CHALLENGE_RESULT = "CHALLENGE_RESULT";
 	final private static String CHALLENGE_STATUS = "CHALLENGE_STATUS";
-
-	private NotificationManager mNotificationManager;
 
 	public GcmIntentService() {
 		super("GcmIntentService");
@@ -61,11 +56,11 @@ public class GcmIntentService extends IntentService {
 			 * recognize.
 			 */
 			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-				sendNotification("Send error: " + extras.toString());
+				// There was a send error
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-				sendNotification("Deleted messages on server: " + extras.toString());
-				// If it's a regular GCM message, do some work.
+				// Server deleted message
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+				// If it's a regular GCM message, do some work.
 				if (!userID.equals("") || type.equals(USER_ID_TO_CONFIRM)) {
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 					sharedPrefsUserInfo.edit().putString(getString(R.string.pref_user_userid), userID).commit();
@@ -110,7 +105,7 @@ public class GcmIntentService extends IntentService {
 							if (!phoneHash.equals(""))
 								userName = EncryptionHelper.decryptForURL(phoneHash);
 							else
-								userName = "Someone";
+								userName = getString(R.string.challenge_default_opponent);
 						}
 					}
 					int bet = getIntFromMessage(fullMessage, "bet");
@@ -125,6 +120,7 @@ public class GcmIntentService extends IntentService {
 							dbManager.addChallengeQuestion(challengeID, descriptions.get(i), questions.get(i), answers.get(i), userName);
 						}
 					}
+					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Undefined);
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper
 							.sendChallengeNotification(challengeID, userName, questions.size(), difficultyMin, difficultyMax, bet);
@@ -135,14 +131,24 @@ public class GcmIntentService extends IntentService {
 					String oUserID = getStringFromMessage(fullMessage, "o_user_id");
 					int bet = getIntFromMessage(fullMessage, "bet");
 					userID = ContactHelper.getUserID(this);
-					if (userID.equals(cUserID)) {
-						userName = getStringFromMessage(fullMessage, "c_user_name");
-						score = getIntFromMessage(fullMessage, "c_score");
-						scoreYou = getIntFromMessage(fullMessage, "o_score");
-					} else {
+					if (userID.equals(cUserID)) {										// You are c_user
 						userName = getStringFromMessage(fullMessage, "o_user_name");
 						score = getIntFromMessage(fullMessage, "o_score");
 						scoreYou = getIntFromMessage(fullMessage, "c_score");
+					} else if (userID.equals(oUserID)) {									// You are o_user
+						userName = getStringFromMessage(fullMessage, "c_user_name");
+						score = getIntFromMessage(fullMessage, "c_score");
+						scoreYou = getIntFromMessage(fullMessage, "o_score");
+					} else {																// couldn't figure out who you are
+						userName = getString(R.string.challenge_default_opponent);			// assume you won
+						int scoreTemp = getIntFromMessage(fullMessage, "o_score");
+						scoreYou = getIntFromMessage(fullMessage, "c_score");
+						if (scoreTemp > scoreYou) {
+							score = scoreYou;
+							scoreYou = scoreTemp;
+						} else {
+							score = scoreTemp;
+						}
 					}
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					if (scoreYou == score) {
@@ -159,34 +165,15 @@ public class GcmIntentService extends IntentService {
 				} else if (type.equals(CHALLENGE_STATUS)) {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String status = getStringFromMessage(fullMessage, "status");
-					boolean accepted = false;
+					ChallengeStatus challengeStatus = ChallengeStatus.Denied;
 					if (status.equals("accepted"))
-						accepted = true;
-					PreferenceHelper.storeChallengeAccepted(this, challengeID, accepted);
-				} else {
-					// Post notification of received message.
-					sendNotification("Received: " + extras.toString());
+						challengeStatus = ChallengeStatus.Accepted;
+					PreferenceHelper.storeChallengeStatus(this, challengeID, challengeStatus);
 				}
 			}
 		}
 		// Release the wake lock provided by the WakefulBroadcastReceiver.
 		GcmBroadcastReceiver.completeWakefulIntent(intent);
-	}
-
-	// Put the message into a notification and post it.
-	private void sendNotification(String msg) {
-		mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
-
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-		mBuilder.setSmallIcon(R.drawable.ic_notification_large);
-		mBuilder.setContentTitle("GCM Notification");
-		mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(msg));
-		mBuilder.setContentText(msg);
-
-		mBuilder.setContentIntent(contentIntent);
-		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
 	}
 
 	private String getStringFromMessage(String msg, String key) {

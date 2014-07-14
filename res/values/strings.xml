@@ -10,7 +10,11 @@
     <string name="coming_soon_message">Short quiz challenges between friends will be coming soon in a future update.</string>
     <string name="coming_soon_ok">OK</string>
     
+    <!-- Challenges -->
+    <string name="challenge_default_opponent">Someone</string>
+    
     <!-- Challenge Dialog -->
+    <string name="fragment_challenge_facebook_prompt">Login with Facebook to Find More Friends</string>
     <string name="fragment_challenge_title">Challenge!</string>
     <string name="fragment_challenge_invite">Invite</string>
     <string name="fragment_challenge_start">Start</string>
@@ -147,6 +151,7 @@
     
     <!-- Questions -->
     <string name="question_description_prefix">Hiq Lockscreen</string>
+    <string name="question_description_challenge_prefix">Challenge From\u0020</string>
     <string name="question_description_share">Shared Question</string>
     <string name="question_types_title">What Types of Questions Would You Like to Start With</string>
     

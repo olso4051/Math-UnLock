@@ -98,18 +98,16 @@ public class NotificationHelper {
 
 	public void sendChallengeNotification(String challengeID, String userName, int questions, int difficultyMin, int difficultyMax, int bet) {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		int modifiedBet = Math.min(bet, MoneyHelper.getTotalMoney(ctx) / 2);
 		String title = ctx.getString(R.string.notification_title_challenge) + userName;
 		String diff = Difficulty.fromValueToString(difficultyMin);
 		if (difficultyMin != difficultyMax)
 			diff += " To " + Difficulty.fromValueToString(difficultyMax);
 		String msg = questions + ctx.getString(R.string.notification_message_challenge1) + diff
-				+ ctx.getString(R.string.notification_message_challenge2) + bet + ctx.getString(R.string.notification_message_challenge3);
+				+ ctx.getString(R.string.notification_message_challenge2) + modifiedBet
+				+ ctx.getString(R.string.notification_message_challenge3);
 
 		// intent to accept notification
-		/*Intent iMain = new Intent(ctx, MainActivity.class);
-		iMain.putExtra("challenge_accepted", true);
-		iMain.putExtra("challenge_id", challengeID);
-		PendingIntent mainIntent = PendingIntent.getActivity(ctx, 0, iMain, 0);*/
 		Intent iMain = new Intent(ctx, NotificationBroadcastReceiver.class);
 		iMain.setAction(NotificationBroadcastReceiver.ACTION_CHALLENGE_ACCEPTED);
 		iMain.putExtra(NotificationBroadcastReceiver.CHALLENGE_ID, challengeID);

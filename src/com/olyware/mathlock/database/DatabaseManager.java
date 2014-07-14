@@ -1,7 +1,9 @@
 package com.olyware.mathlock.database;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import android.content.ContentValues;
@@ -455,6 +457,38 @@ public class DatabaseManager {
 		return new GenericQuestion(question.getCategory(), question.getQuestionText(), question.getAnswers());
 	}
 
+	public int getChallengeScore(long ID) {
+		if (db.isOpen()) {
+			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
+					+ BaseContract._ID + " = " + ID;
+			cursor = db.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+				return getChallengeScore(cursor.getString(0));
+			else
+				return -1;
+		} else
+			return -1;
+	}
+
+	public int getChallengeScore(String challengeID) {
+		if (db.isOpen()) {
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			cursor = db.rawQuery("SELECT SUM(" + ChallengeQuestionContract.SCORE + ") FROM " + ChallengeQuestionContract.TABLE_NAME
+					+ " WHERE " + where, null);
+			cursor.moveToFirst();
+			return cursor.getInt(0);
+		} else
+			return -1;
+	}
+
+	public Map<String, Integer> getChallengeIDs() {
+		if (db.isOpen()) {
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ID_AND_SCORE, null, null, null, null, null);
+			return DatabaseModelFactory.buildChallengeIDs(cursor);
+		} else
+			return new HashMap<String, Integer>();
+	}
+
 	public ChallengeQuestion getChallengeQuestion(String challengeID) {
 		if (db.isOpen()) {
 			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
@@ -464,10 +498,23 @@ public class DatabaseManager {
 			return null;
 	}
 
-	public int removeChallengeQuestion(long ID) {
+	public int removeChallengeQuestions(long ID) {
 		if (db.isOpen()) {
-			String where = BaseContract._ID + " = " + ID;
-			return db.delete(CustomQuestionContract.TABLE_NAME, where, null);
+			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
+					+ BaseContract._ID + " = " + ID;
+			cursor = db.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+				return removeChallengeQuestions(cursor.getString(0));
+			else
+				return -1;
+		} else
+			return -1;
+	}
+
+	public int removeChallengeQuestions(String challengeID) {
+		if (db.isOpen()) {
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			return db.delete(ChallengeQuestionContract.TABLE_NAME, where, null);
 		} else
 			return 0;
 	}
@@ -485,6 +532,60 @@ public class DatabaseManager {
 			values.put(ChallengeQuestionContract.CHALLENGE_DESCRIPTION, description);
 			values.put(ChallengeQuestionContract.SCORE, -1);
 			return db.insert(ChallengeQuestionContract.TABLE_NAME, null, values);
+		} else
+			return -1;
+	}
+
+	public boolean addChallengeStat(long ID, int score) {
+		if (db.isOpen()) {
+			ContentValues values = new ContentValues();
+			values.put(ChallengeQuestionContract.SCORE, score);
+			String where = BaseContract._ID + "=" + ID;
+			db.update(ChallengeQuestionContract.TABLE_NAME, values, where, null);
+			return isChallengeDone(ID);
+		}
+		return false;
+	}
+
+	public String getChallengeID(long ID) {
+		if (db.isOpen()) {
+			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
+					+ BaseContract._ID + " = " + ID;
+			cursor = db.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+				return cursor.getString(0);
+			else
+				return "";
+		} else
+			return "";
+	}
+
+	public boolean isChallengeDone(long ID) {
+		if (db.isOpen()) {
+			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
+					+ BaseContract._ID + " = " + ID;
+			cursor = db.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+				return isChallengeDone(cursor.getString(0));
+			else
+				return false;
+		} else
+			return false;
+	}
+
+	public boolean isChallengeDone(String challengeID) {
+		if (getQuestionsToAnswer(challengeID) == 0)
+			return true;
+		else
+			return false;
+	}
+
+	public int getQuestionsToAnswer(String challengeID) {
+		if (db.isOpen()) {
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ID_AND_SCORE, where, null, null, null, null);
+			Map<String, Integer> map = DatabaseModelFactory.buildChallengeIDs(cursor);
+			return map.get(challengeID);
 		} else
 			return -1;
 	}

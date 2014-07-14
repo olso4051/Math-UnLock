@@ -73,4 +73,13 @@ public class MoneyHelper {
 		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
 		editorPrefsMoney.commit();
 	}
+
+	public static int getTotalMoney(Context context) {
+		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+		return sharedPrefsMoney.getInt("money", 0) + sharedPrefsMoney.getInt("paid_money", 0);
+	}
+
+	public static int getMaxBet(Context context) {
+		return getTotalMoney(context) / 2;
+	}
 }

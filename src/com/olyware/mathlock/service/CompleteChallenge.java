@@ -19,15 +19,22 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.PreferenceHelper;
+import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
-public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
+public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
-	private String success, error, challengeID;
-	private boolean accept;
+	private String success, error, challengeID, userID;
+	private int score, bet;
+	private Context ctx;
 
-	public AcceptChallenge(Context ctx, String challengeID, boolean accept) {
+	public CompleteChallenge(Context ctx, String challengeID, int score, int bet) {
+		this.ctx = ctx;
+		this.userID = ContactHelper.getUserID(ctx);
 		this.challengeID = challengeID;
-		this.accept = accept;
+		this.score = score;
+		this.bet = bet;
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
@@ -47,7 +54,7 @@ public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Void... v) {
-		String endpoint = "challenge/" + (accept ? "accept" : "decline");
+		String endpoint = "challenge/complete";
 
 		// PUT to API challenge
 		HttpParams params = new BasicHttpParams();
@@ -64,6 +71,9 @@ public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 		try {
 			JSONObject data = new JSONObject();
 			data.put("challenge_id", challengeID);
+			data.put("user_id", userID);
+			data.put("score", score);
+			data.put("bet", bet);
 
 			Log.d("test", "JSON to " + endpoint + ": " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), "UTF-8"));
@@ -83,6 +93,7 @@ public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
 			if (success.equals("true")) {
+				PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done);
 				return 0;
 			} else
 				return 1;

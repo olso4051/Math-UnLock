@@ -19,6 +19,38 @@ public class PreferenceHelper {
 	final public static String DIFFICULTY_MIN = "difficulty_min";
 	final public static String DIFFICULTY_MAX = "difficulty_max";
 
+	public static enum ChallengeStatus {
+		Accepted(0), Denied(1), Done(2), Undefined(3);
+		private int value;
+
+		private ChallengeStatus(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		public static int getDefaultValue() {
+			return 3;
+		}
+
+		public static ChallengeStatus valueOf(int value) {
+			switch (value) {
+			case 0:
+				return Accepted;
+			case 1:
+				return Denied;
+			case 2:
+				return Done;
+			case 3:
+				return Undefined;
+			default:
+				return Undefined;
+			}
+		}
+	}
+
 	public static ArrayList<String> getDisplayableUnlockedPackages(Context ctx, DatabaseManager dbManager) {
 		ArrayList<String> list = new ArrayList<String>();
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
@@ -133,10 +165,15 @@ public class PreferenceHelper {
 		sharedPrefsChallengeEdit.commit();
 	}
 
-	public static void storeChallengeAccepted(Context ctx, String challengeID, boolean accepted) {
+	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status) {
 		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
-		sharedPrefsChallengeEdit.putBoolean(challengeID, accepted);
+		sharedPrefsChallengeEdit.putInt(challengeID, status.getValue());
 		sharedPrefsChallengeEdit.commit();
+	}
+
+	public static ChallengeStatus getChallengeStatus(Context ctx, String challengeID) {
+		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+		return ChallengeStatus.valueOf(sharedPrefsChallenge.getInt(challengeID, ChallengeStatus.getDefaultValue()));
 	}
 
 	public static void increaseMoney(Context ctx, int amount) {
