@@ -206,7 +206,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
 		@Override
 		protected Void doInBackground(Void... voids) {
+			Log.d("test", "database updating");
 			dbManager = new DatabaseManager(getApplicationContext());
+			Log.d("test", "database updating");
 			customCategories = dbManager.getAllCustomCategories();
 			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
 			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
@@ -216,6 +218,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			UnlockedPackages = isAnyPackageUnlocked();
 			EnabledPackages = getEnabledPackages();
+			Log.d("test", "database updating");
 			return null;
 		}
 
@@ -226,6 +229,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		@Override
 		protected void onPostExecute(Void v) {
+			Log.d("test", "database updated");
 			setProblemAndAnswer();
 			super.onPostExecute(null);
 		}
@@ -796,7 +800,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						}
 					}
 				} else if (requestCode == INVITE_SENT) {
-					Log.d("test", "invite sent");
+					// Log.d("test", "invite sent");
 				}
 			}
 		} else
@@ -1138,9 +1142,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					problem.setTextColor(defaultTextColor);
 					questionDescription.setText(getString(R.string.question_description_prefix) + " | " + currentPack);
 					resetQuestionWorth(questionWorthMax);
+				} else {
+					setDefaultQuestion();
 				}
-			} else {
-				setDefaultQuestion();
 			}
 		} else {
 			setDefaultQuestion();
