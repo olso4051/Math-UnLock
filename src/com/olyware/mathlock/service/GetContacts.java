@@ -176,16 +176,16 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		try {
 			JSONObject data = new JSONObject();
 			JSONArray phoneHashes = new JSONArray();
-			for (int i = 0; i < Math.min(allEncryptedPhoneNumbers.size(), 5); i++) {
-				String encryptedPhoneNumber = allEncryptedPhoneNumbers.get(i);
-				// for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
+			// for (int i = 0; i < Math.min(allEncryptedPhoneNumbers.size(), 5); i++) {
+			// String encryptedPhoneNumber = allEncryptedPhoneNumbers.get(i);
+			for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
 				phoneHashes.put(encryptedPhoneNumber);
 			}
 			data.put("phone_hashes", phoneHashes);
 			JSONArray facebookHashes = new JSONArray();
-			for (int i = 0; i < Math.min(allFacebookHashes.size(), 5); i++) {
-				String facebookID = allFacebookHashes.get(i);
-				// for (String facebookID : allFacebookHashes) {
+			// for (int i = 0; i < Math.min(allFacebookHashes.size(), 5); i++) {
+			// String facebookID = allFacebookHashes.get(i);
+			for (String facebookID : allFacebookHashes) {
 				facebookHashes.put(facebookID);
 			}
 			data.put("facebook_hashes", facebookHashes);
