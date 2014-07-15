@@ -618,7 +618,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				int pendingCoins = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending_paid), 0);
 				Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0) + pendingCoins);
 				editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0).commit();
-				new NotificationHelper(this).clearCoinNotification();
 			}
 			Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 			coins.setText(String.valueOf(Money.getTotalMoney()));
