@@ -16,10 +16,10 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
@@ -75,7 +75,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 			data.put("score", score);
 			data.put("bet", bet);
 
-			Log.d("test", "JSON to " + endpoint + ": " + data.toString());
+			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), "UTF-8"));
 			httpput.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httpput);

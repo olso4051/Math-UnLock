@@ -32,7 +32,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.vending.billing.IInAppBillingService;
 
@@ -963,14 +962,14 @@ public class IabHelper {
 
 	void logDebug(String msg) {
 		if (mDebugLog)
-			Log.d(mDebugTag, msg);
+			Loggy.d(mDebugTag, msg);
 	}
 
 	void logError(String msg) {
-		Log.e(mDebugTag, "In-app billing error: " + msg);
+		Loggy.e(mDebugTag, "In-app billing error: " + msg);
 	}
 
 	void logWarn(String msg) {
-		Log.w(mDebugTag, "In-app billing warning: " + msg);
+		Loggy.w(mDebugTag, "In-app billing warning: " + msg);
 	}
 }

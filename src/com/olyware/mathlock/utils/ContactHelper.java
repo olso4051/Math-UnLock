@@ -10,7 +10,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactHashes;
@@ -49,7 +48,7 @@ public class ContactHelper {
 					values[0].getEmails().remove(emailsTemp.size() - 1);
 					listener.onNewContactFound(replaceID, values[0]);
 				} else {
-					Log.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID());
+					Loggy.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID());
 					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getName());
 				}
 			}
@@ -169,9 +168,9 @@ public class ContactHelper {
 		case NAME:
 			break;
 		case PhoneAndFacebookHASH:
-			Log.d("test", "searching contacts");
-			Log.d("test", "contacts.size() = " + contacts.size());
-			Log.d("test", "searches.size() = " + searches.size());
+			Loggy.d("test", "searching contacts");
+			Loggy.d("test", "contacts.size() = " + contacts.size());
+			Loggy.d("test", "searches.size() = " + searches.size());
 			for (int i = 0; i < contacts.size(); i++) {
 				boolean found = false;
 				CustomContactData contact = contacts.get(i);
@@ -180,7 +179,7 @@ public class ContactHelper {
 					String search = searches.get(location).getFacebookHash();
 					if (contact.getFacebookHash() != null && contact.getFacebookHash().equals(search)) {
 						// matchingIndex.get(location).add(i);
-						Log.d("test", "sending facebook friend to listener");
+						Loggy.d("test", "sending facebook friend to listener");
 						listener.onFriendContactFound(i, location);
 						found = true;
 						break;
@@ -196,7 +195,7 @@ public class ContactHelper {
 							String search = searches.get(location).getPhoneHash();
 							if (phoneHash != null && phoneHash.equals(search)) {
 								// matchingIndex.get(location).add(i);
-								Log.d("test", "sending contacts friend to listener");
+								Loggy.d("test", "sending contacts friend to listener");
 								listener.onFriendContactFound(i, location);
 								found = true;
 								break;

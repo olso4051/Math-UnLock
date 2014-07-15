@@ -142,7 +142,7 @@
 			android:value="3265130" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/app_id"/>
+            android:value="@string/facebook_app_id"/>
         
         <provider android:authorities="com.facebook.app.NativeAppCallContentProvider650274738378817"
           android:name="com.facebook.NativeAppCallContentProvider"

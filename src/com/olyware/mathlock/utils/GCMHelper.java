@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -75,9 +74,9 @@ public class GCMHelper {
 		if (checkPlayServices(act)) {
 			SharedPreferences prefsGA = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 			regID = getRegistrationId(app);
-			Log.d("GAtest", "regID = " + regID);
+			Loggy.d("GAtest", "regID = " + regID);
 			if (regID.equals("")) {
-				Log.d("GAtest", "registerInBackground");
+				Loggy.d("GAtest", "registerInBackground");
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(act, app, false);
@@ -107,7 +106,7 @@ public class GCMHelper {
 		final SharedPreferences prefs = getGCMPreferences(context);
 		String registrationId = prefs.getString(context.getString(R.string.gcm_reg_id_property), "");
 		if (registrationId.equals("")) {
-			Log.d("GAtest", "Registration not found");
+			Loggy.d("GAtest", "Registration not found");
 			return "";
 		}
 		// Check if app was updated; if so, it must clear the registration ID since the existing regID is not guaranteed to work with the
@@ -116,7 +115,7 @@ public class GCMHelper {
 		int currentVersion = getAppVersion(context);
 		if (registeredVersion != currentVersion) {
 			// if (true) {
-			Log.d("GAtest", "App version changed");
+			Loggy.d("GAtest", "App version changed");
 			return "";
 		}
 		return registrationId;
@@ -179,7 +178,7 @@ public class GCMHelper {
 			@Override
 			protected void onPostExecute(Boolean GCMresult) {
 				// Toast.makeText(act, msg, Toast.LENGTH_LONG).show();
-				// Log.d("GAtest", msg);
+				// Loggy.d("GAtest", msg);
 				if (!sendToBackend)
 					mCallback.GCMResult(GCMresult);
 			}
@@ -188,19 +187,19 @@ public class GCMHelper {
 
 	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral,
 			String birth, String gender, String location, String email, String faceID) {
-		Log.d("test", "sendRegistrationIdToBackend");
-		new RegisterID(act) {
+		Loggy.d("test", "sendRegistrationIdToBackend");
+		new RegisterID(act, username, regId, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				mCallback.RegisterIDResult(result);
 			}
-		}.execute(username, regId, userID, referral, birth, gender, location, email, faceID);
+		}.execute();
 	}
 
 	private static void storeRegistrationId(Context act, Context context, String regId) {
 		final SharedPreferences prefs = getGCMPreferences(act);
 		int appVersion = getAppVersion(context);
-		Log.d("GAtest", "Saving regId on app version " + appVersion);
+		Loggy.d("GAtest", "Saving regId on app version " + appVersion);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString(act.getString(R.string.gcm_reg_id_property), regId);
 		editor.putInt(act.getString(R.string.gcm_app_version_property), appVersion);

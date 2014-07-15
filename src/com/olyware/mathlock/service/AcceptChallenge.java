@@ -16,9 +16,9 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.Loggy;
 
 public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
@@ -65,7 +65,7 @@ public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 			JSONObject data = new JSONObject();
 			data.put("challenge_id", challengeID);
 
-			Log.d("test", "JSON to " + endpoint + ": " + data.toString());
+			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), "UTF-8"));
 			httpput.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httpput);

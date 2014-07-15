@@ -2,7 +2,7 @@
 	tools:ignore="TypographyDashes">
 
     <string name="app_name">Hiq Lockscreen</string>
-    <string name="app_id">650274738378817</string>
+    <string name="facebook_app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
     
     <!-- Coming Soon -->

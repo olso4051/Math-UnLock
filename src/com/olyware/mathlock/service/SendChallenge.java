@@ -20,11 +20,11 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.Loggy;
 
 public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
@@ -138,13 +138,13 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 			data.put("answers", answerArray);
 			data.put("bet", bet);
 
-			Log.d("test", "JSON to challenge: " + data.toString());
+			Loggy.d("test", "JSON to challenge: " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), "UTF-8"));
 			httpput.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
-			Log.d("test", fullResult);
+			Loggy.d("test", fullResult);
 			jsonResponse = new JSONObject(fullResult);
 		} catch (JSONException j) {
 			j.printStackTrace();

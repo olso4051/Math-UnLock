@@ -6,8 +6,6 @@ import android.graphics.Typeface;
 import com.olyware.mathlock.utils.Loggy;
 
 public class Typefaces {
-	private Loggy log = new Loggy(Typefaces.class);
-
 	protected static Typefaces instance;
 	public Typeface robotoLight;
 
@@ -15,7 +13,7 @@ public class Typefaces {
 		try {
 			robotoLight = Typeface.createFromAsset(context.getAssets(), "Roboto-Light.otf");
 		} catch (Exception e) {
-			log.d("Unable to load typefaces", e);
+			Loggy.d("Unable to load typefaces", e);
 		}
 	}
 

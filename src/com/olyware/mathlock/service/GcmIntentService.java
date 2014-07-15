@@ -19,6 +19,7 @@ import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.EncryptionHelper;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
@@ -77,6 +78,7 @@ public class GcmIntentService extends IntentService {
 
 					}.execute(userID);
 				} else if (!pickupHash.equals("") || type.equals(GET_COINS)) {
+					Loggy.d("get coins from gcm");
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 					String storedUserID = sharedPrefsUserInfo.getString(getString(R.string.pref_user_userid), "");
 					final Context ctx = this;

@@ -15,7 +15,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
@@ -72,10 +71,10 @@ public class ShareHelper {
 		new UploadImage(context, image) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				Log.d("test", "success = " + getSuccess());
-				Log.d("test", "error = " + getError());
-				Log.d("test", "url = " + getURL());
-				Log.d("test", "hash = " + getHash());
+				Loggy.d("test", "success = " + getSuccess());
+				Loggy.d("test", "error = " + getError());
+				Loggy.d("test", "url = " + getURL());
+				Loggy.d("test", "hash = " + getHash());
 				if (result == 0 || getSuccess().equals("true")) {
 					loginOrShareFacebook(context, uiHelper, pDialog, getURL());
 				} else {
@@ -118,13 +117,13 @@ public class ShareHelper {
 		staticProgressDialog = pDialog;
 		Session session = Session.getActiveSession();
 		if (!session.isOpened() && !session.isClosed()) {
-			Log.d("test", "openForRead");
+			Loggy.d("test", "openForRead");
 			session.openForRead(new Session.OpenRequest(staticActivity).setPermissions(LoginFragment.PERMISSIONS)
 					.setCallback(loginCallback));
 		} else if (session.isOpened()) {
 			shareFacebook();
 		} else {
-			Log.d("test", "openActiveSession");
+			Loggy.d("test", "openActiveSession");
 			Session.openActiveSession(staticActivity, true, LoginFragment.PERMISSIONS, loginCallback);
 		}
 	}
@@ -153,17 +152,17 @@ public class ShareHelper {
 							// and the post Id.
 							final String postId = values.getString("post_id");
 							if (postId != null) {
-								Log.d("test", "Posted story, id: " + postId);
+								Loggy.d("test", "Posted story, id: " + postId);
 							} else {
 								// User clicked the Cancel button
-								Log.d("test", "Publish cancelled");
+								Loggy.d("test", "Publish cancelled");
 							}
 						} else if (error instanceof FacebookOperationCanceledException) {
 							// User clicked the "x" button
-							Log.d("test", "Publish cancelled");
+							Loggy.d("test", "Publish cancelled");
 						} else {
 							// Generic, ex: network error
-							Log.d("test", "Error posting story");
+							Loggy.d("test", "Error posting story");
 						}
 						if (staticProgressDialog != null) {
 							staticProgressDialog.dismiss();
@@ -238,7 +237,7 @@ public class ShareHelper {
 	public static String buildShareFacebookURL(Context context) {
 		String userID = context.getSharedPreferences(context.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
 				context.getString(R.string.pref_user_userid), "");
-		String baseLink = context.getString(R.string.share_base_url_facebook) + context.getString(R.string.app_id)
+		String baseLink = context.getString(R.string.share_base_url_facebook) + context.getString(R.string.facebook_app_id)
 				+ context.getString(R.string.share_base_url_facebook_link);
 		String baseLinkEasy = baseLink + context.getString(R.string.share_link_url_easy);
 		if (userID.equals("")) {
@@ -265,7 +264,7 @@ public class ShareHelper {
 		}
 		String userID = context.getSharedPreferences(context.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
 				context.getString(R.string.pref_user_userid), "");
-		String baseLink = context.getString(R.string.share_base_url_facebook) + context.getString(R.string.app_id)
+		String baseLink = context.getString(R.string.share_base_url_facebook) + context.getString(R.string.facebook_app_id)
 				+ context.getString(R.string.share_base_url_facebook_link);
 		String baseLinkEasy = baseLink + context.getString(R.string.share_link_url_easy);
 		if (userID.equals("")) {

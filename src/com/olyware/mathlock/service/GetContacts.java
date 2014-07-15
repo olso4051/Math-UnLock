@@ -29,6 +29,7 @@ import com.facebook.Session;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.Loggy;
 
 public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 	private List<ContactHashes> userHashes = new ArrayList<ContactHashes>();
@@ -175,21 +176,26 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		try {
 			JSONObject data = new JSONObject();
 			JSONArray phoneHashes = new JSONArray();
-			for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
+			for (int i = 0; i < Math.min(allEncryptedPhoneNumbers.size(), 5); i++) {
+				String encryptedPhoneNumber = allEncryptedPhoneNumbers.get(i);
+				// for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
 				phoneHashes.put(encryptedPhoneNumber);
 			}
 			data.put("phone_hashes", phoneHashes);
 			JSONArray facebookHashes = new JSONArray();
-			for (String facebookID : allFacebookHashes) {
+			for (int i = 0; i < Math.min(allFacebookHashes.size(), 5); i++) {
+				String facebookID = allFacebookHashes.get(i);
+				// for (String facebookID : allFacebookHashes) {
 				facebookHashes.put(facebookID);
 			}
 			data.put("facebook_hashes", facebookHashes);
-
+			Loggy.d("JSON to get friends = " + data.toString());
 			httppost.setEntity(new StringEntity(data.toString()));
 			httppost.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httppost);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
+			Loggy.d("fullResult = " + fullResult);
 			jsonResponse = new JSONArray(fullResult);
 			if (entity != null && fullResult != null && jsonResponse != null) {
 				getFriendsFromJSON(jsonResponse);
@@ -199,9 +205,9 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		}
 
 		// for testing we'll assume we got 5 random contacts back from the service
-		/*for (int i = 2; i < 10; i++) {
+		for (int i = 2; i < 10; i++) {
 			userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(i), "facebook" + i, "test" + i, "userName" + i));
-		}*/
+		}
 
 		Collections.sort(allContacts);
 		if (userHashes.size() > 0) {

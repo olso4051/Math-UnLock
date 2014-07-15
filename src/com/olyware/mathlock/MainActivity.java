@@ -42,7 +42,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -53,6 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AppEventsLogger;
 import com.facebook.LoggingBehavior;
 import com.facebook.Settings;
 import com.facebook.UiLifecycleHelper;
@@ -87,6 +87,7 @@ import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
@@ -186,7 +187,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private BroadcastReceiver finishBroadcast = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d("test", "Logout in progress");
+			Loggy.d("test", "Logout in progress");
 			// At this point you should start the login activity and finish this one
 			finish();
 		}
@@ -206,9 +207,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
 		@Override
 		protected Void doInBackground(Void... voids) {
-			Log.d("test", "database updating");
 			dbManager = new DatabaseManager(getApplicationContext());
-			Log.d("test", "database updating");
 			customCategories = dbManager.getAllCustomCategories();
 			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
 			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
@@ -218,7 +217,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			UnlockedPackages = isAnyPackageUnlocked();
 			EnabledPackages = getEnabledPackages();
-			Log.d("test", "database updating");
 			return null;
 		}
 
@@ -229,7 +227,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		@Override
 		protected void onPostExecute(Void v) {
-			Log.d("test", "database updated");
+			Loggy.d("test", "database updated");
 			setProblemAndAnswer();
 			super.onPostExecute(null);
 		}
@@ -249,7 +247,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// save the original wallpaper
 			long time = System.currentTimeMillis();
 			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], wallpaper);
-			Log.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
+			Loggy.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
 
 			// blur bitmap
 			final RenderScript rs = RenderScript.create(ctx);
@@ -275,7 +273,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// save bitmap to internal private storage
 			time = System.currentTimeMillis();
 			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], blurred);
-			Log.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
+			Loggy.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
 
 			// convert bitmap to BitmapDrawable so we can set it as the background of a view
 			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
@@ -304,7 +302,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d("GAtest", "onCreate");
+		Loggy.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
 		trackerGA = MyApplication.getGaTracker();
@@ -527,7 +525,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (attached)
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		if (loggedIn) {
-			Log.d("GAtest", "onPause");
+			Loggy.d("GAtest", "onPause");
 			paused = true;
 
 			sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -551,7 +549,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onStop() {
 		if (loggedIn) {
-			Log.d("GAtest", "onStop");
+			Loggy.d("GAtest", "onStop");
 			if (attached)
 				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 			joystick.removeCallbacks();
@@ -566,7 +564,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onDestroy() {
 		if (loggedIn) {
-			Log.d("GAtest", "onDestroy");
+			Loggy.d("GAtest", "onDestroy");
 			clock.destroy();
 			if (mHelper != null)
 				mHelper.dispose();
@@ -593,10 +591,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@Override
 	protected void onResume() {
-		Log.d("GAtest", "onResume");
+		Loggy.d("GAtest", "onResume");
 		long currentTime = System.currentTimeMillis();
 		paused = false;
 		super.onResume();
+		AppEventsLogger.activateApp(this, getString(R.string.facebook_app_id));
 		GCMHelper.checkPlayServices(this);
 
 		if (loggedIn) {
@@ -693,7 +692,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			if (pm.isScreenOn()) {
-				Log.d("test", "onResume Screen is on");
+				Loggy.d("test", "onResume Screen is on");
 				trackerGA.set(Fields.SESSION_CONTROL, "start");
 				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 				// showWallpaper();
@@ -756,7 +755,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						progressDialog.dismiss();
 						progressDialog = null;
 					}
-					Log.d("test", String.format("Error: %s", error.toString()));
+					Loggy.d("test", String.format("Error: %s", error.toString()));
 				}
 
 				@Override
@@ -769,16 +768,16 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					String completionGesture = FacebookDialog.getNativeDialogCompletionGesture(data);
 					String postID = FacebookDialog.getNativeDialogPostId(data);
 					if (didFinishNormal)
-						Log.d("test", "facebook post didFinishNormal");
+						Loggy.d("test", "facebook post didFinishNormal");
 					if (completionGesture.equals("post"))
-						Log.d("test", "successful facebook post");
+						Loggy.d("test", "successful facebook post");
 					if (completionGesture.equals("cancel"))
-						Log.d("test", "facebook cancel");
+						Loggy.d("test", "facebook cancel");
 					if (postID == null)
-						Log.d("test", "post ID is null (postID==null) = " + (postID == null));
+						Loggy.d("test", "post ID is null (postID==null) = " + (postID == null));
 					else if (postID.equals("null"))
-						Log.d("test", "post ID is null (postID.equals(\"null\") = " + (postID.equals("null")));
-					Log.d("test", "post ID = " + postID);
+						Loggy.d("test", "post ID is null (postID.equals(\"null\") = " + (postID.equals("null")));
+					Loggy.d("test", "post ID = " + postID);
 				}
 			});
 			if (resultCode == RESULT_OK) {
@@ -800,7 +799,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						}
 					}
 				} else if (requestCode == INVITE_SENT) {
-					// Log.d("test", "invite sent");
+					// Loggy.d("test", "invite sent");
 				}
 			}
 		} else
@@ -958,11 +957,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		final BitmapDrawable wallpaper = new BitmapDrawable(getResources(), bitmap2);
 
 		// Blur and Dim bitmap
-		Log.d("test", "blurring background time start = " + System.currentTimeMillis());
+		Loggy.d("test", "blurring background time start = " + System.currentTimeMillis());
 		new BlurBackground(this) {
 			@Override
 			protected void onPostExecute(BitmapDrawable blurred) {
-				Log.d("test", "blurred background time end = " + System.currentTimeMillis());
+				Loggy.d("test", "blurred background time end = " + System.currentTimeMillis());
 				if (layout != null) {
 					TransitionDrawable transitionBackground = new TransitionDrawable(new Drawable[] { wallpaper, blurred });
 					setLayoutBackground(layout,transitionBackground);
@@ -1393,7 +1392,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private void JoystickSelected(JoystickSelect s, boolean vibrate, int Extra) {
 		dialogOn = false;
-		Log.d("test", "s = " + s.toString());
+		Loggy.d("test", "s = " + s.toString());
 		if (vibrate) {
 			if (sharedPrefs.getBoolean("vibration", true)
 					&& ((AudioManager) getSystemService(Context.AUDIO_SERVICE)).getRingerMode() != AudioManager.RINGER_MODE_SILENT)
@@ -1584,7 +1583,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			for (int i = 0; i < answers.length; i++) {
 				deepLink += "-" + URLEncoder.encode(answers[i], "utf-8");
 			}
-			Log.d("test", "deep link = " + deepLink);
+			Loggy.d("test", "deep link = " + deepLink);
 			return deepLink;
 		} catch (UnsupportedEncodingException e) {
 			return "";
@@ -1596,7 +1595,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// String scheme = "sharequestion";
 			String target = "http://deeldat.com/f/";
 			String url = data.toString();
-			Log.d("test", "url = " + url);
+			Loggy.d("test", "url = " + url);
 			int start = url.indexOf(target);
 			if (start >= 0) {
 				try {
@@ -1607,7 +1606,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					for (int i = 0; i < answers.length; i++) {
 						start = end + 1;
 						end = url.indexOf('-', start);
-						Log.d("test", "start = " + start + " | end = " + end);
+						Loggy.d("test", "start = " + start + " | end = " + end);
 						if (end > 0)
 							answersFromDeepLink[i] = URLDecoder.decode(url.substring(start, end), "utf-8");
 						else

@@ -15,9 +15,9 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.provider.Settings;
-import android.util.Log;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.Loggy;
 
 public class PostChirpAds extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
@@ -66,8 +66,8 @@ public class PostChirpAds extends AsyncTask<String, Integer, Integer> {
 				pairs.add(new BasicNameValuePair("externalAdId", s[5]));
 			pairs.add(new BasicNameValuePair("androidId", Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.ANDROID_ID)));
 			String params = URLEncodedUtils.format(pairs, "utf-8");
-			Log.d("test", "Params: " + params);
-			Log.d("test", "url = " + baseURL + params);
+			Loggy.d("test", "Params: " + params);
+			Loggy.d("test", "url = " + baseURL + params);
 			HttpPost httppost = new HttpPost(baseURL + params);
 			HttpResponse response = httpclient.execute(httppost);
 			/*entity = response.getEntity();

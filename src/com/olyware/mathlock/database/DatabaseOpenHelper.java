@@ -28,9 +28,6 @@ import com.olyware.mathlock.utils.Loggy;
  * This creates/opens the actual SQLite database file.
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
-
-	private final Loggy log = new Loggy(this.getClass());
-
 	private static final String DATABASE_NAME = "mathunlock.db";
 	private static final int DATABASE_VERSION = 4;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
@@ -63,7 +60,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			File dest = new File(DATABASE_FULL_PATH);
 			FileUtils.copyInputStreamToFile(is, dest);
 		} catch (IOException e) {
-			log.e("Unable to populate database", e);
+			Loggy.e("Unable to populate database", e);
 			return;
 		}
 	}
@@ -77,11 +74,11 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			try {
 				FileUtils.copyInputStreamToFile(is, dest);
 			} catch (IOException e) {
-				log.e("Unable to populate database", e);
+				Loggy.e("Unable to populate database", e);
 			}
 			getWritableDatabase().close();
 		} catch (IOException e) {
-			log.e("Unable to populate database", e);
+			Loggy.e("Unable to populate database", e);
 			return;
 		}
 		SQLiteDatabase oldDB = SQLiteDatabase.openDatabase(DATABASE_OLD_FULL_PATH, null, SQLiteDatabase.OPEN_READWRITE);

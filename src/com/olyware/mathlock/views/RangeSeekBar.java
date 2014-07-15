@@ -6,8 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.RectF;
+import android.graphics.Rect;
+import android.graphics.drawable.NinePatchDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -33,10 +33,9 @@ public class RangeSeekBar extends ImageView {
 	private Thumb pressedThumb = null;
 	private boolean notifyWhileDragging = false;
 	private OnRangeSeekBarChangeListener listener;
+	private Rect fullRect, rangeRect;
+	private NinePatchDrawable progress, track;
 
-	/**
-	 * Default color of a {@link RangeSeekBar}, #FF33B5E5. This is also known as "Ice Cream Sandwich" blue.
-	 */
 	public static final int DEFAULT_COLOR = Color.argb(0xFF, 0x00, 0x5C, 0xB5);
 
 	/**
@@ -84,6 +83,11 @@ public class RangeSeekBar extends ImageView {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 		mScaledTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+		fullRect = new Rect();
+		rangeRect = new Rect();
+		progress = (NinePatchDrawable) ctx.getResources().getDrawable(R.drawable.custom_progress_primary);
+		track = (NinePatchDrawable) ctx.getResources().getDrawable(R.drawable.custom_progress_track);
+
 	}
 
 	public boolean isNotifyWhileDragging() {
@@ -336,6 +340,8 @@ public class RangeSeekBar extends ImageView {
 			height = Math.min(height, MeasureSpec.getSize(heightMeasureSpec));
 		}
 		setMeasuredDimension(width, height);
+		fullRect.set((int) padding, 0, (int) (width - padding), height);
+		rangeRect.set(normalizedToScreen(normalizedMinValue), 0, normalizedToScreen(normalizedMaxValue), height);
 	}
 
 	/**
@@ -346,19 +352,24 @@ public class RangeSeekBar extends ImageView {
 		super.onDraw(canvas);
 
 		// draw seek bar background line
-		final RectF rect = new RectF(padding, 0.5f * (getHeight() - lineHeight), getWidth() - padding, 0.5f * (getHeight() + lineHeight));
-		paint.setStyle(Style.FILL);
-		paint.setColor(Color.GRAY);
-		paint.setAntiAlias(true);
-		canvas.drawRect(rect, paint);
+		// final RectF rect = new RectF(padding, 0.5f * (getHeight() - lineHeight), getWidth() - padding, 0.5f * (getHeight() +
+		// lineHeight));
+		// paint.setStyle(Style.FILL);
+		// paint.setColor(Color.GRAY);
+		// paint.setAntiAlias(true);
+		// canvas.drawRect(fullRect, paint);
+		track.setBounds(fullRect);
+		track.draw(canvas);
 
 		// draw seek bar active range line
-		rect.left = normalizedToScreen(normalizedMinValue);
-		rect.right = normalizedToScreen(normalizedMaxValue);
+		// rect.left = normalizedToScreen(normalizedMinValue);
+		// rect.right = normalizedToScreen(normalizedMaxValue);
 
 		// orange color
-		paint.setColor(DEFAULT_COLOR);
-		canvas.drawRect(rect, paint);
+		// paint.setColor(DEFAULT_COLOR);
+		// canvas.drawRect(rangeRect, paint);
+		progress.setBounds(rangeRect);
+		progress.draw(canvas);
 
 		// draw minimum thumb
 		drawThumb(normalizedToScreen(normalizedMinValue), Thumb.MIN.equals(pressedThumb), canvas);
@@ -391,6 +402,8 @@ public class RangeSeekBar extends ImageView {
 		super.onRestoreInstanceState(bundle.getParcelable("SUPER"));
 		normalizedMinValue = bundle.getDouble("MIN");
 		normalizedMaxValue = bundle.getDouble("MAX");
+		rangeRect.left = normalizedToScreen(normalizedMinValue);
+		rangeRect.right = normalizedToScreen(normalizedMaxValue);
 	}
 
 	/**
@@ -453,6 +466,7 @@ public class RangeSeekBar extends ImageView {
 	 */
 	public void setNormalizedMinValue(double value) {
 		normalizedMinValue = Math.max(0d, Math.min(1d, Math.min(value, normalizedMaxValue)));
+		rangeRect.set(normalizedToScreen(normalizedMinValue), 0, normalizedToScreen(normalizedMaxValue), getHeight());
 		invalidate();
 	}
 
@@ -465,6 +479,7 @@ public class RangeSeekBar extends ImageView {
 	 */
 	public void setNormalizedMaxValue(double value) {
 		normalizedMaxValue = Math.max(0d, Math.min(1d, Math.max(value, normalizedMinValue)));
+		rangeRect.set(normalizedToScreen(normalizedMinValue), 0, normalizedToScreen(normalizedMaxValue), getHeight());
 		invalidate();
 	}
 
@@ -500,8 +515,8 @@ public class RangeSeekBar extends ImageView {
 	 *            The normalized value to convert.
 	 * @return The converted value in screen space.
 	 */
-	private float normalizedToScreen(double normalizedCoord) {
-		return (float) (padding + normalizedCoord * (getWidth() - 2 * padding));
+	private int normalizedToScreen(double normalizedCoord) {
+		return (int) (padding + normalizedCoord * (getWidth() - 2 * padding));
 	}
 
 	/**

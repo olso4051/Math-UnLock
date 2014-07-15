@@ -19,7 +19,6 @@ import com.olyware.mathlock.views.GraphView;
 import com.olyware.mathlock.views.JoystickView;
 
 public class EZ {
-	private static final Loggy log = new Loggy(EZ.class);
 
 	public static <T> List<T> list(T... objects) {
 		return new ArrayList<T>(Arrays.asList(objects));
@@ -84,7 +83,7 @@ public class EZ {
 			if (view instanceof TextView) {
 				((TextView) view).setTypeface(font);
 			} else {
-				log.d("Unable to set typeface: View is not a TextView!");
+				Loggy.d("Unable to set typeface: View is not a TextView!");
 			}
 		}
 	}

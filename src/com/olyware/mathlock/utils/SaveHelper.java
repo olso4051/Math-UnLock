@@ -11,7 +11,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.util.Log;
 
 public class SaveHelper {
 
@@ -23,11 +22,11 @@ public class SaveHelper {
 			fos.close();
 			return true;
 		} catch (FileNotFoundException e) {
-			Log.d("GAtest", "file not found");
+			Loggy.d("GAtest", "file not found");
 			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
-			Log.d("GAtest", "io exception");
+			Loggy.d("GAtest", "io exception");
 			e.printStackTrace();
 			return false;
 		}
@@ -41,10 +40,10 @@ public class SaveHelper {
 			b = BitmapFactory.decodeStream(fis);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			Log.d("GAtest", "file not found");
+			Loggy.d("GAtest", "file not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			Log.d("GAtest", "io exception");
+			Loggy.d("GAtest", "io exception");
 			e.printStackTrace();
 		}
 		return b;
@@ -66,7 +65,7 @@ public class SaveHelper {
 				stream.write(txt.getBytes());
 				stream.close();
 			} catch (IOException e) {
-				Log.d("GAtest", "File did not save" + e.toString());
+				Loggy.d("GAtest", "File did not save" + e.toString());
 				return false;
 			}
 		} else {
@@ -88,7 +87,7 @@ public class SaveHelper {
 		// Get the directory for the user's public pictures directory.
 		File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 		if (!file.mkdirs()) {
-			Log.e("GAtest", "Directory not created");
+			Loggy.e("GAtest", "Directory not created");
 		}
 		File file2 = new File(file.getAbsolutePath() + "/" + fileName);
 		return file2;

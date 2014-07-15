@@ -22,13 +22,13 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.Loggy;
 
 public class JoystickView extends View {
 	public static int IN_OUT_DURATION = 250, PULSE_DURATION = 400, PULSE_PAUSE = 3000;
@@ -831,8 +831,8 @@ public class JoystickView extends View {
 		selectUnlock = false;
 		selectAppDrag = -1;
 
-		Log.d("test", "returnToDefault() - options = " + options);
-		Log.d("test", "returnToDefault() - selectSideBar = " + selectSideBar);
+		Loggy.d("test", "returnToDefault() - options = " + options);
+		Loggy.d("test", "returnToDefault() - selectSideBar = " + selectSideBar);
 		if (options)
 			showStartAnimation(0, 3000);
 		else if (selectSideBar)

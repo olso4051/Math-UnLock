@@ -10,7 +10,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,7 @@ import com.olyware.mathlock.adapter.ContactArrayAdapter;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.Loggy;
 
 /**
  * Created by Kyle on 2/11/14.
@@ -155,7 +155,7 @@ public class ChallengeDialog extends DialogFragment {
 	private void refreshContacts() {
 		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
-		Log.d("test", "numFriends = " + numFriends);
+		Loggy.d("test", "numFriends = " + numFriends);
 		ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, new ContactHelper.contactDataListener() {
 			@Override
 			public void onNewContactFound(int replaceID, CustomContactData contactData) {

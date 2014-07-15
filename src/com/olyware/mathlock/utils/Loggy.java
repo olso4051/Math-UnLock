@@ -3,49 +3,71 @@ package com.olyware.mathlock.utils;
 import android.util.Log;
 
 public class Loggy {
-	String tag;
+	private static String tag = "test";
+	private static boolean logging = true;
 
-	public Loggy(Class<?> clazz) {
-		this.tag = clazz.getName();
+	public static void i(String msg) {
+		if (logging)
+			Log.i(tag, msg);
 	}
 
-	public void i(String msg) {
-		Log.i(tag, msg);
+	public static void i(String msg, Throwable exception) {
+		if (logging)
+			Log.i(tag, msg, exception);
 	}
 
-	public void i(String msg, Throwable exception) {
-		Log.i(tag, msg, exception);
+	public static void v(String msg) {
+		if (logging)
+			Log.v(tag, msg);
 	}
 
-	public void v(String msg) {
-		Log.v(tag, msg);
+	public static void v(String msg, Throwable exception) {
+		if (logging)
+			Log.v(tag, msg, exception);
 	}
 
-	public void v(String msg, Throwable exception) {
-		Log.v(tag, msg, exception);
+	public static void d(String msg) {
+		if (logging)
+			Log.d(tag, msg);
 	}
 
-	public void d(String msg) {
-		Log.d(tag, msg);
+	public static void d(String tag, String msg) {
+		if (logging)
+			Log.d(tag, msg);
 	}
 
-	public void d(String msg, Throwable exception) {
-		Log.d(tag, msg, exception);
+	public static void d(String msg, Throwable exception) {
+		if (logging)
+			Log.d(tag, msg, exception);
 	}
 
-	public void w(String msg) {
-		Log.w(tag, msg);
+	public static void w(String msg) {
+		if (logging)
+			Log.w(tag, msg);
 	}
 
-	public void w(String msg, Throwable exception) {
-		Log.w(tag, msg, exception);
+	public static void w(String tag, String msg) {
+		if (logging)
+			Log.w(tag, msg);
 	}
 
-	public void e(String msg) {
-		Log.e(tag, msg);
+	public static void w(String msg, Throwable exception) {
+		if (logging)
+			Log.w(tag, msg, exception);
 	}
 
-	public void e(String msg, Throwable exception) {
-		Log.e(tag, msg, exception);
+	public static void e(String msg) {
+		if (logging)
+			Log.e(tag, msg);
+	}
+
+	public static void e(String tag, String msg) {
+		if (logging)
+			Log.e(tag, msg);
+	}
+
+	public static void e(String msg, Throwable exception) {
+		if (logging)
+			Log.e(tag, msg, exception);
 	}
 }

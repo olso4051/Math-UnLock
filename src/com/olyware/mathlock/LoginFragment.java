@@ -12,7 +12,6 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +33,7 @@ import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.utils.GCMHelper;
+import com.olyware.mathlock.utils.Loggy;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
@@ -133,7 +133,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		authButton.setFragment(this);
 
 		if (getArguments().getBoolean("facebook_logout")) {
-			Log.d("test", "facebook_logout");
+			Loggy.d("test", "facebook_logout");
 			Session session = Session.getActiveSession();
 			if (!session.isClosed()) {
 				session.closeAndClearTokenInformation();
@@ -205,7 +205,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			}
 			View content = getActivity().getWindow().findViewById(Window.ID_ANDROID_CONTENT);
 			int statusBarHeight = sizeY - content.getHeight();
-			Log.d("test", "sizeY = " + sizeY + " | content.getHeight() = " + content.getHeight() + " | statusBarHeight = "
+			Loggy.d("test", "sizeY = " + sizeY + " | content.getHeight() = " + content.getHeight() + " | statusBarHeight = "
 					+ statusBarHeight);
 			sharedPrefs.edit().putInt("layout_status_bar_height", statusBarHeight).commit();
 		}
@@ -222,21 +222,21 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
-				Log.d("test", "openForRead");
+				Loggy.d("test", "openForRead");
 				session.openForRead(new Session.OpenRequest(this).setPermissions(PERMISSIONS).setCallback(loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {
-				Log.d("test", "openActiveSession");
+				Loggy.d("test", "openActiveSession");
 				Session.openActiveSession(getActivity(), this, true, PERMISSIONS, loginCallback);
 			}
 		}
 	}
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception, final boolean fromFacebookButton) {
-		Log.d("test", "onSessionStateChange + facebookButtonClicked = " + (facebookButtonClicked));
+		Loggy.d("test", "onSessionStateChange + facebookButtonClicked = " + (facebookButtonClicked));
 		if (state.isOpened()) {
-			Log.d("test", "Logged in... " + facebookButtonClicked);
+			Loggy.d("test", "Logged in... " + facebookButtonClicked);
 			if (facebookButtonClicked) {
 				facebookButtonClicked = false;
 				// Request user data and show the results
@@ -258,14 +258,14 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 									.putString(mPrefUserFacebookName, user.getName()).putString(mPrefUserFacebookBirth, birthday)
 									.putString(mPrefUserFacebookGender, gender).putString(mPrefUserFacebookLocation, location)
 									.putString(mPrefUserFacebookEmail, email).putBoolean(mPrefUserSkipped, false).commit();
-							Log.d("GAtest", user.toString());
+							Loggy.d("GAtest", user.toString());
 						}
 						logIn();
 					}
 				}).executeAsync();
 			}
 		} else if (state.isClosed()) {
-			Log.d("test", "Logged out... " + facebookButtonClicked);
+			Loggy.d("test", "Logged out... " + facebookButtonClicked);
 		}
 	}
 
@@ -299,12 +299,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 	private void attemptLogin(String username, String regID, String userID, String referral, String birth, String gender, String location,
 			String email, String faceID) {
-		new RegisterID(getActivity()) {
+		new RegisterID(getActivity(), username, regID, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				Log.d("test", "result=" + result);
-				Log.d("test", "success=" + getSuccess());
-				Log.d("test", "error=" + getError());
+				Loggy.d("test", "result=" + result);
+				Loggy.d("test", "success=" + getSuccess());
+				Loggy.d("test", "error=" + getError());
 				if (result == 0) {
 					SharedPreferences prefsGA = getActivity().getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
 					prefsGA.edit().putBoolean("reg_uploaded", true).commit();
@@ -314,7 +314,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					startMainActivity();
 				}
 			}
-		}.execute(username, regID, userID, referral, birth, gender, location, email, faceID);
+		}.execute();
 	}
 
 	public void GCMRegistrationDone(boolean result) {

@@ -11,11 +11,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.analytics.tracking.android.CampaignTrackingReceiver;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.EncryptionHelper;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 
 /*
@@ -33,7 +33,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			final Bundle extras = intent.getExtras();
 			if (extras != null) {
 				extras.containsKey(null);
-				Log.d("GAtest", extras.toString());
+				Loggy.d("GAtest", extras.toString());
 			}
 		} catch (final Exception e) {
 			return;
@@ -51,7 +51,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			return;
 		}
 
-		Log.d("GAtest", "referrer = " + referrer);
+		Loggy.d("GAtest", "referrer = " + referrer);
 		try {    // Remove any url encoding
 			referrer = URLDecoder.decode(referrer, "UTF-8"); //$NON-NLS-1$
 		} catch (UnsupportedEncodingException e) {
@@ -59,10 +59,10 @@ public class CustomGAReceiver extends BroadcastReceiver {
 		}
 
 		// Parse the query string, extracting the relevant data
-		Log.d("GAtest", "referrer = " + referrer);
+		Loggy.d("GAtest", "referrer = " + referrer);
 		String[] params = referrer.split("\\&"); // $NON-NLS-1$
 		for (String param : params) {
-			Log.d("GAtest", "param = " + param);
+			Loggy.d("GAtest", "param = " + param);
 			String[] pair = param.split("="); // $NON-NLS-1$
 			referralParams.put(pair[0], pair[1]);
 		}
@@ -84,7 +84,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			String value = params.get(key);
 			if (value != null) {
 				editor.putString(key, value);
-				Log.d("GAtest", "key = " + value);
+				Loggy.d("GAtest", "key = " + value);
 			}
 		}
 		editor.commit();
@@ -94,7 +94,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			String referral = new EncryptionHelper().decryptForURL(params.get("utm_content"));
 			MoneyHelper.increasePaidMoney(context, 40);
 			editorUserInfo.putString(context.getString(R.string.pref_user_referrer), referral).commit();
-			Log.d("GAtest", "referral key = " + referral);
+			Loggy.d("GAtest", "referral key = " + referral);
 		} else if (storage.getString("utm_source", "").equals("chirpads")) {
 			String clickGuid = params.get("utm_content");
 			String action = "install";
@@ -102,7 +102,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			String osVersion = Build.VERSION.RELEASE;
 			String appPackageName = "com.olyware.mathlock";
 			String externalAdId = "com.olyware.mathlock";
-			Log.d("test", "clickGuid = " + clickGuid);
+			Loggy.d("test", "clickGuid = " + clickGuid);
 			new PostChirpAds(context).execute(action, clickGuid, os, osVersion, appPackageName, externalAdId);
 		}
 

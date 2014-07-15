@@ -14,17 +14,63 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.Loggy;
 
-public class RegisterID extends AsyncTask<String, Integer, Integer> {
+public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String success, error;
-	private String phoneNumberEncrypted;
+	private String userName, regID, userID, referral, birthday, gender, location, email, facebookID, phoneNumberEncrypted;
 
-	public RegisterID(Activity act) {
+	public RegisterID(Activity act, String userName, String regID, String userID, String referral, String birthday, String gender,
+			String location, String email, String facebookID) {
+		if (userName != null)
+			this.userName = userName;
+		else
+			this.userName = "";
+
+		if (regID != null)
+			this.regID = regID;
+		else
+			this.regID = "";
+
+		if (userID != null)
+			this.userID = userID;
+		else
+			this.userID = "";
+
+		if (referral != null)
+			this.referral = referral;
+		else
+			this.referral = "";
+
+		if (birthday != null)
+			this.birthday = birthday;
+		else
+			this.birthday = "";
+
+		if (gender != null)
+			this.gender = gender;
+		else
+			this.gender = "";
+
+		if (location != null)
+			this.location = location;
+		else
+			this.location = "";
+
+		if (email != null)
+			this.email = email;
+		else
+			this.email = "";
+
+		if (facebookID != null)
+			this.facebookID = facebookID;
+		else
+			this.facebookID = "";
+
 		TelephonyManager telephonyManager = (TelephonyManager) act.getSystemService(Context.TELEPHONY_SERVICE);
 		String number = telephonyManager.getLine1Number();
 		if (number != null && number.length() > 0) {
@@ -32,15 +78,6 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		} else {
 			phoneNumberEncrypted = "";
 		}
-		/*number = number.replaceAll("[^\\d]", "");
-		if (number != null && number.length() > 0) {
-			phoneNumberEncrypted = number;
-		} else {
-			phoneNumberEncrypted = "";
-		}
-		if (!phoneNumberEncrypted.equals("")) {
-			phoneNumberEncrypted = new EncryptionHelper().encryptForURL(phoneNumberEncrypted);
-		}*/
 		baseURL = act.getString(R.string.service_base_url);
 	}
 
@@ -59,17 +96,17 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 	}
 
 	@Override
-	protected Integer doInBackground(String... s) {
+	protected Integer doInBackground(Void... v) {
 		String endpoint = "register";
-		if (s[2].length() > 0) {
+		if (userID.length() > 0) {
 			endpoint = endpoint + "/update";
-			s[3] = "";
+			referral = "";
 		}
-		if (s[1].length() <= 0) {
+		if (regID.length() <= 0) {
 			return 1;
 		}
 
-		// POST to API with old and new registration, also referral's registration
+		// POST to API new or update registration, also referral's registration
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
 
@@ -79,46 +116,44 @@ public class RegisterID extends AsyncTask<String, Integer, Integer> {
 		JSONObject jsonResponse;
 		try {
 			JSONObject data = new JSONObject();
-			if (s[0].length() > 0) {
-				data.put("username", s[0]);
+			if (userName.length() > 0) {
+				data.put("username", userName);
 			}
-			if (s[1].length() > 0) {
-				data.put("registration_id", s[1]);
+			if (regID.length() > 0) {
+				data.put("registration_id", regID);
 			}
-			if (s[2].length() > 0) {
-				data.put("user_id", s[2]);
+			if (userID.length() > 0) {
+				data.put("user_id", userID);
 			}
-			if (s[3].length() > 0) {
-				data.put("referral", s[3]);
+			if (referral.length() > 0) {
+				data.put("referral", referral);
 			}
-			if (s[4].length() > 0) {
-				data.put("birthday", s[4]);
+			if (birthday.length() > 0) {
+				data.put("birthday", birthday);
 			}
-			if (s[5].length() > 0) {
-				data.put("gender", s[5]);
+			if (gender.length() > 0) {
+				data.put("gender", gender);
 			}
-			if (s[6].length() > 0) {
-				data.put("location", s[6]);
+			if (location.length() > 0) {
+				data.put("location", location);
 			}
-			if (s[7].length() > 0) {
-				data.put("email", s[7]);
+			if (email.length() > 0) {
+				data.put("email", email);
 			}
-			if (s[8].length() > 0) {
-				data.put("facebook_hash", s[8]);
+			if (facebookID.length() > 0) {
+				data.put("facebook_hash", facebookID);
 			}
 			if (!phoneNumberEncrypted.equals("")) {
 				data.put("phone_hash", phoneNumberEncrypted);
 			}
 
-			Log.d("test", "JSON to register: " + data.toString());
-			// String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
+			Loggy.d("test", "JSON to register: " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString()));
 			httpput.setHeader("Content-Type", "application/json");
-			// httpput.setHeader("Authorization", authorizationString);
 			HttpResponse response = httpclient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
-			Log.d("test", fullResult);
+			Loggy.d("test", fullResult);
 			jsonResponse = new JSONObject(fullResult);
 		} catch (JSONException j) {
 			j.printStackTrace();
