@@ -35,6 +35,7 @@ public class RangeSeekBar extends ImageView {
 	private OnRangeSeekBarChangeListener listener;
 	private Rect fullRect, rangeRect;
 	private NinePatchDrawable progress, track;
+	private int Width = 0, Height = 0, PaddingLeft = 0, PaddingTop = 0, PaddingRight = 0, PaddingBottom = 0;
 
 	public static final int DEFAULT_COLOR = Color.argb(0xFF, 0x00, 0x5C, 0xB5);
 
@@ -331,17 +332,21 @@ public class RangeSeekBar extends ImageView {
 	 */
 	@Override
 	protected synchronized void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int width = 200;
+		PaddingLeft = getPaddingLeft();
+		PaddingTop = getPaddingTop();
+		PaddingRight = getPaddingRight();
+		PaddingBottom = getPaddingBottom();
+		Width = 200;
 		if (MeasureSpec.UNSPECIFIED != MeasureSpec.getMode(widthMeasureSpec)) {
-			width = MeasureSpec.getSize(widthMeasureSpec);
+			Width = MeasureSpec.getSize(widthMeasureSpec);
 		}
-		int height = thumbImage.getHeight();
+		Height = thumbImage.getHeight() + PaddingTop + PaddingBottom;
 		if (MeasureSpec.UNSPECIFIED != MeasureSpec.getMode(heightMeasureSpec)) {
-			height = Math.min(height, MeasureSpec.getSize(heightMeasureSpec));
+			Height = Math.min(Height, MeasureSpec.getSize(heightMeasureSpec));
 		}
-		setMeasuredDimension(width, height);
-		fullRect.set((int) padding, 0, (int) (width - padding), height);
-		rangeRect.set(normalizedToScreen(normalizedMinValue), 0, normalizedToScreen(normalizedMaxValue), height);
+		setMeasuredDimension(Width, Height);
+		fullRect.set((int) padding + PaddingLeft, PaddingTop, (int) (Width - padding - PaddingRight), Height - PaddingBottom);
+		rangeRect.set(normalizedToScreen(normalizedMinValue), PaddingTop, normalizedToScreen(normalizedMaxValue), Height - PaddingBottom);
 	}
 
 	/**
@@ -417,8 +422,7 @@ public class RangeSeekBar extends ImageView {
 	 *            The canvas to draw upon.
 	 */
 	private void drawThumb(float screenCoord, boolean pressed, Canvas canvas) {
-		canvas.drawBitmap(pressed ? thumbPressedImage : thumbImage, screenCoord - thumbHalfWidth,
-				(float) ((0.5f * getHeight()) - thumbHalfHeight), paint);
+		canvas.drawBitmap(pressed ? thumbPressedImage : thumbImage, screenCoord - thumbHalfWidth, PaddingTop, paint);
 	}
 
 	/**
@@ -466,7 +470,8 @@ public class RangeSeekBar extends ImageView {
 	 */
 	public void setNormalizedMinValue(double value) {
 		normalizedMinValue = Math.max(0d, Math.min(1d, Math.min(value, normalizedMaxValue)));
-		rangeRect.set(normalizedToScreen(normalizedMinValue), 0, normalizedToScreen(normalizedMaxValue), getHeight());
+		rangeRect.set(normalizedToScreen(normalizedMinValue), PaddingTop, normalizedToScreen(normalizedMaxValue), getHeight()
+				- PaddingBottom);
 		invalidate();
 	}
 
@@ -479,7 +484,8 @@ public class RangeSeekBar extends ImageView {
 	 */
 	public void setNormalizedMaxValue(double value) {
 		normalizedMaxValue = Math.max(0d, Math.min(1d, Math.max(value, normalizedMinValue)));
-		rangeRect.set(normalizedToScreen(normalizedMinValue), 0, normalizedToScreen(normalizedMaxValue), getHeight());
+		rangeRect.set(normalizedToScreen(normalizedMinValue), PaddingTop, normalizedToScreen(normalizedMaxValue), getHeight()
+				- PaddingBottom);
 		invalidate();
 	}
 
@@ -516,7 +522,7 @@ public class RangeSeekBar extends ImageView {
 	 * @return The converted value in screen space.
 	 */
 	private int normalizedToScreen(double normalizedCoord) {
-		return (int) (padding + normalizedCoord * (getWidth() - 2 * padding));
+		return (int) (padding + PaddingLeft + normalizedCoord * (getWidth() - 2 * padding - PaddingLeft - PaddingRight));
 	}
 
 	/**
@@ -528,11 +534,11 @@ public class RangeSeekBar extends ImageView {
 	 */
 	private double screenToNormalized(float screenCoord) {
 		int width = getWidth();
-		if (width <= 2 * padding) {
+		if (width <= 2 * padding + PaddingLeft + PaddingRight) {
 			// prevent division by zero, simply return 0.
 			return 0d;
 		} else {
-			double result = (screenCoord - padding) / (width - 2 * padding);
+			double result = (screenCoord - padding - PaddingLeft) / (width - 2 * padding - PaddingLeft - PaddingRight);
 			return Math.min(1d, Math.max(0d, result));
 		}
 	}

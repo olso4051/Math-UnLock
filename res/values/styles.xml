@@ -37,6 +37,21 @@
         <item name="android:layout_marginLeft">@dimen/login_vertical_margin_half</item>
     </style>
     
+    <style name="SeekBar">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">@dimen/login_vertical_margin_half</item>
+        <item name="android:paddingRight">@dimen/login_vertical_margin_half</item>
+        <item name="android:paddingTop">@dimen/login_vertical_margin</item>
+        <item name="android:progressDrawable">@drawable/custom_progress</item>
+        <item name="android:thumb">@drawable/custom_progress_thumb</item>
+    </style>
+    <style name="RangeSeekBar">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">@dimen/login_vertical_margin</item>
+    </style>
+    
     <style name="TitleStyle">
         <item name="android:textSize">@dimen/text_size_extra_large</item>
         <item name="android:textColor">@color/blue_on_white</item>

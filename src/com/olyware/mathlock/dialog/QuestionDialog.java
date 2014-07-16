@@ -31,10 +31,10 @@ import com.olyware.mathlock.views.RangeSeekBar.OnRangeSeekBarChangeListener;
 /**
  * Created by Kyle on 2/11/14.
  */
-public class QuestionDialog extends DialogFragment implements View.OnClickListener {
+public class QuestionDialog extends DialogFragment {
 
 	final private static int MAX_QUESTIONS = 5, MIN_QUESTIONS = 1, MIN_BET = 0, MIN_PROGRESS = 100;
-	private TextView betText, questionsText, difficultyText;
+	private TextView betText, questionsText, difficultyMinText, difficultyMaxText;
 	private SeekBar seekBet, seekQuestions;
 	private RangeSeekBar seekDifficulty;
 	private ListView lv;
@@ -116,9 +116,9 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		difficultyMax = Difficulty.fromValueToString(difficultyMaxValue);
 
 		// Bet Slider
-		betText = (TextView) v.findViewById(R.id.question_select_bet_text);
-		betText.setText(bet + betValue);
-		seekBet = (SeekBar) v.findViewById(R.id.question_select_bet);
+		betText = (TextView) v.findViewById(R.id.question_select_bet);
+		betText.setText(String.valueOf(betValue));
+		seekBet = (SeekBar) v.findViewById(R.id.question_select_seekbar_bet);
 		seekBet.setMax(betProgressMax);
 		seekBet.setProgress((int) ((betProgressMax - MIN_BET) * betPercent));
 		seekBet.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -126,7 +126,7 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				betPercent = ((float) (progress - MIN_BET)) / ((float) (betProgressMax - MIN_BET));
 				betValue = (int) (betPercent * (betMax - MIN_BET)) + MIN_BET;
-				betText.setText(bet + betValue);
+				betText.setText(String.valueOf(betValue));
 			}
 
 			@Override
@@ -141,9 +141,9 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		});
 
 		// Number of Questions Slider
-		questionsText = (TextView) v.findViewById(R.id.question_select_number_text);
-		questionsText.setText(questions + questionsValue);
-		seekQuestions = (SeekBar) v.findViewById(R.id.question_select_number);
+		questionsText = (TextView) v.findViewById(R.id.question_select_questions);
+		questionsText.setText(String.valueOf(questionsValue));
+		seekQuestions = (SeekBar) v.findViewById(R.id.question_select_seekbar_questions);
 		seekQuestions.setMax(questionsProgressMax);
 		seekQuestions.setProgress((int) ((questionsProgressMax - MIN_QUESTIONS) * questionsPercent));
 		seekQuestions.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -152,7 +152,7 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 				float percent = ((float) (progress - MIN_QUESTIONS))
 						/ ((float) (Math.max(MIN_PROGRESS + MIN_QUESTIONS, MAX_QUESTIONS - MIN_QUESTIONS) - MIN_QUESTIONS));
 				questionsValue = (int) (percent * (MAX_QUESTIONS - MIN_QUESTIONS)) + MIN_QUESTIONS;
-				questionsText.setText(questions + questionsValue);
+				questionsText.setText(String.valueOf(questionsValue));
 			}
 
 			@Override
@@ -167,9 +167,11 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		});
 
 		// Difficulty slider
-		difficultyText = (TextView) v.findViewById(R.id.question_select_difficulty_text);
-		difficultyText.setText(difficultyMin + difficulty + difficultyMax);
-		seekDifficulty = (RangeSeekBar) v.findViewById(R.id.question_select_difficulty);
+		difficultyMinText = (TextView) v.findViewById(R.id.question_select_difficulty_min);
+		difficultyMinText.setText(difficultyMin);
+		difficultyMaxText = (TextView) v.findViewById(R.id.question_select_difficulty_max);
+		difficultyMaxText.setText(difficultyMax);
+		seekDifficulty = (RangeSeekBar) v.findViewById(R.id.question_select_seekbar_difficulty);
 		seekDifficulty.setNotifyWhileDragging(true);
 		seekDifficulty.setSelectedMinValue(difficultyMinValue);
 		seekDifficulty.setSelectedMaxValue(difficultyMaxValue);
@@ -180,7 +182,8 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 				difficultyMaxValue = maxValue;
 				difficultyMin = Difficulty.fromValueToString(difficultyMinValue);
 				difficultyMax = Difficulty.fromValueToString(difficultyMaxValue);
-				difficultyText.setText(difficultyMin + difficulty + difficultyMax);
+				difficultyMinText.setText(difficultyMin);
+				difficultyMaxText.setText(difficultyMax);
 			}
 		});
 
@@ -218,7 +221,7 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 		});
 		setListViewHeightBasedOnChildren(lv, 6);
 
-		Button b = (Button) v.findViewById(R.id.question_select_button);
+		Button b = (Button) v.findViewById(R.id.question_select_button_challenge);
 		b.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -238,11 +241,6 @@ public class QuestionDialog extends DialogFragment implements View.OnClickListen
 
 		});
 		return v;
-	}
-
-	@Override
-	public void onClick(View view) {
-
 	}
 
 	public void setBuilder(ChallengeBuilder builder) {

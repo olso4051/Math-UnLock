@@ -111,6 +111,7 @@ public class ChallengeDialog extends DialogFragment {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
 					if (selectedContact.hasHiqUserID()) {
+						Loggy.d("userName = " + selectedContact.getName() + " |userID = " + selectedContact.getHiqUserID());
 						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getHiqUserID()));
 					} else {
 						String addresses = "";
