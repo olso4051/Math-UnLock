@@ -111,8 +111,8 @@ public class ChallengeDialog extends DialogFragment {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
 					if (selectedContact.hasHiqUserID()) {
-						Loggy.d("userName = " + selectedContact.getName() + " |userID = " + selectedContact.getHiqUserID());
-						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getHiqUserID()));
+						Loggy.d("selected: userName = " + selectedContact.getName() + " |userID = " + selectedContact.getHiqUserID());
+						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getName(), selectedContact.getHiqUserID()));
 					} else {
 						String addresses = "";
 						for (String address : selectedContact.getPhoneNumbers()) {
@@ -199,6 +199,7 @@ public class ChallengeDialog extends DialogFragment {
 
 			@Override
 			public void onDoneFindingContacts() {
+				Loggy.d("storing contacts");
 				ContactHelper.storeContacts(getActivity(), allContacts);
 				inputSearch.setEnabled(true);
 				swipeLayout.setRefreshing(false);

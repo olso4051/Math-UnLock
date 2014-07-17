@@ -221,9 +221,8 @@ public class QuestionDialog extends DialogFragment {
 		});
 		setListViewHeightBasedOnChildren(lv, 6);
 
-		Button b = (Button) v.findViewById(R.id.question_select_button_challenge);
-		b.setOnClickListener(new OnClickListener() {
-
+		Button challenge = (Button) v.findViewById(R.id.question_select_button_challenge);
+		challenge.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				List<QuestionSelectData> selectedQuestionPacks = new ArrayList<QuestionSelectData>(questionPackNames.size());
@@ -237,6 +236,14 @@ public class QuestionDialog extends DialogFragment {
 				builder.setQuestionSettings(betValue, questionsValue, difficultyMinValue, difficultyMaxValue);
 				builder.setSelectedQuestionPacks(selectedQuestionPacks);
 				listener.onChallenge(builder);
+			}
+
+		});
+		Button cancel = (Button) v.findViewById(R.id.question_select_button_cancel);
+		cancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dismiss();
 			}
 
 		});

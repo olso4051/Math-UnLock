@@ -122,7 +122,7 @@ public class GcmIntentService extends IntentService {
 							dbManager.addChallengeQuestion(challengeID, descriptions.get(i), questions.get(i), answers.get(i), userName);
 						}
 					}
-					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Undefined);
+					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Undefined, userName);
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper
 							.sendChallengeNotification(challengeID, userName, questions.size(), difficultyMin, difficultyMax, bet);
@@ -171,6 +171,8 @@ public class GcmIntentService extends IntentService {
 					if (status.equals("accepted"))
 						challengeStatus = ChallengeStatus.Accepted;
 					PreferenceHelper.storeChallengeStatus(this, challengeID, challengeStatus);
+					NotificationHelper notificationHelper = new NotificationHelper(this);
+					notificationHelper.sendChallengeStatusNotification(challengeID, challengeStatus);
 				}
 			}
 		}

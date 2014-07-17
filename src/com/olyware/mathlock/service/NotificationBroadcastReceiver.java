@@ -20,7 +20,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 		if (ACTION_CHALLENGE_ACCEPTED.equals(intent.getAction())) {
 			// TODO accept challenge
 			Bundle bundle = intent.getExtras();
-			final String challengeID = bundle.getString("challenge_id");
+			final String challengeID = bundle.getString(CHALLENGE_ID);
 			new AcceptChallenge(context, challengeID, true) {
 				@Override
 				protected void onPostExecute(Integer result) {
@@ -33,7 +33,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 		} else if (ACTION_CHALLENGE_DENIED.equals(intent.getAction())) {
 			// TODO deny challenge
 			Bundle bundle = intent.getExtras();
-			final String challengeID = bundle.getString("challenge_id");
+			final String challengeID = bundle.getString(CHALLENGE_ID);
 			new AcceptChallenge(context, challengeID, false) {
 				@Override
 				protected void onPostExecute(Integer result) {

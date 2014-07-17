@@ -53,6 +53,7 @@ public class MathQuestion extends Question {
 		this.parseMode = parseMode;
 		this.range = range;
 		this.answerPrecision = answerPrecision;
+		// setVariables();
 	}
 
 	public void setVariables() {

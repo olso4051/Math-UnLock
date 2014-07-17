@@ -6,14 +6,18 @@ import java.util.List;
 import com.olyware.mathlock.adapter.QuestionSelectData;
 
 public class ChallengeBuilder {
-	private String userHash;
+	private String userHash, userName;
 	private int bet, numQuestions, difficultyMin, difficultyMax;
 	private List<Integer> selectedQuestionPackIDs = new ArrayList<Integer>();
 	private List<String> questions = new ArrayList<String>();
 	private List<String[]> answers = new ArrayList<String[]>();
 
-	public ChallengeBuilder(String userHash) {
+	public ChallengeBuilder(String userName, String userHash) {
 		this.userHash = userHash;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	public void setUserHash(String userHash) {
@@ -47,6 +51,10 @@ public class ChallengeBuilder {
 	public void setAnswers(List<String[]> answers) {
 		this.answers.clear();
 		this.answers.addAll(answers);
+	}
+
+	public String getUserName() {
+		return userName;
 	}
 
 	public String getUserHash() {

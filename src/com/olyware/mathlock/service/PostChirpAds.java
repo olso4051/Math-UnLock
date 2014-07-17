@@ -2,19 +2,19 @@ package com.olyware.mathlock.service;
 
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.provider.Settings;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.NameValuePair;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
+import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.Loggy;
@@ -47,8 +47,7 @@ public class PostChirpAds extends AsyncTask<String, Integer, Integer> {
 	protected Integer doInBackground(String... s) {
 
 		// POST to API with old and new registration, also referral's registration
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+		HttpClient httpclient = HttpClientBuilder.create().build();
 
 		try {
 			ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();

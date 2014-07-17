@@ -3,40 +3,41 @@ package com.olyware.mathlock.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.entity.ContentType;
+import ch.boye.httpclientandroidlib.entity.StringEntity;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.Loggy;
 
-public class SendChallenge extends AsyncTask<String, Integer, Integer> {
+public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String success, error, challengeID;
 	private String userID, opponentUserID;
+	private List<GenericQuestion> genericQuestions;
 	private List<String> questions, descriptions;
 	private List<String[]> answers;
-	private int bet = 0;
+	private int bet = 0, difficultyMin, difficultyMax;
 
-	public SendChallenge(Activity act, String opponentUserID, List<GenericQuestion> questions, int bet) {
+	public SendChallenge(Activity act, String opponentUserID, List<GenericQuestion> questions, int bet, int difficultyMin, int difficultyMax) {
+		Loggy.d("SendChallenge");
 		userID = ContactHelper.getUserID(act);
 		this.opponentUserID = opponentUserID;
+		this.genericQuestions = new ArrayList<GenericQuestion>(questions.size());
+		this.genericQuestions.addAll(questions);
 		this.descriptions = new ArrayList<String>(questions.size());
 		this.questions = new ArrayList<String>(questions.size());
 		this.answers = new ArrayList<String[]>(questions.size());
@@ -46,6 +47,8 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 			this.answers.add(question.getAnswers());
 		}
 		this.bet = bet;
+		this.difficultyMin = difficultyMin;
+		this.difficultyMax = difficultyMax;
 		baseURL = act.getString(R.string.service_base_url);
 	}
 
@@ -68,6 +71,13 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 			return challengeID;
 		else
 			return "";
+	}
+
+	public List<GenericQuestion> getGenericQuestions() {
+		if (genericQuestions != null)
+			return genericQuestions;
+		else
+			return new ArrayList<GenericQuestion>();
 	}
 
 	public List<String> getDescriptions() {
@@ -95,19 +105,24 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 		return bet;
 	}
 
+	public int getDifficultyMin() {
+		return difficultyMin;
+	}
+
+	public int getDifficultyMax() {
+		return difficultyMax;
+	}
+
 	@Override
-	protected Integer doInBackground(String... s) {
+	protected Integer doInBackground(Void... v) {
+		Loggy.d("questions size = " + questions.size());
+		Loggy.d("answers size = " + answers.size());
 		if (questions.size() != answers.size() || questions.size() <= 0 || answers.size() <= 0)
 			return 1;
 		String endpoint = "challenge";
 
 		// PUT to API challenge
-		HttpParams params = new BasicHttpParams();
-		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		HttpProtocolParams.setContentCharset(params, "UTF-8");
-		DefaultHttpClient httpclient = new DefaultHttpClient(params);
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		httpclient.getParams().setParameter("http.protocol.content-charset", "UTF-8");
+		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
 		HttpEntity entity;
@@ -118,15 +133,17 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 			data.put("o_user_id", opponentUserID);
 			data.put("c_user_id", userID);
 			JSONArray descriptionArray = new JSONArray();
+			for (String description : descriptions) {
+				descriptionArray.put(description);
+			}
+			data.put("descriptions", descriptionArray);
+
+			JSONArray questionArray = new JSONArray();
 			for (String question : questions) {
 				descriptionArray.put(question);
 			}
-			data.put("descriptions", descriptionArray);
-			JSONArray questionArray = new JSONArray();
-			for (String question : questions) {
-				questionArray.put(question);
-			}
 			data.put("questions", questionArray);
+
 			JSONArray answerArray = new JSONArray();
 			for (String[] answerSet : answers) {
 				JSONArray answerSetArray = new JSONArray();
@@ -137,11 +154,13 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 			}
 			data.put("answers", answerArray);
 			data.put("bet", bet);
+			data.put("difficulty_min", difficultyMin);
+			data.put("difficulty_max", difficultyMax);
 
-			Loggy.d("test", "JSON to challenge: " + data.toString());
-			httpput.setEntity(new StringEntity(data.toString(), "UTF-8"));
+			Loggy.d("JSON to challenge: " + data.toString());
+			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httpput.setHeader("Content-Type", "application/json");
-			HttpResponse response = httpclient.execute(httpput);
+			HttpResponse response = httpClient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			Loggy.d("test", fullResult);
@@ -158,7 +177,6 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 			error = getStringFromJSON(jsonResponse, "error");
 			challengeID = getStringFromJSON(jsonResponse, "challenge_id");
 			if (success.equals("true")) {
-				storeChallenge();
 				return 0;
 			} else
 				return 1;
@@ -169,8 +187,7 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 
 	@Override
 	protected void onPostExecute(Integer result) {
-		// override in calling class
-		// result == 0 success
+		// Store the list of generic questions in the database in the calling thread
 	}
 
 	private String getStringFromJSON(JSONObject json, String key) {
@@ -179,17 +196,5 @@ public class SendChallenge extends AsyncTask<String, Integer, Integer> {
 		} catch (JSONException e) {
 			return "";
 		}
-	}
-
-	private boolean getBooleanFromJSON(JSONObject json, String key) {
-		try {
-			return json.getBoolean(key);
-		} catch (JSONException e) {
-			return false;
-		}
-	}
-
-	private void storeChallenge() {
-		// TODO store challenge in challenge DB table
 	}
 }

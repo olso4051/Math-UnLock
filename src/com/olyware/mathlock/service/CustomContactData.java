@@ -175,7 +175,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public String getJSON() {
 		String json = "{";
-		json += "\"" + ContactHelper.CONTACT_IS_FRIEND + "\":\"" + isFriend + "\",";
+		json += "\"" + ContactHelper.CONTACT_IS_FRIEND + "\":\"" + isFriend() + "\",";
 		json += "\"" + ContactHelper.CONTACT_USER_ID + "\":\"" + hiqUserID + "\",";
 		json += "\"" + ContactHelper.CONTACT_NAME + "\":\"" + name + "\",";
 		json += "\"" + ContactHelper.CONTACT_PHONE + "\":[";

@@ -94,6 +94,7 @@ import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 import com.olyware.mathlock.utils.Purchase;
 import com.olyware.mathlock.utils.ShareHelper;
+import com.olyware.mathlock.utils.Toaster;
 import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
 import com.olyware.mathlock.views.JoystickSelectListener;
@@ -1481,15 +1482,42 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					questionDialog.setCancelable(true);
 					questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
 						@Override
-						public void onChallenge(ChallengeBuilder builder) {
+						public void onChallenge(final ChallengeBuilder builder) {
+							Loggy.d("sending challenge...");
+							boolean success = false;
 							questionDialog.dismiss();
-							List<GenericQuestion> questions = dbManager.getChallengeQuestions(builder);
-							new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet()) {
-								@Override
-								protected void onPostExecute(Integer result) {
-									super.onPostExecute(result);
+							if (dbManager != null) {
+								if (!dbManager.isDestroyed()) {
+									Loggy.d("sending challenge...database is not null...");
+									List<GenericQuestion> questions = dbManager.getChallengeQuestions(builder);
+									Loggy.d("before sending questions size = " + questions.size());
+									new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet(), builder
+											.getDifficultyMin(), builder.getDifficultyMax()) {
+										@Override
+										protected void onPostExecute(Integer result) {
+											Loggy.d("sending challenge...response from server...");
+											boolean success = false;
+											if (result == 0) {
+												if (dbManager != null) {
+													if (!dbManager.isDestroyed()) {
+														dbManager.addChallengeQuestions(getChallengeID(), getGenericQuestions(),
+																builder.getUserName());
+														PreferenceHelper.storeChallengeStatus(MainActivity.this, getChallengeID(),
+																ChallengeStatus.Undefined, builder.getUserName());
+														success = true;
+														Loggy.d("sent challenge");
+													}
+												}
+											}
+											if (!success)
+												Toaster.sendChallengeFailed(MainActivity.this);
+										}
+									}.execute();
+									success = true;
 								}
-							};
+							}
+							if (!success)
+								Toaster.sendChallengeFailed(MainActivity.this);
 						}
 					});
 					questionDialog.show(getSupportFragmentManager(), "fragment_question_select");

@@ -90,7 +90,6 @@
     <string name="notification_message_challenge1">\u0020questions,\u0020</string>
     <string name="notification_message_challenge2">Difficulty, for\u0020</string>
     <string name="notification_message_challenge3">Coins</string>
-    
     <string name="notification_title_challenge_result_tie">So Close, You Tied</string>
     <string name="notification_message_challenge_result_tie">\u0020got the same score as you</string>
     <string name="notification_title_challenge_result_won">Congrats, You Won!</string>
@@ -99,6 +98,11 @@
     <string name="notification_message_challenge_result3">\u0020coins</string>
     <string name="notification_title_challenge_result_loss">Too Bad, You Lost</string>
     <string name="notification_message_challenge_result_loss1">You lost to\u0020</string>
+    
+    <string name="notification_title_challenge_status_accepted">\u0020 Accepted Your Challenge</string>
+    <string name="notification_title_challenge_status_declined">\u0020 Declined Your Challenge</string>
+    <string name="notification_message_challenge_status_accepted">Answer the questions and beat your friend</string>
+    <string name="notification_message_challenge_status_declined">They don\'t have time right now, try again later.</string>
     
     <!-- Preferences(default) -->
     <string name="enable_sponsored">Sponsored question frequency</string>

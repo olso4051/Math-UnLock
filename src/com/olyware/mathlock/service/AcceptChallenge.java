@@ -1,21 +1,18 @@
 package com.olyware.mathlock.service;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.entity.ContentType;
+import ch.boye.httpclientandroidlib.entity.StringEntity;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.Loggy;
@@ -49,13 +46,8 @@ public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 	protected Integer doInBackground(Void... v) {
 		String endpoint = "challenge/" + (accept ? "accept" : "decline");
 
-		// PUT to API challenge
-		HttpParams params = new BasicHttpParams();
-		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		HttpProtocolParams.setContentCharset(params, "UTF-8");
-		DefaultHttpClient httpclient = new DefaultHttpClient(params);
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		httpclient.getParams().setParameter("http.protocol.content-charset", "UTF-8");
+		// PUT to API accept or decline challenge
+		HttpClient httpclient = HttpClientBuilder.create().build();
 
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
 		HttpEntity entity;
@@ -66,7 +58,7 @@ public class AcceptChallenge extends AsyncTask<Void, Integer, Integer> {
 			data.put("challenge_id", challengeID);
 
 			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());
-			httpput.setEntity(new StringEntity(data.toString(), "UTF-8"));
+			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httpput.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httpput);
 			entity = response.getEntity();

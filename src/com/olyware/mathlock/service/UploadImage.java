@@ -2,15 +2,6 @@ package com.olyware.mathlock.service;
 
 import java.io.ByteArrayOutputStream;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,6 +9,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
+import ch.boye.httpclientandroidlib.entity.mime.HttpMultipartMode;
+import ch.boye.httpclientandroidlib.entity.mime.MultipartEntityBuilder;
+import ch.boye.httpclientandroidlib.entity.mime.content.ByteArrayBody;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 public class UploadImage extends AsyncTask<String, Integer, Integer> {
 	private final String BASE_URL = "http://deeldat.com/share/fb";
@@ -58,7 +58,7 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(String... s) {
-		HttpClient httpClient = new DefaultHttpClient();
+		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(BASE_URL);
 		HttpEntity entity;
 		String fullResult;

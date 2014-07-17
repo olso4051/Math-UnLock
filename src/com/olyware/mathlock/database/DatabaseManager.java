@@ -36,6 +36,7 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.ChallengeBuilder;
+import com.olyware.mathlock.utils.Loggy;
 
 public class DatabaseManager {
 
@@ -380,6 +381,7 @@ public class DatabaseManager {
 				packIDs.remove(0);
 			}
 			int packs = packIDs.size();
+			Loggy.d("questions = " + questions + " |packs = " + packs + " |");
 			Random rand = new Random();
 			List<GenericQuestion> challengeQuestions = new ArrayList<GenericQuestion>(questions);
 			for (int i = 0; i < questions; i++) {
@@ -417,14 +419,15 @@ public class DatabaseManager {
 							Difficulty.fromValue(builder.getDifficultyMin()), Difficulty.fromValue(builder.getDifficultyMax()), -1)));
 					break;
 				}
-
 			}
+			Loggy.d("challengeQuestions size = " + challengeQuestions.size());
 			return challengeQuestions;
 		} else
 			return null;
 	}
 
 	private GenericQuestion getGenericQuestion(MathQuestion question) {
+		question.setVariables();
 		return new GenericQuestion("Math", question.getQuestionText(), question.getAnswers());
 	}
 
@@ -517,6 +520,27 @@ public class DatabaseManager {
 			return db.delete(ChallengeQuestionContract.TABLE_NAME, where, null);
 		} else
 			return 0;
+	}
+
+	public long addChallengeQuestions(String challengeID, List<GenericQuestion> questions, String userName) {
+		if (db.isOpen()) {
+			long row = -1;
+			for (GenericQuestion question : questions) {
+				ContentValues values = new ContentValues();
+				values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
+				values.put(QuestionContract.QUESTION_TEXT, question.getQuestion());
+				values.put(QuestionContract.ANSWER_CORRECT, question.getAnswers()[0]);
+				values.put(ChallengeQuestionContract.ANSWER_INCORRECT1, question.getAnswers()[1]);
+				values.put(ChallengeQuestionContract.ANSWER_INCORRECT2, question.getAnswers()[2]);
+				values.put(ChallengeQuestionContract.ANSWER_INCORRECT3, question.getAnswers()[3]);
+				values.put(ChallengeQuestionContract.USER_NAME, userName);
+				values.put(ChallengeQuestionContract.CHALLENGE_DESCRIPTION, question.getDescription());
+				values.put(ChallengeQuestionContract.SCORE, -1);
+				row = db.insert(ChallengeQuestionContract.TABLE_NAME, null, values);
+			}
+			return row;
+		} else
+			return -1;
 	}
 
 	public long addChallengeQuestion(String challengeID, String description, String question, String[] answers, String userName) {

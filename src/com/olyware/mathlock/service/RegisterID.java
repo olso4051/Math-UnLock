@@ -1,12 +1,5 @@
 package com.olyware.mathlock.service;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,6 +7,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.entity.ContentType;
+import ch.boye.httpclientandroidlib.entity.StringEntity;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
@@ -107,8 +108,7 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 		}
 
 		// POST to API new or update registration, also referral's registration
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
 		HttpEntity entity;
@@ -148,9 +148,9 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 			}
 
 			Loggy.d("test", "JSON to register: " + data.toString());
-			httpput.setEntity(new StringEntity(data.toString()));
+			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httpput.setHeader("Content-Type", "application/json");
-			HttpResponse response = httpclient.execute(httpput);
+			HttpResponse response = httpClient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			Loggy.d("test", fullResult);

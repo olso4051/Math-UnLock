@@ -5,13 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +15,14 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
 import android.widget.Toast;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
+import ch.boye.httpclientandroidlib.entity.ContentType;
+import ch.boye.httpclientandroidlib.entity.StringEntity;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -167,8 +168,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		cur.close();
 
 		// POST to API to get user_ids of contacts and facebook friends
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpPost httppost = new HttpPost(baseURL + "friend");
 		HttpEntity entity;
 		String fullResult;
@@ -190,7 +190,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 			}
 			data.put("facebook_hashes", facebookHashes);
 			Loggy.d("JSON to get friends = " + data.toString());
-			httppost.setEntity(new StringEntity(data.toString()));
+			httppost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httppost.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httppost);
 			entity = response.getEntity();
@@ -205,9 +205,11 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		}
 
 		// for testing we'll assume we got 5 random contacts back from the service
-		for (int i = 2; i < 10; i++) {
-			userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(i), "facebook" + i, "test" + i, "userName" + i));
-		}
+		// for (int i = 2; i < 10; i++) {
+		userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(6), "262217307306251", "34d90771d25aabbe6bfd39bb9514d3c3",
+				"Kyle Tester"));
+		userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(20), "13959212", "5f14e3e2e9738b9d50ca3334a438c954", "Kyle Olson"));
+		// }
 
 		Collections.sort(allContacts);
 		if (userHashes.size() > 0) {

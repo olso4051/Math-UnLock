@@ -11,9 +11,10 @@ import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.service.NotificationBroadcastReceiver;
+import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class NotificationHelper {
-	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3, CHALLENGE_ID = 4, CHALLENGE_RESULT_ID = 5;
+	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3, CHALLENGE_ID = 4, CHALLENGE_RESULT_ID = 5, CHALLENGE_STATUS_ID = 6;
 	private NotificationManager mNotificationManager;
 	NotificationCompat.Builder builder;
 	private Context ctx;
@@ -133,6 +134,34 @@ public class NotificationHelper {
 	public void clearChallengeNotification() {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(CHALLENGE_ID);
+	}
+
+	public void sendChallengeStatusNotification(String challengeID, ChallengeStatus status) {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		String title = "";
+		String msg = "";
+		String userName = PreferenceHelper.getChallengeUserName(ctx, challengeID);
+		if (status == ChallengeStatus.Accepted) {
+			title = userName + ctx.getString(R.string.notification_title_challenge_status_accepted);
+			msg = ctx.getString(R.string.notification_message_challenge_status_accepted);
+		} else if (status == ChallengeStatus.Denied) {
+			title = userName + ctx.getString(R.string.notification_title_challenge_status_declined);
+			msg = ctx.getString(R.string.notification_message_challenge_status_declined);
+		} else
+			return;
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small);
+		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
+		mBuilder.setContentTitle(title);
+		mBuilder.setContentText(msg);
+		mBuilder.setAutoCancel(true);
+		mNotificationManager.notify(CHALLENGE_STATUS_ID, mBuilder.build());
+	}
+
+	public void clearChallengeStatusNotification() {
+		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.cancel(CHALLENGE_STATUS_ID);
 	}
 
 	public void sendChallengeResultNotification(String userName, int scoreYou, int scoreThem, int bet) {

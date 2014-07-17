@@ -1,18 +1,19 @@
 package com.olyware.mathlock.service;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.entity.ContentType;
+import ch.boye.httpclientandroidlib.entity.StringEntity;
+import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 
@@ -45,8 +46,7 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 	@Override
 	protected Integer doInBackground(String... s) {
 		// PUT to API with user_id
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		httpclient.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpPut httpput = new HttpPut(baseURL + "confirm");
 		HttpEntity entity;
 		String fullResult;
@@ -57,7 +57,7 @@ public class ConfirmID extends AsyncTask<String, Integer, Integer> {
 				data.put("user_id", s[0]);
 			}
 			String authorizationString = "Basic " + Base64.encodeToString(("roll" + ":" + "over").getBytes(), Base64.NO_WRAP);
-			httpput.setEntity(new StringEntity(data.toString()));
+			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httpput.setHeader("Content-Type", "application/json");
 			httpput.setHeader("Authorization", authorizationString);
 			HttpResponse response = httpclient.execute(httpput);

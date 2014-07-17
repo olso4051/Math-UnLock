@@ -14,6 +14,7 @@ import com.olyware.mathlock.database.DatabaseManager;
 public class PreferenceHelper {
 	final public static String MONEY_PREFS = "Packages";
 	final public static String CHALLENGE_PREFS = "Challenge";
+	final public static String USER_NAME = "user_name";
 	final public static String BET_DEFAULT = "default_bet_percent";
 	final public static String QUESTION_NUMBER = "num_questions";
 	final public static String DIFFICULTY_MIN = "difficulty_min";
@@ -171,9 +172,21 @@ public class PreferenceHelper {
 		sharedPrefsChallengeEdit.commit();
 	}
 
+	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status, String userName) {
+		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		sharedPrefsChallengeEdit.putInt(challengeID, status.getValue());
+		sharedPrefsChallengeEdit.putString(challengeID + USER_NAME, userName);
+		sharedPrefsChallengeEdit.commit();
+	}
+
 	public static ChallengeStatus getChallengeStatus(Context ctx, String challengeID) {
 		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
 		return ChallengeStatus.valueOf(sharedPrefsChallenge.getInt(challengeID, ChallengeStatus.getDefaultValue()));
+	}
+
+	public static String getChallengeUserName(Context ctx, String challengeID) {
+		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsChallenge.getString(challengeID + USER_NAME, ctx.getString(R.string.challenge_default_opponent));
 	}
 
 	public static void increaseMoney(Context ctx, int amount) {

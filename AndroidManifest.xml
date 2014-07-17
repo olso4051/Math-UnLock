@@ -114,6 +114,16 @@
 			</intent-filter>
 		</receiver>
 		
+		<receiver android:name=".service.ChirpAdsReceiver">
+			<intent-filter> 
+				<action android:name="android.intent.action.PACKAGE_ADDED" />
+				<category android:name="android.intent.category.DEFAULT" /> 
+				<data android:scheme="package" /> 
+			</intent-filter>
+		</receiver>
+		
+		<service android:name=".service.ChirpAdsService" />
+		
 		<!-- Used for Google Play Store Campaign Measurement-->;
 		<service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
 		<receiver android:name="com.olyware.mathlock.service.CustomGAReceiver"
