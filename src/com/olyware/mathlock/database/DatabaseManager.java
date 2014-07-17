@@ -475,7 +475,7 @@ public class DatabaseManager {
 
 	public int getChallengeScore(String challengeID) {
 		if (db.isOpen()) {
-			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
 			cursor = db.rawQuery("SELECT SUM(" + ChallengeQuestionContract.SCORE + ") FROM " + ChallengeQuestionContract.TABLE_NAME
 					+ " WHERE " + where, null);
 			cursor.moveToFirst();
@@ -494,7 +494,7 @@ public class DatabaseManager {
 
 	public ChallengeQuestion getChallengeQuestion(String challengeID) {
 		if (db.isOpen()) {
-			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
 			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 			return DatabaseModelFactory.buildChallengeQuestion(cursor);
 		} else
@@ -516,16 +516,19 @@ public class DatabaseManager {
 
 	public int removeChallengeQuestions(String challengeID) {
 		if (db.isOpen()) {
-			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
 			return db.delete(ChallengeQuestionContract.TABLE_NAME, where, null);
 		} else
 			return 0;
 	}
 
 	public long addChallengeQuestions(String challengeID, List<GenericQuestion> questions, String userName) {
+		Loggy.d("adding challegne questions");
 		if (db.isOpen()) {
+			Loggy.d("adding challenge questions");
 			long row = -1;
 			for (GenericQuestion question : questions) {
+				Loggy.d("adding challenge question " + question.getQuestion());
 				ContentValues values = new ContentValues();
 				values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
 				values.put(QuestionContract.QUESTION_TEXT, question.getQuestion());
@@ -544,7 +547,9 @@ public class DatabaseManager {
 	}
 
 	public long addChallengeQuestion(String challengeID, String description, String question, String[] answers, String userName) {
+		Loggy.d("adding challegne questions");
 		if (db.isOpen()) {
+			Loggy.d("adding challenge question " + question);
 			ContentValues values = new ContentValues();
 			values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
 			values.put(QuestionContract.QUESTION_TEXT, question);
@@ -606,7 +611,7 @@ public class DatabaseManager {
 
 	public int getQuestionsToAnswer(String challengeID) {
 		if (db.isOpen()) {
-			String where = ChallengeQuestionContract.CHALLENGE_ID + " = " + challengeID;
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
 			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ID_AND_SCORE, where, null, null, null, null);
 			Map<String, Integer> map = DatabaseModelFactory.buildChallengeIDs(cursor);
 			return map.get(challengeID);

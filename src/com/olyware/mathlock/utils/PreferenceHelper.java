@@ -173,6 +173,7 @@ public class PreferenceHelper {
 	}
 
 	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status, String userName) {
+		Loggy.d("set challengeID and challenge+username");
 		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
 		sharedPrefsChallengeEdit.putInt(challengeID, status.getValue());
 		sharedPrefsChallengeEdit.putString(challengeID + USER_NAME, userName);
@@ -180,6 +181,7 @@ public class PreferenceHelper {
 	}
 
 	public static ChallengeStatus getChallengeStatus(Context ctx, String challengeID) {
+		Loggy.d("set challengeID");
 		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
 		return ChallengeStatus.valueOf(sharedPrefsChallenge.getInt(challengeID, ChallengeStatus.getDefaultValue()));
 	}

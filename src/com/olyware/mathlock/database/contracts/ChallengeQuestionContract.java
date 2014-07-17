@@ -40,7 +40,7 @@ public final class ChallengeQuestionContract extends QuestionContract {
 	/**
 	 * Type: TEXT
 	 */
-	public static final String CHALLENGE_DESCRIPTION = "descritption";
+	public static final String CHALLENGE_DESCRIPTION = "description";
 	/**
 	 * Type: TEXT
 	 */

@@ -26,6 +26,7 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.MathQuestion.ParseMode;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.EZ;
+import com.olyware.mathlock.utils.Loggy;
 
 public class DatabaseModelFactory {
 
@@ -355,24 +356,34 @@ public class DatabaseModelFactory {
 
 	public static Map<String, Integer> buildChallengeIDs(Cursor cursor) {
 		Map<String, Integer> challengeIDs = new HashMap<String, Integer>();
+		Loggy.d("number of challengeIDs = " + cursor.getCount());
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			String challengeID, lastChallengeID = "";
-			int questionsToDo = 0;
+			int questionsToDo = 0, lastQuestionsToDo = 0;
 			while (!cursor.isAfterLast()) {
 				cursorHelper.setCursor(cursor);
 				challengeID = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_ID);
-				if (!challengeID.equals(lastChallengeID)) {
-					if (!lastChallengeID.equals("")) {
-						challengeIDs.put(lastChallengeID, questionsToDo);
-					}
+				if (cursor.isFirst())
 					lastChallengeID = challengeID;
-					questionsToDo = 0;
-				}
 				int score = cursorHelper.getInteger(ChallengeQuestionContract.SCORE);
-				if (score < 0)
-					questionsToDo++;
+				if (score < 0) {
+					if (challengeID.equals(lastChallengeID)) {
+						questionsToDo++;
+					} else {
+						lastQuestionsToDo = questionsToDo;
+						questionsToDo = 1;
+					}
+				}
+				Loggy.d("challengeID = " + challengeID + " |lastChallengeID = " + lastChallengeID);
+				if (!challengeID.equals(lastChallengeID)) {
+					challengeIDs.put(lastChallengeID, lastQuestionsToDo);
+					lastChallengeID = challengeID;
+				}
+				if (cursor.isLast()) {
+					challengeIDs.put(challengeID, questionsToDo);
+				}
 				cursor.moveToNext();
 			}
 			cursor.close();

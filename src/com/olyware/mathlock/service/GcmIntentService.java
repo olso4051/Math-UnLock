@@ -62,6 +62,7 @@ public class GcmIntentService extends IntentService {
 				// Server deleted message
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
 				// If it's a regular GCM message, do some work.
+				Loggy.d(fullMessage);
 				if (!userID.equals("") || type.equals(USER_ID_TO_CONFIRM)) {
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 					sharedPrefsUserInfo.edit().putString(getString(R.string.pref_user_userid), userID).commit();
@@ -96,7 +97,8 @@ public class GcmIntentService extends IntentService {
 					}.execute(storedUserID, pickupHash);
 				} else if (type.equals(CHALLENGE)) {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
-					String userName = getStringFromMessage(fullMessage, "c_user_name");
+					String userName = getStringFromMessage(fullMessage, "c_username");
+					Loggy.d("userName = " + userName);
 					if (userName.equals("")) {
 						String phoneHash = getStringFromMessage(fullMessage, "phone_hash");
 						String facebookHash = getStringFromMessage(fullMessage, "facebook_hash");
@@ -134,11 +136,11 @@ public class GcmIntentService extends IntentService {
 					int bet = getIntFromMessage(fullMessage, "bet");
 					userID = ContactHelper.getUserID(this);
 					if (userID.equals(cUserID)) {										// You are c_user
-						userName = getStringFromMessage(fullMessage, "o_user_name");
+						userName = getStringFromMessage(fullMessage, "o_username");
 						score = getIntFromMessage(fullMessage, "o_score");
 						scoreYou = getIntFromMessage(fullMessage, "c_score");
 					} else if (userID.equals(oUserID)) {									// You are o_user
-						userName = getStringFromMessage(fullMessage, "c_user_name");
+						userName = getStringFromMessage(fullMessage, "c_username");
 						score = getIntFromMessage(fullMessage, "c_score");
 						scoreYou = getIntFromMessage(fullMessage, "o_score");
 					} else {																// couldn't figure out who you are

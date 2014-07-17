@@ -1009,10 +1009,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				fromChallenge = false;
 				challengeIDToDisplay = "";
 				Map<String, Integer> challengeIDs = dbManager.getChallengeIDs();
+				Loggy.d("challengeIDs.size() = " + challengeIDs.size());
 				for (Map.Entry<String, Integer> entry : challengeIDs.entrySet()) {
 					String challengeID = entry.getKey();
 					int questionsToAnswer = entry.getValue();
 					ChallengeStatus status = PreferenceHelper.getChallengeStatus(this, challengeID);
+					Loggy.d("challengeID = " + challengeID + " |questions = " + questionsToAnswer + " |status = " + status.getValue());
 					if (status.equals(ChallengeStatus.Accepted) && challengeIDToDisplay.equals("")) {
 						if (questionsToAnswer > 0) {
 							// display challenge Question
@@ -1026,6 +1028,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						dbManager.removeChallengeQuestions(challengeID);
 					}
 				}
+				Loggy.d(challengeIDToDisplay);
 				if (!challengeIDToDisplay.equals("")) {
 					ChallengeQuestion question = dbManager.getChallengeQuestion(challengeIDToDisplay);
 					if (question != null) {
@@ -1039,14 +1042,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 						answers = question.getAnswers();
 						problem.setText(question.getQuestionText());
+						problem.setTextColor(defaultTextColor);
 
 						joystick.resetGuess();
 						joystick.setProblem(true);
-						problem.setText(questionFromDeepLink);
-						problem.setTextColor(defaultTextColor);
+
 						questionDescription.setText(getString(R.string.question_description_challenge_prefix) + userName + " | "
 								+ description);
-						answers = answersFromDeepLink;
+
 						setRandomAnswers();
 						joystick.setAnswers(answersRandom, answerLoc);
 						resetQuestionWorth(questionWorthMax);
