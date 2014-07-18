@@ -19,9 +19,11 @@ import android.widget.ListView;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactArrayAdapter;
+import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.ContactHelper.FindType;
 import com.olyware.mathlock.utils.Loggy;
 
 /**
@@ -200,8 +202,37 @@ public class ChallengeDialog extends DialogFragment {
 			}
 
 			@Override
-			public void onDoneFindingContacts() {
+			public void onDoneFindingContacts(List<ContactHashes> hashesList) {
 				if (allContacts != null && getActivity() != null) {
+					for (ContactHashes hashes : hashesList) {
+						List<Integer> ids = ContactHelper.findContacts(FindType.PhoneAndFacebookHASH, 0, allContacts, hashes);
+						if (ids.size() > 0) {
+							int mergeID = ids.get(0);
+							int mergeReplaceAddition = 1;
+							if (!contacts.get(mergeID + 1).isFriend()) {
+								mergeReplaceAddition += 1;
+							}
+							for (int i = 1; i < ids.size(); i++) {
+								int replaceAddition = 1;
+								int id = ids.get(i);
+								if (!contacts.get(id + 1).isFriend()) {
+									replaceAddition += 1;
+								}
+								contacts.get(mergeID + mergeReplaceAddition).mergeWith(contacts.get(id + replaceAddition));
+								allContacts.get(mergeID).mergeWith(allContacts.get(id));
+							}
+							for (int i = 1; i < ids.size(); i++) {
+								int replaceAddition = 1;
+								int id = ids.get(i);
+								if (!contacts.get(id + 1).isFriend()) {
+									replaceAddition += 1;
+								}
+								contacts.remove(id + replaceAddition);
+								allContacts.remove(id);
+							}
+						}
+						adapter.notifyDataSetChanged();
+					}
 					Loggy.d("storing contacts");
 					ContactHelper.storeContacts(getActivity(), allContacts);
 					inputSearch.setEnabled(true);

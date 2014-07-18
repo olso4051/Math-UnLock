@@ -11,16 +11,18 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	private String name, description, hiqUserID, hiqUserName, facebookUserID, facebookName;
 	private List<String> emails, phoneNumbers;
 	private boolean isFriend, isContact;
-	private int contact, section;
+	private int section, contact;
+	private List<Integer> contacts;
 
 	public CustomContactData() {
 		this.name = "";
 		this.emails = new ArrayList<String>();
 		this.phoneNumbers = new ArrayList<String>();
+		this.contacts = new ArrayList<Integer>();
 		isFriend = false;
 		isContact = false;
-		contact = -1;
 		section = -1;
+		contact = -1;
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
@@ -30,6 +32,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public CustomContactData(int contact, String userID, String hiqUserName) {
 		isContact = false;
+		this.contacts = new ArrayList<Integer>();
 		this.contact = contact;
 		this.hiqUserID = userID;
 		this.hiqUserName = hiqUserName;
@@ -43,6 +46,23 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.description = "";
 	}
 
+	public CustomContactData(List<Integer> contacts, String userID, String hiqUserName) {
+		isContact = false;
+		this.contacts = new ArrayList<Integer>();
+		this.contacts.addAll(contacts);
+		this.hiqUserID = userID;
+		this.hiqUserName = hiqUserName;
+		this.name = "";
+		this.emails = new ArrayList<String>();
+		this.phoneNumbers = new ArrayList<String>();
+		isFriend = false;
+		section = -1;
+		contact = -1;
+		facebookUserID = "";
+		facebookName = "";
+		this.description = "";
+	}
+
 	public CustomContactData(String name, String email, String phoneNumber) {
 		this.name = name;
 		this.emails = new ArrayList<String>(1);
@@ -51,8 +71,9 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers.add(ContactHelper.getPhoneNumberFromString(phoneNumber));
 		isFriend = false;
 		isContact = true;
-		contact = -1;
+		contacts = new ArrayList<Integer>();
 		section = -1;
+		contact = -1;
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
@@ -73,8 +94,9 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.facebookUserID = facebookUserID;
 		this.facebookName = facebookName;
 		isContact = true;
-		contact = -1;
+		contacts = new ArrayList<Integer>();
 		section = -1;
+		contact = -1;
 		this.description = "";
 	}
 
@@ -86,8 +108,9 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers.addAll(ContactHelper.getPhoneNumbersFromStrings(phoneNumbers));
 		isFriend = false;
 		isContact = true;
-		contact = -1;
+		contacts = new ArrayList<Integer>();
 		section = -1;
+		contact = -1;
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
@@ -101,8 +124,9 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers = new ArrayList<String>();
 		isFriend = true;
 		isContact = true;
-		contact = -1;
+		contacts = new ArrayList<Integer>();
 		section = -1;
+		contact = -1;
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = facebookID;
@@ -118,11 +142,27 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.section = section;
 		name = title;
 		this.description = description;
-		contact = -1;
+		contacts = new ArrayList<Integer>();
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
 		facebookName = "";
+		contact = -1;
+	}
+
+	public void mergeWith(CustomContactData data) {
+		if (name.equals(""))
+			name = data.getName();
+		if (hiqUserID.equals(""))
+			hiqUserID = data.getHiqUserID();
+		if (hiqUserName.equals(""))
+			hiqUserName = data.getHiqUserName();
+		if (facebookUserID.equals(""))
+			facebookUserID = data.getFacebookHash();
+		if (facebookName.equals(""))
+			facebookName = data.getFacebookName();
+		phoneNumbers.addAll(data.getPhoneNumbers());
+		emails.addAll(data.getEmails());
 	}
 
 	public String getName() {
@@ -131,6 +171,10 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public String getHiqUserName() {
 		return hiqUserName;
+	}
+
+	public String getFacebookName() {
+		return facebookName;
 	}
 
 	public String getDisplayName() {
@@ -211,6 +255,10 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public int getContact() {
 		return contact;
+	}
+
+	public List<Integer> getContacts() {
+		return contacts;
 	}
 
 	public int getSection() {

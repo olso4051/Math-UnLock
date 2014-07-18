@@ -110,10 +110,10 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 			Response response = meRequest.executeAndWait();
 			try {
 				JSONObject json = new JSONObject(response.getRawResponse());
-				userName = JSONHelper.getStringFromMessage(json, "name");
-				facebookID = JSONHelper.getStringFromMessage(json, "id");
-				gender = JSONHelper.getStringFromMessage(json, "gender");
-				email = JSONHelper.getStringFromMessage(json, "email");
+				userName = JSONHelper.getStringFromJSON(json, "name");
+				facebookID = JSONHelper.getStringFromJSON(json, "id");
+				gender = JSONHelper.getStringFromJSON(json, "gender");
+				email = JSONHelper.getStringFromJSON(json, "email");
 				PreferenceHelper.storeFacebookMe(ctx, facebookID, userName, gender, email);
 			} catch (JSONException e) {
 				e.printStackTrace();

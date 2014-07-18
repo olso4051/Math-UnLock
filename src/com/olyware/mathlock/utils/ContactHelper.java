@@ -1,8 +1,10 @@
 package com.olyware.mathlock.utils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,11 +38,16 @@ public class ContactHelper {
 
 		public void onFriendContactFound(int id, String userID, String userName);
 
-		public void onDoneFindingContacts();
+		public void onDoneFindingContacts(List<ContactHashes> hashes);
 	}
 
 	public interface friendDataListener {
 		public void onFriendContactFound(int contact, int id);
+	}
+
+	public static List<ContactHashes> getUniqueContactHashes(List<ContactHashes> list) {
+		Set<ContactHashes> unique = new LinkedHashSet<ContactHashes>(list);
+		return new ArrayList<ContactHashes>(unique);
 	}
 
 	public static void getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts, final contactDataListener listener) {
@@ -55,15 +62,16 @@ public class ContactHelper {
 					values[0].getEmails().remove(emailsTemp.size() - 1);
 					listener.onNewContactFound(replaceID, values[0]);
 				} else {
-					Loggy.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID()
-							+ " userName = " + values[0].getDisplayName());
+					Loggy.d("test",
+							"new Friend found, contactID = " + values[0].getContacts().toString() + " userID = " + values[0].getHiqUserID()
+									+ " userName = " + values[0].getDisplayName());
 					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getHiqUserName());
 				}
 			}
 
 			@Override
 			protected void onPostExecute(Integer result) {
-				listener.onDoneFindingContacts();
+				listener.onDoneFindingContacts(getUserHashes());
 			}
 
 		}.execute();
@@ -196,7 +204,7 @@ public class ContactHelper {
 
 	public static void findContact(FindType findType, List<CustomContactData> contacts, List<ContactHashes> searches,
 			final friendDataListener listener) {
-		// List<ArrayList<Integer>> matchingIndex = new ArrayList<ArrayList<Integer>>(searches.size());
+
 		switch (findType) {
 		case NAME:
 			break;
@@ -211,7 +219,7 @@ public class ContactHelper {
 				for (int location = 0; location < searches.size(); location++) {
 					String search = searches.get(location).getFacebookHash();
 					if (contact.getFacebookHash() != null && contact.getFacebookHash().equals(search)) {
-						// matchingIndex.get(location).add(i);
+						// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
 						Loggy.d("test", "sending facebook friend to listener");
 						listener.onFriendContactFound(i, location);
 						found = true;
@@ -227,7 +235,7 @@ public class ContactHelper {
 						for (int location = 0; location < searches.size(); location++) {
 							String search = searches.get(location).getPhoneHash();
 							if (phoneHash != null && phoneHash.equals(search)) {
-								// matchingIndex.get(location).add(i);
+								// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
 								Loggy.d("test", "sending contacts friend to listener");
 								listener.onFriendContactFound(i, location);
 								found = true;
@@ -244,6 +252,47 @@ public class ContactHelper {
 			break;
 		}
 		// return matchingIndex;
+	}
+
+	public static List<Integer> findContacts(FindType findType, int start, List<CustomContactData> contacts, ContactHashes search) {
+		List<Integer> indexes = new ArrayList<Integer>();
+		if (start < contacts.size()) {
+			switch (findType) {
+			case NAME:
+				break;
+			case PhoneAndFacebookHASH:
+				Loggy.d("test", "searching contacts");
+				Loggy.d("test", "contacts.size() = " + contacts.size());
+				Loggy.d("test", "start = " + start);
+				for (int i = start; i < contacts.size(); i++) {
+					CustomContactData contact = contacts.get(i);
+					// Search contacts facebook hashes
+					if (!search.getFacebookHash().equals("")) {
+						if (contact.getFacebookHash() != null && contact.getFacebookHash().equals(search.getFacebookHash())) {
+							if (!indexes.contains(i))
+								indexes.add(i);
+						}
+					}
+					// Search contacts phone hashes
+					if (!search.getPhoneHash().equals("")) {
+						List<String> phoneHashes = new ArrayList<String>();
+						phoneHashes.addAll(contact.getPhoneHashs());
+						for (String phoneHash : phoneHashes) {
+							if (phoneHash.equals(search.getPhoneHash())) {
+								if (!indexes.contains(i)) {
+									indexes.add(i);
+									break;
+								}
+							}
+						}
+					}
+				}
+				break;
+			case EMAIL:
+				break;
+			}
+		}
+		return indexes;
 	}
 
 	public static CustomContactData findContact(Context ctx, FindType findType, ContactHashes search) {

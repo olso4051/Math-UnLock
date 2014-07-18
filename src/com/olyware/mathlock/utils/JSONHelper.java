@@ -2,21 +2,26 @@ package com.olyware.mathlock.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSONHelper {
-	public static String getStringFromMessage(JSONObject json, String key) {
+	public static String getStringFromJSON(JSONObject json, String key) {
 		try {
-			return json.getString(key);
+			String s = json.getString(key);
+			if (s.toLowerCase(Locale.ENGLISH).equals("null"))
+				return "";
+			else
+				return s;
 		} catch (JSONException e) {
 			return "";
 		}
 	}
 
-	public static List<String> getStringListFromMessage(JSONObject json, String key) {
+	public static List<String> getStringListFromJSON(JSONObject json, String key) {
 		try {
 			JSONArray array = json.getJSONArray(key);
 			List<String> result = new ArrayList<String>(array.length());
@@ -29,7 +34,7 @@ public class JSONHelper {
 		}
 	}
 
-	public static List<String[]> getStringArrayListFromMessage(JSONObject json, String key) {
+	public static List<String[]> getStringArrayListFromJSON(JSONObject json, String key) {
 		try {
 			JSONArray array = json.getJSONArray(key);
 			List<String[]> result = new ArrayList<String[]>(array.length());
@@ -47,7 +52,7 @@ public class JSONHelper {
 		}
 	}
 
-	public static int getIntFromMessage(JSONObject json, String key) {
+	public static int getIntFromJSON(JSONObject json, String key) {
 		try {
 			int value = Integer.parseInt(json.getString(key));
 			return value;

@@ -215,9 +215,9 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 
 	private List<GenericQuestion> getGenericQuestionsFromJSON(JSONObject json, String descKey, String quesKey, String ansKey) {
 		List<GenericQuestion> genericQuestions = new ArrayList<GenericQuestion>();
-		List<String> descriptions = JSONHelper.getStringListFromMessage(json, descKey);
-		List<String> questions = JSONHelper.getStringListFromMessage(json, quesKey);
-		List<String[]> answers = JSONHelper.getStringArrayListFromMessage(json, ansKey);
+		List<String> descriptions = JSONHelper.getStringListFromJSON(json, descKey);
+		List<String> questions = JSONHelper.getStringListFromJSON(json, quesKey);
+		List<String[]> answers = JSONHelper.getStringArrayListFromJSON(json, ansKey);
 		if (descriptions.size() == questions.size() && questions.size() == answers.size() && answers.size() == descriptions.size()) {
 			for (int i = 0; i < descriptions.size(); i++) {
 				genericQuestions.add(new GenericQuestion(descriptions.get(i), questions.get(i), answers.get(i)));
