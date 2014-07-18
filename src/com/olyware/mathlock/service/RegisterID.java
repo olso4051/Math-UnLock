@@ -3,10 +3,8 @@ package com.olyware.mathlock.service;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.telephony.TelephonyManager;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.HttpClient;
@@ -16,16 +14,22 @@ import ch.boye.httpclientandroidlib.entity.StringEntity;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.JSONHelper;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String success, error;
 	private String userName, regID, userID, referral, birthday, gender, location, email, facebookID, phoneNumberEncrypted;
+	private Context ctx;
 
-	public RegisterID(Activity act, String userName, String regID, String userID, String referral, String birthday, String gender,
+	public RegisterID(Context ctx, String userName, String regID, String userID, String referral, String birthday, String gender,
 			String location, String email, String facebookID) {
 		if (userName != null)
 			this.userName = userName;
@@ -72,14 +76,14 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 		else
 			this.facebookID = "";
 
-		TelephonyManager telephonyManager = (TelephonyManager) act.getSystemService(Context.TELEPHONY_SERVICE);
-		String number = telephonyManager.getLine1Number();
+		String number = ContactHelper.getUserPhoneNumber(ctx);
 		if (number != null && number.length() > 0) {
-			phoneNumberEncrypted = ContactHelper.getPhoneHashFromString(number);
+			phoneNumberEncrypted = ContactHelper.storeUserPhoneNumber(ctx, number);
 		} else {
 			phoneNumberEncrypted = "";
 		}
-		baseURL = act.getString(R.string.service_base_url);
+		baseURL = ctx.getString(R.string.service_base_url);
+		this.ctx = ctx;
 	}
 
 	public String getSuccess() {
@@ -98,6 +102,24 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Void... v) {
+
+		final Session session = Session.getActiveSession();
+		if (session != null && session.isOpened()) {
+			// Get the user's list of friends
+			Request meRequest = new Request(session, "/me");
+			Response response = meRequest.executeAndWait();
+			try {
+				JSONObject json = new JSONObject(response.getRawResponse());
+				userName = JSONHelper.getStringFromMessage(json, "name");
+				facebookID = JSONHelper.getStringFromMessage(json, "id");
+				gender = JSONHelper.getStringFromMessage(json, "gender");
+				email = JSONHelper.getStringFromMessage(json, "email");
+				PreferenceHelper.storeFacebookMe(ctx, facebookID, userName, gender, email);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+
 		String endpoint = "register";
 		if (userID.length() > 0) {
 			endpoint = endpoint + "/update";

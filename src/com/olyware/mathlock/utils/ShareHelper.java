@@ -26,6 +26,8 @@ import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 import com.olyware.mathlock.LoginFragment;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.service.ConfirmID;
+import com.olyware.mathlock.service.ConfirmID.ConfirmType;
 import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
@@ -53,10 +55,9 @@ public class ShareHelper {
 	}
 
 	public static void getLinkAndShareFacebook(final Context context, final UiLifecycleHelper uiHelper, final ProgressDialog pDialog,
-			Bitmap image, String question, String deepLink) {
+			Bitmap image, final String title, String deepLink) {
 		final String link = buildShareURL(context);
 		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
-		final String title = "Can you answer " + question + " to unlock your phone?";
 		String name = LoginFragment.getUserName(context);
 		if (name.equals(""))
 			name = context.getString(R.string.share_base_url_facebook_description_readable);
@@ -71,10 +72,11 @@ public class ShareHelper {
 		new UploadImage(context, image) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				Loggy.d("test", "success = " + getSuccess());
-				Loggy.d("test", "error = " + getError());
-				Loggy.d("test", "url = " + getURL());
-				Loggy.d("test", "hash = " + getHash());
+				Loggy.d("success = " + getSuccess());
+				Loggy.d("error = " + getError());
+				Loggy.d("url = " + getURL());
+				Loggy.d("hash = " + getHash());
+				PreferenceHelper.storeLatestShareHash(context, getHash());
 				if (result == 0 || getSuccess().equals("true")) {
 					loginOrShareFacebook(context, uiHelper, pDialog, getURL());
 				} else {
@@ -139,7 +141,7 @@ public class ShareHelper {
 		}
 	}
 
-	private static void showFeedDialog(Context context, String link) {
+	private static void showFeedDialog(final Context context, String link) {
 		Bundle params = new Bundle();
 		params.putString("link", link);
 		WebDialog feedDialog = (new WebDialog.FeedDialogBuilder(context, Session.getActiveSession(), params)).setOnCompleteListener(
@@ -153,6 +155,7 @@ public class ShareHelper {
 							final String postId = values.getString("post_id");
 							if (postId != null) {
 								Loggy.d("test", "Posted story, id: " + postId);
+								confirmShare(context);
 							} else {
 								// User clicked the Cancel button
 								Loggy.d("test", "Publish cancelled");
@@ -171,6 +174,16 @@ public class ShareHelper {
 					}
 				}).build();
 		feedDialog.show();
+	}
+
+	public static void confirmShare(final Context context) {
+		String hash = PreferenceHelper.getLatestShareHash(context);
+		new ConfirmID(context, ConfirmType.SHARE_HASH, hash) {
+			@Override
+			protected void onPostExecute(Integer result) {
+				Loggy.d("Confirmed Share");
+			}
+		}.execute();
 	}
 
 	public static Intent getShareIntent(Context context, String subject, Bitmap bitmap, String message, String link) {
@@ -229,7 +242,7 @@ public class ShareHelper {
 		if (userID.equals("")) {
 			return baseLink;
 		} else {
-			String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
+			String encryptedContentForURL = EncryptionHelper.encryptForURL(userID);
 			return baseLink + context.getString(R.string.share_content_url) + encryptedContentForURL;
 		}
 	}
@@ -243,7 +256,7 @@ public class ShareHelper {
 		if (userID.equals("")) {
 			return baseLinkEasy;
 		} else {
-			String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
+			String encryptedContentForURL = EncryptionHelper.encryptForURL(userID);
 			baseLink = baseLink + context.getString(R.string.share_link_url_facebook) + encryptedContentForURL
 					+ context.getString(R.string.share_base_url_facebook_name)
 					+ context.getString(R.string.share_base_url_facebook_caption)
@@ -271,7 +284,7 @@ public class ShareHelper {
 			baseLink = baseLinkEasy + title + caption + context.getString(R.string.share_base_url_facebook_description)
 					+ context.getString(R.string.share_base_url_facebook_redirect);
 		} else {
-			String encryptedContentForURL = new EncryptionHelper().encryptForURL(userID);
+			String encryptedContentForURL = EncryptionHelper.encryptForURL(userID);
 			baseLink = baseLink + context.getString(R.string.share_link_url_facebook) + encryptedContentForURL + title + caption
 					+ context.getString(R.string.share_base_url_facebook_description)
 					+ context.getString(R.string.share_base_url_facebook_redirect)

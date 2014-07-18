@@ -32,13 +32,15 @@ import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.Loggy;
 
-public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
+public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
+	final private static String FriendsEndpoint = "friends";
 	private List<ContactHashes> userHashes = new ArrayList<ContactHashes>();
-	private List<String> allFacebookHashes = new ArrayList<String>();
 	private List<String> allNames = new ArrayList<String>();
 	private List<String> allPhoneNumbers = new ArrayList<String>();
 	private List<String> allEmails = new ArrayList<String>();
+	private List<String> allFacebookHashes = new ArrayList<String>();
 	private List<CustomContactData> allContacts = new ArrayList<CustomContactData>();
+	private String notNumber;
 	private String baseURL;
 	private Context ctx;
 
@@ -46,17 +48,14 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		this.ctx = ctx;
 		allContacts.clear();
 		allContacts.addAll(contacts);
-		allNames.clear();
-		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
-		allPhoneNumbers.clear();
-		allPhoneNumbers.addAll(ContactHelper.getPhoneNumbersFromContacts(allContacts));
-		allEmails.clear();
-		allEmails.addAll(ContactHelper.getEmailsFromContacts(allContacts));
+		this.notNumber = ContactHelper.getUserPhoneNumber(ctx);
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
 	@Override
-	protected Integer doInBackground(String... s) {
+	protected Integer doInBackground(Void... v) {
+		allFacebookHashes.clear();
+		allFacebookHashes.addAll(ContactHelper.getFirstFacebookHashesFromContacts(allContacts));
 		// Get Contacts from user's facebook
 		List<String> phoneNumbers = new ArrayList<String>();
 		List<String> allEncryptedPhoneNumbers = new ArrayList<String>();
@@ -76,19 +75,22 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 					JSONArray data = responseJSON.getJSONArray("data");
 					if (data.length() > 0) {
 						for (int i = 0; i < data.length(); i++) {
-							name = ((JSONObject) data.get(i)).getString("name");
-							String nameLo = name.toLowerCase(Locale.ENGLISH);
+							String facebookName = ((JSONObject) data.get(i)).getString("name");
+							/*String nameLo = name.toLowerCase(Locale.ENGLISH);
 							if (allNames.contains(nameLo)) {
 								replaceID = allNames.indexOf(nameLo);
-							}
+							}*/
 							String facebookID = ((JSONObject) data.get(i)).getString("id");
-							allFacebookHashes.add(facebookID);
-							CustomContactData contact = new CustomContactData(name, facebookID);
+							if (allFacebookHashes.contains(facebookID)) {
+								replaceID = allFacebookHashes.indexOf(facebookID);
+							}
+
+							CustomContactData contact = new CustomContactData(facebookName, facebookID);
 							if (replaceID == -1) {
 								allContacts.add(contact);
 								Collections.sort(allContacts);
-								allNames.clear();
-								allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
+								allFacebookHashes.clear();
+								allFacebookHashes.addAll(ContactHelper.getFirstFacebookHashesFromContacts(allContacts));
 							}
 							contact.getEmails().add(String.valueOf(replaceID));
 							publishProgress(contact);
@@ -101,6 +103,12 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 		} else {
 			Toast.makeText(ctx, ctx.getString(R.string.fragment_challenge_facebook_prompt), Toast.LENGTH_LONG).show();
 		}
+		allNames.clear();
+		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
+		allPhoneNumbers.clear();
+		allPhoneNumbers.addAll(ContactHelper.getFirstPhoneNumbersFromContacts(allContacts));
+		allEmails.clear();
+		allEmails.addAll(ContactHelper.getFirstEmailsFromContacts(allContacts));
 		// Get contacts from user's contacts
 		ContentResolver cr = ctx.getContentResolver();
 		Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
@@ -126,7 +134,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 							String number = ContactHelper.getPhoneNumberFromString(pCur.getString(pCur
 									.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
 							// only add phone numbers we haven't found yet
-							if (number.length() >= 7 && !allPhoneNumbers.contains(number)) {
+							if (!number.equals(notNumber) && number.length() >= 7 && !allPhoneNumbers.contains(number)) {
 								isPerson = true;
 								phoneNumbers.add(number);
 								allPhoneNumbers.add(number);
@@ -169,7 +177,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 
 		// POST to API to get user_ids of contacts and facebook friends
 		HttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPost httppost = new HttpPost(baseURL + "friend");
+		HttpPost httppost = new HttpPost(baseURL + FriendsEndpoint);
 		HttpEntity entity;
 		String fullResult;
 		JSONArray jsonResponse;
@@ -182,6 +190,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 				phoneHashes.put(encryptedPhoneNumber);
 			}
 			data.put("phone_hashes", phoneHashes);
+
 			JSONArray facebookHashes = new JSONArray();
 			// for (int i = 0; i < Math.min(allFacebookHashes.size(), 5); i++) {
 			// String facebookID = allFacebookHashes.get(i);
@@ -189,7 +198,21 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 				facebookHashes.put(facebookID);
 			}
 			data.put("facebook_hashes", facebookHashes);
-			Loggy.d("JSON to get friends = " + data.toString());
+
+			String st = data.toString();
+			int end = st.length();
+			int output = 1000;
+			int endSub = Math.min(output, end);
+			int start = 0;
+			String line = data.toString().substring(start, endSub);
+			Loggy.d(line);
+			while (endSub < end) {
+				start = endSub;
+				endSub = Math.min(endSub + output, end);
+				line = data.toString().substring(start, endSub);
+				Loggy.d(line);
+			}
+			// Loggy.d("JSON to get friends = " + data.toString());
 			httppost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httppost.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httppost);
@@ -206,9 +229,10 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 
 		// for testing we'll assume we got 5 random contacts back from the service
 		// for (int i = 2; i < 10; i++) {
-		userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(6), "262217307306251", "34d90771d25aabbe6bfd39bb9514d3c3",
-				"Kyle Tester"));
-		userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(20), "13959212", "5f14e3e2e9738b9d50ca3334a438c954", "Kyle Olson"));
+		// userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(6), "262217307306251",
+		// "34d90771d25aabbe6bfd39bb9514d3c3","Kyle Tester"));
+		// userHashes.add(new ContactHashes(allEncryptedPhoneNumbers.get(20), "13959212", "5f14e3e2e9738b9d50ca3334a438c954",
+		// "Kyle Olson"));
 		// }
 
 		Collections.sort(allContacts);
@@ -235,7 +259,7 @@ public class GetContacts extends AsyncTask<String, CustomContactData, Integer> {
 					String phoneHash = getStringFromJSON(jsonFriend, "phone_hash");
 					String facebookHash = getStringFromJSON(jsonFriend, "facebook_hash");
 					String hiqUserHash = getStringFromJSON(jsonFriend, "user_id");
-					String hiqUserName = getStringFromJSON(jsonFriend, "user_name");
+					String hiqUserName = getStringFromJSON(jsonFriend, "username");
 					userHashes.add(new ContactHashes(phoneHash, facebookHash, hiqUserHash, hiqUserName));
 				}
 				return 0;

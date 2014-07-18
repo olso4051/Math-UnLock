@@ -21,9 +21,23 @@ import ch.boye.httpclientandroidlib.util.EntityUtils;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.JSONHelper;
 import com.olyware.mathlock.utils.Loggy;
 
 public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
+	final private static String Endpoint = "challenge";
+	final private static String OpponentUserID = "o_user_id";
+	final private static String ChallengerUserID = "c_user_id";
+	final private static String ChallengeID = "challenge_id";
+	final private static String Descs = "descriptions";
+	final private static String Quests = "questions";
+	final private static String Answers = "answers";
+	final private static String Bet = "bet";
+	final private static String DiffMin = "difficulty_min";
+	final private static String DiffMax = "difficulty_max";
+	final private static String Success = "success";
+	final private static String Error = "error";
+
 	private String baseURL;
 	private String success, error, challengeID;
 	private String userID, opponentUserID;
@@ -119,30 +133,29 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 		Loggy.d("answers size = " + answers.size());
 		if (questions.size() != answers.size() || questions.size() <= 0 || answers.size() <= 0)
 			return 1;
-		String endpoint = "challenge";
 
 		// PUT to API challenge
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
-		HttpPut httpput = new HttpPut(baseURL + endpoint);
+		HttpPut httpput = new HttpPut(baseURL + Endpoint);
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
 		try {
 			JSONObject data = new JSONObject();
-			data.put("o_user_id", opponentUserID);
-			data.put("c_user_id", userID);
+			data.put(OpponentUserID, opponentUserID);
+			data.put(ChallengerUserID, userID);
 			JSONArray descriptionArray = new JSONArray();
 			for (String description : descriptions) {
 				descriptionArray.put(description);
 			}
-			data.put("descriptions", descriptionArray);
+			data.put(Descs, descriptionArray);
 
 			JSONArray questionArray = new JSONArray();
 			for (String question : questions) {
-				descriptionArray.put(question);
+				questionArray.put(question);
 			}
-			data.put("questions", questionArray);
+			data.put(Quests, questionArray);
 
 			JSONArray answerArray = new JSONArray();
 			for (String[] answerSet : answers) {
@@ -152,10 +165,10 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 				}
 				answerArray.put(answerSetArray);
 			}
-			data.put("answers", answerArray);
-			data.put("bet", bet);
-			data.put("difficulty_min", difficultyMin);
-			data.put("difficulty_max", difficultyMax);
+			data.put(Answers, answerArray);
+			data.put(Bet, bet);
+			data.put(DiffMin, difficultyMin);
+			data.put(DiffMax, difficultyMax);
 
 			Loggy.d("JSON to challenge: " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
@@ -173,9 +186,11 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			success = getStringFromJSON(jsonResponse, "success");
-			error = getStringFromJSON(jsonResponse, "error");
-			challengeID = getStringFromJSON(jsonResponse, "challenge_id");
+			success = getStringFromJSON(jsonResponse, Success);
+			error = getStringFromJSON(jsonResponse, Error);
+			challengeID = getStringFromJSON(jsonResponse, ChallengeID);
+			genericQuestions.clear();
+			genericQuestions.addAll(getGenericQuestionsFromJSON(jsonResponse, Descs, Quests, Answers));
 			if (success.equals("true")) {
 				return 0;
 			} else
@@ -196,5 +211,18 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 		} catch (JSONException e) {
 			return "";
 		}
+	}
+
+	private List<GenericQuestion> getGenericQuestionsFromJSON(JSONObject json, String descKey, String quesKey, String ansKey) {
+		List<GenericQuestion> genericQuestions = new ArrayList<GenericQuestion>();
+		List<String> descriptions = JSONHelper.getStringListFromMessage(json, descKey);
+		List<String> questions = JSONHelper.getStringListFromMessage(json, quesKey);
+		List<String[]> answers = JSONHelper.getStringArrayListFromMessage(json, ansKey);
+		if (descriptions.size() == questions.size() && questions.size() == answers.size() && answers.size() == descriptions.size()) {
+			for (int i = 0; i < descriptions.size(); i++) {
+				genericQuestions.add(new GenericQuestion(descriptions.get(i), questions.get(i), answers.get(i)));
+			}
+		}
+		return genericQuestions;
 	}
 }

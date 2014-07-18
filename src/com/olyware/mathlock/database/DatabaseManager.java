@@ -372,7 +372,7 @@ public class DatabaseManager {
 			return 0;
 	}
 
-	public List<GenericQuestion> getChallengeQuestions(ChallengeBuilder builder) {
+	public List<GenericQuestion> createChallengeQuestions(ChallengeBuilder builder) {
 		if (db.isOpen()) {
 			int questions = builder.getNumberOfQuestions();
 			List<Integer> packIDs = builder.getSelectedQuestionPackIDs();
@@ -460,6 +460,18 @@ public class DatabaseManager {
 		return new GenericQuestion(question.getCategory(), question.getQuestionText(), question.getAnswers());
 	}
 
+	public ChallengeQuestion getChallengeQuestion(String challengeID) {
+		if (db.isOpen()) {
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "' AND " + ChallengeQuestionContract.SCORE
+					+ " < 0";
+			Loggy.d("getChallengeQuestion WHERE " + where);
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+			Loggy.d("getChallengeQuestion rows return = " + cursor.getCount());
+			return DatabaseModelFactory.buildChallengeQuestion(cursor);
+		} else
+			return null;
+	}
+
 	public int getChallengeScore(long ID) {
 		if (db.isOpen()) {
 			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
@@ -490,15 +502,6 @@ public class DatabaseManager {
 			return DatabaseModelFactory.buildChallengeIDs(cursor);
 		} else
 			return new HashMap<String, Integer>();
-	}
-
-	public ChallengeQuestion getChallengeQuestion(String challengeID) {
-		if (db.isOpen()) {
-			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
-			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ALL_COLUMNS, where, null, null, null, null);
-			return DatabaseModelFactory.buildChallengeQuestion(cursor);
-		} else
-			return null;
 	}
 
 	public int removeChallengeQuestions(long ID) {
@@ -565,12 +568,13 @@ public class DatabaseManager {
 			return -1;
 	}
 
-	public boolean addChallengeStat(long ID, int score) {
+	public boolean addChallengeScore(long ID, int score) {
+		Loggy.d("addChallengeScore ID = " + ID + " |score = " + score);
 		if (db.isOpen()) {
 			ContentValues values = new ContentValues();
 			values.put(ChallengeQuestionContract.SCORE, score);
-			String where = BaseContract._ID + "=" + ID;
-			db.update(ChallengeQuestionContract.TABLE_NAME, values, where, null);
+			String where = BaseContract._ID + "=" + ID + " AND " + ChallengeQuestionContract.SCORE + " < 0";
+			Loggy.d("rows changed from update score = " + db.update(ChallengeQuestionContract.TABLE_NAME, values, where, null));
 			return isChallengeDone(ID);
 		}
 		return false;
@@ -590,6 +594,7 @@ public class DatabaseManager {
 	}
 
 	public boolean isChallengeDone(long ID) {
+		Loggy.d("isChallengeDone ID = " + ID);
 		if (db.isOpen()) {
 			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
 					+ BaseContract._ID + " = " + ID;
@@ -603,6 +608,7 @@ public class DatabaseManager {
 	}
 
 	public boolean isChallengeDone(String challengeID) {
+		Loggy.d("isChallengeDone challengeID = " + challengeID);
 		if (getQuestionsToAnswer(challengeID) == 0)
 			return true;
 		else
@@ -610,10 +616,12 @@ public class DatabaseManager {
 	}
 
 	public int getQuestionsToAnswer(String challengeID) {
+		Loggy.d("getQuestionsToAnswer challengeID = " + challengeID);
 		if (db.isOpen()) {
 			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
 			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ID_AND_SCORE, where, null, null, null, null);
 			Map<String, Integer> map = DatabaseModelFactory.buildChallengeIDs(cursor);
+			Loggy.d("questions to answer  = " + map.get(challengeID));
 			return map.get(challengeID);
 		} else
 			return -1;

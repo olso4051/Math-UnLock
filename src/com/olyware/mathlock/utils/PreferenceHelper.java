@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.QuestionSelectData;
@@ -19,9 +20,10 @@ public class PreferenceHelper {
 	final public static String QUESTION_NUMBER = "num_questions";
 	final public static String DIFFICULTY_MIN = "difficulty_min";
 	final public static String DIFFICULTY_MAX = "difficulty_max";
+	final public static String SHARE_HASH = "share_hash_latest";
 
 	public static enum ChallengeStatus {
-		Accepted(0), Denied(1), Done(2), Undefined(3);
+		Accepted(0), Declined(1), Done(2), Undefined(3);
 		private int value;
 
 		private ChallengeStatus(int value) {
@@ -41,7 +43,7 @@ public class PreferenceHelper {
 			case 0:
 				return Accepted;
 			case 1:
-				return Denied;
+				return Declined;
 			case 2:
 				return Done;
 			case 3:
@@ -192,14 +194,14 @@ public class PreferenceHelper {
 	}
 
 	public static void increaseMoney(Context ctx, int amount) {
-		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
 		editorPrefsMoney.commit();
 	}
 
 	public static void decreaseMoneyNoDebt(Context ctx, int amount) {
-		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 		int initMoney = sharedPrefsMoney.getInt("money", 0);
 		int money = initMoney - amount;
@@ -208,5 +210,40 @@ public class PreferenceHelper {
 		int newAmount = initMoney - money;
 		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) - newAmount);
 		editorPrefsMoney.commit();
+	}
+
+	public static void storeFacebookMe(Context ctx, String faceID, String faceName, String gender, String email) {
+		SharedPreferences.Editor editorPrefsUsers = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE)
+				.edit();
+		editorPrefsUsers.putString(ctx.getString(R.string.pref_user_facebook_id), faceID)
+				.putString(ctx.getString(R.string.pref_user_facebook_name), faceName)
+				.putString(ctx.getString(R.string.pref_user_facebook_gender), gender)
+				.putString(ctx.getString(R.string.pref_user_facebook_email), email).commit();
+	}
+
+	public static boolean shouldDoMeRequest(Context ctx) {
+		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		if (sharedPrefsUsers.getString(ctx.getString(R.string.pref_user_facebook_id), "").equals(""))
+			return true;
+		else
+			return false;
+	}
+
+	public static void storeLatestShareHash(Context ctx, String hash) {
+		SharedPreferences sharedPrefsDefault = PreferenceManager.getDefaultSharedPreferences(ctx);
+		SharedPreferences.Editor editorPrefsDefault = sharedPrefsDefault.edit();
+		editorPrefsDefault.putString(SHARE_HASH, hash).commit();
+	}
+
+	public static String getLatestShareHash(Context ctx) {
+		SharedPreferences sharedPrefsDefault = PreferenceManager.getDefaultSharedPreferences(ctx);
+		return sharedPrefsDefault.getString(SHARE_HASH, "");
+	}
+
+	public static void logout(Context ctx) {
+		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		sharedPrefsUsers.edit().putBoolean(ctx.getString(R.string.pref_user_skipped), false)
+				.putBoolean(ctx.getString(R.string.pref_user_logged_in), false).commit();
+		ContactHelper.removeStoredContacts(ctx);
 	}
 }

@@ -17,6 +17,7 @@ import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.ConfirmID;
+import com.olyware.mathlock.service.ConfirmID.ConfirmType;
 import com.olyware.mathlock.service.RegisterID;
 
 public class GCMHelper {
@@ -188,6 +189,7 @@ public class GCMHelper {
 	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral,
 			String birth, String gender, String location, String email, String faceID) {
 		Loggy.d("test", "sendRegistrationIdToBackend");
+
 		new RegisterID(act, username, regId, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
@@ -204,25 +206,19 @@ public class GCMHelper {
 		editor.putString(act.getString(R.string.gcm_reg_id_property), regId);
 		editor.putInt(act.getString(R.string.gcm_app_version_property), appVersion);
 		editor.commit();
-		/*if (SaveHelper.SaveTextFile(regId)) {
-			Toast.makeText(act, "created file with reg_id", Toast.LENGTH_LONG).show();
-		} else {
-			Toast.makeText(act, "failed to create file with reg_id", Toast.LENGTH_LONG).show();
-		}*/
 	}
 
-	private static void confirmID(final Context ctx, String userID) {
-		new ConfirmID(ctx) {
+	public static void confirmID(final Context ctx, String userID) {
+		new ConfirmID(ctx, ConfirmType.USER_ID, userID) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info),
 						Context.MODE_PRIVATE);
-				if (result == 0)
+				if (result == 0 || getError().equals(ConfirmID.AlreadyConfirmed))
 					sharedPrefsUserInfo.edit().putBoolean(ctx.getString(R.string.pref_user_confirmed), true).commit();
 				else
 					sharedPrefsUserInfo.edit().putBoolean(ctx.getString(R.string.pref_user_confirmed), false).commit();
 			}
-
-		}.execute(userID);
+		}.execute();
 	}
 }

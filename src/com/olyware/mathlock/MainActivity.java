@@ -778,6 +778,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					else if (postID.equals("null"))
 						Loggy.d("test", "post ID is null (postID.equals(\"null\") = " + (postID.equals("null")));
 					Loggy.d("test", "post ID = " + postID);
+					if (didFinishNormal && completionGesture.equals("post")) {
+						ShareHelper.confirmShare(MainActivity.this);
+					}
 				}
 			});
 			if (resultCode == RESULT_OK) {
@@ -992,10 +995,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private void setProblemAndAnswer() {
 		if (fromDeepLink) {
+			joystick.setProblem(true);
 			questionWorth = 0;
 			questionWorthMax = 0;
 			joystick.resetGuess();
-			joystick.setProblem(true);
+			joystick.unPauseSelection();
 			problem.setText(questionFromDeepLink);
 			problem.setTextColor(defaultTextColor);
 			questionDescription.setText(getString(R.string.question_description_prefix) + " | "
@@ -1014,16 +1018,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					String challengeID = entry.getKey();
 					int questionsToAnswer = entry.getValue();
 					ChallengeStatus status = PreferenceHelper.getChallengeStatus(this, challengeID);
-					Loggy.d("challengeID = " + challengeID + " |questions = " + questionsToAnswer + " |status = " + status.getValue());
+					Loggy.d("challengeIDToDisplay = " + challengeIDToDisplay + " |challengeID = " + challengeID + " |questions = "
+							+ questionsToAnswer + " |status = " + status.getValue());
 					if (status.equals(ChallengeStatus.Accepted) && challengeIDToDisplay.equals("")) {
 						if (questionsToAnswer > 0) {
 							// display challenge Question
 							challengeIDToDisplay = challengeID;
+							Loggy.d("challengeIDToDisplay = " + challengeIDToDisplay);
 						} else {
 							// send challenge complete to the api
 							sendChallengeComplete(challengeID);
+							Loggy.d("sendChallengeComplete challengeID = " + challengeID);
 						}
-					} else if (status.equals(ChallengeStatus.Denied) || status.equals(ChallengeStatus.Done)) {
+					} else if (status.equals(ChallengeStatus.Declined) || status.equals(ChallengeStatus.Done)) {
 						// delete questions from database
 						dbManager.removeChallengeQuestions(challengeID);
 					}
@@ -1033,6 +1040,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					ChallengeQuestion question = dbManager.getChallengeQuestion(challengeIDToDisplay);
 					if (question != null) {
 						fromChallenge = true;
+						joystick.setProblem(true);
 						ID = question.getID();
 						String description = question.getDescription();
 						String userName = question.getUserName();
@@ -1045,7 +1053,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						problem.setTextColor(defaultTextColor);
 
 						joystick.resetGuess();
-						joystick.setProblem(true);
+						joystick.unPauseSelection();
 
 						questionDescription.setText(getString(R.string.question_description_challenge_prefix) + userName + " | "
 								+ description);
@@ -1369,7 +1377,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (!dbManager.isDestroyed()) {
 				joystick.setCorrectGuess(correctLoc);
 				if (fromChallenge) {
-					if (dbManager.addChallengeStat(ID, getChallengeScore(startTime))) {
+					if (correct) {
+						sendEvent("question_challenge", "question_answered", "correct", (long) questionWorth);
+						problem.setTextColor(Color.GREEN);
+					} else {
+						sendEvent("question_challenge", "question_answered", "incorrect", (long) questionWorth);
+						joystick.setIncorrectGuess(guessLoc);
+						problem.setTextColor(Color.RED);
+					}
+					if (dbManager.addChallengeScore(ID, getChallengeScore(startTime))) {
 						sendChallengeComplete(ID);
 					}
 				} else {
@@ -1492,7 +1508,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							if (dbManager != null) {
 								if (!dbManager.isDestroyed()) {
 									Loggy.d("sending challenge...database is not null...");
-									List<GenericQuestion> questions = dbManager.getChallengeQuestions(builder);
+									List<GenericQuestion> questions = dbManager.createChallengeQuestions(builder);
 									Loggy.d("before sending questions size = " + questions.size());
 									new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet(), builder
 											.getDifficultyMin(), builder.getDifficultyMax()) {
@@ -1578,7 +1594,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Share:	// share was selected
 			progressDialog = ProgressDialog.show(this, "", "Starting Facebook", true);
-			ShareHelper.getLinkAndShareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, problem.getReadableText(),
+			ShareHelper.getLinkAndShareFacebook(this, uiHelper, progressDialog, HelpQuestionImage, getString(R.string.share_title),
 					getDeepLinkToShare());
 			break;
 		case Touch:

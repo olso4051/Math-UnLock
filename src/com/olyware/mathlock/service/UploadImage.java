@@ -20,7 +20,8 @@ import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 public class UploadImage extends AsyncTask<String, Integer, Integer> {
-	private final String BASE_URL = "http://deeldat.com/share/fb";
+	public final static String BASE_URL_DEELDAT = "http://deeldat.com/";
+	private final static String ENDPOINT = "share/fb";
 	private String success, hash, url, error;
 	private Bitmap image;
 
@@ -59,7 +60,7 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 	@Override
 	protected Integer doInBackground(String... s) {
 		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost postRequest = new HttpPost(BASE_URL);
+		HttpPost postRequest = new HttpPost(BASE_URL_DEELDAT + ENDPOINT);
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;

@@ -99,14 +99,16 @@ public class NotificationHelper {
 
 	public void sendChallengeNotification(String challengeID, String userName, int questions, int difficultyMin, int difficultyMax, int bet) {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-		int modifiedBet = Math.min(bet, MoneyHelper.getTotalMoney(ctx) / 2);
-		String title = ctx.getString(R.string.notification_title_challenge) + userName;
+		int modifiedBet = Math.min(bet, MoneyHelper.getMaxBet(ctx));
+		String title = ctx.getString(R.string.notification_title_challenge);
 		String diff = Difficulty.fromValueToString(difficultyMin);
 		if (difficultyMin != difficultyMax)
 			diff += " To " + Difficulty.fromValueToString(difficultyMax);
-		String msg = questions + ctx.getString(R.string.notification_message_challenge1) + diff
-				+ ctx.getString(R.string.notification_message_challenge2) + modifiedBet
-				+ ctx.getString(R.string.notification_message_challenge3);
+		String msg = userName + ctx.getString(R.string.notification_message_challenge_for) + modifiedBet
+				+ ctx.getString(R.string.notification_message_challenge_coins);
+		String[] msgInbox = new String[] { questions + ctx.getString(R.string.notification_message_challenge1),
+				diff + ctx.getString(R.string.notification_message_challenge2),
+				modifiedBet + ctx.getString(R.string.notification_message_challenge_coins) };
 
 		// intent to accept notification
 		Intent iMain = new Intent(ctx, NotificationBroadcastReceiver.class);
@@ -121,19 +123,25 @@ public class NotificationHelper {
 		PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, iDelete, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		mBuilder.setSmallIcon(R.drawable.ic_notification_small);
+		NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+		inboxStyle.setBigContentTitle(title);
+		for (String line : msgInbox) {
+			inboxStyle.addLine(line);
+		}
+		mBuilder.setStyle(inboxStyle);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);
 		mBuilder.setAutoCancel(true);
 		mBuilder.setContentIntent(mainIntent);
 		mBuilder.setDeleteIntent(deleteIntent);
-		mNotificationManager.notify(CHALLENGE_ID, mBuilder.build());
+		mNotificationManager.notify(challengeID, CHALLENGE_ID, mBuilder.build());
 	}
 
-	public void clearChallengeNotification() {
+	public void clearChallengeNotification(String challengeID) {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.cancel(CHALLENGE_ID);
+		mNotificationManager.cancel(challengeID, CHALLENGE_ID);
 	}
 
 	public void sendChallengeStatusNotification(String challengeID, ChallengeStatus status) {
@@ -142,16 +150,18 @@ public class NotificationHelper {
 		String msg = "";
 		String userName = PreferenceHelper.getChallengeUserName(ctx, challengeID);
 		if (status == ChallengeStatus.Accepted) {
-			title = userName + ctx.getString(R.string.notification_title_challenge_status_accepted);
-			msg = ctx.getString(R.string.notification_message_challenge_status_accepted);
-		} else if (status == ChallengeStatus.Denied) {
-			title = userName + ctx.getString(R.string.notification_title_challenge_status_declined);
-			msg = ctx.getString(R.string.notification_message_challenge_status_declined);
+			title = ctx.getString(R.string.notification_title_challenge_status_accepted);
+			msg = userName + ctx.getString(R.string.notification_message_challenge_status_accepted);
+		} else if (status == ChallengeStatus.Declined) {
+			title = ctx.getString(R.string.notification_title_challenge_status_declined);
+			msg = userName + ctx.getString(R.string.notification_message_challenge_status_declined);
 		} else
 			return;
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		mBuilder.setSmallIcon(R.drawable.ic_notification_small);
+		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx.getApplicationContext(), 0, new Intent(), 0);
+		mBuilder.setContentIntent(notifyPIntent);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);
@@ -187,7 +197,9 @@ public class NotificationHelper {
 		}
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		mBuilder.setSmallIcon(R.drawable.ic_notification_small);
+		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx.getApplicationContext(), 0, new Intent(), 0);
+		mBuilder.setContentIntent(notifyPIntent);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);

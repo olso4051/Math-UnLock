@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.telephony.TelephonyManager;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactHashes;
@@ -18,9 +19,14 @@ import com.olyware.mathlock.service.GetContacts;
 
 public class ContactHelper {
 	final public static String CONTACT_PREFS = "contact_prefs";
+	final public static String USER_PHONE = "phone_number";
+	final public static String USER_PHONE_HASH = "phone_hash";
 	final public static String CONTACTS = "contacts";
 	final public static String CONTACT_IS_FRIEND = "is_friend";
-	final public static String CONTACT_USER_ID = "user_id";
+	final public static String CONTACT_HIQ_USER_ID = "hiq_user_id";
+	final public static String CONTACT_HIQ_NAME = "hiq_name";
+	final public static String CONTACT_FACEBOOK_USER_ID = "facebook_user_id";
+	final public static String CONTACT_FACEBOOK_NAME = "facebook_name";
 	final public static String CONTACT_NAME = "name";
 	final public static String CONTACT_PHONE = "phone";
 	final public static String CONTACT_EMAIL = "email";
@@ -38,6 +44,7 @@ public class ContactHelper {
 	}
 
 	public static void getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts, final contactDataListener listener) {
+		// TODO user phone number instead of ""
 		new GetContacts(ctx, contacts) {
 			@Override
 			protected void onProgressUpdate(CustomContactData... values) {
@@ -48,8 +55,9 @@ public class ContactHelper {
 					values[0].getEmails().remove(emailsTemp.size() - 1);
 					listener.onNewContactFound(replaceID, values[0]);
 				} else {
-					Loggy.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID());
-					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getName());
+					Loggy.d("test", "new Friend found, contactID = " + values[0].getContact() + " userID = " + values[0].getHiqUserID()
+							+ " userName = " + values[0].getDisplayName());
+					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getHiqUserName());
 				}
 			}
 
@@ -62,7 +70,7 @@ public class ContactHelper {
 	}
 
 	public static void storeContacts(Context ctx, List<CustomContactData> contacts) {
-		SharedPreferences.Editor editSharedPrefs = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE).edit();
+		SharedPreferences.Editor editorPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE).edit();
 		String contactsJSON = "[";
 		boolean first = true;
 		for (CustomContactData contact : contacts) {
@@ -73,25 +81,29 @@ public class ContactHelper {
 				contactsJSON += "," + contact.getJSON();
 		}
 		contactsJSON += "]";
-		editSharedPrefs.putString(CONTACTS, contactsJSON).commit();
+		Loggy.d("contacts to store = " + contactsJSON);
+		editorPrefsContacts.putString(CONTACTS, contactsJSON).commit();
 	}
 
 	public static List<CustomContactData> getStoredContacts(Context ctx) {
-		SharedPreferences sharedPrefs = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE);
-		String contactsJSON = sharedPrefs.getString(CONTACTS, null);
-		if (contactsJSON != null) {
+		SharedPreferences sharedPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE);
+		String contactsJSON = sharedPrefsContacts.getString(CONTACTS, "");
+		if (!contactsJSON.equals("")) {
 			try {
 				List<CustomContactData> contacts = new ArrayList<CustomContactData>();
 				JSONArray contactsJSONArray = new JSONArray(contactsJSON);
 				for (int i = 0; i < contactsJSONArray.length(); i++) {
 					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
 					boolean isFriend = contactJSONObject.getBoolean(CONTACT_IS_FRIEND);
-					String userID = contactJSONObject.getString(CONTACT_USER_ID);
+					String hiqUserID = contactJSONObject.getString(CONTACT_HIQ_USER_ID);
+					String hiqName = contactJSONObject.getString(CONTACT_HIQ_NAME);
+					String facebookUserID = contactJSONObject.getString(CONTACT_FACEBOOK_USER_ID);
+					String facebookName = contactJSONObject.getString(CONTACT_FACEBOOK_NAME);
 					String name = contactJSONObject.getString(CONTACT_NAME);
 					JSONArray contactPhoneNumbers = contactJSONObject.getJSONArray(CONTACT_PHONE);
 					JSONArray contactEmails = contactJSONObject.getJSONArray(CONTACT_EMAIL);
-					contacts.add(new CustomContactData(name, getStringListFromJSONArray(contactEmails),
-							getStringListFromJSONArray(contactPhoneNumbers), isFriend));
+					contacts.add(new CustomContactData(hiqUserID, hiqName, facebookUserID, facebookName, name,
+							getStringListFromJSONArray(contactEmails), getStringListFromJSONArray(contactPhoneNumbers), isFriend));
 				}
 				return contacts;
 			} catch (JSONException e) {
@@ -99,6 +111,11 @@ public class ContactHelper {
 			}
 		} else
 			return new ArrayList<CustomContactData>();
+	}
+
+	public static void removeStoredContacts(Context ctx) {
+		SharedPreferences.Editor editorPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE).edit();
+		editorPrefsContacts.putString(CONTACTS, "").commit();
 	}
 
 	public static List<String> getNamesFromContacts(List<CustomContactData> contacts) {
@@ -117,20 +134,28 @@ public class ContactHelper {
 		return names;
 	}
 
-	public static List<String> getPhoneNumbersFromContacts(List<CustomContactData> contacts) {
+	public static List<String> getFirstPhoneNumbersFromContacts(List<CustomContactData> contacts) {
 		List<String> phones = new ArrayList<String>(contacts.size());
 		for (CustomContactData contact : contacts) {
-			phones.add(contact.getPhone());
+			phones.add(contact.getPhoneNumber());
 		}
 		return phones;
 	}
 
-	public static List<String> getEmailsFromContacts(List<CustomContactData> contacts) {
+	public static List<String> getFirstEmailsFromContacts(List<CustomContactData> contacts) {
 		List<String> emails = new ArrayList<String>(contacts.size());
 		for (CustomContactData contact : contacts) {
 			emails.add(contact.getEmail());
 		}
 		return emails;
+	}
+
+	public static List<String> getFirstFacebookHashesFromContacts(List<CustomContactData> contacts) {
+		List<String> hashes = new ArrayList<String>(contacts.size());
+		for (CustomContactData contact : contacts) {
+			hashes.add(contact.getFacebookHash());
+		}
+		return hashes;
 	}
 
 	public static int getNumberOfFriendsFromContacts(List<CustomContactData> contacts) {
@@ -147,15 +172,23 @@ public class ContactHelper {
 		return phoneNumber;
 	}
 
+	public static List<String> getPhoneNumbersFromStrings(List<String> phoneNumbers) {
+		List<String> phoneNumbersEdited = new ArrayList<String>(phoneNumbers.size());
+		for (String phoneNumber : phoneNumbers) {
+			phoneNumbersEdited.add(getPhoneNumberFromString(phoneNumber));
+		}
+		return phoneNumbersEdited;
+	}
+
 	public static String getPhoneHashFromString(String phoneNumber) {
-		return new EncryptionHelper().encryptForURL(getPhoneNumberFromString(phoneNumber));
+		return EncryptionHelper.encryptForURL(getPhoneNumberFromString(phoneNumber));
 	}
 
 	public static List<String> getPhoneHashes(List<String> phoneNumbers) {
 		List<String> phoneNumberEncrypted = new ArrayList<String>(phoneNumbers.size());
 		if (phoneNumbers.size() > 0) {
 			for (int i = 0; i < phoneNumbers.size(); i++) {
-				phoneNumberEncrypted.add(new EncryptionHelper().encryptForURL(phoneNumbers.get(i)));
+				phoneNumberEncrypted.add(EncryptionHelper.encryptForURL(phoneNumbers.get(i)));
 			}
 		}
 		return phoneNumberEncrypted;
@@ -247,6 +280,34 @@ public class ContactHelper {
 			break;
 		}
 		return new CustomContactData();
+	}
+
+	public static String storeUserPhoneNumber(Context ctx, String number) {
+		String numberEncrypted = getPhoneHashFromString(number);
+		SharedPreferences.Editor editorPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE).edit();
+		editorPrefsContacts.putString(USER_PHONE, number);
+		editorPrefsContacts.putString(USER_PHONE_HASH, numberEncrypted).commit();
+		return numberEncrypted;
+	}
+
+	public static String getUserPhoneNumber(Context ctx) {
+		SharedPreferences sharedPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE);
+		String number = sharedPrefsContacts.getString(USER_PHONE, "");
+		if (number.equals("")) {
+			TelephonyManager telephonyManager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
+			number = telephonyManager.getLine1Number();
+			if (number == null || number.length() <= 0) {
+				return "";
+			} else {
+				storeUserPhoneNumber(ctx, number);
+			}
+		}
+		return number;
+	}
+
+	public static String getUserPhoneHash(Context ctx) {
+		SharedPreferences sharedPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsContacts.getString(USER_PHONE_HASH, "");
 	}
 
 	public static String getGCMID(Context ctx) {

@@ -92,10 +92,12 @@ public class CustomGAReceiver extends BroadcastReceiver {
 		// is this a referral link
 		if (storage.getString("utm_source", "").equals("app") && storage.getString("utm_medium", "").equals("share")) {
 			String referral = new EncryptionHelper().decryptForURL(params.get("utm_content"));
-			MoneyHelper.increasePaidMoney(context, 40);
+			MoneyHelper.increasePaidMoney(context, context.getResources().getInteger(R.integer.coins_from_share));
 			editorUserInfo.putString(context.getString(R.string.pref_user_referrer), referral).commit();
 			Loggy.d("GAtest", "referral key = " + referral);
-		} else if (storage.getString("utm_source", "").equals("chirpads")) {
+		}
+		// else is this a chirpads link
+		else if (storage.getString("utm_source", "").equals("chirpads")) {
 			String clickGuid = params.get("utm_content");
 			String action = "install";
 			String os = "Android";

@@ -19,6 +19,7 @@ import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.EncryptionHelper;
+import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
@@ -66,18 +67,7 @@ public class GcmIntentService extends IntentService {
 				if (!userID.equals("") || type.equals(USER_ID_TO_CONFIRM)) {
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 					sharedPrefsUserInfo.edit().putString(getString(R.string.pref_user_userid), userID).commit();
-					new ConfirmID(this) {
-						@Override
-						protected void onPostExecute(Integer result) {
-							SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info),
-									Context.MODE_PRIVATE);
-							if (result == 0)
-								sharedPrefsUserInfo.edit().putBoolean(getString(R.string.pref_user_confirmed), true).commit();
-							else
-								sharedPrefsUserInfo.edit().putBoolean(getString(R.string.pref_user_confirmed), false).commit();
-						}
-
-					}.execute(userID);
+					GCMHelper.confirmID(this, userID);
 				} else if (!pickupHash.equals("") || type.equals(GET_COINS)) {
 					Loggy.d("get coins from gcm");
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
@@ -104,7 +94,7 @@ public class GcmIntentService extends IntentService {
 						String facebookHash = getStringFromMessage(fullMessage, "facebook_hash");
 						CustomContactData contact = ContactHelper.findContact(this, ContactHelper.FindType.PhoneAndFacebookHASH,
 								new ContactHashes(phoneHash, facebookHash, "", ""));
-						userName = contact.getName();
+						userName = contact.getDisplayName();
 						if (userName.equals("")) {
 							if (!phoneHash.equals(""))
 								userName = EncryptionHelper.decryptForURL(phoneHash);
@@ -169,7 +159,7 @@ public class GcmIntentService extends IntentService {
 				} else if (type.equals(CHALLENGE_STATUS)) {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String status = getStringFromMessage(fullMessage, "status");
-					ChallengeStatus challengeStatus = ChallengeStatus.Denied;
+					ChallengeStatus challengeStatus = ChallengeStatus.Declined;
 					if (status.equals("accepted"))
 						challengeStatus = ChallengeStatus.Accepted;
 					PreferenceHelper.storeChallengeStatus(this, challengeID, challengeStatus);

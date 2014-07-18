@@ -38,7 +38,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 				@Override
 				protected void onPostExecute(Integer result) {
 					if (result == 0) {
-						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Denied);
+						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Declined);
 						Toast.makeText(context, "Challenge Denied", Toast.LENGTH_LONG).show();
 					}
 				}

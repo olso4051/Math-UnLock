@@ -39,6 +39,7 @@
     
     <!-- Sharing -->
     <string name="deeldat_api_key">1716a4ac3509884eb5cf0245d392be52</string>
+    <string name="share_title">Could You Answer This Question To Unlock Your Phone?</string>
     <string name="ask_to_share1">Ask for help</string>
     <string name="ask_to_share0">Challenge Friends</string>
     <string name="ask_to_share2">Share question</string>
@@ -62,9 +63,9 @@
     <string name="share_base_url_facebook_caption_readable">Unlock Your IQ!</string>
     <string formatted="false" name="share_base_url_facebook_base_caption">&amp;caption=</string>
     <string formatted="false" name="share_base_url_facebook_description">&amp;description=Download%20Hiq%20From%20This%20Link%20And%20Get%2040%20Gold%20Coins</string>
-    <string name="share_base_url_facebook_description_readable">Download Hiq Today and Get 40 Gold Coins</string>
+    <string name="share_base_url_facebook_description_readable">Download Hiq Today and Get @integer/coins_from_share Gold Coins</string>
     <string name="share_base_url_facebook_description_readable1">Download Hiq Today and You and</string>
-    <string name="share_base_url_facebook_description_readable2">Will Get 40 Gold Coins</string>
+    <string name="share_base_url_facebook_description_readable2">Will Get @integer/coins_from_share Gold Coins</string>
     <string name="share_base_url_facebook_picture">&amp;picture=http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_picture_readable">http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_redirect">&amp;redirect_uri=http://www.facebook.com</string>
@@ -86,23 +87,26 @@
     <string name="notification_message_referral1">You\'ve received</string>
     <string name="notification_message_referral2">coins from your referral network</string>
     <string name="notification_message_referral_facebook">Join me and Unlock Your IQ!</string>
-    <string name="notification_title_challenge">Challenge From\u0020</string>
-    <string name="notification_message_challenge1">\u0020questions,\u0020</string>
-    <string name="notification_message_challenge2">Difficulty, for\u0020</string>
-    <string name="notification_message_challenge3">Coins</string>
-    <string name="notification_title_challenge_result_tie">So Close, You Tied</string>
+    
+    <string name="notification_title_challenge">New Challenge</string>
+    <string name="notification_message_challenge_for">\u0020for\u0020</string>
+    <string name="notification_message_challenge1">\u0020questions</string>
+    <string name="notification_message_challenge2">\u0020Difficulty</string>
+    <string name="notification_message_challenge_coins">\u0020Coins</string>
+    
+    <string name="notification_title_challenge_result_tie">Challenge Tied</string>
     <string name="notification_message_challenge_result_tie">\u0020got the same score as you</string>
-    <string name="notification_title_challenge_result_won">Congrats, You Won!</string>
+    <string name="notification_title_challenge_result_won">Challenge Won!</string>
     <string name="notification_message_challenge_result_won1">You beat\u0020</string>
+    <string name="notification_title_challenge_result_loss">Challenge Lost</string>
+    <string name="notification_message_challenge_result_loss1">You lost to\u0020</string>
     <string name="notification_message_challenge_result2">\u0020for\u0020</string>
     <string name="notification_message_challenge_result3">\u0020coins</string>
-    <string name="notification_title_challenge_result_loss">Too Bad, You Lost</string>
-    <string name="notification_message_challenge_result_loss1">You lost to\u0020</string>
     
-    <string name="notification_title_challenge_status_accepted">\u0020 Accepted Your Challenge</string>
-    <string name="notification_title_challenge_status_declined">\u0020 Declined Your Challenge</string>
-    <string name="notification_message_challenge_status_accepted">Answer the questions and beat your friend</string>
-    <string name="notification_message_challenge_status_declined">They don\'t have time right now, try again later.</string>
+    <string name="notification_title_challenge_status_accepted">Challenge Accepted</string>
+    <string name="notification_title_challenge_status_declined">Challenge Declined</string>
+    <string name="notification_message_challenge_status_accepted">\u0020started your challenge</string>
+    <string name="notification_message_challenge_status_declined">\u0020deleted your challenge</string>
     
     <!-- Preferences(default) -->
     <string name="enable_sponsored">Sponsored question frequency</string>

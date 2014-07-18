@@ -6,7 +6,9 @@ import java.util.List;
 import com.olyware.mathlock.utils.ContactHelper;
 
 public class CustomContactData implements Comparable<CustomContactData> {
-	private String name, description, hiqUserID, hiqUserName, facebookUserID;
+	final private static String FacebookContact = "Facebook";
+	final private static String PhoneContact = "Phonebook";
+	private String name, description, hiqUserID, hiqUserName, facebookUserID, facebookName;
 	private List<String> emails, phoneNumbers;
 	private boolean isFriend, isContact;
 	private int contact, section;
@@ -22,6 +24,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
+		facebookName = "";
+		this.description = "";
 	}
 
 	public CustomContactData(int contact, String userID, String hiqUserName) {
@@ -29,6 +33,14 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.contact = contact;
 		this.hiqUserID = userID;
 		this.hiqUserName = hiqUserName;
+		this.name = "";
+		this.emails = new ArrayList<String>();
+		this.phoneNumbers = new ArrayList<String>();
+		isFriend = false;
+		section = -1;
+		facebookUserID = "";
+		facebookName = "";
+		this.description = "";
 	}
 
 	public CustomContactData(String name, String email, String phoneNumber) {
@@ -44,23 +56,26 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
+		facebookName = "";
+		this.description = "";
 	}
 
-	public CustomContactData(String name, List<String> emails, List<String> phoneNumbers, boolean isFriend) {
+	public CustomContactData(String hiqUserID, String hiqUserName, String facebookUserID, String facebookName, String name,
+			List<String> emails, List<String> phoneNumbers, boolean isFriend) {
 		this.name = name;
 		this.emails = new ArrayList<String>(emails.size());
 		this.emails.addAll(emails);
 		this.phoneNumbers = new ArrayList<String>(phoneNumbers.size());
-		for (int i = 0; i < phoneNumbers.size(); i++) {
-			this.phoneNumbers.add(phoneNumbers.get(i).replaceAll("[^\\d]", ""));
-		}
+		this.phoneNumbers.addAll(ContactHelper.getPhoneNumbersFromStrings(phoneNumbers));
 		this.isFriend = isFriend;
+		this.hiqUserID = hiqUserID;
+		this.hiqUserName = hiqUserName;
+		this.facebookUserID = facebookUserID;
+		this.facebookName = facebookName;
 		isContact = true;
 		contact = -1;
 		section = -1;
-		hiqUserID = "";
-		hiqUserName = "";
-		facebookUserID = "";
+		this.description = "";
 	}
 
 	public CustomContactData(String name, List<String> emails, List<String> phoneNumbers) {
@@ -68,9 +83,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.emails = new ArrayList<String>(emails.size());
 		this.emails.addAll(emails);
 		this.phoneNumbers = new ArrayList<String>(phoneNumbers.size());
-		for (int i = 0; i < phoneNumbers.size(); i++) {
-			this.phoneNumbers.add(phoneNumbers.get(i).replaceAll("[^\\d]", ""));
-		}
+		this.phoneNumbers.addAll(ContactHelper.getPhoneNumbersFromStrings(phoneNumbers));
 		isFriend = false;
 		isContact = true;
 		contact = -1;
@@ -78,10 +91,12 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
+		facebookName = "";
+		this.description = "";
 	}
 
 	public CustomContactData(String facebookName, String facebookID) {
-		this.name = facebookName;
+		this.name = "";
 		this.emails = new ArrayList<String>();
 		this.phoneNumbers = new ArrayList<String>();
 		isFriend = true;
@@ -91,6 +106,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = facebookID;
+		this.facebookName = facebookName;
+		this.description = "";
 	}
 
 	public CustomContactData(String title, String description, int section) {
@@ -105,10 +122,45 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		hiqUserID = "";
 		hiqUserName = "";
 		facebookUserID = "";
+		facebookName = "";
 	}
 
 	public String getName() {
-		return hiqUserName.equals("") ? name : hiqUserName;
+		return name;
+	}
+
+	public String getHiqUserName() {
+		return hiqUserName;
+	}
+
+	public String getDisplayName() {
+		return facebookName.equals("") ? (hiqUserName.equals("") ? name : hiqUserName) : facebookName;
+	}
+
+	public String getDisplayDescription() {
+		String display = getDisplayContact();
+		String desc = "";
+		if (hiqUserName.equals("")) {
+			return PhoneContact + " - " + display;
+		}
+		if (!facebookName.equals("")) {
+			desc = FacebookContact;
+		}
+		if (!display.equals("")) {
+			if (desc.equals(""))
+				desc = PhoneContact;
+			else
+				desc += ", " + PhoneContact;
+		}
+		return desc;
+	}
+
+	public String getDisplayContact() {
+		String display = getPhoneNumber();
+		if (display.equals("")) {
+			display = getEmail();
+		}
+		return display;
 	}
 
 	public String getDescription() {
@@ -126,7 +178,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		return emails;
 	}
 
-	public String getPhone() {
+	public String getPhoneNumber() {
 		if (phoneNumbers.size() > 0)
 			return phoneNumbers.get(0);
 		else
@@ -166,7 +218,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	}
 
 	public String getScore() {
-		return "0";
+		return "";
 	}
 
 	public List<String> getPhoneHashs() {
@@ -175,8 +227,11 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public String getJSON() {
 		String json = "{";
-		json += "\"" + ContactHelper.CONTACT_IS_FRIEND + "\":\"" + isFriend() + "\",";
-		json += "\"" + ContactHelper.CONTACT_USER_ID + "\":\"" + hiqUserID + "\",";
+		json += "\"" + ContactHelper.CONTACT_IS_FRIEND + "\":\"" + isFriend + "\",";
+		json += "\"" + ContactHelper.CONTACT_HIQ_USER_ID + "\":\"" + hiqUserID + "\",";
+		json += "\"" + ContactHelper.CONTACT_HIQ_NAME + "\":\"" + hiqUserName + "\",";
+		json += "\"" + ContactHelper.CONTACT_FACEBOOK_USER_ID + "\":\"" + facebookUserID + "\",";
+		json += "\"" + ContactHelper.CONTACT_FACEBOOK_NAME + "\":\"" + facebookName + "\",";
 		json += "\"" + ContactHelper.CONTACT_NAME + "\":\"" + name + "\",";
 		json += "\"" + ContactHelper.CONTACT_PHONE + "\":[";
 		boolean first = true;
@@ -276,7 +331,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			else
 				return 1;
 		}
-		int compareName = name.compareToIgnoreCase(data.name);
+		int compareName = getDisplayName().compareToIgnoreCase(data.getDisplayName());
 		if (isFriend() == data.isFriend()) {
 			// if both are friends or not friends then compare by name
 			if (compareName == 0) {

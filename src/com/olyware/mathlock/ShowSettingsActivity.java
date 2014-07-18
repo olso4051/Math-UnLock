@@ -21,6 +21,7 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.service.ScreenService;
+import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	final private static String SCREEN_LABEL = "Settings Screen";
@@ -123,8 +124,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		logoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-				sharedPrefsUsers.edit().putBoolean(mPrefUserSkipped, false).putBoolean(mPrefUserLoggedIn, false).commit();
+				PreferenceHelper.logout(ctx);
 				ctx.stopService(sIntent);
 				Intent broadcastIntent = new Intent(getString(R.string.logout_receiver_filter));
 				LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent);

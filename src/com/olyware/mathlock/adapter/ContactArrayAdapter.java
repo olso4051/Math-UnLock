@@ -104,11 +104,11 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 
 		if (isContact) {
 			contactHolder.layout.setBackgroundResource(backgroundResourceID);
-			contactHolder.txtName.setText(customContactData.getName());
-			contactHolder.txtSub.setText(customContactData.getPhone());
+			contactHolder.txtName.setText(customContactData.getDisplayName());
+			contactHolder.txtSub.setText(customContactData.getDisplayDescription());
 			contactHolder.txtWinLoss.setText(customContactData.isFriend() ? customContactData.getScore() : "");
 		} else {
-			sectionHolder.title.setText(customContactData.getName());
+			sectionHolder.title.setText(customContactData.getDisplayName());
 			sectionHolder.description.setText(customContactData.getDescription());
 		}
 
@@ -150,7 +150,7 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 
 				for (int i = 0; i < count; i++) {
 					CustomContactData customContact = list.get(i);
-					String valueName = customContact.getName().toLowerCase(Locale.ENGLISH);
+					String valueName = customContact.getDisplayName().toLowerCase(Locale.ENGLISH);
 					int valueSection = customContact.getSection();
 					if (valueSection >= 0) {
 						newList.add(customContact);

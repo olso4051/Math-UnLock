@@ -368,12 +368,18 @@ public class DatabaseModelFactory {
 				if (cursor.isFirst())
 					lastChallengeID = challengeID;
 				int score = cursorHelper.getInteger(ChallengeQuestionContract.SCORE);
+				Loggy.d("challengeID = " + challengeID + " |score = " + score);
 				if (score < 0) {
 					if (challengeID.equals(lastChallengeID)) {
 						questionsToDo++;
 					} else {
 						lastQuestionsToDo = questionsToDo;
 						questionsToDo = 1;
+					}
+				} else {
+					if (!challengeID.equals(lastChallengeID)) {
+						lastQuestionsToDo = questionsToDo;
+						questionsToDo = 0;
 					}
 				}
 				Loggy.d("challengeID = " + challengeID + " |lastChallengeID = " + lastChallengeID);

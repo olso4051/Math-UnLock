@@ -74,7 +74,7 @@ public class ChallengeDialog extends DialogFragment {
 				} else {
 					lastLength = cs.length();
 					contacts.clear();
-					contacts.add(new CustomContactData("Friends", "Score", 0));
+					contacts.add(new CustomContactData("Friends", "", 0));
 					contacts.add(new CustomContactData("Friends to invite", "", 1));
 					contacts.addAll(allContacts);
 					Collections.sort(contacts);
@@ -99,7 +99,7 @@ public class ChallengeDialog extends DialogFragment {
 		// Listview Data
 		contacts = new ArrayList<CustomContactData>();
 		allContacts = new ArrayList<CustomContactData>();
-		contacts.add(new CustomContactData("Friends", "Score", 0));
+		contacts.add(new CustomContactData("Friends", "", 0));
 		contacts.add(new CustomContactData("Friends to invite", "", 1));
 
 		// Adding items to listview
@@ -111,8 +111,8 @@ public class ChallengeDialog extends DialogFragment {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
 					if (selectedContact.hasHiqUserID()) {
-						Loggy.d("selected: userName = " + selectedContact.getName() + " |userID = " + selectedContact.getHiqUserID());
-						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getName(), selectedContact.getHiqUserID()));
+						Loggy.d("selected: userName = " + selectedContact.getDisplayName() + " |userID = " + selectedContact.getHiqUserID());
+						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getDisplayName(), selectedContact.getHiqUserID()));
 					} else {
 						String addresses = "";
 						for (String address : selectedContact.getPhoneNumbers()) {
@@ -181,28 +181,32 @@ public class ChallengeDialog extends DialogFragment {
 
 			@Override
 			public void onFriendContactFound(int id, String userID, String userName) {
-				int replaceAddition = 1;
-				if (!contacts.get(id + 1).isFriend()) {
-					numFriends++;
-					replaceAddition += 1;
+				if (contacts != null && allContacts != null && adapter != null) {
+					int replaceAddition = 1;
+					if (!contacts.get(id + 1).isFriend()) {
+						numFriends++;
+						replaceAddition += 1;
+					}
+					contacts.get(id + replaceAddition).setIsFriend(true);
+					contacts.get(id + replaceAddition).setUserID(userID);
+					contacts.get(id + replaceAddition).setHiqUserName(userName);
+					Collections.sort(contacts);
+					allContacts.get(id).setIsFriend(true);
+					allContacts.get(id).setUserID(userID);
+					allContacts.get(id).setHiqUserName(userName);
+					Collections.sort(allContacts);
+					adapter.notifyDataSetChanged();
 				}
-				contacts.get(id + replaceAddition).setIsFriend(true);
-				contacts.get(id + replaceAddition).setUserID(userID);
-				contacts.get(id + replaceAddition).setHiqUserName(userName);
-				Collections.sort(contacts);
-				allContacts.get(id).setIsFriend(true);
-				allContacts.get(id).setUserID(userID);
-				allContacts.get(id).setHiqUserName(userName);
-				Collections.sort(allContacts);
-				adapter.notifyDataSetChanged();
 			}
 
 			@Override
 			public void onDoneFindingContacts() {
-				Loggy.d("storing contacts");
-				ContactHelper.storeContacts(getActivity(), allContacts);
-				inputSearch.setEnabled(true);
-				swipeLayout.setRefreshing(false);
+				if (allContacts != null && getActivity() != null) {
+					Loggy.d("storing contacts");
+					ContactHelper.storeContacts(getActivity(), allContacts);
+					inputSearch.setEnabled(true);
+					swipeLayout.setRefreshing(false);
+				}
 			}
 		});
 	}
