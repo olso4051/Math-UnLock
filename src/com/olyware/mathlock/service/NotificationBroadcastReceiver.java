@@ -25,7 +25,8 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 				@Override
 				protected void onPostExecute(Integer result) {
 					if (result == 0) {
-						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Accepted);
+						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Accepted,
+								CustomContactData.ChallengeState.Active);
 						Toast.makeText(context, "Challenge Accepted", Toast.LENGTH_LONG).show();
 					}
 				}
@@ -38,7 +39,8 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 				@Override
 				protected void onPostExecute(Integer result) {
 					if (result == 0) {
-						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Declined);
+						PreferenceHelper.storeChallengeStatus(context, challengeID, ChallengeStatus.Declined,
+								CustomContactData.ChallengeState.None);
 						Toast.makeText(context, "Challenge Denied", Toast.LENGTH_LONG).show();
 					}
 				}

@@ -58,12 +58,12 @@ public class ShareHelper {
 			Bitmap image, final String title, String deepLink) {
 		final String link = buildShareURL(context);
 		final String DeelDatApiKey = context.getString(R.string.deeldat_api_key);
-		String name = LoginFragment.getUserName(context);
+		String name = ContactHelper.getUserName(context);
+		String coins = context.getString(R.string.coins_from_share);
 		if (name.equals(""))
-			name = context.getString(R.string.share_base_url_facebook_description_readable);
+			name = context.getString(R.string.share_base_url_facebook_description_readable, coins);
 		else
-			name = context.getString(R.string.share_base_url_facebook_description_readable1) + " " + name + " "
-					+ context.getString(R.string.share_base_url_facebook_description_readable2);
+			name = context.getString(R.string.share_base_url_facebook_description_readable1, name, coins);
 		final String description = name;
 		String siteName = "Hiq Lockscreen";
 		String appName = context.getString(R.string.app_name);

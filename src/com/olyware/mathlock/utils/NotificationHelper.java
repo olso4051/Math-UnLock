@@ -10,11 +10,11 @@ import android.support.v4.app.NotificationCompat;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.Difficulty;
-import com.olyware.mathlock.service.NotificationBroadcastReceiver;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class NotificationHelper {
 	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3, CHALLENGE_ID = 4, CHALLENGE_RESULT_ID = 5, CHALLENGE_STATUS_ID = 6;
+	final static public String EXTRA_OPEN_CHALLENGE = "open_challenge";
 	private NotificationManager mNotificationManager;
 	NotificationCompat.Builder builder;
 	private Context ctx;
@@ -111,16 +111,20 @@ public class NotificationHelper {
 				modifiedBet + ctx.getString(R.string.notification_message_challenge_coins) };
 
 		// intent to accept notification
-		Intent iMain = new Intent(ctx, NotificationBroadcastReceiver.class);
+		/*Intent iMain = new Intent(ctx, NotificationBroadcastReceiver.class);
 		iMain.setAction(NotificationBroadcastReceiver.ACTION_CHALLENGE_ACCEPTED);
 		iMain.putExtra(NotificationBroadcastReceiver.CHALLENGE_ID, challengeID);
-		PendingIntent mainIntent = PendingIntent.getBroadcast(ctx, 0, iMain, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent mainIntent = PendingIntent.getBroadcast(ctx, 0, iMain, PendingIntent.FLAG_CANCEL_CURRENT);*/
 
 		// intent when notification cleared
-		Intent iDelete = new Intent(ctx, NotificationBroadcastReceiver.class);
+		/*Intent iDelete = new Intent(ctx, NotificationBroadcastReceiver.class);
 		iDelete.setAction(NotificationBroadcastReceiver.ACTION_CHALLENGE_DENIED);
-		iMain.putExtra(NotificationBroadcastReceiver.CHALLENGE_ID, challengeID);
-		PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, iDelete, PendingIntent.FLAG_CANCEL_CURRENT);
+		iDelete.putExtra(NotificationBroadcastReceiver.CHALLENGE_ID, challengeID);
+		PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, iDelete, PendingIntent.FLAG_CANCEL_CURRENT);*/
+
+		Intent iMain = new Intent(ctx, MainActivity.class);
+		iMain.putExtra(EXTRA_OPEN_CHALLENGE, true);
+		PendingIntent mainIntent = PendingIntent.getActivity(ctx, 0, iMain, 0);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
 		NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
@@ -135,8 +139,8 @@ public class NotificationHelper {
 		mBuilder.setContentText(msg);
 		mBuilder.setAutoCancel(true);
 		mBuilder.setContentIntent(mainIntent);
-		mBuilder.setDeleteIntent(deleteIntent);
-		mNotificationManager.notify(challengeID, CHALLENGE_ID, mBuilder.build());
+		// mBuilder.setDeleteIntent(deleteIntent);
+		mNotificationManager.notify(CHALLENGE_ID, mBuilder.build());
 	}
 
 	public void clearChallengeNotification(String challengeID) {
@@ -159,13 +163,14 @@ public class NotificationHelper {
 			return;
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx.getApplicationContext(), 0, new Intent(), 0);
-		mBuilder.setContentIntent(notifyPIntent);
+		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
+
 		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);
 		mBuilder.setAutoCancel(true);
+		mBuilder.setContentIntent(notifyPIntent);
 		mNotificationManager.notify(CHALLENGE_STATUS_ID, mBuilder.build());
 	}
 
@@ -197,13 +202,14 @@ public class NotificationHelper {
 		}
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx.getApplicationContext(), 0, new Intent(), 0);
-		mBuilder.setContentIntent(notifyPIntent);
+		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
+
 		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);
 		mBuilder.setAutoCancel(true);
+		mBuilder.setContentIntent(notifyPIntent);
 		mNotificationManager.notify(CHALLENGE_RESULT_ID, mBuilder.build());
 	}
 

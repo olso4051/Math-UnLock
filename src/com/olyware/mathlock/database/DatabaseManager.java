@@ -504,6 +504,9 @@ public class DatabaseManager {
 			return new HashMap<String, Integer>();
 	}
 
+	/*public CustomContactData.ChallengeState getChallengeState(String hiqUserID){
+		
+	}*/
 	public int removeChallengeQuestions(long ID) {
 		if (db.isOpen()) {
 			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "

@@ -88,6 +88,7 @@ public class GcmIntentService extends IntentService {
 				} else if (type.equals(CHALLENGE)) {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String userName = getStringFromMessage(fullMessage, "c_username");
+					String cUserID = getStringFromMessage(fullMessage, "c_user_id");
 					Loggy.d("userName = " + userName);
 					if (userName.equals("")) {
 						String phoneHash = getStringFromMessage(fullMessage, "phone_hash");
@@ -114,7 +115,8 @@ public class GcmIntentService extends IntentService {
 							dbManager.addChallengeQuestion(challengeID, descriptions.get(i), questions.get(i), answers.get(i), userName);
 						}
 					}
-					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Undefined, userName);
+					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Undefined,
+							CustomContactData.ChallengeState.New, userName, cUserID, bet, difficultyMin, difficultyMax, questions.size());
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper
 							.sendChallengeNotification(challengeID, userName, questions.size(), difficultyMin, difficultyMax, bet);
@@ -160,9 +162,12 @@ public class GcmIntentService extends IntentService {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String status = getStringFromMessage(fullMessage, "status");
 					ChallengeStatus challengeStatus = ChallengeStatus.Declined;
-					if (status.equals("accepted"))
+					CustomContactData.ChallengeState challengeState = CustomContactData.ChallengeState.None;
+					if (status.equals("accepted")) {
 						challengeStatus = ChallengeStatus.Accepted;
-					PreferenceHelper.storeChallengeStatus(this, challengeID, challengeStatus);
+						challengeState = CustomContactData.ChallengeState.Active;
+					}
+					PreferenceHelper.storeChallengeStatus(this, challengeID, challengeStatus, challengeState);
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper.sendChallengeStatusNotification(challengeID, challengeStatus);
 				}

@@ -44,16 +44,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		public void restart();
 	}
 
-	public static String getUserName(Context ctx) {
-		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_name), "");
-	}
-
-	public static String getUserID(Context ctx) {
-		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_userid), "");
-	}
-
 	public static List<String> PERMISSIONS = Arrays
 			.asList("email", "public_profile", "user_friends"/*, "user_birthday", "user_location"*/);
 

@@ -127,6 +127,13 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 		return difficultyMax;
 	}
 
+	public int getQuestionNumber() {
+		if (genericQuestions != null)
+			return genericQuestions.size();
+		else
+			return 0;
+	}
+
 	@Override
 	protected Integer doInBackground(Void... v) {
 		Loggy.d("questions size = " + questions.size());
@@ -186,11 +193,13 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			success = getStringFromJSON(jsonResponse, Success);
-			error = getStringFromJSON(jsonResponse, Error);
-			challengeID = getStringFromJSON(jsonResponse, ChallengeID);
-			genericQuestions.clear();
-			genericQuestions.addAll(getGenericQuestionsFromJSON(jsonResponse, Descs, Quests, Answers));
+			success = JSONHelper.getStringFromJSON(jsonResponse, Success);
+			error = JSONHelper.getStringFromJSON(jsonResponse, Error);
+			challengeID = JSONHelper.getStringFromJSON(jsonResponse, ChallengeID);
+			bet = JSONHelper.getIntFromJSON(jsonResponse, Bet);
+			difficultyMin = JSONHelper.getIntFromJSON(jsonResponse, DiffMin);
+			difficultyMax = JSONHelper.getIntFromJSON(jsonResponse, DiffMax);
+			getGenericQuestionsFromJSON(jsonResponse, Descs, Quests, Answers);
 			if (success.equals("true")) {
 				return 0;
 			} else
@@ -205,24 +214,21 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 		// Store the list of generic questions in the database in the calling thread
 	}
 
-	private String getStringFromJSON(JSONObject json, String key) {
-		try {
-			return json.getString(key);
-		} catch (JSONException e) {
-			return "";
-		}
-	}
+	private void getGenericQuestionsFromJSON(JSONObject json, String descKey, String quesKey, String ansKey) {
+		genericQuestions.clear();
 
-	private List<GenericQuestion> getGenericQuestionsFromJSON(JSONObject json, String descKey, String quesKey, String ansKey) {
-		List<GenericQuestion> genericQuestions = new ArrayList<GenericQuestion>();
-		List<String> descriptions = JSONHelper.getStringListFromJSON(json, descKey);
-		List<String> questions = JSONHelper.getStringListFromJSON(json, quesKey);
-		List<String[]> answers = JSONHelper.getStringArrayListFromJSON(json, ansKey);
+		descriptions.clear();
+		descriptions.addAll(JSONHelper.getStringListFromJSON(json, descKey));
+
+		questions.clear();
+		questions.addAll(JSONHelper.getStringListFromJSON(json, quesKey));
+
+		answers.clear();
+		answers.addAll(JSONHelper.getStringArrayListFromJSON(json, ansKey));
 		if (descriptions.size() == questions.size() && questions.size() == answers.size() && answers.size() == descriptions.size()) {
 			for (int i = 0; i < descriptions.size(); i++) {
 				genericQuestions.add(new GenericQuestion(descriptions.get(i), questions.get(i), answers.get(i)));
 			}
 		}
-		return genericQuestions;
 	}
 }

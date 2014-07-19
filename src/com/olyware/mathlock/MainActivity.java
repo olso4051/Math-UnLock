@@ -62,6 +62,8 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.dialog.ChallengeDialog;
+import com.olyware.mathlock.dialog.ChallengeNewDialog;
+import com.olyware.mathlock.dialog.ChallengeNewDialog.OnAcceptOrDeclineListener;
 import com.olyware.mathlock.dialog.QuestionDialog;
 import com.olyware.mathlock.dialog.QuestionDialog.QuestionDialogListener;
 import com.olyware.mathlock.model.ChallengeQuestion;
@@ -74,7 +76,9 @@ import com.olyware.mathlock.model.LanguageQuestion;
 import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
+import com.olyware.mathlock.service.AcceptChallenge;
 import com.olyware.mathlock.service.CompleteChallenge;
+import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.service.SendChallenge;
 import com.olyware.mathlock.ui.Typefaces;
@@ -136,7 +140,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private long ID = 0;
 
 	private int EnabledPackages = 0;
-	private boolean loggedIn, info, locked, unlocking, UnlockedPackages = false;
+	private boolean loggedIn, info, challenge, locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false, isWallpaperShown = false;
 	final private long MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
 
@@ -353,6 +357,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			ctx = this;
 			info = getIntent().getBooleanExtra("info", false);
+			challenge = getIntent().getBooleanExtra(NotificationHelper.EXTRA_OPEN_CHALLENGE, false);
 			locked = getIntent().getBooleanExtra("locked", false);
 			unlocking = locked;
 
@@ -486,16 +491,16 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						questionWorth -= 1;
 						if (questionWorth <= 0) {
 							questionWorth = 0;
-							if (attached)
-								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+							/*if (attached)
+								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 							if (!joystick.getQuickUnlock()) {
 								HelpQuestionImage = takeScreenShot();
 								joystick.askToShare();
 							}
 						} else {
 							timerHandler.postDelayed(this, decreaseRate);
-							if (attached)
-								getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+							/*if (attached)
+								getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 						}
 					}
 				}
@@ -514,7 +519,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void onAttachedToWindow() {
 		if (loggedIn) {
 			attached = true;
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			// getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 		}
@@ -523,8 +528,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onPause() {
 		screenViewed = false;
-		if (attached)
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		/*if (attached)
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 		if (loggedIn) {
 			Loggy.d("GAtest", "onPause");
 			paused = true;
@@ -551,8 +556,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	protected void onStop() {
 		if (loggedIn) {
 			Loggy.d("GAtest", "onStop");
-			if (attached)
-				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			/*if (attached)
+				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 			joystick.removeCallbacks();
 		}
 		if (progressDialog != null) {
@@ -656,6 +661,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			if (!UnlockedPackages)
 				displayInfo(true);
+			else if (challenge)
+				displayFriends();
 			else if (info)
 				displayInfo(false);
 			else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
@@ -730,6 +737,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (loggedIn) {
+			challenge = intent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_CHALLENGE, false);
 			info = intent.getBooleanExtra("info", false);
 			locked = intent.getBooleanExtra("locked", false);
 			unlocking = locked;
@@ -1017,7 +1025,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				for (Map.Entry<String, Integer> entry : challengeIDs.entrySet()) {
 					String challengeID = entry.getKey();
 					int questionsToAnswer = entry.getValue();
-					ChallengeStatus status = PreferenceHelper.getChallengeStatus(this, challengeID);
+					ChallengeStatus status = PreferenceHelper.getChallengeStatusFromID(this, challengeID);
 					Loggy.d("challengeIDToDisplay = " + challengeIDToDisplay + " |challengeID = " + challengeID + " |questions = "
 							+ questionsToAnswer + " |status = " + status.getValue());
 					if (status.equals(ChallengeStatus.Accepted) && challengeIDToDisplay.equals("")) {
@@ -1477,72 +1485,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				});
 				builder.create().show();
 			}*/
-			final ChallengeDialog challengeDialog = new ChallengeDialog();
-			challengeDialog.setCancelable(true);
-			challengeDialog.setChallengeDialogListener(new ChallengeDialog.ChallengeDialogListener() {
-				@Override
-				public void onInviteSelected(String address) {
-					challengeDialog.dismiss();
-					String uri = "smsto:" + address;
-					Intent intentSMS = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
-					intentSMS.putExtra("sms_body", ShareHelper.getInvite(MainActivity.this));
-					intentSMS.putExtra("compose_mode", true);
-					intentSMS.putExtra("exit_on_sent", true);
-					startActivityForResult(intentSMS, INVITE_SENT);
-				}
-
-				@Override
-				public void onFriendSelected(ChallengeBuilder builder) {
-					challengeDialog.dismiss();
-					final QuestionDialog questionDialog = QuestionDialog.newInstance(ctx,
-							PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager),
-							PreferenceHelper.getDisplayableUnlockedPackageIDs(ctx, dbManager), MoneyHelper.getMaxBet(MainActivity.this));
-					questionDialog.setBuilder(builder);
-					questionDialog.setCancelable(true);
-					questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
-						@Override
-						public void onChallenge(final ChallengeBuilder builder) {
-							Loggy.d("sending challenge...");
-							boolean success = false;
-							questionDialog.dismiss();
-							if (dbManager != null) {
-								if (!dbManager.isDestroyed()) {
-									Loggy.d("sending challenge...database is not null...");
-									List<GenericQuestion> questions = dbManager.createChallengeQuestions(builder);
-									Loggy.d("before sending questions size = " + questions.size());
-									new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet(), builder
-											.getDifficultyMin(), builder.getDifficultyMax()) {
-										@Override
-										protected void onPostExecute(Integer result) {
-											Loggy.d("sending challenge...response from server...");
-											boolean success = false;
-											if (result == 0) {
-												if (dbManager != null) {
-													if (!dbManager.isDestroyed()) {
-														dbManager.addChallengeQuestions(getChallengeID(), getGenericQuestions(),
-																builder.getUserName());
-														PreferenceHelper.storeChallengeStatus(MainActivity.this, getChallengeID(),
-																ChallengeStatus.Undefined, builder.getUserName());
-														success = true;
-														Loggy.d("sent challenge");
-													}
-												}
-											}
-											if (!success)
-												Toaster.sendChallengeFailed(MainActivity.this);
-										}
-									}.execute();
-									success = true;
-								}
-							}
-							if (!success)
-								Toaster.sendChallengeFailed(MainActivity.this);
-						}
-					});
-					questionDialog.show(getSupportFragmentManager(), "fragment_question_select");
-				}
-			});
-			challengeDialog.show(getSupportFragmentManager(), "fragment_challenge");
+			displayFriends();
 			/*unlocking = false;
 			startActivity(new Intent(this,ChallengeActivity.class));*/
 			break;
@@ -1770,6 +1713,124 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					getString(R.string.notification_message_total_facebook), NotificationHelper.TOTAL_ID);
 		}
 		editorPrefsStats.commit();
+	}
+
+	private void displayFriends() {
+		final ChallengeDialog challengeDialog = new ChallengeDialog();
+		challengeDialog.setCancelable(true);
+		challengeDialog.setChallengeDialogListener(new ChallengeDialog.ChallengeDialogListener() {
+			@Override
+			public void onInviteSelected(String address) {
+				challengeDialog.dismiss();
+				String uri = "smsto:" + address;
+				Intent intentSMS = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
+				intentSMS.putExtra("sms_body", ShareHelper.getInvite(MainActivity.this));
+				intentSMS.putExtra("compose_mode", true);
+				intentSMS.putExtra("exit_on_sent", true);
+				startActivityForResult(intentSMS, INVITE_SENT);
+			}
+
+			@Override
+			public void onInactiveSelected(ChallengeBuilder builder) {
+				challengeDialog.dismiss();
+				final QuestionDialog questionDialog = QuestionDialog.newInstance(ctx,
+						PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager),
+						PreferenceHelper.getDisplayableUnlockedPackageIDs(ctx, dbManager), MoneyHelper.getMaxBet(MainActivity.this));
+				questionDialog.setBuilder(builder);
+				questionDialog.setCancelable(true);
+				questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
+					@Override
+					public void onChallenge(final ChallengeBuilder builder) {
+						Loggy.d("sending challenge...");
+						boolean success = false;
+						questionDialog.dismiss();
+						if (dbManager != null) {
+							if (!dbManager.isDestroyed()) {
+								Loggy.d("sending challenge...database is not null...");
+								List<GenericQuestion> questions = dbManager.createChallengeQuestions(builder);
+								Loggy.d("before sending questions size = " + questions.size());
+								new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet(), builder
+										.getDifficultyMin(), builder.getDifficultyMax()) {
+									@Override
+									protected void onPostExecute(Integer result) {
+										Loggy.d("sending challenge...response from server...");
+										boolean success = false;
+										if (result == 0) {
+											if (dbManager != null) {
+												if (!dbManager.isDestroyed()) {
+													dbManager.addChallengeQuestions(getChallengeID(), getGenericQuestions(),
+															builder.getUserName());
+													PreferenceHelper.storeChallengeStatus(MainActivity.this, getChallengeID(),
+															ChallengeStatus.Undefined, CustomContactData.ChallengeState.Sent,
+															builder.getUserName(), builder.getUserHash(), getBet(), getDifficultyMin(),
+															getDifficultyMax(), getQuestionNumber());
+													success = true;
+													Loggy.d("sent challenge");
+												}
+											}
+										}
+										if (!success)
+											Toaster.sendChallengeFailed(MainActivity.this);
+									}
+								}.execute();
+								success = true;
+							}
+						}
+						if (!success)
+							Toaster.sendChallengeFailed(MainActivity.this);
+					}
+				});
+				questionDialog.show(getSupportFragmentManager(), "fragment_question_select");
+			}
+
+			@Override
+			public void onActiveStateSelected() {
+				challengeDialog.dismiss();
+			}
+
+			@Override
+			public void onSentStateSelected(String userName) {
+				// TODO do you want to cancel the challenge with NAME
+				challengeDialog.dismiss();
+			}
+
+			@Override
+			public void onNewStateSelected(final String challengeID, String userName, int bet, int diffMin, int diffMax, int questions) {
+				challengeDialog.dismiss();
+				final ChallengeNewDialog challengeNewDialog = ChallengeNewDialog.newInstance(ctx, userName, bet, diffMin, diffMax,
+						questions);
+				challengeNewDialog.setCancelable(true);
+				challengeNewDialog.setChallengeDialogListener(new OnAcceptOrDeclineListener() {
+					@Override
+					public void onClick(boolean accepted) {
+						if (accepted) {
+							new AcceptChallenge(MainActivity.this, challengeID, true) {
+								@Override
+								protected void onPostExecute(Integer result) {
+									if (result == 0) {
+										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Accepted,
+												CustomContactData.ChallengeState.Active);
+										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
+									}
+								}
+							}.execute();
+						} else {
+							new AcceptChallenge(MainActivity.this, challengeID, false) {
+								@Override
+								protected void onPostExecute(Integer result) {
+									if (result == 0) {
+										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
+												CustomContactData.ChallengeState.None);
+										Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
+									}
+								}
+							}.execute();
+						}
+					}
+				});
+			}
+		});
+		challengeDialog.show(getSupportFragmentManager(), "fragment_challenge");
 	}
 
 	private void displayInfo(boolean first) {

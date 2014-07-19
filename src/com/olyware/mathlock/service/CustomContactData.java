@@ -3,16 +3,125 @@ package com.olyware.mathlock.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
 
 public class CustomContactData implements Comparable<CustomContactData> {
 	final private static String FacebookContact = "Facebook";
 	final private static String PhoneContact = "Phonebook";
-	private String name, description, hiqUserID, hiqUserName, facebookUserID, facebookName;
+	private String name, description, hiqUserID, hiqUserName, facebookUserID, facebookName, challengeID;
 	private List<String> emails, phoneNumbers;
 	private boolean isFriend, isContact;
 	private int section, contact;
 	private List<Integer> contacts;
+	private ChallengeState state;
+
+	public static enum ChallengeState {
+		New(0, R.drawable.challenge_state_new, R.color.lv_txt_blue), Sent(1), Active(2, 0, R.color.lv_txt_blue), None(3);
+
+		final private static int DefaultValue = 3;
+		final private static int DefaultImage = 0;
+		final private static int DefaultColor = R.color.lv_txt;
+		private int value, imageResID, textColor;
+
+		ChallengeState() {
+			this.value = DefaultValue;
+			this.imageResID = DefaultImage;
+			this.textColor = DefaultColor;
+		}
+
+		ChallengeState(int value) {
+			this.value = value;
+			this.imageResID = DefaultImage;
+			this.textColor = DefaultColor;
+		}
+
+		ChallengeState(int value, int imageResource, int textColor) {
+			this.value = value;
+			this.imageResID = imageResource;
+			this.textColor = textColor;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		public int getImageResID() {
+			return imageResID;
+		}
+
+		public int getTextColorID() {
+			return textColor;
+		}
+
+		public int getStateTextColorID() {
+			switch (value) {
+			case 0:
+			case 1:
+			case 2:
+				return R.color.lv_txt;
+			case 3:
+			default:
+				return R.color.white;
+			}
+		}
+
+		public int getStateTextBackgroundResID() {
+			switch (value) {
+			case 0:
+			case 1:
+			case 2:
+				return 0;
+			case 3:
+				return R.drawable.challenge_create_button;
+			default:
+				return 0;
+			}
+		}
+
+		public static int getDefaultValue() {
+			return DefaultValue;
+		}
+
+		public static int getDefaultImageResID() {
+			return DefaultImage;
+		}
+
+		public static ChallengeState getDefaultState() {
+			return valueOf(DefaultValue);
+		}
+
+		public static ChallengeState valueOf(int value) {
+			switch (value) {
+			case 0:
+				return New;
+			case 1:
+				return Sent;
+			case 2:
+				return Active;
+			case 3:
+				return None;
+			default:
+				return valueOf(DefaultValue);
+			}
+		}
+
+		@Override
+		public String toString() {
+			switch (value) {
+			case 0:
+				return "";
+			case 1:
+				return "Waiting...";
+			case 2:
+				return "";
+			case 3:
+				return "Create";
+			default:
+				return "";
+			}
+		}
+	}
 
 	public CustomContactData() {
 		this.name = "";
@@ -27,7 +136,9 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		hiqUserName = "";
 		facebookUserID = "";
 		facebookName = "";
+		challengeID = "";
 		this.description = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(int contact, String userID, String hiqUserName) {
@@ -44,6 +155,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		facebookUserID = "";
 		facebookName = "";
 		this.description = "";
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(List<Integer> contacts, String userID, String hiqUserName) {
@@ -61,6 +174,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		facebookUserID = "";
 		facebookName = "";
 		this.description = "";
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(String name, String email, String phoneNumber) {
@@ -79,6 +194,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		facebookUserID = "";
 		facebookName = "";
 		this.description = "";
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(String hiqUserID, String hiqUserName, String facebookUserID, String facebookName, String name,
@@ -98,6 +215,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		section = -1;
 		contact = -1;
 		this.description = "";
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(String name, List<String> emails, List<String> phoneNumbers) {
@@ -116,6 +235,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		facebookUserID = "";
 		facebookName = "";
 		this.description = "";
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(String facebookName, String facebookID) {
@@ -132,6 +253,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		facebookUserID = facebookID;
 		this.facebookName = facebookName;
 		this.description = "";
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public CustomContactData(String title, String description, int section) {
@@ -148,6 +271,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		facebookUserID = "";
 		facebookName = "";
 		contact = -1;
+		challengeID = "";
+		state = ChallengeState.getDefaultState();
 	}
 
 	public void mergeWith(CustomContactData data) {
@@ -163,6 +288,14 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			facebookName = data.getFacebookName();
 		phoneNumbers.addAll(data.getPhoneNumbers());
 		emails.addAll(data.getEmails());
+	}
+
+	public String getChallengeID() {
+		return challengeID;
+	}
+
+	public void setChallengeID(String challengeID) {
+		this.challengeID = challengeID;
 	}
 
 	public String getName() {
@@ -181,10 +314,14 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		return facebookName.equals("") ? (hiqUserName.equals("") ? name : hiqUserName) : facebookName;
 	}
 
+	public static String getDisplayName(String facebookName, String hiqUserName) {
+		return facebookName.equals("") ? hiqUserName : facebookName;
+	}
+
 	public String getDisplayDescription() {
 		String display = getDisplayContact();
 		String desc = "";
-		if (hiqUserName.equals("")) {
+		if (hiqUserID.equals("")) {
 			return PhoneContact + " - " + display;
 		}
 		if (!facebookName.equals("")) {
@@ -265,8 +402,32 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		return section;
 	}
 
-	public String getScore() {
-		return "";
+	public String getStateDisplayString() {
+		return isFriend() ? state.toString() : "invite";
+	}
+
+	public int getImageResID() {
+		return state.getImageResID();
+	}
+
+	public int getTextColorID() {
+		return state.getTextColorID();
+	}
+
+	public int getStateTextColorID() {
+		return state.getStateTextColorID();
+	}
+
+	public int getStateTextBackgroundResID() {
+		return state.getStateTextBackgroundResID();
+	}
+
+	public CustomContactData.ChallengeState getState() {
+		return state;
+	}
+
+	public void setState(ChallengeState state) {
+		this.state = state;
 	}
 
 	public List<String> getPhoneHashs() {
@@ -317,8 +478,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.isFriend = isFriend;
 	}
 
-	public void setUserID(String userID) {
-		this.hiqUserID = userID;
+	public void setHiqUserID(String hiqUserID) {
+		this.hiqUserID = hiqUserID;
 	}
 
 	public void setDescription(String description) {

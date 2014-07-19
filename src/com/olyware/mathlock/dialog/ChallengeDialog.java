@@ -25,6 +25,7 @@ import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.ContactHelper.FindType;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.PreferenceHelper;
 
 /**
  * Created by Kyle on 2/11/14.
@@ -40,7 +41,13 @@ public class ChallengeDialog extends DialogFragment {
 	private ChallengeDialogListener listener;
 
 	public interface ChallengeDialogListener {
-		void onFriendSelected(ChallengeBuilder builder);
+		void onActiveStateSelected();
+
+		void onSentStateSelected(String userName);
+
+		void onNewStateSelected(String challengeID, String userName, int bet, int diffMin, int diffMax, int questions);
+
+		void onInactiveSelected(ChallengeBuilder builder);
 
 		void onInviteSelected(String address);
 	}
@@ -113,8 +120,25 @@ public class ChallengeDialog extends DialogFragment {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
 					if (selectedContact.hasHiqUserID()) {
-						Loggy.d("selected: userName = " + selectedContact.getDisplayName() + " |userID = " + selectedContact.getHiqUserID());
-						listener.onFriendSelected(new ChallengeBuilder(selectedContact.getDisplayName(), selectedContact.getHiqUserID()));
+						CustomContactData.ChallengeState state = selectedContact.getState();
+						if (state.equals(CustomContactData.ChallengeState.Active)) {
+							listener.onActiveStateSelected();
+						} else if (state.equals(CustomContactData.ChallengeState.New)) {
+							String challengeID = selectedContact.getChallengeID();
+							String displayName = selectedContact.getDisplayName();
+							int bet = PreferenceHelper.getChallengeBet(getActivity(), challengeID);
+							int diffMin = PreferenceHelper.getChallengeDifficultyMin(getActivity(), challengeID);
+							int diffMax = PreferenceHelper.getChallengeDifficultyMax(getActivity(), challengeID);
+							int questions = PreferenceHelper.getChallengeQuestions(getActivity(), challengeID);
+							listener.onNewStateSelected(challengeID, displayName, bet, diffMin, diffMax, questions);
+						} else if (state.equals(CustomContactData.ChallengeState.Sent)) {
+							listener.onSentStateSelected(selectedContact.getDisplayName());
+						} else if (state.equals(CustomContactData.ChallengeState.None)) {
+							Loggy.d("selected: userName = " + selectedContact.getDisplayName() + " |userID = "
+									+ selectedContact.getHiqUserID());
+							listener.onInactiveSelected(new ChallengeBuilder(selectedContact.getDisplayName(), selectedContact
+									.getHiqUserID()));
+						}
 					} else {
 						String addresses = "";
 						for (String address : selectedContact.getPhoneNumbers()) {
@@ -182,20 +206,26 @@ public class ChallengeDialog extends DialogFragment {
 			}
 
 			@Override
-			public void onFriendContactFound(int id, String userID, String userName) {
-				if (contacts != null && allContacts != null && adapter != null) {
+			public void onFriendContactFound(int id, String hiqUserID, String userName) {
+				if (contacts != null && allContacts != null && adapter != null && getActivity() != null) {
 					int replaceAddition = 1;
 					if (!contacts.get(id + 1).isFriend()) {
 						numFriends++;
 						replaceAddition += 1;
 					}
+					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromUserID(getActivity(), hiqUserID);
+					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(getActivity(), hiqUserID);
 					contacts.get(id + replaceAddition).setIsFriend(true);
-					contacts.get(id + replaceAddition).setUserID(userID);
+					contacts.get(id + replaceAddition).setHiqUserID(hiqUserID);
 					contacts.get(id + replaceAddition).setHiqUserName(userName);
+					contacts.get(id + replaceAddition).setState(state);
+					contacts.get(id + replaceAddition).setChallengeID(challengeID);
 					Collections.sort(contacts);
 					allContacts.get(id).setIsFriend(true);
-					allContacts.get(id).setUserID(userID);
+					allContacts.get(id).setHiqUserID(hiqUserID);
 					allContacts.get(id).setHiqUserName(userName);
+					allContacts.get(id).setState(state);
+					allContacts.get(id).setChallengeID(challengeID);
 					Collections.sort(allContacts);
 					adapter.notifyDataSetChanged();
 				}

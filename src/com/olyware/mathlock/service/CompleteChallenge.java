@@ -85,7 +85,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
 			if (success.equals("true")) {
-				PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done);
+				PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
 				return 0;
 			} else
 				return 1;

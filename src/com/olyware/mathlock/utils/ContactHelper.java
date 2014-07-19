@@ -373,6 +373,11 @@ public class ContactHelper {
 		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_id), "");
 	}
 
+	public static String getFacebookUserName(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_name), "");
+	}
+
 	public static String getReferrer(Context ctx) {
 		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_referrer), "");
@@ -400,7 +405,9 @@ public class ContactHelper {
 
 	public static String getUserName(Context ctx) {
 		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-		return sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_username), "");
+		String hiqUserName = sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_username), "");
+		String facebookUserName = sharedPrefsUserInfo.getString(ctx.getString(R.string.pref_user_facebook_name), "");
+		return CustomContactData.getDisplayName(facebookUserName, hiqUserName);
 	}
 
 	private static List<String> getStringListFromJSONArray(JSONArray array) {

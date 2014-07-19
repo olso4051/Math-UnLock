@@ -1,3 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 	<integer name="coins_from_share">150</integer>
+	<string name="coins_from_share">150</string>
 </resources>

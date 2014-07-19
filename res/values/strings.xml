@@ -22,6 +22,16 @@
     <string name="fragment_challenge_search_contacts_hint">Search Friends</string>
     <string name="fragment_challenge_search_packs_hint">Search Packs</string>
     
+    <!-- Challenge New Dialog -->
+    <string name="fragment_challenge_new_from">From</string>
+    <string name="fragment_challenge_new_difficulty">Difficulty</string>
+    <string name="fragment_challenge_new_bet">Bet</string>
+    <string name="fragment_challenge_new_questions">Questions</string>
+    <string name="fragment_challenge_new_accept">Accept</string>
+    <string name="fragment_challenge_new_decline">Decline</string>
+    <string name="challenge_accepted">Challenge Accepted!</string>
+    <string name="challenge_declined">Challenge Declined</string>
+    
     <!-- Google Analytics Tracking strings -->
     <string name="google_analytics_tracking_id">UA-48722021-1</string>
 	<string name="enable_tracking">Google Analytics</string>
@@ -63,9 +73,9 @@
     <string name="share_base_url_facebook_caption_readable">Unlock Your IQ!</string>
     <string formatted="false" name="share_base_url_facebook_base_caption">&amp;caption=</string>
     <string formatted="false" name="share_base_url_facebook_description">&amp;description=Download%20Hiq%20From%20This%20Link%20And%20Get%2040%20Gold%20Coins</string>
-    <string name="share_base_url_facebook_description_readable">Download Hiq Today and Get @integer/coins_from_share Gold Coins</string>
-    <string name="share_base_url_facebook_description_readable1">Download Hiq Today and You and</string>
-    <string name="share_base_url_facebook_description_readable2">Will Get @integer/coins_from_share Gold Coins</string>
+    <string name="share_base_url_facebook_description_readable">Unlock Your IQ! Download Hiq Today and Get %1$s Gold Coins</string>
+    <string name="share_base_url_facebook_description_readable1">Unlock Your IQ! Download Hiq Today and You and %1$s Will Get %2$s Gold Coins</string>
+    <string name="share_base_url_facebook_description_readable2">Will Get %1$s Gold Coins</string>
     <string name="share_base_url_facebook_picture">&amp;picture=http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_picture_readable">http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_redirect">&amp;redirect_uri=http://www.facebook.com</string>
