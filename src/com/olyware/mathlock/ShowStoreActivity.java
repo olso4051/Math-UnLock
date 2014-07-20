@@ -26,6 +26,7 @@ import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.Purchase;
 
@@ -148,10 +149,19 @@ public class ShowStoreActivity extends Activity {
 					// handle error
 					return;
 				} else if (purchase.getSku().equals(SKU[0])) {
+					sendTransaction(purchase.getOrderId(), 0.99 * .7);
+					sendItem(purchase.getOrderId(), getString(R.string.extra_coins1), purchase.getSku(), "coins", 0.99);
+					Loggy.d("purchased 1,000");
 					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 				} else if (purchase.getSku().equals(SKU[1])) {
+					sendTransaction(purchase.getOrderId(), 1.99 * .7);
+					sendItem(purchase.getOrderId(), getString(R.string.extra_coins2), purchase.getSku(), "coins", 1.99);
+					Loggy.d("purchased 5,000");
 					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 				} else if (purchase.getSku().equals(SKU[2])) {
+					sendTransaction(purchase.getOrderId(), 2.99 * .7);
+					sendItem(purchase.getOrderId(), getString(R.string.extra_coins3), purchase.getSku(), "coins", 2.99);
+					Loggy.d("purchased 10,000");
 					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 				}
 			}
@@ -161,18 +171,15 @@ public class ShowStoreActivity extends Activity {
 			public void onConsumeFinished(Purchase purchase, IabResult result) {
 				if (result.isSuccess()) {
 					if (purchase.getSku().equals(SKU[0])) {
-						sendTransaction(purchase.getOrderId(), 0.99 * .7);
-						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 0.99);
+						Loggy.d("consumed 1,000");
 						updateMoney(Cost[0]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[10], EggMaxValues[10]));
 					} else if (purchase.getSku().equals(SKU[1])) {
-						sendTransaction(purchase.getOrderId(), 1.99 * .7);
-						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 1.99);
+						Loggy.d("consumed 1,000");
 						updateMoney(Cost[1]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[11], EggMaxValues[11]));
 					} else if (purchase.getSku().equals(SKU[2])) {
-						sendTransaction(purchase.getOrderId(), 2.99 * .7);
-						sendItem(purchase.getOrderId(), purchase.getPackageName(), purchase.getSku(), "coins", 2.99);
+						Loggy.d("consumed 1,000");
 						updateMoney(Cost[2]);
 						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[12], EggMaxValues[12]));
 					}
@@ -253,6 +260,14 @@ public class ShowStoreActivity extends Activity {
 		// dismiss keyguard though so if there is no security then the activity is shown
 		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+	}
+
+	@Override
+	protected void onDestroy() {
+		if (mHelper != null)
+			mHelper.dispose();
+		mHelper = null;
+		super.onDestroy();
 	}
 
 	private void initMoney() {

@@ -57,10 +57,10 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 				contactHolder.layout.setBackgroundResource(backgroundResourceID);
 				contactHolder.txtName = (TextView) row.findViewById(R.id.contact_name);
 				contactHolder.txtName.setTypeface(fonts.robotoLight);
-				contactHolder.txtName.setTextColor(ctx.getResources().getColor(customContactData.getTextColorID()));
+				contactHolder.txtName.setTextColor(ctx.getResources().getColorStateList(customContactData.getTextColorID()));
 				contactHolder.txtSub = (TextView) row.findViewById(R.id.contact_phone);
 				contactHolder.txtSub.setTypeface(fonts.robotoLight);
-				contactHolder.txtSub.setTextColor(ctx.getResources().getColor(customContactData.getTextColorID()));
+				contactHolder.txtSub.setTextColor(ctx.getResources().getColorStateList(customContactData.getTextColorID()));
 				contactHolder.txtState = (TextView) row.findViewById(R.id.contact_state_text);
 				contactHolder.txtState.setTypeface(fonts.robotoLight);
 				contactHolder.imgState = (ImageView) row.findViewById(R.id.contact_state_image);
@@ -85,10 +85,10 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 					contactHolder.layout.setBackgroundResource(backgroundResourceID);
 					contactHolder.txtName = (TextView) row.findViewById(R.id.contact_name);
 					contactHolder.txtName.setTypeface(fonts.robotoLight);
-					contactHolder.txtName.setTextColor(ctx.getResources().getColor(customContactData.getTextColorID()));
+					contactHolder.txtName.setTextColor(ctx.getResources().getColorStateList(customContactData.getTextColorID()));
 					contactHolder.txtSub = (TextView) row.findViewById(R.id.contact_phone);
 					contactHolder.txtSub.setTypeface(fonts.robotoLight);
-					contactHolder.txtSub.setTextColor(ctx.getResources().getColor(customContactData.getTextColorID()));
+					contactHolder.txtSub.setTextColor(ctx.getResources().getColorStateList(customContactData.getTextColorID()));
 					contactHolder.txtState = (TextView) row.findViewById(R.id.contact_state_text);
 					contactHolder.txtState.setTypeface(fonts.robotoLight);
 					contactHolder.imgState = (ImageView) row.findViewById(R.id.contact_state_image);
@@ -114,9 +114,10 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 			contactHolder.txtName.setText(customContactData.getDisplayName());
 			contactHolder.txtSub.setText(customContactData.getDisplayDescription());
 
-			contactHolder.txtState.setTextColor(ctx.getResources().getColor(customContactData.getStateTextColorID()));
 			contactHolder.txtState.setText(customContactData.getStateDisplayString());
-			contactHolder.txtState.setBackgroundResource(customContactData.getStateTextBackgroundResID());
+			contactHolder.txtState.setTextColor(ctx.getResources().getColorStateList(customContactData.getTextColorID()));
+			// contactHolder.txtState.setTextColor(ctx.getResources().getColor(customContactData.getStateTextColorID()));
+			// contactHolder.txtState.setBackgroundResource(customContactData.getStateTextBackgroundResID());
 
 			contactHolder.imgState.setImageResource(customContactData.getImageResID());
 		} else {

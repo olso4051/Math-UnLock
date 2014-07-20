@@ -17,7 +17,7 @@ import android.telephony.TelephonyManager;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.service.CustomContactData;
-import com.olyware.mathlock.service.GetContacts;
+import com.olyware.mathlock.service.RefreshContacts;
 
 public class ContactHelper {
 	final public static String CONTACT_PREFS = "contact_prefs";
@@ -50,31 +50,37 @@ public class ContactHelper {
 		return new ArrayList<ContactHashes>(unique);
 	}
 
-	public static void getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts, final contactDataListener listener) {
+	public static RefreshContacts getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts,
+			final contactDataListener listener) {
 		// TODO user phone number instead of ""
-		new GetContacts(ctx, contacts) {
+		RefreshContacts c = new RefreshContacts(ctx, contacts) {
 			@Override
 			protected void onProgressUpdate(CustomContactData... values) {
-				if (values[0].isContact()) {
-					List<String> emailsTemp = new ArrayList<String>();
-					emailsTemp.addAll(values[0].getEmails());
-					int replaceID = Integer.parseInt(values[0].getEmails().get(emailsTemp.size() - 1));
-					values[0].getEmails().remove(emailsTemp.size() - 1);
-					listener.onNewContactFound(replaceID, values[0]);
-				} else {
-					Loggy.d("test",
-							"new Friend found, contactID = " + values[0].getContacts().toString() + " userID = " + values[0].getHiqUserID()
-									+ " userName = " + values[0].getDisplayName());
-					listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getHiqUserName());
+				if (!isCancelled()) {
+					if (values[0].isContact()) {
+						List<String> emailsTemp = new ArrayList<String>();
+						emailsTemp.addAll(values[0].getEmails());
+						int replaceID = Integer.parseInt(values[0].getEmails().get(emailsTemp.size() - 1));
+						values[0].getEmails().remove(emailsTemp.size() - 1);
+						listener.onNewContactFound(replaceID, values[0]);
+					} else {
+						Loggy.d("test",
+								"new Friend found, contactID = " + values[0].getContacts().toString() + " userID = "
+										+ values[0].getHiqUserID() + " userName = " + values[0].getDisplayName());
+						listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getHiqUserName());
+					}
 				}
 			}
 
 			@Override
 			protected void onPostExecute(Integer result) {
-				listener.onDoneFindingContacts(getUserHashes());
+				if (!isCancelled())
+					listener.onDoneFindingContacts(getUserHashes());
 			}
 
-		}.execute();
+		};
+		c.execute();
+		return c;
 	}
 
 	public static void storeContacts(Context ctx, List<CustomContactData> contacts) {

@@ -22,24 +22,24 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		final private static int DefaultValue = 3;
 		final private static int DefaultImage = 0;
 		final private static int DefaultColor = R.color.lv_txt;
-		private int value, imageResID, textColor;
+		private int value, imageResID, textColorID;
 
 		ChallengeState() {
 			this.value = DefaultValue;
 			this.imageResID = DefaultImage;
-			this.textColor = DefaultColor;
+			this.textColorID = DefaultColor;
 		}
 
 		ChallengeState(int value) {
 			this.value = value;
 			this.imageResID = DefaultImage;
-			this.textColor = DefaultColor;
+			this.textColorID = DefaultColor;
 		}
 
 		ChallengeState(int value, int imageResource, int textColor) {
 			this.value = value;
 			this.imageResID = imageResource;
-			this.textColor = textColor;
+			this.textColorID = textColor;
 		}
 
 		public int getValue() {
@@ -51,7 +51,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		}
 
 		public int getTextColorID() {
-			return textColor;
+			return textColorID;
 		}
 
 		public int getStateTextColorID() {
@@ -116,7 +116,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			case 2:
 				return "";
 			case 3:
-				return "Create";
+				return "Challenge";
 			default:
 				return "";
 			}

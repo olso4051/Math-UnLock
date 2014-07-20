@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.olyware.mathlock"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout"
     android:layout_width="match_parent"
@@ -22,16 +23,16 @@
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:text="@string/clock"
-                android:textColor="#FFF"
-                android:textSize="40sp" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_huge" />
             <TextView
                 android:id="@+id/money"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right|bottom"
                 android:text="@string/default_money"
-                android:textColor="#FFF"
-                android:textSize="30sp" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_extra_large" />
 		</FrameLayout>
 		<TextView
 			android:id="@+id/description"
@@ -39,14 +40,14 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="right"
 			android:text="@string/question_description_prefix"
-			android:textColor="#999"
-			android:textSize="16sp" />
+			android:textColor="@color/grey_on_dark"
+			android:textSize="@dimen/text_size_small" />
         <com.olyware.mathlock.views.EquationView
             android:id="@+id/problem"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
-            android:textSize="30sp" />
+            custom:textSizeDefault="@dimen/text_size_large" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -56,6 +57,7 @@
         <com.olyware.mathlock.views.JoystickView
             android:id="@+id/joystick"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent" />
+            android:layout_height="fill_parent"
+            custom:textSizeDefault="@dimen/text_size_large" />
     </LinearLayout>
 </LinearLayout>

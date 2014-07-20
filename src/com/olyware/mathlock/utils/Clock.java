@@ -16,10 +16,11 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.views.PixelHelper;
 
 public class Clock {
 
-	final private float clockSize = 40, dateSize = 20;
+	private float clockSizeSP = 40, dateSize = 20;
 	private TextView clock, coins;
 	private float currentClockSize;
 
@@ -53,7 +54,8 @@ public class Clock {
 				toggleClockDate();
 			}
 		});
-		currentClockSize = clockSize;
+		clockSizeSP = PixelHelper.pixelToSP(ctx, clock.getTextSize());
+		currentClockSize = clockSizeSP;
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
@@ -74,7 +76,8 @@ public class Clock {
 				toggleClockDate();
 			}
 		});
-		currentClockSize = clockSize;
+		clockSizeSP = PixelHelper.pixelToSP(ctx, clock.getTextSize());
+		currentClockSize = clockSizeSP;
 
 		IntentFilter c_intentFilter = new IntentFilter(Intent.ACTION_TIME_TICK);
 		c_intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
@@ -101,8 +104,8 @@ public class Clock {
 			EggHelper.unlockEgg(ctx, EggKeys[4], EggMaxValues[4]);
 
 		if (currentClockSize == dateSize) {
-			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSize);	// clock
-			currentClockSize = clockSize;
+			clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSizeSP);	// clock
+			currentClockSize = clockSizeSP;
 			setTime();
 		} else {
 			clock.setHeight(clock.getHeight());

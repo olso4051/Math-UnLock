@@ -3,10 +3,16 @@ package com.olyware.mathlock.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Display;
+import android.view.View;
+import android.view.Window;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.QuestionSelectData;
@@ -16,6 +22,12 @@ import com.olyware.mathlock.service.CustomContactData;
 public class PreferenceHelper {
 	final public static String MONEY_PREFS = "Packages";
 	final public static String CHALLENGE_PREFS = "Challenge";
+	final public static String LAYOUT_PREFS = "Layout_Size";
+
+	final public static String LAYOUT_WIDTH = "layout_width";
+	final public static String LAYOUT_HEIGHT = "layout_height";
+	final public static String LAYOUT_STATUS = "layout_status_bar_height";
+
 	final public static String STATUS = "status";
 	final public static String STATE = "state";
 	final public static String HIQ_USER_NAME = "hiq_user_name";
@@ -305,5 +317,59 @@ public class PreferenceHelper {
 		sharedPrefsUsers.edit().putBoolean(ctx.getString(R.string.pref_user_skipped), false)
 				.putBoolean(ctx.getString(R.string.pref_user_logged_in), false).commit();
 		ContactHelper.removeStoredContacts(ctx);
+	}
+
+	@SuppressLint("NewApi")
+	public static void storeLayoutParams(Activity act) {
+		SharedPreferences sharedPrefsLayout = act.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editPrefsLayout = sharedPrefsLayout.edit();
+		Display display = act.getWindowManager().getDefaultDisplay();
+		int sizeY, sizeX;
+		if (android.os.Build.VERSION.SDK_INT < 13) {
+			sizeY = display.getHeight();
+			sizeX = display.getWidth();
+		} else {
+			Point size = new Point();
+			display.getSize(size);
+			sizeY = size.y;
+			sizeX = size.x;
+		}
+		editPrefsLayout.putInt(LAYOUT_WIDTH, sizeX).putInt(LAYOUT_HEIGHT, sizeY);
+		View content = act.getWindow().findViewById(Window.ID_ANDROID_CONTENT);
+		int w = content.getWidth();
+		int h = content.getHeight();
+		if (w > 0 && h > 0) {
+			int statusBarHeight = sizeY - h;
+			Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " | statusBarHeight = "
+					+ statusBarHeight);
+			editPrefsLayout.putInt(LAYOUT_STATUS, statusBarHeight);
+		} else {
+
+		}
+		editPrefsLayout.commit();
+	}
+
+	public static void storeLayoutParams(Context ctx, int width, int height, int statusBarHeight) {
+		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
+		sharedPrefsLayout.edit().putInt(LAYOUT_WIDTH, width).putInt(LAYOUT_HEIGHT, height).putInt(LAYOUT_STATUS, statusBarHeight).commit();
+	}
+
+	public static int getLayoutWidth(Context ctx, int defaultValue) {
+		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsLayout.getInt(LAYOUT_WIDTH, defaultValue);
+	}
+
+	public static int getLayoutHeight(Context ctx, int defaultValue) {
+		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsLayout.getInt(LAYOUT_HEIGHT, defaultValue);
+	}
+
+	public static int getLayoutStatusBarHeight(Context ctx, int defaultValue) {
+		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
+		int sh = sharedPrefsLayout.getInt(LAYOUT_STATUS, defaultValue);
+		if (sh < 0) {
+			sh = (int) Math.ceil(25 * ctx.getResources().getDisplayMetrics().density);
+		}
+		return sh;
 	}
 }

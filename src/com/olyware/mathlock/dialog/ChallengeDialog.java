@@ -21,6 +21,7 @@ import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ContactArrayAdapter;
 import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.service.CustomContactData;
+import com.olyware.mathlock.service.RefreshContacts;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.ContactHelper.FindType;
@@ -39,6 +40,7 @@ public class ChallengeDialog extends DialogFragment {
 	private EditText inputSearch;
 	private int lastLength = 0, numFriends = 0;
 	private ChallengeDialogListener listener;
+	private RefreshContacts refreshContactsTask = null;
 
 	public interface ChallengeDialogListener {
 		void onActiveStateSelected();
@@ -72,19 +74,21 @@ public class ChallengeDialog extends DialogFragment {
 
 		// search box
 		inputSearch = (EditText) v.findViewById(R.id.challenge_search);
-		inputSearch.setEnabled(false);
 		inputSearch.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
 				// When user changed the Text
+				if (refreshContactsTask != null) {
+					refreshContactsTask.cancel(true);
+					swipeLayout.setRefreshing(false);
+				}
 				if (cs.length() > lastLength) {
 					lastLength = cs.length();
 					adapter.getFilter().filter(cs);
 				} else {
 					lastLength = cs.length();
 					contacts.clear();
-					contacts.add(new CustomContactData("Friends", "", 0));
-					contacts.add(new CustomContactData("Friends to invite", "", 1));
+					addSectionHeaders();
 					contacts.addAll(allContacts);
 					Collections.sort(contacts);
 					adapter.getFilter().filter(cs);
@@ -108,8 +112,7 @@ public class ChallengeDialog extends DialogFragment {
 		// Listview Data
 		contacts = new ArrayList<CustomContactData>();
 		allContacts = new ArrayList<CustomContactData>();
-		contacts.add(new CustomContactData("Friends", "", 0));
-		contacts.add(new CustomContactData("Friends to invite", "", 1));
+		addSectionHeaders();
 
 		// Adding items to listview
 		adapter = new ContactArrayAdapter(getActivity(), R.layout.list_friend_item, R.layout.list_section_item, contacts);
@@ -164,28 +167,37 @@ public class ChallengeDialog extends DialogFragment {
 		if (contactsTemp.size() == 0)
 			refreshContacts();
 		else {
-			// refreshContacts();
 			contacts.clear();
-			contacts.add(new CustomContactData("Friends", "0/0", 0));
-			contacts.add(new CustomContactData("Friends to invite", "0/0", 1));
+			addSectionHeaders();
 			contacts.addAll(contactsTemp);
 			Collections.sort(contacts);
 			allContacts.clear();
 			allContacts.addAll(contactsTemp);
 			Collections.sort(allContacts);
 			adapter.notifyDataSetChanged();
+			refreshContacts();
 		}
 
 		return v;
+	}
+
+	@Override
+	public void onStop() {
+		Loggy.d("ChallengeDialog onStop");
+		if (refreshContactsTask != null)
+			refreshContactsTask.cancel(true);
+		refreshContactsTask = null;
+		super.onStop();
 	}
 
 	private void refreshContacts() {
 		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
 		Loggy.d("test", "numFriends = " + numFriends);
-		ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, new ContactHelper.contactDataListener() {
+		refreshContactsTask = ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, new ContactHelper.contactDataListener() {
 			@Override
 			public void onNewContactFound(int replaceID, CustomContactData contactData) {
+
 				if (contacts != null && allContacts != null && adapter != null) {
 					if (replaceID < 0) {
 						if (contactData.isFriend())
@@ -265,10 +277,14 @@ public class ChallengeDialog extends DialogFragment {
 					}
 					Loggy.d("storing contacts");
 					ContactHelper.storeContacts(getActivity(), allContacts);
-					inputSearch.setEnabled(true);
 					swipeLayout.setRefreshing(false);
 				}
 			}
 		});
+	}
+
+	private void addSectionHeaders() {
+		contacts.add(new CustomContactData(getString(R.string.fragment_challenge_friends), "", 0));
+		contacts.add(new CustomContactData(getString(R.string.fragment_challenge_friends_invite), "", 1));
 	}
 }

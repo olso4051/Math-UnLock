@@ -1,5 +1,7 @@
 package com.olyware.mathlock.service;
 
+import com.olyware.mathlock.utils.Loggy;
+
 public class PackageData {
 
 	private String pack;
@@ -18,8 +20,9 @@ public class PackageData {
 		return startTime;
 	}
 
-	public long getTime(long doneTime) {
-		return doneTime - startTime;
+	public long getTimeToOpen() {
+		Loggy.d("getTimeToOpen = " + (System.currentTimeMillis() - startTime));
+		return System.currentTimeMillis() - startTime;
 	}
 
 	@Override

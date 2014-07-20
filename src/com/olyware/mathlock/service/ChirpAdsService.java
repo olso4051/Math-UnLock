@@ -11,16 +11,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
+import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.utils.Loggy;
 
 public class ChirpAdsService extends Service {
 
 	final private static long CHECK_PERIOD = 1000;// milliseconds
-	final private static long STOP_TIME = 60000;// milliseconds
+	final private static long STOP_TIME = 600000;// milliseconds
 
 	private static Timer timer = new Timer();
 	private static Timer timerToStop = new Timer();
 	private List<PackageData> packagesToWatch = new ArrayList<PackageData>();
+	private Tracker trackerGA;
 
 	public IBinder onBind(Intent arg0) {
 		return null;
@@ -47,11 +52,19 @@ public class ChirpAdsService extends Service {
 	@Override
 	public void onCreate() {
 		Loggy.d("chirpadsservice onCreate");
+		trackerGA = MyApplication.getGaTracker();
+		trackerGA.set(Fields.SCREEN_NAME, "ChirpAds Service");
 		super.onCreate();
 	}
 
 	@Override
 	public void onDestroy() {
+		for (PackageData data : packagesToWatch) {
+			String pkg = data.getPack();
+			long time = data.getTimeToOpen();
+			Loggy.d("send event open event");
+			trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
+		}
 		if (timer != null) {
 			timer.cancel();
 			timer = null;
@@ -64,8 +77,10 @@ public class ChirpAdsService extends Service {
 	}
 
 	private void startService() {
-		timer.cancel();
-		timerToStop.cancel();
+		if (timer != null)
+			timer.cancel();
+		if (timerToStop != null)
+			timerToStop.cancel();
 		timer = new Timer();
 		timerToStop = new Timer();
 		timer.scheduleAtFixedRate(new mainTask(), 0, CHECK_PERIOD);
@@ -86,6 +101,9 @@ public class ChirpAdsService extends Service {
 						int i = packagesToWatch.indexOf(new PackageData(pkg, 0));
 						Loggy.d("remove index = " + i);
 						if (i >= 0 && i < packagesToWatch.size()) {
+							long time = packagesToWatch.get(i).getTimeToOpen();
+							Loggy.d("send event open event");
+							trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
 							packagesToWatch.remove(i);
 							if (packagesToWatch.size() == 0) {
 								timer.cancel();

@@ -33,7 +33,7 @@ import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.JSONHelper;
 import com.olyware.mathlock.utils.Loggy;
 
-public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
+public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer> {
 	final private static String FriendsEndpoint = "friends";
 	private List<ContactHashes> userHashes = new ArrayList<ContactHashes>();
 	private List<String> allNames = new ArrayList<String>();
@@ -45,7 +45,7 @@ public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
 	private String baseURL;
 	private Context ctx;
 
-	public GetContacts(Context ctx, List<CustomContactData> contacts) {
+	public RefreshContacts(Context ctx, List<CustomContactData> contacts) {
 		this.ctx = ctx;
 		allContacts.clear();
 		allContacts.addAll(contacts);
@@ -83,6 +83,8 @@ public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
 					JSONArray data = responseJSON.getJSONArray("data");
 					if (data.length() > 0) {
 						for (int i = 0; i < data.length(); i++) {
+							if (isCancelled())
+								break;
 							String facebookName = ((JSONObject) data.get(i)).getString("name");
 							String facebookID = ((JSONObject) data.get(i)).getString("id");
 							if (allFacebookHashes.contains(facebookID)) {
@@ -119,6 +121,8 @@ public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
 		if (cur.getCount() > 0) {
 			// next stored contact
 			while (cur.moveToNext()) {
+				if (isCancelled())
+					break;
 				boolean quit = false;
 				id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));				// store ID for getting the email and phone number
 				name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));	// name of the contact
@@ -134,6 +138,8 @@ public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
 						Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
 								ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] { id }, null);
 						while (pCur.moveToNext() && !quit) {
+							if (isCancelled())
+								break;
 							// could use the next line to restrict types of numbers
 							// int phoneType = pCur.getInt(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
 							String number = ContactHelper.getPhoneNumberFromString(pCur.getString(pCur
@@ -151,6 +157,8 @@ public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
 						Cursor emailCur = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
 								ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[] { id }, null);
 						while (emailCur.moveToNext() && !quit) {
+							if (isCancelled())
+								break;
 							String email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
 							// only add emails we haven't found yet
 							if (email.length() >= 5 && !allEmails.contains(email)) {
@@ -182,71 +190,75 @@ public class GetContacts extends AsyncTask<Void, CustomContactData, Integer> {
 		allEncryptedPhoneNumbers.addAll(ContactHelper.getPhoneHashes(allPhoneNumbers));
 		cur.close();
 
-		// POST to API to get user_ids of contacts and facebook friends
-		HttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPost httppost = new HttpPost(baseURL + FriendsEndpoint);
-		HttpEntity entity;
-		String fullResult;
-		JSONArray jsonResponse;
-		try {
-			JSONObject data = new JSONObject();
-			JSONArray phoneHashes = new JSONArray();
-			// for (int i = 0; i < Math.min(allEncryptedPhoneNumbers.size(), 5); i++) {
-			// String encryptedPhoneNumber = allEncryptedPhoneNumbers.get(i);
-			for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
-				phoneHashes.put(encryptedPhoneNumber);
-			}
-			data.put("phone_hashes", phoneHashes);
+		if (!isCancelled()) {
+			// POST to API to get user_ids of contacts and facebook friends
+			HttpClient httpclient = HttpClientBuilder.create().build();
+			HttpPost httppost = new HttpPost(baseURL + FriendsEndpoint);
+			HttpEntity entity;
+			String fullResult;
+			JSONArray jsonResponse;
+			try {
+				JSONObject data = new JSONObject();
+				JSONArray phoneHashes = new JSONArray();
+				// for (int i = 0; i < Math.min(allEncryptedPhoneNumbers.size(), 5); i++) {
+				// String encryptedPhoneNumber = allEncryptedPhoneNumbers.get(i);
+				for (String encryptedPhoneNumber : allEncryptedPhoneNumbers) {
+					phoneHashes.put(encryptedPhoneNumber);
+				}
+				data.put("phone_hashes", phoneHashes);
 
-			JSONArray facebookHashes = new JSONArray();
-			// for (int i = 0; i < Math.min(allFacebookHashes.size(), 5); i++) {
-			// String facebookID = allFacebookHashes.get(i);
-			for (String facebookID : allFacebookHashes) {
-				facebookHashes.put(facebookID);
-			}
-			// facebookHashes.put("13959212");
-			data.put("facebook_hashes", facebookHashes);
+				JSONArray facebookHashes = new JSONArray();
+				// for (int i = 0; i < Math.min(allFacebookHashes.size(), 5); i++) {
+				// String facebookID = allFacebookHashes.get(i);
+				for (String facebookID : allFacebookHashes) {
+					facebookHashes.put(facebookID);
+				}
+				// facebookHashes.put("13959212");
+				data.put("facebook_hashes", facebookHashes);
 
-			String st = data.toString();
-			int end = st.length();
-			int output = 1000;
-			int endSub = Math.min(output, end);
-			int start = 0;
-			String line = data.toString().substring(start, endSub);
-			Loggy.d(line);
-			while (endSub < end) {
-				start = endSub;
-				endSub = Math.min(endSub + output, end);
-				line = data.toString().substring(start, endSub);
+				String st = data.toString();
+				int end = st.length();
+				int output = 1000;
+				int endSub = Math.min(output, end);
+				int start = 0;
+				String line = data.toString().substring(start, endSub);
 				Loggy.d(line);
+				while (endSub < end) {
+					start = endSub;
+					endSub = Math.min(endSub + output, end);
+					line = data.toString().substring(start, endSub);
+					Loggy.d(line);
+				}
+				// Loggy.d("JSON to get friends = " + data.toString());
+				httppost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
+				httppost.setHeader("Content-Type", "application/json");
+				HttpResponse response = httpclient.execute(httppost);
+				entity = response.getEntity();
+				fullResult = EntityUtils.toString(entity);
+				Loggy.d("fullResult = " + fullResult);
+				jsonResponse = new JSONArray(fullResult);
+				if (entity != null && fullResult != null && jsonResponse != null) {
+					getFriendsFromJSON(jsonResponse);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			// Loggy.d("JSON to get friends = " + data.toString());
-			httppost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
-			httppost.setHeader("Content-Type", "application/json");
-			HttpResponse response = httpclient.execute(httppost);
-			entity = response.getEntity();
-			fullResult = EntityUtils.toString(entity);
-			Loggy.d("fullResult = " + fullResult);
-			jsonResponse = new JSONArray(fullResult);
-			if (entity != null && fullResult != null && jsonResponse != null) {
-				getFriendsFromJSON(jsonResponse);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		Collections.sort(allContacts);
-		userHashes = ContactHelper.getUniqueContactHashes(userHashes);
-		if (userHashes.size() > 0) {
-			ContactHelper.findContact(ContactHelper.FindType.PhoneAndFacebookHASH, allContacts, userHashes,
-					new ContactHelper.friendDataListener() {
-						@Override
-						public void onFriendContactFound(int contact, int id) {
-							CustomContactData contactData = new CustomContactData(contact, userHashes.get(id).getHiqUserHash(), userHashes
-									.get(id).getHiqUserName());
-							publishProgress(contactData);
-						}
-					});
+			Collections.sort(allContacts);
+			userHashes = ContactHelper.getUniqueContactHashes(userHashes);
+			if (userHashes.size() > 0) {
+				ContactHelper.findContact(ContactHelper.FindType.PhoneAndFacebookHASH, allContacts, userHashes,
+						new ContactHelper.friendDataListener() {
+							@Override
+							public void onFriendContactFound(int contact, int id) {
+								if (!isCancelled()) {
+									CustomContactData contactData = new CustomContactData(contact, userHashes.get(id).getHiqUserHash(),
+											userHashes.get(id).getHiqUserName());
+									publishProgress(contactData);
+								}
+							}
+						});
+			}
 		}
 		return 0;
 	}

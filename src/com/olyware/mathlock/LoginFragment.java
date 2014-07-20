@@ -8,15 +8,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Point;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,6 +30,7 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
@@ -182,23 +179,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	@SuppressLint("NewApi")
 	@Override
 	public void onClick(View view) {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		if (sharedPrefs.getInt("layout_status_bar_height", -1) < 0) {
-			Display display = getActivity().getWindowManager().getDefaultDisplay();
-			int sizeY;
-			if (android.os.Build.VERSION.SDK_INT < 13) {
-				sizeY = display.getHeight();
-			} else {
-				Point size = new Point();
-				display.getSize(size);
-				sizeY = size.y;
-			}
-			View content = getActivity().getWindow().findViewById(Window.ID_ANDROID_CONTENT);
-			int statusBarHeight = sizeY - content.getHeight();
-			Loggy.d("test", "sizeY = " + sizeY + " | content.getHeight() = " + content.getHeight() + " | statusBarHeight = "
-					+ statusBarHeight);
-			sharedPrefs.edit().putInt("layout_status_bar_height", statusBarHeight).commit();
-		}
+		PreferenceHelper.storeLayoutParams(getActivity());
 		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
 		if (view.getId() == R.id.fragment_login_button_login) {
@@ -233,7 +214,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				Request.newMeRequest(session, new Request.GraphUserCallback() {
 					@Override
 					public void onCompleted(GraphUser user, Response response) {
-						if (user != null) {
+						if (user != null && getActivity() != null) {
 							String gender = "", birthday = "", location = "", email = "";
 							if (user.getProperty("gender") != null)
 								gender = user.getProperty("gender").toString();

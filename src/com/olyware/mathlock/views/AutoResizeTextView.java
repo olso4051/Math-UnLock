@@ -1,6 +1,7 @@
 package com.olyware.mathlock.views;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -10,6 +11,8 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
+
+import com.olyware.mathlock.R;
 
 public class AutoResizeTextView extends TextView {
 
@@ -37,6 +40,13 @@ public class AutoResizeTextView extends TextView {
 	public AutoResizeTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		ctx = context;
+		TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Custom, 0, 0);
+		try {
+			textSizePixDefault = a.getDimension(R.styleable.Custom_textSizeDefault, 0);
+			textSizeSP = (int) PixelHelper.pixelToSP(context, textSizePixDefault);
+		} finally {
+			a.recycle();
+		}
 		initView();
 	}
 
@@ -51,7 +61,6 @@ public class AutoResizeTextView extends TextView {
 	// =========================================
 
 	private void initView() {
-		textSizePixDefault = getTextSize();
 		textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		setTextColor(Color.WHITE);
 		textPaint.setTextAlign(Paint.Align.LEFT);
@@ -127,6 +136,7 @@ public class AutoResizeTextView extends TextView {
 	}
 
 	private void resetTextSize() {
+
 		textSizePix = textSizePixDefault;
 		float scaledDensity = ctx.getResources().getDisplayMetrics().scaledDensity;
 		textSizeSP = (int) (textSizePix / scaledDensity);

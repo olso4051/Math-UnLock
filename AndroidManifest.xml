@@ -21,6 +21,9 @@
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.READ_CONTACTS" />
 	
+	<!-- FOR TAPJOY -->
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	
 	<!-- FOR GOOGLE CLOUD MESSAGING -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -144,6 +147,28 @@
         
         <service android:name="com.olyware.mathlock.service.GcmIntentService" />
         
+        <!-- FOR TAPJOY -->
+        <activity
+		    android:name="com.tapjoy.TJCOffersWebView"
+		    android:configChanges="orientation|keyboardHidden|screenSize" />
+		<activity
+		    android:name="com.tapjoy.TapjoyFullScreenAdWebView"
+		    android:configChanges="orientation|keyboardHidden|screenSize" />
+		<activity
+		    android:name="com.tapjoy.TapjoyVideoView"
+		    android:configChanges="orientation|keyboardHidden|screenSize" />
+		<activity
+		    android:name="com.tapjoy.TJAdUnitView"
+		    android:configChanges="orientation|keyboardHidden|screenSize"
+		    android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+		    android:hardwareAccelerated="true" />
+		<activity
+		    android:name="com.tapjoy.mraid.view.ActionHandler"
+		    android:configChanges="orientation|keyboardHidden|screenSize" />
+		<activity
+		    android:name="com.tapjoy.mraid.view.Browser"
+		    android:configChanges="orientation|keyboardHidden|screenSize" />
+
         <meta-data
             android:name="com.google.android.backup.api_key"
     		android:value="AEdPqrEAAAAImXbdgOeV5XdSON5zQBYbgeDfC4N9HkDgWEaSIA" />

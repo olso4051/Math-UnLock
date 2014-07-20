@@ -21,6 +21,8 @@
     <string name="fragment_challenge_next">Next</string>
     <string name="fragment_challenge_search_contacts_hint">Search Friends</string>
     <string name="fragment_challenge_search_packs_hint">Search Packs</string>
+    <string name="fragment_challenge_friends">Friends</string>
+    <string name="fragment_challenge_friends_invite">Contacts</string>
     
     <!-- Challenge New Dialog -->
     <string name="fragment_challenge_new_from">From</string>

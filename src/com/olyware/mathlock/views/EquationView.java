@@ -1,9 +1,12 @@
 package com.olyware.mathlock.views;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
+
+import com.olyware.mathlock.R;
 
 public class EquationView extends AutoResizeTextView {
 
@@ -22,6 +25,13 @@ public class EquationView extends AutoResizeTextView {
 
 	public EquationView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Custom, 0, 0);
+		try {
+			float answerSizePix = a.getDimension(R.styleable.Custom_textSizeDefault, 0);
+			textSizeSPDefault = (int) PixelHelper.pixelToSP(context, answerSizePix);
+		} finally {
+			a.recycle();
+		}
 		initView();
 	}
 

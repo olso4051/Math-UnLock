@@ -26,7 +26,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
@@ -42,7 +41,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -103,6 +101,7 @@ import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
+import com.tapjoy.TapjoyConnect;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
 	final private int startingPmoney = 0, streakToIncrease = 40;
@@ -311,6 +310,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
 		trackerGA = MyApplication.getGaTracker();
+		TapjoyConnect.requestTapjoyConnect(this, "937ee2a5-b377-4ed3-8156-16f635e69749", "m7lfX2V6hofuY9pKz34t");
 
 		// Add code to print out the key hash
 		/*try {
@@ -380,18 +380,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			for (int i : getResources().getIntArray(R.array.notify_total_questions))
 				totalToNotify.add(i);
 
-			Display display = getWindowManager().getDefaultDisplay();
-			int sizeY, sizeX;
-			if (android.os.Build.VERSION.SDK_INT < 13) {
-				sizeY = display.getHeight();
-				sizeX = display.getWidth();
-			} else {
-				Point size = new Point();
-				display.getSize(size);
-				sizeY = size.y;
-				sizeX = size.x;
-			}
-			sharedPrefs.edit().putInt("layout_width", sizeX).putInt("layout_height", sizeY).commit();
+			PreferenceHelper.storeLayoutParams(this);
 
 			String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFriusQ7xzxd5eXOnodv5f/XFohXXDHyguNboQC5kPBbwF+Dje/LwdnNN4tzFYN/SbelMPu4sGFdKh6sA4f13wmzIvVOynG3WUqRzut53mAq7/2ljNjwTO0enfYh6F54lnHrp2FpZsLpbzSMnC95dd07k4YbDs5e4AbqtgHIRCLPOsTnmsihOQO8kf1cR0G/b+B37sqaLEnMAKFDcSICup5LMHLOimQMQ3K9eFjBsyU8fiIe+JqnXOdQfknshxZ33tFu+hO3JXs7wxOs/n2uaIm14e95FlC4T/RXC/duAi8LWt3NOFXgJIqAwztncGJHi3u787wEQkiDKNBO8AkSkwIDAQAB";
 			mHelper = new IabHelper(this, base64EncodedPublicKey);
@@ -887,11 +876,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private Bitmap getWallpaperImage(boolean dimOrGradient) {
 
-		int w = sharedPrefs.getInt("layout_width", -1);
-		int h = sharedPrefs.getInt("layout_height", -1);
-		int statusBarHeight = sharedPrefs.getInt("layout_status_bar_height", -1);
-		if (statusBarHeight < 0)
-			statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
+		int w = PreferenceHelper.getLayoutWidth(this, -1);
+		int h = PreferenceHelper.getLayoutHeight(this, -1);
+		int statusBarHeight = PreferenceHelper.getLayoutStatusBarHeight(this, -1);
+		Loggy.d("w = " + w + " |h = " + h + " |sh = " + statusBarHeight);
 
 		if (w > 0 && h > 0 && statusBarHeight >= 0) {
 			BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
@@ -900,16 +888,25 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			Bitmap bitmap = background.getBitmap();
 
 			// set scaling factors
-			int left = bitmap.getWidth() / 2 - w / 2;
-			int top = bitmap.getHeight() / 2 - h / 2;
+			int x = bitmap.getWidth() / 2 - w / 2;
+			int y = bitmap.getHeight() / 2 - h / 2 + statusBarHeight;
+			int width = w;
+			int height = h - statusBarHeight;
 
-			// scale the bitmap to fit on the background
-			bitmap = Bitmap.createBitmap(bitmap, left, top + statusBarHeight, w, h - statusBarHeight);
+			Loggy.d("bw = " + bitmap.getWidth() + " |bh = " + bitmap.getHeight());
+			Loggy.d("x = " + x + " |y = " + y + " |width = " + width + " |height = " + height);
+			if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0) {
+				// scale the bitmap to fit on the background
+				bitmap = Bitmap.createBitmap(bitmap, x, y, width, height);
+			} else {
+				// Should never happen but user reported y>bitmap.getHeight so here it is
+				bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
+			}
 
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawBitmap(bitmap, 0, 0, null);
 			Rect dstRectForOpt = new Rect();
-			dstRectForOpt.set(0, 0, w, h);
+			dstRectForOpt.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
 			Paint optPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			optPaint.setStyle(Paint.Style.FILL);
 			if (dimOrGradient) {
@@ -919,6 +916,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						Color.argb(0, 0, 0, 0) }, new float[] { 0, 0.3f, 1 }, TileMode.MIRROR));
 				canvas.drawRect(dstRectForOpt, optPaint);
 			}
+
 			return bitmap;
 		}
 		return null;
@@ -927,8 +925,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	/*private void showWallpaper() {
 		if (!isWallpaperShown) {
 			BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
-			int w = sharedPrefs.getInt("layout_width", 0);
-			int h = sharedPrefs.getInt("layout_height", 0);
+			int w = PreferenceHelper.getLayoutWidth(this,-1);
+			int h = PreferenceHelper.getLayoutHeight(this,-1);
 			int statusBarHeight = (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
 			if (w > 0 && h > 0) {
 				isWallpaperShown = true;
@@ -1426,6 +1424,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				vib.vibrate(50);	// vibrate for 50ms
 		}
 		int maxAttempts = Integer.parseInt(sharedPrefs.getString("max_tries", "1"));
+		if (s == JoystickSelect.Settings || s == JoystickSelect.QuizMode || s == JoystickSelect.Progress || s == JoystickSelect.Store
+				|| s == JoystickSelect.Friends) {
+			PreferenceHelper.storeLayoutParams(this);
+		}
 		switch (s) {
 		case A:		// A was selected
 		case B:		// B was selected
@@ -1895,8 +1897,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			AlertDialog alert = builder.create();
 			dialogOn = true;
 			alert.show();
-			int w = sharedPrefs.getInt("layout_width", 0);
-			int h = sharedPrefs.getInt("layout_height", 0);
+			int w = PreferenceHelper.getLayoutWidth(this, -1);
+			int h = PreferenceHelper.getLayoutHeight(this, -1);
 			if (!first && w > 0 && h > 0)
 				alert.getWindow().setLayout(w, h * 2 / 3);
 		}

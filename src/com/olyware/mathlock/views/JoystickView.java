@@ -6,6 +6,7 @@ import java.util.Random;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -32,9 +33,10 @@ import com.olyware.mathlock.utils.Loggy;
 
 public class JoystickView extends View {
 	public static int IN_OUT_DURATION = 250, PULSE_DURATION = 400, PULSE_PAUSE = 3000;
-	private final int pad = 5, NumAnswers = 4, NumOptions = 5, answerSizeSPDefault = 30, startFrames = 30, startFrameTime = 50,
-			frameTimeReveal = 10, pulseFrames = 100;
+	private final int pad = 5, NumAnswers = 4, NumOptions = 5, startFrames = 30, startFrameTime = 50, frameTimeReveal = 10,
+			pulseFrames = 100;
 	private final long tapLength = 250;
+	private int answerSizeSPDefault = 22;
 
 	private Bitmap bmpSelectBar, bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpFriend, bmpUnlock, bmpHand, bmpArrow;
 	private Bitmap[] bmpBack = new Bitmap[3];
@@ -167,6 +169,14 @@ public class JoystickView extends View {
 
 	public JoystickView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Custom, 0, 0);
+
+		try {
+			answerSizePix = a.getDimension(R.styleable.Custom_textSizeDefault, 0);
+			answerSizeSPDefault = (int) PixelHelper.pixelToSP(context, answerSizePix);
+		} finally {
+			a.recycle();
+		}
 		initView(context);
 	}
 
