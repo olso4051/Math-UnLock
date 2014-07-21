@@ -12,12 +12,13 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.utils.MoneyHelper;
 
 /**
  * Created by Kyle on 2/11/14.
  */
 public class ChallengeNewDialog extends DialogFragment {
-
+	final public static String TAG = "fragment_challenge_new";
 	final private static String USERNAME = "username", DIFFICULTY = "difficulty", BET = "bet", QUESTIONS = "questions";
 	private TextView userNameText, difficultyText, betText, questionsText;
 	private OnAcceptOrDeclineListener listener;
@@ -40,7 +41,7 @@ public class ChallengeNewDialog extends DialogFragment {
 		if (diffMin != diffMax)
 			diff += " - " + Difficulty.fromValueToString(diffMax);
 		args.putString(DIFFICULTY, diff);
-		args.putInt(BET, bet);
+		args.putInt(BET, MoneyHelper.getModifiedBet(ctx, bet));
 		args.putInt(QUESTIONS, questions);
 
 		f.setArguments(args);
@@ -52,7 +53,7 @@ public class ChallengeNewDialog extends DialogFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		int style = DialogFragment.STYLE_NORMAL | DialogFragment.STYLE_NO_TITLE;
+		int style = DialogFragment.STYLE_NO_TITLE;
 		int theme = R.style.ChallengeTheme;
 		setStyle(style, theme);
 	}
@@ -92,4 +93,5 @@ public class ChallengeNewDialog extends DialogFragment {
 
 		return v;
 	}
+
 }

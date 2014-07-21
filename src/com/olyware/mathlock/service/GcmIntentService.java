@@ -21,6 +21,7 @@ import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
@@ -147,15 +148,20 @@ public class GcmIntentService extends IntentService {
 						}
 					}
 					NotificationHelper notificationHelper = new NotificationHelper(this);
+					bet = MoneyHelper.getModifiedBet(this, bet);
 					if (scoreYou == score) {
 						// Tie
 						// don't do anything with bet
 					} else if (scoreYou > score) {
 						// Win - add money to account
-						PreferenceHelper.increaseMoney(this, bet);
+						Loggy.d("adding money = " + bet);
+						// PreferenceHelper.increaseMoney(this, bet);
+						MoneyHelper.increasePendingMoney(this, bet);
 					} else {
 						// Loss - subtract money from account
-						PreferenceHelper.decreaseMoneyNoDebt(this, bet);
+						Loggy.d("taking money = " + bet);
+						// PreferenceHelper.decreaseMoneyNoDebt(this, bet);
+						MoneyHelper.decreasePendingMoneyNoDebt(this, bet);
 					}
 					notificationHelper.sendChallengeResultNotification(userName, scoreYou, score, bet);
 				} else if (type.equals(CHALLENGE_STATUS)) {

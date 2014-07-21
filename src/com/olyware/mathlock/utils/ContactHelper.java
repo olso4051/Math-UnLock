@@ -105,6 +105,7 @@ public class ContactHelper {
 		if (!contactsJSON.equals("")) {
 			try {
 				List<CustomContactData> contacts = new ArrayList<CustomContactData>();
+				Loggy.d("contacts to get = " + contactsJSON);
 				JSONArray contactsJSONArray = new JSONArray(contactsJSON);
 				for (int i = 0; i < contactsJSONArray.length(); i++) {
 					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
@@ -116,8 +117,11 @@ public class ContactHelper {
 					String name = contactJSONObject.getString(CONTACT_NAME);
 					JSONArray contactPhoneNumbers = contactJSONObject.getJSONArray(CONTACT_PHONE);
 					JSONArray contactEmails = contactJSONObject.getJSONArray(CONTACT_EMAIL);
+					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(ctx, hiqUserID);
+					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromID(ctx, challengeID);
 					contacts.add(new CustomContactData(hiqUserID, hiqName, facebookUserID, facebookName, name,
-							getStringListFromJSONArray(contactEmails), getStringListFromJSONArray(contactPhoneNumbers), isFriend));
+							getStringListFromJSONArray(contactEmails), getStringListFromJSONArray(contactPhoneNumbers), isFriend, state,
+							challengeID));
 				}
 				return contacts;
 			} catch (JSONException e) {

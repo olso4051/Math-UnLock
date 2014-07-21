@@ -136,7 +136,7 @@ public class PreferenceHelper {
 		boolean[] checked = new boolean[questionPacks.size()];
 		for (int i = 0; i < questionPacks.size(); i++) {
 			String questionPack = questionPacks.get(i);
-			if (sharedPrefsChallenge.getBoolean(questionPack, false))
+			if (sharedPrefsChallenge.getBoolean(questionPack, true))
 				checked[i] = true;
 			else
 				checked[i] = false;
@@ -190,8 +190,37 @@ public class PreferenceHelper {
 		sharedPrefsChallengeEdit.commit();
 	}
 
+	public static void updateHiqUserID(Context ctx, String oldHiqUserID, String newHiqUserID) {
+		if (!oldHiqUserID.equals("")) {
+			SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+			String challengeID = getChallengeIDFromHiqUserID(ctx, oldHiqUserID);
+			SharedPreferences.Editor editorPrefsChallenge = sharedPrefsChallenge.edit();
+			editorPrefsChallenge.remove(oldHiqUserID);
+			editorPrefsChallenge.putString(newHiqUserID, challengeID);
+			editorPrefsChallenge.commit();
+		}
+	}
+
+	public static void removeChallengeID(Context ctx, String challengeID, String hiqUserID) {
+		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+		String challengeIDStored = getChallengeIDFromHiqUserID(ctx, hiqUserID);
+		if (challengeIDStored.equals(challengeID)) {
+			SharedPreferences.Editor editorPrefsChallenge = sharedPrefsChallenge.edit();
+			editorPrefsChallenge.remove(challengeID + STATUS);
+			editorPrefsChallenge.remove(challengeID + STATE);
+			editorPrefsChallenge.remove(challengeID + HIQ_USER_NAME);
+			editorPrefsChallenge.remove(challengeID + BET);
+			editorPrefsChallenge.remove(challengeID + DIFFMIN);
+			editorPrefsChallenge.remove(challengeID + DIFFMAX);
+			editorPrefsChallenge.remove(challengeID + QUESTIONS);
+			editorPrefsChallenge.remove(hiqUserID);
+			editorPrefsChallenge.commit();
+		}
+	}
+
 	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status, CustomContactData.ChallengeState state) {
 		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		Loggy.d("set challengeID(" + challengeID + ") to status = " + status.getValue() + " state = " + state.getValue());
 		sharedPrefsChallengeEdit.putInt(challengeID + STATUS, status.getValue());
 		sharedPrefsChallengeEdit.putInt(challengeID + STATE, state.getValue());
 		sharedPrefsChallengeEdit.commit();
@@ -199,7 +228,7 @@ public class PreferenceHelper {
 
 	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status,
 			CustomContactData.ChallengeState state, String userName, String hiqUserID, int bet, int diffMin, int diffMax, int questions) {
-		Loggy.d("set challengeID and challenge+username");
+		Loggy.d("set challengeID(" + challengeID + ") and username(" + userName + ") and user_id(" + hiqUserID + ")");
 		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
 		sharedPrefsChallengeEdit.putInt(challengeID + STATUS, status.getValue());
 		sharedPrefsChallengeEdit.putInt(challengeID + STATE, state.getValue());
@@ -225,14 +254,16 @@ public class PreferenceHelper {
 
 	public static CustomContactData.ChallengeState getChallengeStateFromID(Context ctx, String challengeID) {
 		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
-		return CustomContactData.ChallengeState.valueOf(sharedPrefsChallenge.getInt(challengeID + STATE,
+		CustomContactData.ChallengeState state = CustomContactData.ChallengeState.valueOf(sharedPrefsChallenge.getInt(challengeID + STATE,
 				CustomContactData.ChallengeState.getDefaultValue()));
+		return state;
 	}
 
 	public static CustomContactData.ChallengeState getChallengeStateFromUserID(Context ctx, String hiqUserID) {
 		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
 		String challengeID = sharedPrefsChallenge.getString(hiqUserID, "");
-		return getChallengeStateFromID(ctx, challengeID);
+		CustomContactData.ChallengeState state = getChallengeStateFromID(ctx, challengeID);
+		return state;
 	}
 
 	public static String getChallengeIDFromHiqUserID(Context ctx, String hiqUserID) {
@@ -268,8 +299,12 @@ public class PreferenceHelper {
 	public static void increaseMoney(Context ctx, int amount) {
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+		Loggy.d("money before putting in = " + sharedPrefsMoney.getInt("money", 0));
 		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
 		editorPrefsMoney.commit();
+		SharedPreferences sharedPrefsMoney2 = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		Loggy.d("money after putting in = " + sharedPrefsMoney.getInt("money", 0));
+		Loggy.d("money after2 putting in = " + sharedPrefsMoney2.getInt("money", 0));
 	}
 
 	public static void decreaseMoneyNoDebt(Context ctx, int amount) {

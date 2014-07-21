@@ -13,6 +13,7 @@ public class ChallengeBuilder {
 	private List<String[]> answers = new ArrayList<String[]>();
 
 	public ChallengeBuilder(String userName, String userHash) {
+		this.userName = userName;
 		this.userHash = userHash;
 	}
 

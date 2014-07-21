@@ -33,6 +33,7 @@ import com.olyware.mathlock.utils.PreferenceHelper;
  */
 public class ChallengeDialog extends DialogFragment {
 
+	final public static String TAG = "fragment_challenge";
 	private ListView lv;
 	private SwipeRefreshLayout swipeLayout;
 	private ContactArrayAdapter adapter;
@@ -124,6 +125,7 @@ public class ChallengeDialog extends DialogFragment {
 				if (selectedContact.isContact()) {
 					if (selectedContact.hasHiqUserID()) {
 						CustomContactData.ChallengeState state = selectedContact.getState();
+						Loggy.d("selected contact state =" + state.getValue());
 						if (state.equals(CustomContactData.ChallengeState.Active)) {
 							listener.onActiveStateSelected();
 						} else if (state.equals(CustomContactData.ChallengeState.New)) {
@@ -170,6 +172,7 @@ public class ChallengeDialog extends DialogFragment {
 			contacts.clear();
 			addSectionHeaders();
 			contacts.addAll(contactsTemp);
+			Loggy.d("contacts.get(2).getState().getValue() = " + contacts.get(2).getState().getValue());
 			Collections.sort(contacts);
 			allContacts.clear();
 			allContacts.addAll(contactsTemp);
@@ -224,6 +227,10 @@ public class ChallengeDialog extends DialogFragment {
 					if (!contacts.get(id + 1).isFriend()) {
 						numFriends++;
 						replaceAddition += 1;
+					}
+					String oldHiqUserID = contacts.get(id + replaceAddition).getHiqUserID();
+					if (!oldHiqUserID.equals(hiqUserID)) {
+
 					}
 					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromUserID(getActivity(), hiqUserID);
 					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(getActivity(), hiqUserID);

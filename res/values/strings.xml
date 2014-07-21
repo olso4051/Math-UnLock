@@ -33,6 +33,9 @@
     <string name="fragment_challenge_new_decline">Decline</string>
     <string name="challenge_accepted">Challenge Accepted!</string>
     <string name="challenge_declined">Challenge Declined</string>
+    <string name="challenge_status_failed">Failed to Respond to Challenge, Try Again Later</string>
+    <string name="challenge_send_failed">Failed to Send Challenge. Try again Later</string>
+    <string name="challenge_send_success">Challenge Sent, Waiting for Reply</string>
     
     <!-- Google Analytics Tracking strings -->
     <string name="google_analytics_tracking_id">UA-48722021-1</string>

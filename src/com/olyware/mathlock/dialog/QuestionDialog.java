@@ -32,7 +32,7 @@ import com.olyware.mathlock.views.RangeSeekBar.OnRangeSeekBarChangeListener;
  * Created by Kyle on 2/11/14.
  */
 public class QuestionDialog extends DialogFragment {
-
+	final public static String TAG = "fragment_question_select";
 	final private static int MAX_QUESTIONS = 5, MIN_QUESTIONS = 1, MIN_BET = 0, MIN_PROGRESS = 100;
 	private TextView betText, questionsText, difficultyMinText, difficultyMaxText;
 	private SeekBar seekBet, seekQuestions;

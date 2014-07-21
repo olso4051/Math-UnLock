@@ -199,7 +199,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	}
 
 	public CustomContactData(String hiqUserID, String hiqUserName, String facebookUserID, String facebookName, String name,
-			List<String> emails, List<String> phoneNumbers, boolean isFriend) {
+			List<String> emails, List<String> phoneNumbers, boolean isFriend, ChallengeState state, String challengeID) {
 		this.name = name;
 		this.emails = new ArrayList<String>(emails.size());
 		this.emails.addAll(emails);
@@ -215,8 +215,8 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		section = -1;
 		contact = -1;
 		this.description = "";
-		challengeID = "";
-		state = ChallengeState.getDefaultState();
+		this.challengeID = challengeID;
+		this.state = state;
 	}
 
 	public CustomContactData(String name, List<String> emails, List<String> phoneNumbers) {

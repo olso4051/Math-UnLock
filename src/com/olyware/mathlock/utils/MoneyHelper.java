@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.widget.TextView;
 
+import com.olyware.mathlock.R;
+
 public class MoneyHelper {
 
 	final private static int updateMoneyTime = 1000;
@@ -74,12 +76,44 @@ public class MoneyHelper {
 		editorPrefsMoney.commit();
 	}
 
+	public static void increasePendingMoney(Context context, int amount) {
+		Loggy.d("increaseing pending money by " + amount);
+		Loggy.d("pending money before = " + sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0));
+		sharedPrefsMoney = context.getSharedPreferences(context.getString(R.string.pref_money), Context.MODE_PRIVATE);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		int pending = sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0);
+		editorPrefsMoney.putInt(context.getString(R.string.pref_money_pending), pending + amount);
+		editorPrefsMoney.commit();
+		Loggy.d("pending money after = " + sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0));
+	}
+
+	public static void decreasePendingMoneyNoDebt(Context context, int amount) {
+		sharedPrefsMoney = context.getSharedPreferences(context.getString(R.string.pref_money), Context.MODE_PRIVATE);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		int pending = sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0);
+		int initMoney = sharedPrefsMoney.getInt("money", 0);
+		int money = initMoney + pending - amount;
+		if (money < 0)
+			money = 0;
+		int newAmount = initMoney + pending - money;
+		editorPrefsMoney.putInt(context.getString(R.string.pref_money_pending), pending - newAmount);
+		editorPrefsMoney.commit();
+	}
+
 	public static int getTotalMoney(Context context) {
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
 		return sharedPrefsMoney.getInt("money", 0) + sharedPrefsMoney.getInt("paid_money", 0);
 	}
 
 	public static int getMaxBet(Context context) {
-		return getTotalMoney(context) / 2;
+		int maxBet = getTotalMoney(context) / 2;
+		if (maxBet >= Integer.MAX_VALUE)
+			maxBet = Integer.MAX_VALUE;
+		return maxBet;
+	}
+
+	public static int getModifiedBet(Context context, int maxBet) {
+		int newMaxBet = getMaxBet(context);
+		return Math.min(newMaxBet, maxBet);
 	}
 }

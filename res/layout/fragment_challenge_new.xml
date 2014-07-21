@@ -21,7 +21,6 @@
         android:layout_gravity="center_horizontal" 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Kyle Olson"
         android:textColor="@color/blue_on_white"
         android:textSize="@dimen/text_size_large" />
 
@@ -39,7 +38,6 @@
         android:layout_gravity="center_horizontal" 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Very Easy - Insane"
         android:textColor="@color/blue_on_white"
         android:textSize="@dimen/text_size_large" />
     
@@ -57,7 +55,6 @@
         android:layout_gravity="center_horizontal" 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="123"
         android:textColor="@color/blue_on_white"
         android:textSize="@dimen/text_size_large" />
     
@@ -75,31 +72,31 @@
         android:layout_gravity="center_horizontal" 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5"
         android:textColor="@color/blue_on_white"
         android:textSize="@dimen/text_size_large" />
     
     <LinearLayout
-		android:layout_width="match_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="center"
+		android:layout_gravity="center_horizontal"
+		android:focusableInTouchMode="true"
 		android:paddingTop="@dimen/login_vertical_margin"
+		android:layout_marginLeft="@dimen/login_vertical_margin"
+		android:layout_marginRight="@dimen/login_vertical_margin"
 		android:orientation="horizontal" >
-       
+        
 	    <Button
 	        android:id="@+id/challenge_new_button_accept"
 			style="@style/Dialog.Button"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_weight="1"
 	        android:text="@string/fragment_challenge_new_accept" />
 	    
 	    <Button
 	        android:id="@+id/challenge_new_button_decline"
 			style="@style/Dialog.Button"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_weight="1"
 	        android:text="@string/fragment_challenge_new_decline" />
 	    
 	</LinearLayout>

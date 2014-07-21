@@ -523,6 +523,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			Loggy.d("GAtest", "onPause");
 			paused = true;
 
+			ChallengeDialog challengeDialog = (ChallengeDialog) getSupportFragmentManager().findFragmentByTag(ChallengeDialog.TAG);
+			QuestionDialog questionDialog = (QuestionDialog) getSupportFragmentManager().findFragmentByTag(QuestionDialog.TAG);
+			ChallengeNewDialog challengeNewDialog = (ChallengeNewDialog) getSupportFragmentManager().findFragmentByTag(
+					ChallengeNewDialog.TAG);
+			if (challengeDialog != null) {
+				challengeDialog.dismiss();
+			}
+			if (questionDialog != null) {
+				questionDialog.dismiss();
+			}
+			if (challengeNewDialog != null) {
+				challengeNewDialog.dismiss();
+			}
+
 			sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 			sharedPrefs.edit().putLong("timeout", System.currentTimeMillis()).commit();
 			sharedPrefsMoney = getSharedPreferences("Packages", 0);
@@ -612,7 +626,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			} else {
 				int pendingCoins = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending_paid), 0);
 				Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0) + pendingCoins);
-				editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0).commit();
+				int pendingMoney = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending), 0);
+				Money.setMoney(sharedPrefsMoney.getInt("money", 0) + pendingMoney);
+				Loggy.d("pendingCoins = " + pendingCoins + " |pendingMoney = " + pendingMoney);
+				editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0);
+				editorPrefsMoney.putInt(getString(R.string.pref_money_pending), 0).commit();
 			}
 			Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 			coins.setText(String.valueOf(Money.getTotalMoney()));
@@ -1735,9 +1753,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			@Override
 			public void onInactiveSelected(ChallengeBuilder builder) {
 				challengeDialog.dismiss();
-				final QuestionDialog questionDialog = QuestionDialog.newInstance(ctx,
-						PreferenceHelper.getDisplayableUnlockedPackages(ctx, dbManager),
-						PreferenceHelper.getDisplayableUnlockedPackageIDs(ctx, dbManager), MoneyHelper.getMaxBet(MainActivity.this));
+				final QuestionDialog questionDialog = QuestionDialog.newInstance(MainActivity.this,
+						PreferenceHelper.getDisplayableUnlockedPackages(MainActivity.this, dbManager),
+						PreferenceHelper.getDisplayableUnlockedPackageIDs(MainActivity.this, dbManager),
+						MoneyHelper.getMaxBet(MainActivity.this));
 				questionDialog.setBuilder(builder);
 				questionDialog.setCancelable(true);
 				questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
@@ -1773,6 +1792,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										}
 										if (!success)
 											Toaster.sendChallengeFailed(MainActivity.this);
+										else
+											Toaster.sendChallengeSuccess(MainActivity.this);
 									}
 								}.execute();
 								success = true;
@@ -1782,7 +1803,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							Toaster.sendChallengeFailed(MainActivity.this);
 					}
 				});
-				questionDialog.show(getSupportFragmentManager(), "fragment_question_select");
+				questionDialog.show(getSupportFragmentManager(), QuestionDialog.TAG);
 			}
 
 			@Override
@@ -1793,18 +1814,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			@Override
 			public void onSentStateSelected(String userName) {
 				// TODO do you want to cancel the challenge with NAME
-				challengeDialog.dismiss();
+				// challengeDialog.dismiss();
 			}
 
 			@Override
 			public void onNewStateSelected(final String challengeID, String userName, int bet, int diffMin, int diffMax, int questions) {
 				challengeDialog.dismiss();
-				final ChallengeNewDialog challengeNewDialog = ChallengeNewDialog.newInstance(ctx, userName, bet, diffMin, diffMax,
-						questions);
+				final ChallengeNewDialog challengeNewDialog = ChallengeNewDialog.newInstance(MainActivity.this, userName, bet, diffMin,
+						diffMax, questions);
 				challengeNewDialog.setCancelable(true);
 				challengeNewDialog.setChallengeDialogListener(new OnAcceptOrDeclineListener() {
 					@Override
 					public void onClick(boolean accepted) {
+						challengeNewDialog.dismiss();
 						if (accepted) {
 							new AcceptChallenge(MainActivity.this, challengeID, true) {
 								@Override
@@ -1813,6 +1835,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Accepted,
 												CustomContactData.ChallengeState.Active);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
+									} else {
+										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
+												.show();
 									}
 								}
 							}.execute();
@@ -1824,15 +1849,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
 												CustomContactData.ChallengeState.None);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
+									} else {
+										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
+												.show();
 									}
 								}
 							}.execute();
 						}
 					}
 				});
+				challengeNewDialog.show(getSupportFragmentManager(), ChallengeNewDialog.TAG);
 			}
 		});
-		challengeDialog.show(getSupportFragmentManager(), "fragment_challenge");
+		challengeDialog.show(getSupportFragmentManager(), ChallengeDialog.TAG);
 	}
 
 	private void displayInfo(boolean first) {

@@ -153,6 +153,7 @@ public class NotificationHelper {
 		String title = "";
 		String msg = "";
 		String userName = PreferenceHelper.getChallengeUserName(ctx, challengeID);
+		Loggy.d("challenge status challengeID = " + challengeID + " |username = " + userName);
 		if (status == ChallengeStatus.Accepted) {
 			title = ctx.getString(R.string.notification_title_challenge_status_accepted);
 			msg = userName + ctx.getString(R.string.notification_message_challenge_status_accepted);
@@ -163,14 +164,15 @@ public class NotificationHelper {
 			return;
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
+		Intent iMain = new Intent(ctx, MainActivity.class);
+		PendingIntent mainIntent = PendingIntent.getActivity(ctx, 0, iMain, 0);
 
 		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);
 		mBuilder.setAutoCancel(true);
-		mBuilder.setContentIntent(notifyPIntent);
+		mBuilder.setContentIntent(mainIntent);
 		mNotificationManager.notify(CHALLENGE_STATUS_ID, mBuilder.build());
 	}
 
@@ -202,14 +204,16 @@ public class NotificationHelper {
 		}
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
-		PendingIntent notifyPIntent = PendingIntent.getActivity(ctx, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
+		Intent iMain = new Intent(ctx, MainActivity.class);
+		iMain.putExtra(EXTRA_OPEN_CHALLENGE, true);
+		PendingIntent mainIntent = PendingIntent.getActivity(ctx, 0, iMain, 0);
 
 		mBuilder.setSmallIcon(R.drawable.ic_notification_small_challenge);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ic_notification_large));
 		mBuilder.setContentTitle(title);
 		mBuilder.setContentText(msg);
 		mBuilder.setAutoCancel(true);
-		mBuilder.setContentIntent(notifyPIntent);
+		mBuilder.setContentIntent(mainIntent);
 		mNotificationManager.notify(CHALLENGE_RESULT_ID, mBuilder.build());
 	}
 
