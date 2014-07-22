@@ -72,6 +72,9 @@ public class IabHelper {
 	// Are subscriptions supported?
 	boolean mSubscriptionsSupported = false;
 
+	// set to true when bindService is called
+	boolean mServiceBound = false;
+
 	// Is an asynchronous operation in progress?
 	// (only one at a time can be in progress)
 	// boolean mAsyncInProgress = false;
@@ -259,6 +262,7 @@ public class IabHelper {
 		serviceIntent.setPackage("com.android.vending");
 		if (!mContext.getPackageManager().queryIntentServices(serviceIntent, 0).isEmpty()) {
 			// service available to handle that Intent
+			mServiceBound = true;
 			mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
 		} else {
 			// no service available to handle that Intent
@@ -284,8 +288,9 @@ public class IabHelper {
 		mSetupDone = false;
 		if (mServiceConn != null) {
 			logDebug("Unbinding from service.");
-			if (mContext != null)
-				mContext.unbindService(mServiceConn);
+			if (mContext != null && mService != null && mServiceBound == true)
+				logDebug("Unbinding from service for real");
+			mContext.unbindService(mServiceConn);
 		}
 		mDisposed = true;
 		mContext = null;

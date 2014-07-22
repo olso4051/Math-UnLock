@@ -32,6 +32,10 @@ import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
 	final public static float FACEBOOK_LINK_RATIO = 1.9178082191780821917808219178082f;
+	final public static String URL_INVITE_BASE = "https://play.google.com/store/apps/details?id=com.olyware.mathlock&referrer=utm_source%3Dapp%26utm_medium%3Dinvite";
+	final public static String URL_SHARE_BASE = "https://play.google.com/store/apps/details?id=com.olyware.mathlock&referrer=utm_source%3Dapp%26utm_medium%3Dshare";
+	final public static String URL_UTM_CONTENT = "%26utm_content%3D";
+
 	private static String staticLink;
 	private static Context staticContext;
 	private static Activity staticActivity;
@@ -232,12 +236,22 @@ public class ShareHelper {
 	}
 
 	public static String getInvite(Context context) {
-		return context.getString(R.string.share_message) + buildShareURL(context);
+		return context.getString(R.string.share_message) + buildInviteURL(context);
+	}
+
+	public static String buildInviteURL(Context context) {
+		String userID = ContactHelper.getUserID(context);
+		String baseLink = URL_INVITE_BASE;
+		if (userID.equals("")) {
+			return baseLink;
+		} else {
+			String encryptedContentForURL = EncryptionHelper.encryptForURL(userID);
+			return baseLink + URL_UTM_CONTENT + encryptedContentForURL;
+		}
 	}
 
 	public static String buildShareURL(Context context) {
-		String userID = context.getSharedPreferences(context.getString(R.string.pref_user_info), Context.MODE_PRIVATE).getString(
-				context.getString(R.string.pref_user_userid), "");
+		String userID = ContactHelper.getUserID(context);
 		String baseLink = context.getString(R.string.share_link_url);
 		if (userID.equals("")) {
 			return baseLink;

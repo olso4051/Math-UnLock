@@ -65,10 +65,12 @@ public class QuestionSelectAdapter extends ArrayAdapter<QuestionSelectData> {
 								for (int i = 0; i < data.size(); i++) {
 									data.get(i).setChecked(true);
 								}
-								notifyDataSetChanged();
 							}
 						}
+					} else {
+						data.get(0).setChecked(false);
 					}
+					notifyDataSetChanged();
 				}
 			});
 

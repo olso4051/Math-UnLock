@@ -27,6 +27,7 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.olyware.mathlock.service.CustomGAReceiver;
 import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.Loggy;
@@ -277,7 +278,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				Loggy.d("test", "success=" + getSuccess());
 				Loggy.d("test", "error=" + getError());
 				if (result == 0) {
-					SharedPreferences prefsGA = getActivity().getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+					SharedPreferences prefsGA = getActivity().getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
 					prefsGA.edit().putBoolean("reg_uploaded", true).commit();
 					startMainActivity();
 				} else if (result == 1) {

@@ -1,3 +1,4 @@
 FOR PRODUCTION
 set Loggy to false
 set GoogleAnalytics in MyApplication to dry_run=false and log_level=error
+set IabHelper mDebugLog = false

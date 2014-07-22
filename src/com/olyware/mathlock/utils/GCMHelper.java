@@ -18,6 +18,7 @@ import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.ConfirmID;
 import com.olyware.mathlock.service.ConfirmID.ConfirmType;
+import com.olyware.mathlock.service.CustomGAReceiver;
 import com.olyware.mathlock.service.RegisterID;
 
 public class GCMHelper {
@@ -28,8 +29,6 @@ public class GCMHelper {
 
 	public interface GCMResponse {
 		void GCMResult(boolean result);
-
-		void RegisterIDResult(int result);
 	}
 
 	public static boolean registerAndStoreGCM(final Activity act, final Context app) {
@@ -40,16 +39,17 @@ public class GCMHelper {
 				throw new ClassCastException(act.toString() + " must implement GCMResponse");
 			}
 			regID = getRegistrationId(app);
-			SharedPreferences prefsGA = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
-			SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-			String username = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_username), "");
-			String userID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_userid), "");
-			String referral = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_referrer), "");
-			String faceID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_id), "");
-			String birth = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_birth), "");
-			String gender = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_gender), "");
-			String location = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_location), "");
-			String email = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_email), "");
+			SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
+			// SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info),
+			// Context.MODE_PRIVATE);
+			String username = ContactHelper.getUserName(act);
+			String userID = ContactHelper.getUserID(act);
+			String referral = ContactHelper.getReferrer(act);
+			String faceID = ContactHelper.getFaceID(act);
+			String birth = ContactHelper.getBirthday(act);
+			String gender = ContactHelper.getGender(act);
+			String location = ContactHelper.getLocation(act);
+			String email = ContactHelper.getEmail(act);
 			if (regID.equals("")) {
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
@@ -57,7 +57,7 @@ public class GCMHelper {
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				storeRegistrationId(act, app, regID);
 				sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location, email, faceID);
-			} else if (!sharedPrefsUserInfo.getBoolean(act.getString(R.string.pref_user_confirmed), false) && !userID.equals("")) {
+			} else if (!ContactHelper.isUserConfirmed(act) && !userID.equals("")) {
 				confirmID(act, userID);
 			}
 		} else {
@@ -73,7 +73,7 @@ public class GCMHelper {
 			throw new ClassCastException(act.toString() + " must implement GCMResponse");
 		}
 		if (checkPlayServices(act)) {
-			SharedPreferences prefsGA = act.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+			SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
 			regID = getRegistrationId(app);
 			Loggy.d("GAtest", "regID = " + regID);
 			if (regID.equals("")) {
@@ -186,14 +186,17 @@ public class GCMHelper {
 		}.execute(null, null, null);
 	}
 
-	private static void sendRegistrationIdToBackend(Activity act, String username, String regId, String userID, String referral,
+	private static void sendRegistrationIdToBackend(final Activity act, String username, String regId, String userID, String referral,
 			String birth, String gender, String location, String email, String faceID) {
 		Loggy.d("test", "sendRegistrationIdToBackend");
 
 		new RegisterID(act, username, regId, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				mCallback.RegisterIDResult(result);
+				if (result == 0) {
+					SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
+					prefsGA.edit().putBoolean("reg_uploaded", true).commit();
+				}
 			}
 		}.execute();
 	}

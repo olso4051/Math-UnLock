@@ -209,6 +209,8 @@ public class QuestionDialog extends DialogFragment {
 							questionPacks.get(i).setChecked(checked);
 						}
 					}
+				} else {
+					questionPacks.get(0).setChecked(false);
 				}
 				adapter.notifyDataSetChanged();
 			}

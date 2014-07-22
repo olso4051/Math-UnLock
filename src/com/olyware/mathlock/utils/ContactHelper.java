@@ -420,6 +420,11 @@ public class ContactHelper {
 		return CustomContactData.getDisplayName(facebookUserName, hiqUserName);
 	}
 
+	public static boolean isUserConfirmed(Context ctx) {
+		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
+		return sharedPrefsUserInfo.getBoolean(ctx.getString(R.string.pref_user_confirmed), false);
+	}
+
 	private static List<String> getStringListFromJSONArray(JSONArray array) {
 		List<String> list = new ArrayList<String>();
 		try {

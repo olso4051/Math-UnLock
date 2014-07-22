@@ -14,7 +14,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
-import android.widget.Toast;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.HttpClient;
@@ -107,7 +106,7 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 				}
 			}
 		} else {
-			Toast.makeText(ctx, ctx.getString(R.string.fragment_challenge_facebook_prompt), Toast.LENGTH_LONG).show();
+			// Toast.makeText(ctx, ctx.getString(R.string.fragment_challenge_facebook_prompt), Toast.LENGTH_LONG).show();
 		}
 		allNames.clear();
 		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));

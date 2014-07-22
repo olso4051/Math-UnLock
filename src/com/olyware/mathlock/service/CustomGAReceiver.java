@@ -24,6 +24,7 @@ import com.olyware.mathlock.utils.MoneyHelper;
 *  the Google Analytics receiver.
 */
 public class CustomGAReceiver extends BroadcastReceiver {
+	final public static String PREFS_GA = "ga_prefs";
 	final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
 
 	@Override
@@ -74,7 +75,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 	}
 
 	public static void storeReferralParams(Context context, Map<String, String> params) {
-		SharedPreferences storage = context.getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
+		SharedPreferences storage = context.getSharedPreferences(PREFS_GA, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = storage.edit();
 		SharedPreferences sharedPrefsUserInfo = context.getSharedPreferences(context.getString(R.string.pref_user_info),
 				Context.MODE_PRIVATE);
@@ -91,7 +92,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 
 		// is this a referral link
 		if (storage.getString("utm_source", "").equals("app") && storage.getString("utm_medium", "").equals("share")) {
-			String referral = new EncryptionHelper().decryptForURL(params.get("utm_content"));
+			String referral = EncryptionHelper.decryptForURL(params.get("utm_content"));
 			MoneyHelper.increasePaidMoney(context, context.getResources().getInteger(R.integer.coins_from_share));
 			editorUserInfo.putString(context.getString(R.string.pref_user_referrer), referral).commit();
 			Loggy.d("GAtest", "referral key = " + referral);

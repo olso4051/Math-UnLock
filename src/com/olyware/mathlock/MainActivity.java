@@ -83,6 +83,7 @@ import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
+import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.GCMHelper;
@@ -306,6 +307,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Loggy.d("userID = " + ContactHelper.getUserID(this));
 		Loggy.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
@@ -576,8 +578,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (loggedIn) {
 			Loggy.d("GAtest", "onDestroy");
 			clock.destroy();
-			if (mHelper != null)
-				mHelper.dispose();
+			if (mHelper != null) {
+				try {
+					mHelper.dispose();
+				} catch (java.lang.IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+			}
 			mHelper = null;
 			if (dbManager != null)
 				if (!dbManager.isDestroyed())
@@ -921,10 +928,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
 			}
 
-			Canvas canvas = new Canvas(bitmap);
-			canvas.drawBitmap(bitmap, 0, 0, null);
+			Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+			Canvas canvas = new Canvas(mutableBitmap);
+			canvas.drawBitmap(mutableBitmap, 0, 0, null);
 			Rect dstRectForOpt = new Rect();
-			dstRectForOpt.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
+			dstRectForOpt.set(0, 0, mutableBitmap.getWidth(), mutableBitmap.getHeight());
 			Paint optPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			optPaint.setStyle(Paint.Style.FILL);
 			if (dimOrGradient) {
@@ -1746,6 +1754,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		challengeDialog.setChallengeDialogListener(new ChallengeDialog.ChallengeDialogListener() {
 			@Override
 			public void onInviteSelected(String address) {
+				sendEvent("social", "invite_selected", "", 0l);
 				challengeDialog.dismiss();
 				String uri = "smsto:" + address;
 				Intent intentSMS = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
@@ -2081,14 +2090,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void GCMResult(boolean result) {
 		if (loginFragment != null) {
 			loginFragment.GCMRegistrationDone(result);
-		}
-	}
-
-	@Override
-	public void RegisterIDResult(int result) {
-		if (result == 0) {
-			SharedPreferences prefsGA = getSharedPreferences("ga_prefs", Context.MODE_PRIVATE);
-			prefsGA.edit().putBoolean("reg_uploaded", true).commit();
 		}
 	}
 }
