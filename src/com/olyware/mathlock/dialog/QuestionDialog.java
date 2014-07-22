@@ -65,10 +65,10 @@ public class QuestionDialog extends DialogFragment {
 
 		// Supply index input as an argument.
 		Bundle args = new Bundle();
-		args.putFloat(PreferenceHelper.BET_DEFAULT, settings.getFloat(PreferenceHelper.BET_DEFAULT));
-		args.putInt(PreferenceHelper.QUESTION_NUMBER, settings.getInt(PreferenceHelper.QUESTION_NUMBER));
-		args.putInt(PreferenceHelper.DIFFICULTY_MIN, settings.getInt(PreferenceHelper.DIFFICULTY_MIN));
-		args.putInt(PreferenceHelper.DIFFICULTY_MAX, settings.getInt(PreferenceHelper.DIFFICULTY_MAX));
+		args.putFloat(PreferenceHelper.CHALLENGE_PREFS_BET_DEFAULT, settings.getFloat(PreferenceHelper.CHALLENGE_PREFS_BET_DEFAULT));
+		args.putInt(PreferenceHelper.CHALLENGE_PREFS_QUESTION_NUMBER, settings.getInt(PreferenceHelper.CHALLENGE_PREFS_QUESTION_NUMBER));
+		args.putInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MIN, settings.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MIN));
+		args.putInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MAX, settings.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MAX));
 		args.putStringArrayList("question_packs", questionPacks);
 		args.putIntegerArrayList("question_pack_ids", questionPackIDs);
 		args.putBooleanArray("questions_is_checked", checked);
@@ -98,14 +98,14 @@ public class QuestionDialog extends DialogFragment {
 
 		Bundle arg = getArguments();
 		betMax = arg.getInt("max_bet");
-		betPercent = arg.getFloat(PreferenceHelper.BET_DEFAULT);
+		betPercent = arg.getFloat(PreferenceHelper.CHALLENGE_PREFS_BET_DEFAULT);
 		betValue = (int) (betMax * betPercent);
 		betProgressMax = Math.max(betMax + MIN_BET, MIN_PROGRESS + MIN_BET);
-		questionsValue = arg.getInt(PreferenceHelper.QUESTION_NUMBER);
+		questionsValue = arg.getInt(PreferenceHelper.CHALLENGE_PREFS_QUESTION_NUMBER);
 		questionsProgressMax = Math.max(MIN_PROGRESS + MIN_QUESTIONS, MAX_QUESTIONS - MIN_QUESTIONS);
 		questionsPercent = ((float) (questionsValue - MIN_QUESTIONS)) / ((float) (MAX_QUESTIONS - MIN_BET));
-		difficultyMinValue = arg.getInt(PreferenceHelper.DIFFICULTY_MIN);
-		difficultyMaxValue = arg.getInt(PreferenceHelper.DIFFICULTY_MAX);
+		difficultyMinValue = arg.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MIN);
+		difficultyMaxValue = arg.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MAX);
 		difficultyMin = Difficulty.fromValueToString(difficultyMinValue);
 		difficultyMax = Difficulty.fromValueToString(difficultyMaxValue);
 

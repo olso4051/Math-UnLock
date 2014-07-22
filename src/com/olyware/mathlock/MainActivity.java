@@ -484,7 +484,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 							if (!joystick.getQuickUnlock()) {
 								HelpQuestionImage = takeScreenShot();
-								joystick.askToShare();
+								if (!fromChallenge)
+									joystick.askToShare();
 							}
 						} else {
 							timerHandler.postDelayed(this, decreaseRate);
@@ -632,7 +633,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0);
 				editorPrefsMoney.putInt(getString(R.string.pref_money_pending), 0).commit();
 			}
-			Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 			coins.setText(String.valueOf(Money.getTotalMoney()));
 
 			// reset attempts to first attempt
@@ -1379,7 +1379,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int getChallengeScore(long startTime) {
 		int timeToAnswer = (int) Math.min(System.currentTimeMillis() - startTime, ChallengeQuestion.MAX_SCORE);
 		return ChallengeQuestion.MAX_SCORE - timeToAnswer;
-
 	}
 
 	private void sendChallengeComplete(long ID) {
@@ -1409,7 +1408,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						joystick.setIncorrectGuess(guessLoc);
 						problem.setTextColor(Color.RED);
 					}
-					if (dbManager.addChallengeScore(ID, getChallengeScore(startTime))) {
+					boolean done = false;
+					if (joystick.getQuickUnlock())
+						done = dbManager.addChallengeScore(ID, 0);
+					else
+						done = dbManager.addChallengeScore(ID, getChallengeScore(startTime));
+					if (done) {
 						sendChallengeComplete(ID);
 					}
 				} else {
@@ -1642,6 +1646,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		sharedPrefsStats = getSharedPreferences("Stats", 0);
 		editorPrefsStats = sharedPrefsStats.edit();
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
 		SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
 		long ms = System.currentTimeMillis() - startTime;
 		int correct = sharedPrefsStats.getInt("correct", 0);
@@ -1835,6 +1840,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Accepted,
 												CustomContactData.ChallengeState.Active);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
+										setProblemAndAnswer();
 									} else {
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
 												.show();

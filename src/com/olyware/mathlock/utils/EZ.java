@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.app.backup.BackupManager;
+import android.app.backup.RestoreObserver;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.view.View;
@@ -44,6 +45,37 @@ public class EZ {
 	public static void requestBackup(Context context) {
 		BackupManager bm = new BackupManager(context);
 		bm.dataChanged();
+	}
+
+	/**
+	 * Starts a restore of all preferences files
+	 * 
+	 * @param context
+	 */
+	public static void requestRestore(Context context) {
+		BackupManager bm = new BackupManager(context);
+		RestoreObserver observer = new RestoreObserver() {
+
+			@Override
+			public void onUpdate(int nowBeingRestored, String currentPackage) {
+				Loggy.d("current Package being restored = " + currentPackage);
+				super.onUpdate(nowBeingRestored, currentPackage);
+			}
+
+			@Override
+			public void restoreFinished(int error) {
+				// TODO Auto-generated method stub
+				super.restoreFinished(error);
+			}
+
+			@Override
+			public void restoreStarting(int numPackages) {
+				// TODO Auto-generated method stub
+				Loggy.d("Packages being restored = " + numPackages);
+				super.restoreStarting(numPackages);
+			}
+		};
+		bm.requestRestore(observer);
 	}
 
 	/**

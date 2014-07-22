@@ -13,7 +13,6 @@
         android:title="@string/settings"
         android:key="settings">
         <ListPreference
-            
 	        android:key="difficulty_min"
 	        android:title="@string/difficulty_min"
 	        android:summary="@string/difficulty_min_summary"

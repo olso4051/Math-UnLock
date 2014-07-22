@@ -66,6 +66,7 @@ public class GcmIntentService extends IntentService {
 				// If it's a regular GCM message, do some work.
 				Loggy.d(fullMessage);
 				if (!userID.equals("") || type.equals(USER_ID_TO_CONFIRM)) {
+					Loggy.d("userID to confirm = " + userID);
 					SharedPreferences sharedPrefsUserInfo = getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 					sharedPrefsUserInfo.edit().putString(getString(R.string.pref_user_userid), userID).commit();
 					GCMHelper.confirmID(this, userID);
@@ -128,6 +129,7 @@ public class GcmIntentService extends IntentService {
 					String oUserID = getStringFromMessage(fullMessage, "o_user_id");
 					int bet = getIntFromMessage(fullMessage, "bet");
 					userID = ContactHelper.getUserID(this);
+					Loggy.d("challenge result userID = " + userID + " |c_user_id = " + cUserID + " |o_user_id = " + oUserID);
 					if (userID.equals(cUserID)) {										// You are c_user
 						userName = getStringFromMessage(fullMessage, "o_username");
 						score = getIntFromMessage(fullMessage, "o_score");
@@ -147,6 +149,7 @@ public class GcmIntentService extends IntentService {
 							score = scoreTemp;
 						}
 					}
+					Loggy.d("your score = " + scoreYou + " there score = " + score);
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					bet = MoneyHelper.getModifiedBet(this, bet);
 					if (scoreYou == score) {

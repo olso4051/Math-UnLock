@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class Loggy {
 	private static String tag = "test";
-	private static boolean logging = true;
+	private static boolean logging = false;
 
 	public static void i(String msg) {
 		if (logging)

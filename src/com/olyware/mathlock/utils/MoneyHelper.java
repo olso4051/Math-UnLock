@@ -10,6 +10,9 @@ import com.olyware.mathlock.R;
 public class MoneyHelper {
 
 	final private static int updateMoneyTime = 1000;
+	final private static String Money = "money";
+	final private static String PaidMoney = "paid_money";
+
 	private static int updateMoneyStep = 1000;
 	private static SharedPreferences sharedPrefsMoney;
 	private static SharedPreferences.Editor editorPrefsMoney;
@@ -40,8 +43,8 @@ public class MoneyHelper {
 		Pmoney = p;
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsMoney.putInt("money", money);
-		editorPrefsMoney.putInt("paid_money", Pmoney);
+		editorPrefsMoney.putInt(Money, money);
+		editorPrefsMoney.putInt(PaidMoney, Pmoney);
 		editorPrefsMoney.commit();
 
 		timerHandler.removeCallbacks(updateMoney);
@@ -57,22 +60,22 @@ public class MoneyHelper {
 		Pmoney = p;
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsMoney.putInt("money", money);
-		editorPrefsMoney.putInt("paid_money", Pmoney);
+		editorPrefsMoney.putInt(Money, money);
+		editorPrefsMoney.putInt(PaidMoney, Pmoney);
 		editorPrefsMoney.commit();
 	}
 
 	public static void increasePaidMoney(Context context, int amount) {
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsMoney.putInt("paid_money", sharedPrefsMoney.getInt("paid_money", 0) + amount);
+		editorPrefsMoney.putInt(PaidMoney, sharedPrefsMoney.getInt(PaidMoney, 0) + amount);
 		editorPrefsMoney.commit();
 	}
 
 	public static void increaseMoney(Context context, int amount) {
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
 		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
+		editorPrefsMoney.putInt(Money, sharedPrefsMoney.getInt(Money, 0) + amount);
 		editorPrefsMoney.commit();
 	}
 
@@ -91,7 +94,7 @@ public class MoneyHelper {
 		sharedPrefsMoney = context.getSharedPreferences(context.getString(R.string.pref_money), Context.MODE_PRIVATE);
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		int pending = sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0);
-		int initMoney = sharedPrefsMoney.getInt("money", 0);
+		int initMoney = sharedPrefsMoney.getInt(Money, 0);
 		int money = initMoney + pending - amount;
 		if (money < 0)
 			money = 0;
@@ -102,7 +105,7 @@ public class MoneyHelper {
 
 	public static int getTotalMoney(Context context) {
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
-		return sharedPrefsMoney.getInt("money", 0) + sharedPrefsMoney.getInt("paid_money", 0);
+		return sharedPrefsMoney.getInt(Money, 0) + sharedPrefsMoney.getInt(PaidMoney, 0);
 	}
 
 	public static int getMaxBet(Context context) {

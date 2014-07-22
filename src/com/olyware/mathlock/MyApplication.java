@@ -24,7 +24,7 @@ public class MyApplication extends Application {
 	private static final boolean GA_IS_DRY_RUN = false;
 
 	// GA Logger verbosity.
-	private static final LogLevel GA_LOG_VERBOSITY = LogLevel.VERBOSE;
+	private static final LogLevel GA_LOG_LEVEL = LogLevel.ERROR;
 
 	// Key used to store a user's tracking preferences in SharedPreferences.
 	private static final String TRACKING_PREF_KEY = "analytics_tracking";
@@ -61,7 +61,7 @@ public class MyApplication extends Application {
 		mGa.setDryRun(GA_IS_DRY_RUN);
 
 		// Set Logger verbosity.
-		mGa.getLogger().setLogLevel(GA_LOG_VERBOSITY);
+		mGa.getLogger().setLogLevel(GA_LOG_LEVEL);
 
 		// Set the opt out flag when user updates a tracking preference.
 		SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);

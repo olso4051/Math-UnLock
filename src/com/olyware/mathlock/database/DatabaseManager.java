@@ -428,7 +428,10 @@ public class DatabaseManager {
 
 	private GenericQuestion getGenericQuestion(MathQuestion question) {
 		question.setVariables();
-		return new GenericQuestion("Math", question.getQuestionText(), question.getAnswers());
+		String[] answers = question.getAnswers();
+		String genericQuestion = question.getQuestionText();
+		Loggy.d("math question for generic = " + genericQuestion + " answers = " + answers.toString());
+		return new GenericQuestion("Math", genericQuestion, answers);
 	}
 
 	private GenericQuestion getGenericQuestionFromVocab(List<VocabQuestion> question) {
