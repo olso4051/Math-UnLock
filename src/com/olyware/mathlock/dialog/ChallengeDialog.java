@@ -46,9 +46,11 @@ public class ChallengeDialog extends DialogFragment {
 	public interface ChallengeDialogListener {
 		void onActiveStateSelected();
 
-		void onSentStateSelected(String userName);
+		void onSentStateSelected(String challengeID, String hiqUserID, String userName, int bet, int diffMin, int diffMax, int questions,
+				CustomContactData.ChallengeState state);
 
-		void onNewStateSelected(String challengeID, String userName, int bet, int diffMin, int diffMax, int questions);
+		void onNewStateSelected(String challengeID, String userName, int bet, int diffMin, int diffMax, int questions,
+				CustomContactData.ChallengeState state);
 
 		void onInactiveSelected(ChallengeBuilder builder);
 
@@ -124,20 +126,21 @@ public class ChallengeDialog extends DialogFragment {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
 					if (selectedContact.hasHiqUserID()) {
+						String challengeID = selectedContact.getChallengeID();
+						String displayName = selectedContact.getDisplayName();
+						int bet = PreferenceHelper.getChallengeBet(getActivity(), challengeID);
+						int diffMin = PreferenceHelper.getChallengeDifficultyMin(getActivity(), challengeID);
+						int diffMax = PreferenceHelper.getChallengeDifficultyMax(getActivity(), challengeID);
+						int questions = PreferenceHelper.getChallengeQuestions(getActivity(), challengeID);
 						CustomContactData.ChallengeState state = selectedContact.getState();
 						Loggy.d("selected contact state =" + state.getValue());
 						if (state.equals(CustomContactData.ChallengeState.Active)) {
 							listener.onActiveStateSelected();
 						} else if (state.equals(CustomContactData.ChallengeState.New)) {
-							String challengeID = selectedContact.getChallengeID();
-							String displayName = selectedContact.getDisplayName();
-							int bet = PreferenceHelper.getChallengeBet(getActivity(), challengeID);
-							int diffMin = PreferenceHelper.getChallengeDifficultyMin(getActivity(), challengeID);
-							int diffMax = PreferenceHelper.getChallengeDifficultyMax(getActivity(), challengeID);
-							int questions = PreferenceHelper.getChallengeQuestions(getActivity(), challengeID);
-							listener.onNewStateSelected(challengeID, displayName, bet, diffMin, diffMax, questions);
+							listener.onNewStateSelected(challengeID, displayName, bet, diffMin, diffMax, questions, state);
 						} else if (state.equals(CustomContactData.ChallengeState.Sent)) {
-							listener.onSentStateSelected(selectedContact.getDisplayName());
+							String hiqUserID = selectedContact.getHiqUserID();
+							listener.onSentStateSelected(challengeID, hiqUserID, displayName, bet, diffMin, diffMax, questions, state);
 						} else if (state.equals(CustomContactData.ChallengeState.None)) {
 							Loggy.d("selected: userName = " + selectedContact.getDisplayName() + " |userID = "
 									+ selectedContact.getHiqUserID());
@@ -159,7 +162,7 @@ public class ChallengeDialog extends DialogFragment {
 		swipeLayout.setOnRefreshListener(new OnRefreshListener() {
 			@Override
 			public void onRefresh() {
-				refreshContacts();
+				refreshContacts(true);
 			}
 		});
 		swipeLayout.setColorScheme(R.color.white, R.color.light_blue, R.color.blue_on_white, R.color.light_blue);
@@ -167,18 +170,17 @@ public class ChallengeDialog extends DialogFragment {
 		List<CustomContactData> contactsTemp = new ArrayList<CustomContactData>();
 		contactsTemp.addAll(ContactHelper.getStoredContacts(getActivity()));
 		if (contactsTemp.size() == 0)
-			refreshContacts();
+			refreshContacts(true);
 		else {
 			contacts.clear();
 			addSectionHeaders();
 			contacts.addAll(contactsTemp);
-			Loggy.d("contacts.get(2).getState().getValue() = " + contacts.get(2).getState().getValue());
 			Collections.sort(contacts);
 			allContacts.clear();
 			allContacts.addAll(contactsTemp);
 			Collections.sort(allContacts);
 			adapter.notifyDataSetChanged();
-			refreshContacts();
+			refreshContacts(false);
 		}
 
 		return v;
@@ -193,101 +195,102 @@ public class ChallengeDialog extends DialogFragment {
 		super.onStop();
 	}
 
-	private void refreshContacts() {
+	private void refreshContacts(boolean refreshPhonebook) {
 		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
 		Loggy.d("test", "numFriends = " + numFriends);
-		refreshContactsTask = ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, new ContactHelper.contactDataListener() {
-			@Override
-			public void onNewContactFound(int replaceID, CustomContactData contactData) {
+		refreshContactsTask = ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, refreshPhonebook,
+				new ContactHelper.contactDataListener() {
+					@Override
+					public void onNewContactFound(int replaceID, CustomContactData contactData) {
 
-				if (contacts != null && allContacts != null && adapter != null) {
-					if (replaceID < 0) {
-						if (contactData.isFriend())
-							numFriends++;
-						contacts.add(contactData);
-						allContacts.add(contactData);
-					} else {
-						int replaceAddition = 1 + ((replaceID > numFriends) ? 1 : 0);
-						contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
-						contacts.get(replaceID + replaceAddition).addPhoneNumbers(contactData.getPhoneNumbers());
-						allContacts.get(replaceID).addEmails(contactData.getEmails());
-						allContacts.get(replaceID).addPhoneNumbers(contactData.getPhoneNumbers());
-					}
-					Collections.sort(contacts);
-					Collections.sort(allContacts);
-					adapter.notifyDataSetChanged();
-				}
-			}
-
-			@Override
-			public void onFriendContactFound(int id, String hiqUserID, String userName) {
-				if (contacts != null && allContacts != null && adapter != null && getActivity() != null) {
-					int replaceAddition = 1;
-					if (!contacts.get(id + 1).isFriend()) {
-						numFriends++;
-						replaceAddition += 1;
-					}
-					String oldHiqUserID = contacts.get(id + replaceAddition).getHiqUserID();
-					if (!oldHiqUserID.equals(hiqUserID)) {
-
-					}
-					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromUserID(getActivity(), hiqUserID);
-					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(getActivity(), hiqUserID);
-					contacts.get(id + replaceAddition).setIsFriend(true);
-					contacts.get(id + replaceAddition).setHiqUserID(hiqUserID);
-					contacts.get(id + replaceAddition).setHiqUserName(userName);
-					contacts.get(id + replaceAddition).setState(state);
-					contacts.get(id + replaceAddition).setChallengeID(challengeID);
-					Collections.sort(contacts);
-					allContacts.get(id).setIsFriend(true);
-					allContacts.get(id).setHiqUserID(hiqUserID);
-					allContacts.get(id).setHiqUserName(userName);
-					allContacts.get(id).setState(state);
-					allContacts.get(id).setChallengeID(challengeID);
-					Collections.sort(allContacts);
-					adapter.notifyDataSetChanged();
-				}
-			}
-
-			@Override
-			public void onDoneFindingContacts(List<ContactHashes> hashesList) {
-				if (allContacts != null && getActivity() != null) {
-					for (ContactHashes hashes : hashesList) {
-						List<Integer> ids = ContactHelper.findContacts(FindType.PhoneAndFacebookHASH, 0, allContacts, hashes);
-						if (ids.size() > 0) {
-							int mergeID = ids.get(0);
-							int mergeReplaceAddition = 1;
-							if (!contacts.get(mergeID + 1).isFriend()) {
-								mergeReplaceAddition += 1;
+						if (contacts != null && allContacts != null && adapter != null) {
+							if (replaceID < 0) {
+								if (contactData.isFriend())
+									numFriends++;
+								contacts.add(contactData);
+								allContacts.add(contactData);
+							} else {
+								int replaceAddition = 1 + ((replaceID > numFriends) ? 1 : 0);
+								contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
+								contacts.get(replaceID + replaceAddition).addPhoneNumbers(contactData.getPhoneNumbers());
+								allContacts.get(replaceID).addEmails(contactData.getEmails());
+								allContacts.get(replaceID).addPhoneNumbers(contactData.getPhoneNumbers());
 							}
-							for (int i = 1; i < ids.size(); i++) {
-								int replaceAddition = 1;
-								int id = ids.get(i);
-								if (!contacts.get(id + 1).isFriend()) {
-									replaceAddition += 1;
-								}
-								contacts.get(mergeID + mergeReplaceAddition).mergeWith(contacts.get(id + replaceAddition));
-								allContacts.get(mergeID).mergeWith(allContacts.get(id));
-							}
-							for (int i = 1; i < ids.size(); i++) {
-								int replaceAddition = 1;
-								int id = ids.get(i);
-								if (!contacts.get(id + 1).isFriend()) {
-									replaceAddition += 1;
-								}
-								contacts.remove(id + replaceAddition);
-								allContacts.remove(id);
-							}
+							Collections.sort(contacts);
+							Collections.sort(allContacts);
+							adapter.notifyDataSetChanged();
 						}
-						adapter.notifyDataSetChanged();
 					}
-					Loggy.d("storing contacts");
-					ContactHelper.storeContacts(getActivity(), allContacts);
-					swipeLayout.setRefreshing(false);
-				}
-			}
-		});
+
+					@Override
+					public void onFriendContactFound(int id, String hiqUserID, String userName) {
+						if (contacts != null && allContacts != null && adapter != null && getActivity() != null) {
+							int replaceAddition = 1;
+							if (!contacts.get(id + 1).isFriend()) {
+								numFriends++;
+								replaceAddition += 1;
+							}
+							String oldHiqUserID = contacts.get(id + replaceAddition).getHiqUserID();
+							if (!oldHiqUserID.equals(hiqUserID)) {
+
+							}
+							CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromUserID(getActivity(), hiqUserID);
+							String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(getActivity(), hiqUserID);
+							contacts.get(id + replaceAddition).setIsFriend(true);
+							contacts.get(id + replaceAddition).setHiqUserID(hiqUserID);
+							contacts.get(id + replaceAddition).setHiqUserName(userName);
+							contacts.get(id + replaceAddition).setState(state);
+							contacts.get(id + replaceAddition).setChallengeID(challengeID);
+							Collections.sort(contacts);
+							allContacts.get(id).setIsFriend(true);
+							allContacts.get(id).setHiqUserID(hiqUserID);
+							allContacts.get(id).setHiqUserName(userName);
+							allContacts.get(id).setState(state);
+							allContacts.get(id).setChallengeID(challengeID);
+							Collections.sort(allContacts);
+							adapter.notifyDataSetChanged();
+						}
+					}
+
+					@Override
+					public void onDoneFindingContacts(List<ContactHashes> hashesList) {
+						if (allContacts != null && getActivity() != null) {
+							for (ContactHashes hashes : hashesList) {
+								List<Integer> ids = ContactHelper.findContacts(FindType.PhoneAndFacebookHASH, 0, allContacts, hashes);
+								if (ids.size() > 0) {
+									int mergeID = ids.get(0);
+									int mergeReplaceAddition = 1;
+									if (!contacts.get(mergeID + 1).isFriend()) {
+										mergeReplaceAddition += 1;
+									}
+									for (int i = 1; i < ids.size(); i++) {
+										int replaceAddition = 1;
+										int id = ids.get(i);
+										if (!contacts.get(id + 1).isFriend()) {
+											replaceAddition += 1;
+										}
+										contacts.get(mergeID + mergeReplaceAddition).mergeWith(contacts.get(id + replaceAddition));
+										allContacts.get(mergeID).mergeWith(allContacts.get(id));
+									}
+									for (int i = 1; i < ids.size(); i++) {
+										int replaceAddition = 1;
+										int id = ids.get(i);
+										if (!contacts.get(id + 1).isFriend()) {
+											replaceAddition += 1;
+										}
+										contacts.remove(id + replaceAddition);
+										allContacts.remove(id);
+									}
+								}
+								adapter.notifyDataSetChanged();
+							}
+							Loggy.d("storing contacts");
+							ContactHelper.storeContacts(getActivity(), allContacts);
+							swipeLayout.setRefreshing(false);
+						}
+					}
+				});
 	}
 
 	private void addSectionHeaders() {

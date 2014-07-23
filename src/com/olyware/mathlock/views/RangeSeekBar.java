@@ -19,13 +19,15 @@ import com.olyware.mathlock.R;
 
 public class RangeSeekBar extends ImageView {
 	private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-	private final Bitmap thumbImage = BitmapFactory.decodeResource(getResources(), R.drawable.seek_thumb_normal);
+	/*private final Bitmap thumbImage = BitmapFactory.decodeResource(getResources(), R.drawable.seek_thumb_normal);
 	private final Bitmap thumbPressedImage = BitmapFactory.decodeResource(getResources(), R.drawable.seek_thumb_pressed);
 	private final float thumbWidth = thumbImage.getWidth();
-	private final float thumbHalfWidth = 0.5f * thumbWidth;
-	private final float thumbHalfHeight = 0.5f * thumbImage.getHeight();
-	private final float lineHeight = 0.1f * thumbHalfHeight;
-	private final float padding = thumbHalfWidth;
+	private final float thumbHalfWidth = 0.5f * thumbWidth;*/
+	private Bitmap thumbImage, thumbPressedImage;
+	private float thumbWidth, thumbHalfWidth;
+	// private final float thumbHalfHeight = 0.5f * thumbImage.getHeight();
+	// private final float lineHeight = 0.1f * thumbHalfHeight;
+	// private final float padding = thumbHalfWidth;
 	private final int absoluteMinValue = 0, absoluteMaxValue = 5;
 	private final double absoluteMinValuePrim = 0d, absoluteMaxValuePrim = 5d;
 	private double normalizedMinValue = 0d;
@@ -84,6 +86,12 @@ public class RangeSeekBar extends ImageView {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 		mScaledTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+		thumbImage = BitmapFactory.decodeResource(getResources(), R.drawable.seek_thumb_normal);
+		thumbPressedImage = BitmapFactory.decodeResource(getResources(), R.drawable.seek_thumb_pressed);
+		// Drawable test = getResources().getDrawable(R.drawable.seek_thumb_normal);
+		// thumbWidth = test.getIntrinsicWidth();
+		thumbWidth = thumbImage.getWidth();
+		thumbHalfWidth = 0.5f * thumbWidth;
 		fullRect = new Rect();
 		rangeRect = new Rect();
 		progress = (NinePatchDrawable) ctx.getResources().getDrawable(R.drawable.custom_progress_primary);
@@ -340,12 +348,13 @@ public class RangeSeekBar extends ImageView {
 		if (MeasureSpec.UNSPECIFIED != MeasureSpec.getMode(widthMeasureSpec)) {
 			Width = MeasureSpec.getSize(widthMeasureSpec);
 		}
+
 		Height = thumbImage.getHeight() + PaddingTop + PaddingBottom;
 		if (MeasureSpec.UNSPECIFIED != MeasureSpec.getMode(heightMeasureSpec)) {
 			Height = Math.min(Height, MeasureSpec.getSize(heightMeasureSpec));
 		}
 		setMeasuredDimension(Width, Height);
-		fullRect.set((int) padding + PaddingLeft, PaddingTop, (int) (Width - padding - PaddingRight), Height - PaddingBottom);
+		fullRect.set((int) thumbHalfWidth + PaddingLeft, PaddingTop, (int) (Width - thumbHalfWidth - PaddingRight), Height - PaddingBottom);
 		rangeRect.set(normalizedToScreen(normalizedMinValue), PaddingTop, normalizedToScreen(normalizedMaxValue), Height - PaddingBottom);
 	}
 
@@ -522,7 +531,7 @@ public class RangeSeekBar extends ImageView {
 	 * @return The converted value in screen space.
 	 */
 	private int normalizedToScreen(double normalizedCoord) {
-		return (int) (padding + PaddingLeft + normalizedCoord * (getWidth() - 2 * padding - PaddingLeft - PaddingRight));
+		return (int) (thumbHalfWidth + PaddingLeft + normalizedCoord * (getWidth() - 2 * thumbHalfWidth - PaddingLeft - PaddingRight));
 	}
 
 	/**
@@ -534,11 +543,11 @@ public class RangeSeekBar extends ImageView {
 	 */
 	private double screenToNormalized(float screenCoord) {
 		int width = getWidth();
-		if (width <= 2 * padding + PaddingLeft + PaddingRight) {
+		if (width <= 2 * thumbHalfWidth + PaddingLeft + PaddingRight) {
 			// prevent division by zero, simply return 0.
 			return 0d;
 		} else {
-			double result = (screenCoord - padding - PaddingLeft) / (width - 2 * padding - PaddingLeft - PaddingRight);
+			double result = (screenCoord - thumbHalfWidth - PaddingLeft) / (width - 2 * thumbHalfWidth - PaddingLeft - PaddingRight);
 			return Math.min(1d, Math.max(0d, result));
 		}
 	}

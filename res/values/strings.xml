@@ -15,6 +15,7 @@
     
     <!-- Challenge Dialog -->
     <string name="fragment_challenge_facebook_prompt">Login with Facebook to Find More Friends</string>
+    <string name="fragment_challenge_waiting">Challenge already sent, waiting for reply</string>
     <string name="fragment_challenge_title">Challenge!</string>
     <string name="fragment_challenge_invite">Invite</string>
     <string name="fragment_challenge_start">Start</string>
@@ -26,16 +27,21 @@
     
     <!-- Challenge New Dialog -->
     <string name="fragment_challenge_new_from">From</string>
+    <string name="fragment_challenge_new_to">Challenge To</string>
     <string name="fragment_challenge_new_difficulty">Difficulty</string>
     <string name="fragment_challenge_new_bet">Bet</string>
     <string name="fragment_challenge_new_questions">Questions</string>
     <string name="fragment_challenge_new_accept">Accept</string>
     <string name="fragment_challenge_new_decline">Decline</string>
+    <string name="fragment_challenge_new_wait">Wait</string>
+    <string name="fragment_challenge_new_cancel">Cancel</string>
     <string name="challenge_accepted">Challenge Accepted!</string>
     <string name="challenge_declined">Challenge Declined</string>
     <string name="challenge_status_failed">Failed to Respond to Challenge, Try Again Later</string>
     <string name="challenge_send_failed">Failed to Send Challenge. Try again Later</string>
     <string name="challenge_send_success">Challenge Sent, Waiting for Reply</string>
+    <string name="challenge_cancel_failed">Failed to Cancel Challenge. Try again Later</string>
+    <string name="challenge_canceled">Challenge Canceled</string>
     
     <!-- Google Analytics Tracking strings -->
     <string name="google_analytics_tracking_id">UA-48722021-1</string>
@@ -184,6 +190,7 @@
     
     <!-- Broadcast -->
     <string name="screen_on_receiver_filter">com.olyware.mathlock.ACTION_SCREEN_ON</string>
+    <string name="challenge_receiver_filter">com.olyware.mathlock.ACTION_CHALLENGE_RESULT</string>
     
     <!-- Custom Pack Downloads -->
     <string name="search_custom_packs_hint">Search Question Packs</string>
@@ -196,7 +203,7 @@
     <string name="search_custom_packs_download_cancel">Cancel</string>
     
     <!-- Question Pack selector -->
-    <string name="question_selector_button_text">Send Challenge</string>
+    <string name="question_selector_challenge">Send</string>
     <string name="question_selector_bet">Bet :\u0020</string>
     <string name="question_selector_difficulty_min">Min</string>
     <string name="question_selector_difficulty_max">Max</string>

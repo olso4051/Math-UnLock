@@ -40,23 +40,14 @@ public class GCMHelper {
 			}
 			regID = getRegistrationId(app);
 			SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
-			// SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info),
-			// Context.MODE_PRIVATE);
-			String username = ContactHelper.getUserName(act);
 			String userID = ContactHelper.getUserID(act);
-			String referral = ContactHelper.getReferrer(act);
-			String faceID = ContactHelper.getFaceID(act);
-			String birth = ContactHelper.getBirthday(act);
-			String gender = ContactHelper.getGender(act);
-			String location = ContactHelper.getLocation(act);
-			String email = ContactHelper.getEmail(act);
 			if (regID.equals("")) {
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(act, app, true);
 			} else if (!prefsGA.getBoolean("reg_uploaded", false)) {
 				storeRegistrationId(act, app, regID);
-				sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location, email, faceID);
+				sendRegistrationIdToBackend(act, regID);
 			} else if (!ContactHelper.isUserConfirmed(act) && !userID.equals("")) {
 				confirmID(act, userID);
 			}
@@ -139,15 +130,6 @@ public class GCMHelper {
 	}
 
 	private static void registerInBackground(final Activity act, final Context app, final boolean sendToBackend) {
-		SharedPreferences sharedPrefsUserInfo = act.getSharedPreferences(act.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
-		final String username = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_username), "");
-		final String userID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_userid), "");
-		final String referral = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_referrer), "");
-		final String faceID = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_id), "");
-		final String birth = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_birth), "");
-		final String gender = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_gender), "");
-		final String location = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_location), "");
-		final String email = sharedPrefsUserInfo.getString(act.getString(R.string.pref_user_facebook_email), "");
 
 		new AsyncTask<Void, Integer, Boolean>() {
 			@Override
@@ -159,7 +141,7 @@ public class GCMHelper {
 
 					// send the registration ID to the server
 					if (sendToBackend) {
-						sendRegistrationIdToBackend(act, username, regID, userID, referral, birth, gender, location, email, faceID);
+						sendRegistrationIdToBackend(act, regID);
 					}
 					// else
 					// mCallback.GCMResult(true);
@@ -186,11 +168,19 @@ public class GCMHelper {
 		}.execute(null, null, null);
 	}
 
-	private static void sendRegistrationIdToBackend(final Activity act, String username, String regId, String userID, String referral,
-			String birth, String gender, String location, String email, String faceID) {
-		Loggy.d("test", "sendRegistrationIdToBackend");
-
-		new RegisterID(act, username, regId, userID, referral, birth, gender, location, email, faceID) {
+	private static void sendRegistrationIdToBackend(final Activity act, String regID) {
+		Loggy.d("sendRegistrationIdToBackend");
+		String username = ContactHelper.getUserName(act);
+		String userID = ContactHelper.getUserID(act);
+		String referral = ContactHelper.getReferrer(act);
+		String faceID = ContactHelper.getFaceID(act);
+		String birth = ContactHelper.getBirthday(act);
+		String gender = ContactHelper.getGender(act);
+		String location = ContactHelper.getLocation(act);
+		String email = ContactHelper.getEmail(act);
+		Loggy.d("username(" + username + ")userID(" + userID + ")referral(" + referral + ")faceID(" + faceID + ")birth(" + birth
+				+ ")gender(" + gender + ")location(" + location + ")email(" + email + ")");
+		new RegisterID(act, username, regID, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				if (result == 0) {

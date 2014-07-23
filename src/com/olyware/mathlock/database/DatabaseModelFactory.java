@@ -7,6 +7,7 @@ import java.util.Random;
 
 import android.database.Cursor;
 
+import com.olyware.mathlock.adapter.ChallengeData;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.ChallengeQuestionContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
@@ -354,19 +355,23 @@ public class DatabaseModelFactory {
 		return new ChallengeQuestion(id, challengeID, description, questionText, answers, userName);
 	}
 
-	public static Map<String, Integer> buildChallengeIDs(Cursor cursor) {
-		Map<String, Integer> challengeIDs = new HashMap<String, Integer>();
+	public static Map<String, ChallengeData> buildChallengeIDs(Cursor cursor) {
+		Map<String, ChallengeData> challengeIDs = new HashMap<String, ChallengeData>();
 		Loggy.d("number of challengeIDs = " + cursor.getCount());
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			CursorHelper cursorHelper = new CursorHelper(cursor);
 			String challengeID, lastChallengeID = "";
+			String userID, lastUserID = "";
 			int questionsToDo = 0, lastQuestionsToDo = 0;
 			while (!cursor.isAfterLast()) {
 				cursorHelper.setCursor(cursor);
 				challengeID = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_ID);
-				if (cursor.isFirst())
+				userID = cursorHelper.getString(ChallengeQuestionContract.USER_ID);
+				if (cursor.isFirst()) {
 					lastChallengeID = challengeID;
+					lastUserID = userID;
+				}
 				int score = cursorHelper.getInteger(ChallengeQuestionContract.SCORE);
 				Loggy.d("challengeID = " + challengeID + " |score = " + score);
 				if (score < 0) {
@@ -384,11 +389,12 @@ public class DatabaseModelFactory {
 				}
 				Loggy.d("challengeID = " + challengeID + " |lastChallengeID = " + lastChallengeID);
 				if (!challengeID.equals(lastChallengeID)) {
-					challengeIDs.put(lastChallengeID, lastQuestionsToDo);
+					challengeIDs.put(lastChallengeID, new ChallengeData(lastChallengeID, lastUserID, lastQuestionsToDo));
 					lastChallengeID = challengeID;
+					lastUserID = userID;
 				}
 				if (cursor.isLast()) {
-					challengeIDs.put(challengeID, questionsToDo);
+					challengeIDs.put(challengeID, new ChallengeData(challengeID, userID, questionsToDo));
 				}
 				cursor.moveToNext();
 			}

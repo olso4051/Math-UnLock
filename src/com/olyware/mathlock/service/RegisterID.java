@@ -133,9 +133,9 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPut httpput = new HttpPut(baseURL + endpoint);
-		HttpEntity entity;
-		String fullResult;
-		JSONObject jsonResponse;
+		HttpEntity entity = null;
+		String fullResult = null;
+		JSONObject jsonResponse = null;
 		try {
 			JSONObject data = new JSONObject();
 			if (userName.length() > 0) {

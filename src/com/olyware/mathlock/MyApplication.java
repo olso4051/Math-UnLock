@@ -24,19 +24,14 @@ public class MyApplication extends Application {
 	private static final boolean GA_IS_DRY_RUN = false;
 
 	// GA Logger verbosity.
-	private static final LogLevel GA_LOG_LEVEL = LogLevel.ERROR;
+	private static final LogLevel GA_LOG_LEVEL = GA_IS_DRY_RUN ? LogLevel.VERBOSE : LogLevel.ERROR;
 
 	// Key used to store a user's tracking preferences in SharedPreferences.
 	private static final String TRACKING_PREF_KEY = "analytics_tracking";
 
-	/*public static String getPackageString() {
-		return instance.getApplicationContext().getPackageName();
-	}*/
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		// instance = this;
 
 		// The following line triggers the initialization of ACRA
 		// ACRA.init(this);

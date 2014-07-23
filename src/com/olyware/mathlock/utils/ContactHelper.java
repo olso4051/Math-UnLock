@@ -50,10 +50,10 @@ public class ContactHelper {
 		return new ArrayList<ContactHashes>(unique);
 	}
 
-	public static RefreshContacts getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts,
+	public static RefreshContacts getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts, boolean refreshPhonebook,
 			final contactDataListener listener) {
 		// TODO user phone number instead of ""
-		RefreshContacts c = new RefreshContacts(ctx, contacts) {
+		RefreshContacts c = new RefreshContacts(ctx, contacts, refreshPhonebook) {
 			@Override
 			protected void onProgressUpdate(CustomContactData... values) {
 				if (!isCancelled()) {
@@ -129,6 +129,30 @@ public class ContactHelper {
 			}
 		} else
 			return new ArrayList<CustomContactData>();
+	}
+
+	public static int getNumberOfChallenges(Context ctx) {
+		SharedPreferences sharedPrefsContacts = ctx.getSharedPreferences(CONTACT_PREFS, Context.MODE_PRIVATE);
+		String contactsJSON = sharedPrefsContacts.getString(CONTACTS, "");
+		if (!contactsJSON.equals("")) {
+			try {
+				int newChallenges = 0;
+				JSONArray contactsJSONArray = new JSONArray(contactsJSON);
+				for (int i = 0; i < contactsJSONArray.length(); i++) {
+					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
+					String hiqUserID = contactJSONObject.getString(CONTACT_HIQ_USER_ID);
+					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(ctx, hiqUserID);
+					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromID(ctx, challengeID);
+					if (state.equals(CustomContactData.ChallengeState.New) || state.equals(CustomContactData.ChallengeState.Active)) {
+						newChallenges++;
+					}
+				}
+				return newChallenges;
+			} catch (JSONException e) {
+				return 0;
+			}
+		} else
+			return 0;
 	}
 
 	public static void removeStoredContacts(Context ctx) {

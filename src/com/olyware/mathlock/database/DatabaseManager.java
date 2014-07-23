@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.adapter.ChallengeData;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.ChallengeQuestionContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
@@ -499,17 +500,14 @@ public class DatabaseManager {
 			return -1;
 	}
 
-	public Map<String, Integer> getChallengeIDs() {
+	public Map<String, ChallengeData> getChallengeIDs() {
 		if (db.isOpen()) {
-			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ID_AND_SCORE, null, null, null, null, null);
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.IDS_AND_SCORE, null, null, null, null, null);
 			return DatabaseModelFactory.buildChallengeIDs(cursor);
 		} else
-			return new HashMap<String, Integer>();
+			return new HashMap<String, ChallengeData>();
 	}
 
-	/*public CustomContactData.ChallengeState getChallengeState(String hiqUserID){
-		
-	}*/
 	public int removeChallengeQuestions(long ID) {
 		if (db.isOpen()) {
 			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
@@ -625,10 +623,10 @@ public class DatabaseManager {
 		Loggy.d("getQuestionsToAnswer challengeID = " + challengeID);
 		if (db.isOpen()) {
 			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
-			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ID_AND_SCORE, where, null, null, null, null);
-			Map<String, Integer> map = DatabaseModelFactory.buildChallengeIDs(cursor);
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.IDS_AND_SCORE, where, null, null, null, null);
+			Map<String, ChallengeData> map = DatabaseModelFactory.buildChallengeIDs(cursor);
 			Loggy.d("questions to answer  = " + map.get(challengeID));
-			return map.get(challengeID);
+			return map.get(challengeID).getNumberOfQuestions();
 		} else
 			return -1;
 	}

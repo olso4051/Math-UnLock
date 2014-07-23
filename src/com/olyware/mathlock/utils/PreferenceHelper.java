@@ -27,7 +27,7 @@ public class PreferenceHelper {
 
 	final public static String LAYOUT_WIDTH = "layout_width";
 	final public static String LAYOUT_HEIGHT = "layout_height";
-	final public static String LAYOUT_STATUS = "layout_status_bar_height";
+	final public static String LAYOUT_STATUSBAR_HEIGHT = "layout_status_bar_height";
 
 	final public static String CHALLENGE_PREFS_STATUS = "status";
 	final public static String CHALLENGE_PREFS_STATE = "state";
@@ -378,7 +378,7 @@ public class PreferenceHelper {
 			int statusBarHeight = sizeY - h;
 			Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " | statusBarHeight = "
 					+ statusBarHeight);
-			editPrefsLayout.putInt(LAYOUT_STATUS, statusBarHeight);
+			editPrefsLayout.putInt(LAYOUT_STATUSBAR_HEIGHT, statusBarHeight);
 		} else {
 
 		}
@@ -387,7 +387,7 @@ public class PreferenceHelper {
 
 	public static void storeLayoutParams(Context ctx, int width, int height, int statusBarHeight) {
 		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
-		sharedPrefsLayout.edit().putInt(LAYOUT_WIDTH, width).putInt(LAYOUT_HEIGHT, height).putInt(LAYOUT_STATUS, statusBarHeight).commit();
+		sharedPrefsLayout.edit().putInt(LAYOUT_WIDTH, width).putInt(LAYOUT_HEIGHT, height).putInt(LAYOUT_STATUSBAR_HEIGHT, statusBarHeight).commit();
 	}
 
 	public static int getLayoutWidth(Context ctx, int defaultValue) {
@@ -402,7 +402,7 @@ public class PreferenceHelper {
 
 	public static int getLayoutStatusBarHeight(Context ctx, int defaultValue) {
 		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
-		int sh = sharedPrefsLayout.getInt(LAYOUT_STATUS, defaultValue);
+		int sh = sharedPrefsLayout.getInt(LAYOUT_STATUSBAR_HEIGHT, defaultValue);
 		if (sh < 0) {
 			sh = (int) Math.ceil(25 * ctx.getResources().getDisplayMetrics().density);
 		}

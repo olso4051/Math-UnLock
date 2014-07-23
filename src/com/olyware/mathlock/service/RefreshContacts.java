@@ -13,6 +13,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
@@ -31,6 +32,7 @@ import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.JSONHelper;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.Toaster;
 
 public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer> {
 	final private static String FriendsEndpoint = "friends";
@@ -41,14 +43,16 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 	private List<String> allFacebookHashes = new ArrayList<String>();
 	private List<CustomContactData> allContacts = new ArrayList<CustomContactData>();
 	private String notNumber;
+	private boolean phonebookRefresh;
 	private String baseURL;
 	private Context ctx;
 
-	public RefreshContacts(Context ctx, List<CustomContactData> contacts) {
+	public RefreshContacts(Context ctx, List<CustomContactData> contacts, boolean phonebookRefresh) {
 		this.ctx = ctx;
 		allContacts.clear();
 		allContacts.addAll(contacts);
 		this.notNumber = ContactHelper.getUserPhoneNumber(ctx);
+		this.phonebookRefresh = phonebookRefresh;
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
@@ -106,7 +110,13 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 				}
 			}
 		} else {
-			// Toast.makeText(ctx, ctx.getString(R.string.fragment_challenge_facebook_prompt), Toast.LENGTH_LONG).show();
+			Handler h = new Handler(ctx.getMainLooper());
+			h.post(new Runnable() {
+				@Override
+				public void run() {
+					Toaster.toastLoginWithFacebook(ctx);
+				}
+			});
 		}
 		allNames.clear();
 		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
@@ -115,79 +125,82 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 		allEmails.clear();
 		allEmails.addAll(ContactHelper.getFirstEmailsFromContacts(allContacts));
 		// Get contacts from user's contacts
-		ContentResolver cr = ctx.getContentResolver();
-		Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-		if (cur.getCount() > 0) {
-			// next stored contact
-			while (cur.moveToNext()) {
-				if (isCancelled())
-					break;
-				boolean quit = false;
-				id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));				// store ID for getting the email and phone number
-				name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));	// name of the contact
-				String nameLo = name.toLowerCase(Locale.ENGLISH);									// lower case name for comparing other contacts
-				if (name.charAt(0) != '#') {														// don't add contacts that start with #
-					// add info to names that we've already found
-					if (allNames.contains(nameLo)) {
-						replaceID = allNames.indexOf(nameLo);
+		if (phonebookRefresh) {
+			ContentResolver cr = ctx.getContentResolver();
+			Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+			if (cur.getCount() > 0) {
+				// next stored contact
+				while (cur.moveToNext()) {
+					if (isCancelled())
+						break;
+					boolean quit = false;
+					id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));				// store ID for getting the email and phone
+					// number
+					name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));	// name of the contact
+					String nameLo = name.toLowerCase(Locale.ENGLISH);									// lower case name for comparing other contacts
+					if (name.charAt(0) != '#') {														// don't add contacts that start with #
+						// add info to names that we've already found
+						if (allNames.contains(nameLo)) {
+							replaceID = allNames.indexOf(nameLo);
+						}
+						// only add a contact if they have a phone number
+						if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0
+								|| replaceID >= 0) {
+							Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+									ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] { id }, null);
+							while (pCur.moveToNext() && !quit) {
+								if (isCancelled())
+									break;
+								// could use the next line to restrict types of numbers
+								// int phoneType = pCur.getInt(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
+								String number = ContactHelper.getPhoneNumberFromString(pCur.getString(pCur
+										.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
+								// only add phone numbers we haven't found yet
+								if (number.equals(notNumber))
+									quit = true;
+								if (!number.equals(notNumber) && number.length() >= 7 && !allPhoneNumbers.contains(number)) {
+									isPerson = true;
+									phoneNumbers.add(number);
+									allPhoneNumbers.add(number);
+								}
+							}
+							pCur.close();
+							Cursor emailCur = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+									ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[] { id }, null);
+							while (emailCur.moveToNext() && !quit) {
+								if (isCancelled())
+									break;
+								String email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+								// only add emails we haven't found yet
+								if (email.length() >= 5 && !allEmails.contains(email)) {
+									isPerson = true;
+									emails.add(email);
+									allEmails.add(email);
+								}
+							}
+							emailCur.close();
+							if (!quit && (isPerson || replaceID >= 0)) {
+								CustomContactData contact = new CustomContactData(name, emails, phoneNumbers);
+								if (replaceID == -1) {
+									allContacts.add(contact);
+									Collections.sort(allContacts);
+									allNames.clear();
+									allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
+								}
+								contact.addEmail(String.valueOf(replaceID));
+								publishProgress(contact);
+							}
+						}
 					}
-					// only add a contact if they have a phone number
-					if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0
-							|| replaceID >= 0) {
-						Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-								ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] { id }, null);
-						while (pCur.moveToNext() && !quit) {
-							if (isCancelled())
-								break;
-							// could use the next line to restrict types of numbers
-							// int phoneType = pCur.getInt(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
-							String number = ContactHelper.getPhoneNumberFromString(pCur.getString(pCur
-									.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
-							// only add phone numbers we haven't found yet
-							if (number.equals(notNumber))
-								quit = true;
-							if (!number.equals(notNumber) && number.length() >= 7 && !allPhoneNumbers.contains(number)) {
-								isPerson = true;
-								phoneNumbers.add(number);
-								allPhoneNumbers.add(number);
-							}
-						}
-						pCur.close();
-						Cursor emailCur = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-								ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[] { id }, null);
-						while (emailCur.moveToNext() && !quit) {
-							if (isCancelled())
-								break;
-							String email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-							// only add emails we haven't found yet
-							if (email.length() >= 5 && !allEmails.contains(email)) {
-								isPerson = true;
-								emails.add(email);
-								allEmails.add(email);
-							}
-						}
-						emailCur.close();
-						if (!quit && (isPerson || replaceID >= 0)) {
-							CustomContactData contact = new CustomContactData(name, emails, phoneNumbers);
-							if (replaceID == -1) {
-								allContacts.add(contact);
-								Collections.sort(allContacts);
-								allNames.clear();
-								allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));
-							}
-							contact.addEmail(String.valueOf(replaceID));
-							publishProgress(contact);
-						}
-					}
+					replaceID = -1;
+					isPerson = false;
+					emails.clear();
+					phoneNumbers.clear();
 				}
-				replaceID = -1;
-				isPerson = false;
-				emails.clear();
-				phoneNumbers.clear();
 			}
+			cur.close();
 		}
 		allEncryptedPhoneNumbers.addAll(ContactHelper.getPhoneHashes(allPhoneNumbers));
-		cur.close();
 
 		if (!isCancelled()) {
 			// POST to API to get user_ids of contacts and facebook friends

@@ -38,23 +38,23 @@ public class JoystickView extends View {
 	private final long tapLength = 250;
 	private int answerSizeSPDefault = 22;
 
-	private Bitmap bmpSelectBar, bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpFriend, bmpUnlock, bmpHand, bmpArrow;
+	private Bitmap bmpSelectBar, bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpFriend, bmpFriendSelected, bmpUnlock, bmpHand, bmpArrow;
 	private Bitmap[] bmpBack = new Bitmap[3];
 	private RectF[] RectForAnswers = new RectF[NumAnswers];
 	private Rect[] bounds = new Rect[NumAnswers];
 	private RectF dstRectForOpt, RectForUnlock, RectForUnlockPulse;
 	private Rect dstRectForS, dstRectForQ, dstRectForP, dstRectForE, dstRectForI, srcRectForBack, srcRectForUnlock, srcRectForBig,
-			srcRectForSmall;
+			srcRectForSmall, challengeBounds;
 	private Matrix rotateHand, rotateArrow;
 
 	private TextPaint[] answerTextPaint = new TextPaint[NumAnswers];
 	private TextPaint optionPaintWhite;
 	private Path optionPath, dstPathForSet;
-	private Paint settingsPaint, settingsPaintOutline, unlockPaint;
+	private Paint settingsPaint, unlockPaint, transparentBlue;
 
 	private int barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP, Width, Height, dstHeight, spacing, rUnlock,
 			radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc, shareLoc, correctGuess, wrongGuess, selectAppDrag,
-			appCenterVert, appCenterHorz, answerAlpha = 0, pulseFrame = 0;
+			appCenterVert, appCenterHorz, answerAlpha = 0, pulseFrame = 0, numberOfChallenges;
 	private long tapTimer, lastTimeRevealOrHide = 0, startTimeRevealOrHide = 0, lastTimePulse = 0, startTimePulse = 0;
 	private float answerSizePix, optionX, optionY, appDragX = 0, appDragY = 0, strokeWidth;
 	private double touchX, touchY, startX, startY, appAngle;
@@ -194,8 +194,8 @@ public class JoystickView extends View {
 		setFocusable(true);
 		Width = getMeasuredWidth();
 		Height = getMeasuredHeight();
-
 		res = getResources();
+		numberOfChallenges = 0;
 
 		textSizeSP = 20;
 		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, res.getDisplayMetrics());
@@ -215,6 +215,10 @@ public class JoystickView extends View {
 		settingsPaint.setStyle(Paint.Style.FILL);
 		settingsPaint.setARGB(100, 150, 150, 150);
 
+		transparentBlue = new Paint(Paint.ANTI_ALIAS_FLAG);
+		transparentBlue.setStyle(Paint.Style.FILL);
+		transparentBlue.setARGB(191, 0, 127, 255);
+
 		optionPath = new Path();
 		dstPathForSet = new Path();
 		options = false;
@@ -222,6 +226,7 @@ public class JoystickView extends View {
 		answerSizeSP = answerSizeSPDefault;
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
 
+		challengeBounds = new Rect();
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i] = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 			answerTextPaint[i].setTextAlign(Paint.Align.CENTER);
@@ -245,6 +250,7 @@ public class JoystickView extends View {
 		bmpP = BitmapFactory.decodeResource(res, R.drawable.select_progress);
 		bmpStore = BitmapFactory.decodeResource(res, R.drawable.select_store);
 		bmpFriend = BitmapFactory.decodeResource(res, R.drawable.select_friend);
+		bmpFriendSelected = BitmapFactory.decodeResource(res, R.drawable.select_friend_selected);
 		bmpUnlock = BitmapFactory.decodeResource(res, R.drawable.unlock);
 		// bmpHand = BitmapFactory.decodeResource(res, R.drawable.swipe_hand);
 		// bmpArrow = BitmapFactory.decodeResource(res, R.drawable.swipe_arrow);
@@ -295,10 +301,6 @@ public class JoystickView extends View {
 		unlockPaint.setColor(Color.WHITE);
 		unlockPaint.setStyle(Paint.Style.STROKE);
 		unlockPaint.setStrokeWidth(strokeWidth);
-		settingsPaintOutline = new Paint(Paint.ANTI_ALIAS_FLAG);
-		settingsPaintOutline.setColor(Color.WHITE);
-		settingsPaintOutline.setStyle(Paint.Style.STROKE);
-		settingsPaintOutline.setStrokeWidth(rUnlock / 20);
 		for (int i = 0; i < NumAnswers; i++) {
 			selectAnswers[i] = false;
 			RectForAnswers[i] = new RectF();
@@ -545,6 +547,11 @@ public class JoystickView extends View {
 		}
 	}
 
+	public void setNumberOfChallenges(int numberOfChallenges) {
+		this.numberOfChallenges = numberOfChallenges;
+		invalidate();
+	}
+
 	public void startAnimations() {
 		startTimePulse = 0;
 		animateHandler.removeCallbacksAndMessages(null);
@@ -708,7 +715,20 @@ public class JoystickView extends View {
 			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, optionPaintWhite);
 		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, optionPaintWhite);
 		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, optionPaintWhite);
-		canvas.drawBitmap(bmpFriend, srcRectForBig, dstRectForI, optionPaintWhite);
+
+		// Draw the Challenges Bubble and Friends selector
+		if (numberOfChallenges > 0) {
+			canvas.drawBitmap(bmpFriendSelected, srcRectForBig, dstRectForI, optionPaintWhite);
+			String challenges = String.valueOf(numberOfChallenges);
+			optionPaintWhite.getTextBounds(challenges, 0, challenges.length(), challengeBounds);
+			int challengeRadius = (int) (Math.sqrt(Math.pow(challengeBounds.width(), 2) + Math.pow(challengeBounds.height(), 2)) * 7 / 8);
+			canvas.drawCircle((Width + test.getIntrinsicWidth()) / 2 + challengeBounds.width(), barY - barHeight, challengeRadius,
+					transparentBlue);
+			canvas.drawText(challenges, (Width + test.getIntrinsicWidth()) / 2 + challengeBounds.width(), barY - barHeight + textSizePix
+					* 3 / 8, optionPaintWhite);
+		} else {
+			canvas.drawBitmap(bmpFriend, srcRectForBig, dstRectForI, optionPaintWhite);
+		}
 
 		// Draw hints
 		if (showHint) {

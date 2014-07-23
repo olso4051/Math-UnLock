@@ -86,7 +86,7 @@ public class QuestionDialog extends DialogFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		int style = DialogFragment.STYLE_NORMAL;
+		int style = DialogFragment.STYLE_NO_TITLE;
 		int theme = R.style.ChallengeTheme;
 		setStyle(style, theme);
 	}
@@ -94,7 +94,6 @@ public class QuestionDialog extends DialogFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_question_select, container, false);
-		getDialog().setTitle(getString(R.string.fragment_challenge_title));
 
 		Bundle arg = getArguments();
 		betMax = arg.getInt("max_bet");
@@ -209,7 +208,7 @@ public class QuestionDialog extends DialogFragment {
 							questionPacks.get(i).setChecked(checked);
 						}
 					}
-				} else {
+				} else if (questionPacks.get(0).getID() == 0) {
 					questionPacks.get(0).setChecked(false);
 				}
 				adapter.notifyDataSetChanged();

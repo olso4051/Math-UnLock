@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.olyware.mathlock.R;
@@ -33,6 +34,7 @@ public class GcmIntentService extends IntentService {
 	final private static String CHALLENGE = "CHALLENGE";
 	final private static String CHALLENGE_RESULT = "CHALLENGE_RESULT";
 	final private static String CHALLENGE_STATUS = "CHALLENGE_STATUS";
+	final private static String CHALLENGE_CANCEL = "CHALLENGE_CANCEL";
 
 	public GcmIntentService() {
 		super("GcmIntentService");
@@ -122,6 +124,8 @@ public class GcmIntentService extends IntentService {
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper
 							.sendChallengeNotification(challengeID, userName, questions.size(), difficultyMin, difficultyMax, bet);
+					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				} else if (type.equals(CHALLENGE_RESULT)) {
 					String userName;
 					int score, scoreYou;
@@ -167,6 +171,8 @@ public class GcmIntentService extends IntentService {
 						MoneyHelper.decreasePendingMoneyNoDebt(this, bet);
 					}
 					notificationHelper.sendChallengeResultNotification(userName, scoreYou, score, bet);
+					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				} else if (type.equals(CHALLENGE_STATUS)) {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String status = getStringFromMessage(fullMessage, "status");
@@ -179,6 +185,21 @@ public class GcmIntentService extends IntentService {
 					PreferenceHelper.storeChallengeStatus(this, challengeID, challengeStatus, challengeState);
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper.sendChallengeStatusNotification(challengeID, challengeStatus);
+					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
+				} else if (type.equals(CHALLENGE_CANCEL)) {
+					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
+
+					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
+					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
+					// try deleting with both id's
+					/*PreferenceHelper.removeChallengeID(this, challengeID, oHiqUserID);
+					PreferenceHelper.removeChallengeID(this, challengeID, cHiqUserID);*/
+
+					// delete the questions from the challenge database
+					/*DatabaseManager dbManager = new DatabaseManager(getApplicationContext());
+					dbManager.removeChallengeQuestions(challengeID);*/
 				}
 			}
 		}

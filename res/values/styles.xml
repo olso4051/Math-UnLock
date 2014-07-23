@@ -38,8 +38,9 @@
     </style>
     
     <style name="SeekBar">
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:paddingLeft">@dimen/login_vertical_margin_half</item>
         <item name="android:paddingRight">@dimen/login_vertical_margin_half</item>
         <item name="android:paddingTop">@dimen/login_vertical_margin</item>
@@ -47,8 +48,9 @@
         <item name="android:thumb">@drawable/custom_progress_thumb</item>
     </style>
     <style name="RangeSeekBar">
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:paddingTop">@dimen/login_vertical_margin</item>
     </style>
     
@@ -73,6 +75,27 @@
     <style name="Dialog.Button">
         <item name="android:background">@drawable/login_button</item>
         <item name="android:textColor">@color/button_text</item>
-        <item name="android:layout_margin">@dimen/login_vertical_margin</item>
+        <item name="android:paddingLeft">@dimen/login_horizontal_margin_half</item>
+        <item name="android:paddingRight">@dimen/login_horizontal_margin_half</item>
+        <item name="android:layout_marginTop">@dimen/login_vertical_margin</item>
+        <item name="android:layout_marginBottom">@dimen/login_vertical_margin</item>
+        <item name="android:layout_marginLeft">@dimen/login_vertical_margin</item>
+        <item name="android:layout_marginRight">@dimen/login_vertical_margin</item>
+    </style>
+    <style name="Dialog.Button.Left">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_marginLeft">@dimen/login_horizontal_margin_half</item>
+        <item name="android:layout_marginRight">@dimen/login_vertical_margin_half</item>
+    </style>
+    <style name="Dialog.Button.Right">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginRight">@dimen/login_horizontal_margin_half</item>
+        <item name="android:layout_marginLeft">@dimen/login_vertical_margin_half</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
     </style>
 </resources>

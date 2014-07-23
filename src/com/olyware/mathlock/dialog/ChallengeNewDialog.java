@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.Difficulty;
+import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.utils.MoneyHelper;
 
 /**
@@ -19,7 +20,13 @@ import com.olyware.mathlock.utils.MoneyHelper;
  */
 public class ChallengeNewDialog extends DialogFragment {
 	final public static String TAG = "fragment_challenge_new";
-	final private static String USERNAME = "username", DIFFICULTY = "difficulty", BET = "bet", QUESTIONS = "questions";
+	final private static String USERNAME = "username";
+	final private static String DIFFICULTY = "difficulty";
+	final private static String BET = "bet";
+	final private static String QUESTIONS = "questions";
+	final private static String POSITIVE = "positive_text";
+	final private static String NEGATIVE = "negative_text";
+	final private static String NAME_TAG = "name_tag";
 	private TextView userNameText, difficultyText, betText, questionsText;
 	private OnAcceptOrDeclineListener listener;
 
@@ -31,7 +38,8 @@ public class ChallengeNewDialog extends DialogFragment {
 		this.listener = listener;
 	}
 
-	public static ChallengeNewDialog newInstance(Context ctx, String userName, int bet, int diffMin, int diffMax, int questions) {
+	public static ChallengeNewDialog newInstance(Context ctx, String userName, int bet, int diffMin, int diffMax, int questions,
+			CustomContactData.ChallengeState state) {
 		ChallengeNewDialog f = new ChallengeNewDialog();
 
 		// Supply index input as an argument.
@@ -43,6 +51,20 @@ public class ChallengeNewDialog extends DialogFragment {
 		args.putString(DIFFICULTY, diff);
 		args.putInt(BET, MoneyHelper.getModifiedBet(ctx, bet));
 		args.putInt(QUESTIONS, questions);
+		String pos = ctx.getString(R.string.ok);
+		String neg = ctx.getString(R.string.cancel);
+		String nameTag = ctx.getString(R.string.fragment_challenge_new_from);
+		if (state == CustomContactData.ChallengeState.Sent) {
+			pos = ctx.getString(R.string.fragment_challenge_new_wait);
+			neg = ctx.getString(R.string.fragment_challenge_new_cancel);
+			nameTag = ctx.getString(R.string.fragment_challenge_new_to);
+		} else if (state == CustomContactData.ChallengeState.New) {
+			pos = ctx.getString(R.string.fragment_challenge_new_accept);
+			neg = ctx.getString(R.string.fragment_challenge_new_decline);
+		}
+		args.putString(POSITIVE, pos);
+		args.putString(NEGATIVE, neg);
+		args.putString(NAME_TAG, nameTag);
 
 		f.setArguments(args);
 
@@ -64,6 +86,9 @@ public class ChallengeNewDialog extends DialogFragment {
 
 		Bundle args = getArguments();
 
+		TextView nameTag = (TextView) v.findViewById(R.id.challenge_new_name_tag);
+		nameTag.setText(args.getString(NAME_TAG));
+
 		userNameText = (TextView) v.findViewById(R.id.challenge_new_username);
 		userNameText.setText(args.getString(USERNAME));
 
@@ -76,15 +101,17 @@ public class ChallengeNewDialog extends DialogFragment {
 		questionsText = (TextView) v.findViewById(R.id.challenge_new_questions);
 		questionsText.setText(String.valueOf(args.getInt(QUESTIONS)));
 
-		Button acceptButton = (Button) v.findViewById(R.id.challenge_new_button_accept);
-		acceptButton.setOnClickListener(new OnClickListener() {
+		Button posiviteButton = (Button) v.findViewById(R.id.challenge_new_button_accept);
+		posiviteButton.setText(args.getString(POSITIVE));
+		posiviteButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				listener.onClick(true);
 			}
 		});
-		Button declineButton = (Button) v.findViewById(R.id.challenge_new_button_decline);
-		declineButton.setOnClickListener(new OnClickListener() {
+		Button negativeButton = (Button) v.findViewById(R.id.challenge_new_button_decline);
+		negativeButton.setText(args.getString(NEGATIVE));
+		negativeButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				listener.onClick(false);

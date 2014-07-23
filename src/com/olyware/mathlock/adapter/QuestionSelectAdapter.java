@@ -42,7 +42,7 @@ public class QuestionSelectAdapter extends ArrayAdapter<QuestionSelectData> {
 
 		View row = convertView;
 		CustomPackDataHolder holder = null;
-		int backgroundResourceID = (position % 2 == 0) ? (R.drawable.lv_dark) : (R.drawable.lv_light);
+		int backgroundResourceID = (position % 2 == 0) ? (R.drawable.lv_light) : (R.drawable.lv_dark);
 
 		if (row == null) {
 			LayoutInflater inflater = ((Activity) ctx).getLayoutInflater();
@@ -67,7 +67,7 @@ public class QuestionSelectAdapter extends ArrayAdapter<QuestionSelectData> {
 								}
 							}
 						}
-					} else {
+					} else if (data.get(0).getID() == 0) {
 						data.get(0).setChecked(false);
 					}
 					notifyDataSetChanged();
