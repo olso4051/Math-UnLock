@@ -2,3 +2,9 @@ FOR PRODUCTION
 set Loggy to false
 set GoogleAnalytics in MyApplication to dry_run=false
 set IabHelper mDebugLog = false // Optional as Loggy provides the logging function
+
+FOR TESTING ATTRIBUTION
+C:\Program Files\Android\android-sdk\platform-tools>adb shell am broadcast -a co
+m.android.vending.INSTALL_REFERRER -n com.olyware.mathlock/com.olyware.mathlock.
+service.CustomInstallReceiver --es "referrer" "utm_source%3dapp%26utm_medium%3ds
+hare%26utm_content%3d1234%26deeldat_share_id%3d12345"

@@ -17,15 +17,23 @@ import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
+import com.olyware.mathlock.utils.ShareHelper;
 
 /*
 *  A simple Broadcast Receiver to receive an INSTALL_REFERRER
 *  intent and pass it to other receivers, including
 *  the Google Analytics receiver.
 */
-public class CustomGAReceiver extends BroadcastReceiver {
+public class CustomInstallReceiver extends BroadcastReceiver {
 	final public static String PREFS_GA = "ga_prefs";
-	final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
+	final private static String UTM_SOURCE = "utm_source";
+	final private static String UTM_MEDIUM = "utm_medium";
+	final private static String UTM_CONTENT = "utm_content";
+	final private static String UTM_TERM = "utm_term";
+	final private static String UTM_CAMPAIGN = "utm_campaign";
+	final private static String SHARE_ID = "deeldat_share_id";
+
+	// final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -43,6 +51,7 @@ public class CustomGAReceiver extends BroadcastReceiver {
 		Map<String, String> referralParams = new HashMap<String, String>();
 
 		// Return if this is not the right intent.
+		Loggy.d("intent action = " + intent.getAction());
 		if (!intent.getAction().equals("com.android.vending.INSTALL_REFERRER")) { //$NON-NLS-1$
 			return;
 		}
@@ -75,31 +84,36 @@ public class CustomGAReceiver extends BroadcastReceiver {
 	}
 
 	public static void storeReferralParams(Context context, Map<String, String> params) {
-		SharedPreferences storage = context.getSharedPreferences(PREFS_GA, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = storage.edit();
+		SharedPreferences sharedPrefsGA = context.getSharedPreferences(PREFS_GA, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editorPrefsGA = sharedPrefsGA.edit();
 		SharedPreferences sharedPrefsUserInfo = context.getSharedPreferences(context.getString(R.string.pref_user_info),
 				Context.MODE_PRIVATE);
-		SharedPreferences.Editor editorUserInfo = sharedPrefsUserInfo.edit();
+		SharedPreferences.Editor editorPrefsUserInfo = sharedPrefsUserInfo.edit();
 
-		for (String key : EXPECTED_PARAMETERS) {
-			String value = params.get(key);
+		for (Map.Entry<String, String> entry : params.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
 			if (value != null) {
-				editor.putString(key, value);
-				Loggy.d("GAtest", "key = " + value);
+				editorPrefsGA.putString(key, value);
+				Loggy.d("GAtest", key + " = " + value);
 			}
 		}
-		editor.commit();
-
-		// is this a referral link
-		if (storage.getString("utm_source", "").equals("app") && storage.getString("utm_medium", "").equals("share")) {
-			String referral = EncryptionHelper.decryptForURL(params.get("utm_content"));
+		editorPrefsGA.commit();
+		String source = sharedPrefsGA.getString(UTM_SOURCE, "");
+		String medium = sharedPrefsGA.getString(UTM_MEDIUM, "");
+		String content = sharedPrefsGA.getString(UTM_CONTENT, "");
+		String shareID = sharedPrefsGA.getString(SHARE_ID, "");
+		Loggy.d("source(" + source + ")medium(" + medium + ")content(" + content + ")shareID(" + shareID + ")");
+		// is this a referral link from share or invite
+		if (source.equals("app") && (medium.equals("share") || medium.equals("invite"))) {
+			String referral = EncryptionHelper.decryptForURL(content);
 			MoneyHelper.increasePaidMoney(context, context.getResources().getInteger(R.integer.coins_from_share));
-			editorUserInfo.putString(context.getString(R.string.pref_user_referrer), referral).commit();
+			editorPrefsUserInfo.putString(context.getString(R.string.pref_user_referrer), referral).commit();
 			Loggy.d("GAtest", "referral key = " + referral);
 		}
 		// else is this a chirpads link
-		else if (storage.getString("utm_source", "").equals("chirpads")) {
-			String clickGuid = params.get("utm_content");
+		else if (sharedPrefsGA.getString(UTM_SOURCE, "").equals("chirpads")) {
+			String clickGuid = content;
 			String action = "install";
 			String os = "Android";
 			String osVersion = Build.VERSION.RELEASE;
@@ -107,6 +121,9 @@ public class CustomGAReceiver extends BroadcastReceiver {
 			String externalAdId = "com.olyware.mathlock";
 			Loggy.d("test", "clickGuid = " + clickGuid);
 			new PostChirpAds(context).execute(action, clickGuid, os, osVersion, appPackageName, externalAdId);
+		}
+		if (!shareID.equals("")) {
+			new PostDeelDatInstall(context, ShareHelper.DEELDAT_APP_ID, shareID).execute();
 		}
 
 	}

@@ -31,6 +31,8 @@ import com.olyware.mathlock.service.ConfirmID.ConfirmType;
 import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
+	final public static String DEELDAT_BASE_URL = "http://deeldat.com/";
+	final public static String DEELDAT_APP_ID = "helloiamhiqthelockscreen";
 	final public static float FACEBOOK_LINK_RATIO = 1.9178082191780821917808219178082f;
 	final public static String URL_INVITE_BASE = "https://play.google.com/store/apps/details?id=com.olyware.mathlock&referrer=utm_source%3Dapp%26utm_medium%3Dinvite";
 	final public static String URL_SHARE_BASE = "https://play.google.com/store/apps/details?id=com.olyware.mathlock&referrer=utm_source%3Dapp%26utm_medium%3Dshare";

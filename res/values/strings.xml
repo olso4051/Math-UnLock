@@ -33,8 +33,8 @@
     <string name="fragment_challenge_new_questions">Questions</string>
     <string name="fragment_challenge_new_accept">Accept</string>
     <string name="fragment_challenge_new_decline">Decline</string>
-    <string name="fragment_challenge_new_wait">Wait</string>
-    <string name="fragment_challenge_new_cancel">Cancel</string>
+    <string name="fragment_challenge_new_wait">OK</string>
+    <string name="fragment_challenge_new_cancel">Delete</string>
     <string name="challenge_accepted">Challenge Accepted!</string>
     <string name="challenge_declined">Challenge Declined</string>
     <string name="challenge_status_failed">Failed to Respond to Challenge, Try Again Later</string>
@@ -61,10 +61,7 @@
     <!-- Sharing -->
     <string name="deeldat_api_key">1716a4ac3509884eb5cf0245d392be52</string>
     <string name="share_title">Could You Answer This Question To Unlock Your Phone?</string>
-    <string name="ask_to_share1">Ask for help</string>
     <string name="ask_to_share0">Challenge Friends</string>
-    <string name="ask_to_share2">Share question</string>
-    <string name="ask_to_share3">Share question</string>
     <string name="cancelled">Cancelled</string>
     <string name="error">Error</string>
     <string name="permission_not_granted">Facebook permissions were not granted</string>

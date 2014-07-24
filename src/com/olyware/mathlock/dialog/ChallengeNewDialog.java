@@ -30,8 +30,12 @@ public class ChallengeNewDialog extends DialogFragment {
 	private TextView userNameText, difficultyText, betText, questionsText;
 	private OnAcceptOrDeclineListener listener;
 
+	public static enum ClickType {
+		Positive, Nuetral, Negative;
+	}
+
 	public interface OnAcceptOrDeclineListener {
-		void onClick(boolean accepted);
+		void onClick(ClickType type);
 	}
 
 	public void setChallengeDialogListener(OnAcceptOrDeclineListener listener) {
@@ -101,20 +105,20 @@ public class ChallengeNewDialog extends DialogFragment {
 		questionsText = (TextView) v.findViewById(R.id.challenge_new_questions);
 		questionsText.setText(String.valueOf(args.getInt(QUESTIONS)));
 
-		Button posiviteButton = (Button) v.findViewById(R.id.challenge_new_button_accept);
+		Button posiviteButton = (Button) v.findViewById(R.id.challenge_new_button_positive);
 		posiviteButton.setText(args.getString(POSITIVE));
 		posiviteButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				listener.onClick(true);
+				listener.onClick(ClickType.Positive);
 			}
 		});
-		Button negativeButton = (Button) v.findViewById(R.id.challenge_new_button_decline);
+		Button negativeButton = (Button) v.findViewById(R.id.challenge_new_button_negative);
 		negativeButton.setText(args.getString(NEGATIVE));
 		negativeButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				listener.onClick(false);
+				listener.onClick(ClickType.Negative);
 			}
 		});
 

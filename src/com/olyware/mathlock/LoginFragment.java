@@ -27,7 +27,7 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
-import com.olyware.mathlock.service.CustomGAReceiver;
+import com.olyware.mathlock.service.CustomInstallReceiver;
 import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.Loggy;
@@ -242,30 +242,33 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	void logIn() {
-		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
-		String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
-		String faceID = sharedPrefsUserInfo.getString(mPrefUserFacebookID, "");
-		String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
-		String birth = sharedPrefsUserInfo.getString(mPrefUserFacebookBirth, "");
-		String gender = sharedPrefsUserInfo.getString(mPrefUserFacebookGender, "");
-		String location = sharedPrefsUserInfo.getString(mPrefUserFacebookLocation, "");
-		String email = sharedPrefsUserInfo.getString(mPrefUserFacebookEmail, "");
-		String uName = sharedPrefsUserInfo.getString(mPrefUserFacebookName, "");
-		if (uName.equals(""))
-			uName = username.getText().toString();
-		sharedPrefsUserInfo.edit().putString(mPrefUserUsername, uName).commit();
+		if (getActivity() != null) {
+			SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+			String regID = GCMHelper.getRegistrationId(getActivity().getApplicationContext());
+			String userID = sharedPrefsUserInfo.getString(mPrefUserUserID, "");
+			String faceID = sharedPrefsUserInfo.getString(mPrefUserFacebookID, "");
+			String referrer = sharedPrefsUserInfo.getString(mPrefUserReferrer, "");
+			String birth = sharedPrefsUserInfo.getString(mPrefUserFacebookBirth, "");
+			String gender = sharedPrefsUserInfo.getString(mPrefUserFacebookGender, "");
+			String location = sharedPrefsUserInfo.getString(mPrefUserFacebookLocation, "");
+			String email = sharedPrefsUserInfo.getString(mPrefUserFacebookEmail, "");
+			String uName = sharedPrefsUserInfo.getString(mPrefUserFacebookName, "");
+			if (uName.equals(""))
+				uName = username.getText().toString();
+			sharedPrefsUserInfo.edit().putString(mPrefUserUsername, uName).commit();
 
-		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		View focus = getActivity().getCurrentFocus();
-		if (imm != null && focus != null) {
-			imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-		}
-		if (login.isEnabled() && !regID.equals(""))
-			attemptLogin(uName, regID, userID, referrer, birth, gender, location, email, faceID);
-		else
+			InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			View focus = getActivity().getCurrentFocus();
+			if (imm != null && focus != null) {
+				imm.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			}
+			if (login.isEnabled() && !regID.equals(""))
+				attemptLogin(uName, regID, userID, referrer, birth, gender, location, email, faceID);
+			else
+				startMainActivity();
+		} else {
 			startMainActivity();
-
+		}
 		startAnimationProgress();
 	}
 
@@ -278,7 +281,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				Loggy.d("test", "success=" + getSuccess());
 				Loggy.d("test", "error=" + getError());
 				if (result == 0) {
-					SharedPreferences prefsGA = getActivity().getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
+					SharedPreferences prefsGA = getActivity().getSharedPreferences(CustomInstallReceiver.PREFS_GA, Context.MODE_PRIVATE);
 					prefsGA.edit().putBoolean("reg_uploaded", true).commit();
 					startMainActivity();
 				} else if (result == 1) {
@@ -413,10 +416,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void startMainActivity() {
-		SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
-		editUserInfo.putBoolean(mPrefUserLoggedIn, true).commit();
-
-		mCallback.restart();
+		if (getActivity() != null) {
+			SharedPreferences sharedPrefsUserInfo = getActivity().getSharedPreferences(mPrefUserInfo, Context.MODE_PRIVATE);
+			SharedPreferences.Editor editUserInfo = sharedPrefsUserInfo.edit();
+			editUserInfo.putBoolean(mPrefUserLoggedIn, true).commit();
+		}
+		if (mCallback != null) {
+			mCallback.restart();
+		}
 	}
 }

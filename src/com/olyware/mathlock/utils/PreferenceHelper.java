@@ -374,8 +374,12 @@ public class PreferenceHelper {
 		View content = act.getWindow().findViewById(Window.ID_ANDROID_CONTENT);
 		int w = content.getWidth();
 		int h = content.getHeight();
+		int y = (int) content.getY();
+		Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " |y = " + y);
 		if (w > 0 && h > 0) {
 			int statusBarHeight = sizeY - h;
+			if (y >= 0 && y != statusBarHeight)
+				statusBarHeight = y;
 			Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " | statusBarHeight = "
 					+ statusBarHeight);
 			editPrefsLayout.putInt(LAYOUT_STATUSBAR_HEIGHT, statusBarHeight);
@@ -387,7 +391,8 @@ public class PreferenceHelper {
 
 	public static void storeLayoutParams(Context ctx, int width, int height, int statusBarHeight) {
 		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(LAYOUT_PREFS, Context.MODE_PRIVATE);
-		sharedPrefsLayout.edit().putInt(LAYOUT_WIDTH, width).putInt(LAYOUT_HEIGHT, height).putInt(LAYOUT_STATUSBAR_HEIGHT, statusBarHeight).commit();
+		sharedPrefsLayout.edit().putInt(LAYOUT_WIDTH, width).putInt(LAYOUT_HEIGHT, height).putInt(LAYOUT_STATUSBAR_HEIGHT, statusBarHeight)
+				.commit();
 	}
 
 	public static int getLayoutWidth(Context ctx, int defaultValue) {

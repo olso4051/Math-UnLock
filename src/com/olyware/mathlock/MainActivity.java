@@ -933,31 +933,29 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			int width = w;
 			int height = h - statusBarHeight;
 
-			if (x > bitmap.getWidth())
-				x = bitmap.getWidth();
 			if (x < 0)
 				x = 0;
+			if (width > bitmap.getWidth())
+				width = bitmap.getWidth();
 			if (x + width > bitmap.getWidth())
 				width = bitmap.getWidth() - x;
-			if (width <= 0)
-				width = 1;
-			if (y > bitmap.getHeight())
-				y = bitmap.getHeight();
+
 			if (y < 0)
 				y = 0;
+			if (height > bitmap.getHeight())
+				height = bitmap.getHeight();
 			if (y + height > bitmap.getHeight())
 				height = bitmap.getHeight() - y;
-			if (height <= 0)
-				height = 1;
 
 			Loggy.d("bw = " + bitmap.getWidth() + " |bh = " + bitmap.getHeight());
 			Loggy.d("x = " + x + " |y = " + y + " |width = " + width + " |height = " + height);
-			if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0) {
+			if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0 && x + width > 0
+					&& x + width < bitmap.getWidth() && y + height > 0 && y + height < bitmap.getHeight()) {
 				// scale the bitmap to fit on the background
 				bitmap = Bitmap.createBitmap(bitmap, x, y, width, height);
 			} else {
 				// Should never happen but user reported y>bitmap.getHeight so here it is and x<0
-				bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
+				return getDimOrGradient(dimOrGradient);
 			}
 
 			if (!bitmap.isMutable()) {
@@ -966,7 +964,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (!bitmap.isMutable()) {
 					// TODO return a default background maybe I don't know
 					Loggy.d("bitmap still not mutable don't try to dim screen");
-					return bitmap;
+					return getDimOrGradient(dimOrGradient);
 				}
 			}
 
@@ -986,7 +984,26 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			return bitmap;
 		}
-		return null;
+		return getDimOrGradient(dimOrGradient);
+	}
+
+	private Bitmap getDimOrGradient(boolean dimOrGradient) {
+		int h = 1000;
+		Bitmap b = Bitmap.createBitmap(1, h, Bitmap.Config.ALPHA_8);
+		Rect dstRectForOpt = new Rect();
+		dstRectForOpt.set(0, 0, b.getWidth(), b.getHeight());
+
+		Canvas canvas = new Canvas(b);
+		Paint optPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		if (dimOrGradient) {
+			canvas.drawARGB(150, 0, 0, 0);
+		} else {
+			optPaint.setShader(new LinearGradient(0, 0, 0, h, new int[] { Color.argb(150, 0, 0, 0), Color.argb(150, 0, 0, 0),
+					Color.argb(0, 0, 0, 0) }, new float[] { 0, 0.3f, 1 }, TileMode.MIRROR));
+			canvas.drawRect(dstRectForOpt, optPaint);
+		}
+		return b;
+
 	}
 
 	/*private void showWallpaper() {
@@ -1889,12 +1906,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				challengeNewDialog.setCancelable(true);
 				challengeNewDialog.setChallengeDialogListener(new OnAcceptOrDeclineListener() {
 					@Override
-					public void onClick(boolean wait) {
+					public void onClick(ChallengeNewDialog.ClickType type) {
 						challengeNewDialog.dismiss();
-						if (wait) {
-							// redisplay the list of friends
-							displayFriends();
-						} else {
+						if (type == ChallengeNewDialog.ClickType.Positive) {
+							// do nothing return to main screen
+						} else if (type == ChallengeNewDialog.ClickType.Nuetral) {
+						} else if (type == ChallengeNewDialog.ClickType.Negative) {
 							new CancelChallenge(MainActivity.this, challengeID, hiqUserID, ContactHelper.getUserID(MainActivity.this))
 									.execute();
 							String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
@@ -1915,9 +1932,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				challengeNewDialog.setCancelable(true);
 				challengeNewDialog.setChallengeDialogListener(new OnAcceptOrDeclineListener() {
 					@Override
-					public void onClick(boolean accepted) {
+					public void onClick(ChallengeNewDialog.ClickType type) {
 						challengeNewDialog.dismiss();
-						if (accepted) {
+						if (type == ChallengeNewDialog.ClickType.Positive) {
 							new AcceptChallenge(MainActivity.this, challengeID, true) {
 								@Override
 								protected void onPostExecute(Integer result) {
@@ -1936,8 +1953,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 									}
 								}
 							}.execute();
-						} else {
-							displayFriends();
+						} else if (type == ChallengeNewDialog.ClickType.Nuetral) {
+						} else if (type == ChallengeNewDialog.ClickType.Negative) {
 							new AcceptChallenge(MainActivity.this, challengeID, false) {
 								@Override
 								protected void onPostExecute(Integer result) {
@@ -2163,26 +2180,38 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@SuppressLint("NewApi")
 	private Bitmap takeScreenShot() {
 		View view = this.getWindow().getDecorView();
+		int layerTypeOld = -1;
+		if (android.os.Build.VERSION.SDK_INT >= 11) {
+			if (view.getLayerType() == View.LAYER_TYPE_HARDWARE) {
+				layerTypeOld = View.LAYER_TYPE_HARDWARE;
+				view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+			}
+		}
 		view.setDrawingCacheEnabled(true);
 		view.buildDrawingCache();
 		Bitmap b1 = view.getDrawingCache();
-
-		int cH = clockTextView.getHeight();
-		int statusBarHeight = 0;
-		if (layout.getHeight() > 0 && layout.getHeight() < b1.getHeight()) {
-			statusBarHeight += b1.getHeight() - layout.getHeight();
+		if (b1 == null) {
+			return getWallpaperImage(true);
+		} else {
+			int cH = clockTextView.getHeight();
+			int statusBarHeight = PreferenceHelper.getLayoutStatusBarHeight(this, -1);
+			if (statusBarHeight == -1 && layout.getHeight() > 0 && layout.getHeight() < b1.getHeight()) {
+				statusBarHeight += b1.getHeight() - layout.getHeight();
+			}
 			statusBarHeight += cH;
-		}
 
-		int height = questionDescription.getHeight() + problem.getHeight();
-		int minHeight = (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO);
-		int maxHeight = b1.getHeight() - statusBarHeight;
-		height = (height < minHeight) ? minHeight : height;
-		height = (height > maxHeight) ? maxHeight : height;
-		Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), height);
-		// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), b1.getHeight() - statusBarHeight);
-		view.destroyDrawingCache();
-		return b;
+			int height = questionDescription.getHeight() + problem.getHeight();
+			int minHeight = (int) (b1.getWidth() / ShareHelper.FACEBOOK_LINK_RATIO);
+			int maxHeight = b1.getHeight() - statusBarHeight;
+			height = (height < minHeight) ? minHeight : height;
+			height = (height > maxHeight) ? maxHeight : height;
+			Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), height);
+			// Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, b1.getWidth(), b1.getHeight() - statusBarHeight);
+			if (layerTypeOld != -1)
+				view.setLayerType(layerTypeOld, null);
+			view.destroyDrawingCache();
+			return b;
+		}
 	}
 
 	@Override

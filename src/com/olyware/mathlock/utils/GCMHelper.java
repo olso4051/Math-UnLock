@@ -18,7 +18,7 @@ import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.ConfirmID;
 import com.olyware.mathlock.service.ConfirmID.ConfirmType;
-import com.olyware.mathlock.service.CustomGAReceiver;
+import com.olyware.mathlock.service.CustomInstallReceiver;
 import com.olyware.mathlock.service.RegisterID;
 
 public class GCMHelper {
@@ -39,7 +39,7 @@ public class GCMHelper {
 				throw new ClassCastException(act.toString() + " must implement GCMResponse");
 			}
 			regID = getRegistrationId(app);
-			SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
+			SharedPreferences prefsGA = act.getSharedPreferences(CustomInstallReceiver.PREFS_GA, Context.MODE_PRIVATE);
 			String userID = ContactHelper.getUserID(act);
 			if (regID.equals("")) {
 				SharedPreferences.Editor editorGA = prefsGA.edit();
@@ -64,7 +64,7 @@ public class GCMHelper {
 			throw new ClassCastException(act.toString() + " must implement GCMResponse");
 		}
 		if (checkPlayServices(act)) {
-			SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
+			SharedPreferences prefsGA = act.getSharedPreferences(CustomInstallReceiver.PREFS_GA, Context.MODE_PRIVATE);
 			regID = getRegistrationId(app);
 			Loggy.d("GAtest", "regID = " + regID);
 			if (regID.equals("")) {
@@ -184,7 +184,7 @@ public class GCMHelper {
 			@Override
 			protected void onPostExecute(Integer result) {
 				if (result == 0) {
-					SharedPreferences prefsGA = act.getSharedPreferences(CustomGAReceiver.PREFS_GA, Context.MODE_PRIVATE);
+					SharedPreferences prefsGA = act.getSharedPreferences(CustomInstallReceiver.PREFS_GA, Context.MODE_PRIVATE);
 					prefsGA.edit().putBoolean("reg_uploaded", true).commit();
 				}
 			}

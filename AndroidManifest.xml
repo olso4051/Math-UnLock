@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.olyware.mathlock"
-    android:versionCode="27"
-    android:versionName="2.5.1" >
+    android:versionCode="28"
+    android:versionName="2.5.2" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -129,7 +129,7 @@
 		
 		<!-- Used for Google Play Store Campaign Measurement-->;
 		<service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
-		<receiver android:name="com.olyware.mathlock.service.CustomGAReceiver"
+		<receiver android:name="com.olyware.mathlock.service.CustomInstallReceiver"
 		    android:exported="true" >
 			<intent-filter>
 				<action android:name="com.android.vending.INSTALL_REFERRER" />

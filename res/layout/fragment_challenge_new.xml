@@ -87,18 +87,25 @@
 		android:orientation="horizontal" >
         
 	    <Button
-	        android:id="@+id/challenge_new_button_accept"
+	        android:id="@+id/challenge_new_button_positive"
 			style="@style/Dialog.Button"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-	        android:text="@string/fragment_challenge_new_accept" />
+	        android:text="@string/fragment_challenge_new_wait" />
 	    
-	    <Button
-	        android:id="@+id/challenge_new_button_decline"
+	    <!-- <Button
+	        android:id="@+id/challenge_new_button_nuetral"
 			style="@style/Dialog.Button"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-	        android:text="@string/fragment_challenge_new_decline" />
+	        android:text="@string/fragment_challenge_new_accept" />-->
+	        
+	    <Button
+	        android:id="@+id/challenge_new_button_negative"
+			style="@style/Dialog.Button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+	        android:text="@string/fragment_challenge_new_cancel" />
 	    
 	</LinearLayout>
     

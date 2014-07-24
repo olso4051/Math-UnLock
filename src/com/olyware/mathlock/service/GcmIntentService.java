@@ -35,6 +35,7 @@ public class GcmIntentService extends IntentService {
 	final private static String CHALLENGE_RESULT = "CHALLENGE_RESULT";
 	final private static String CHALLENGE_STATUS = "CHALLENGE_STATUS";
 	final private static String CHALLENGE_CANCEL = "CHALLENGE_CANCEL";
+	final private static String CHALLENGE_REMIND = "CHALLENGE_REMIND";
 
 	public GcmIntentService() {
 		super("GcmIntentService");
@@ -188,18 +189,21 @@ public class GcmIntentService extends IntentService {
 					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
 					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				} else if (type.equals(CHALLENGE_CANCEL)) {
-					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
-
+					/*String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
 					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
-					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
-					// try deleting with both id's
-					/*PreferenceHelper.removeChallengeID(this, challengeID, oHiqUserID);
-					PreferenceHelper.removeChallengeID(this, challengeID, cHiqUserID);*/
-
-					// delete the questions from the challenge database
-					/*DatabaseManager dbManager = new DatabaseManager(getApplicationContext());
-					dbManager.removeChallengeQuestions(challengeID);*/
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);*/
+				} else if (type.equals(CHALLENGE_REMIND)) {
+					/*String challengeID = getStringFromMessage(fullMessage, "challenge_id");
+					String userName = PreferenceHelper.getChallengeUserName(this, challengeID);
+					int questions = PreferenceHelper.getChallengeQuestions(this, challengeID);
+					int difficultyMin = PreferenceHelper.getChallengeDifficultyMin(this, challengeID);
+					int difficultyMax = PreferenceHelper.getChallengeDifficultyMax(this, challengeID);
+					int bet = PreferenceHelper.getChallengeBet(this, challengeID);
+					NotificationHelper notificationHelper = new NotificationHelper(this);
+					notificationHelper.sendChallengeNotification(challengeID, userName, questions, difficultyMin, difficultyMax, bet);
+					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);*/
 				}
 			}
 		}

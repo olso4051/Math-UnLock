@@ -18,6 +18,7 @@ import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.ShareHelper;
 
 public class ConfirmID extends AsyncTask<Void, Integer, Integer> {
 	final public static String AlreadyConfirmed = "User_id already validated.";
@@ -42,7 +43,7 @@ public class ConfirmID extends AsyncTask<Void, Integer, Integer> {
 			break;
 		case SHARE_HASH:
 			hashID = HASH_ID_SHARE;
-			baseURL = UploadImage.BASE_URL_DEELDAT;
+			baseURL = ShareHelper.DEELDAT_BASE_URL;
 			break;
 		default:
 			hashID = HASH_ID_USER;

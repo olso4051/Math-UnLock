@@ -19,8 +19,9 @@ import ch.boye.httpclientandroidlib.entity.mime.content.ByteArrayBody;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
+import com.olyware.mathlock.utils.ShareHelper;
+
 public class UploadImage extends AsyncTask<String, Integer, Integer> {
-	public final static String BASE_URL_DEELDAT = "http://deeldat.com/";
 	private final static String ENDPOINT = "share/fb";
 	private String success, hash, url, error;
 	private Bitmap image;
@@ -60,7 +61,7 @@ public class UploadImage extends AsyncTask<String, Integer, Integer> {
 	@Override
 	protected Integer doInBackground(String... s) {
 		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost postRequest = new HttpPost(BASE_URL_DEELDAT + ENDPOINT);
+		HttpPost postRequest = new HttpPost(ShareHelper.DEELDAT_BASE_URL + ENDPOINT);
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
