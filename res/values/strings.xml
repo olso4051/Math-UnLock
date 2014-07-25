@@ -5,6 +5,9 @@
     <string name="facebook_app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
     
+    <!-- General Strings -->
+    <string name="or">OR</string>
+    
     <!-- Coming Soon -->
     <string name="coming_soon_title">Challenge Your Friends</string>
     <string name="coming_soon_message">Short quiz challenges between friends will be coming soon in a future update.</string>
@@ -40,6 +43,7 @@
     <string name="challenge_status_failed">Failed to Respond to Challenge, Try Again Later</string>
     <string name="challenge_send_failed">Failed to Send Challenge. Try again Later</string>
     <string name="challenge_send_success">Challenge Sent, Waiting for Reply</string>
+    <string name="challenge_send_no_questions">Select at least 1 question pack</string>
     <string name="challenge_cancel_failed">Failed to Cancel Challenge. Try again Later</string>
     <string name="challenge_canceled">Challenge Canceled</string>
     
@@ -285,6 +289,8 @@
     
     <string name="info_coins_title">Thanks for your interest in buying coins!</string>
     <string name="info_coins_message">Unlock your first question pack before buying coins though. It\'s Free!</string>
+    <string name="info_iab_not_setup_title">In-App Billing</string>
+    <string name="info_iab_not_setup_message">The Google Play Store has not responded with the price for this item yet. If you have a data connection this shouldn\'t take more then a second.</string>
     <string name="info_title">Help and Info</string>
     <string name="info_title_first">Thanks for trying Hiq!</string>
     <string name="info_title_first_pack">First Pack is Unlocked!</string>

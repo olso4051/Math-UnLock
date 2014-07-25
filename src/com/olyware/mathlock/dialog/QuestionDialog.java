@@ -25,6 +25,7 @@ import com.olyware.mathlock.adapter.QuestionSelectData;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.PreferenceHelper;
+import com.olyware.mathlock.utils.Toaster;
 import com.olyware.mathlock.views.RangeSeekBar;
 import com.olyware.mathlock.views.RangeSeekBar.OnRangeSeekBarChangeListener;
 
@@ -35,6 +36,7 @@ public class QuestionDialog extends DialogFragment {
 	final public static String TAG = "fragment_question_select";
 	final private static int MAX_QUESTIONS = 5, MIN_QUESTIONS = 1, MIN_BET = 0, MIN_PROGRESS = 100;
 	private TextView betText, questionsText, difficultyMinText, difficultyMaxText;
+	private Button challenge, cancel;
 	private SeekBar seekBet, seekQuestions;
 	private RangeSeekBar seekDifficulty;
 	private ListView lv;
@@ -95,16 +97,16 @@ public class QuestionDialog extends DialogFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_question_select, container, false);
 
-		Bundle arg = getArguments();
-		betMax = arg.getInt("max_bet");
-		betPercent = arg.getFloat(PreferenceHelper.CHALLENGE_PREFS_BET_DEFAULT);
+		Bundle args = getArguments();
+		betMax = args.getInt("max_bet");
+		betPercent = args.getFloat(PreferenceHelper.CHALLENGE_PREFS_BET_DEFAULT);
 		betValue = (int) (betMax * betPercent);
 		betProgressMax = Math.max(betMax + MIN_BET, MIN_PROGRESS + MIN_BET);
-		questionsValue = arg.getInt(PreferenceHelper.CHALLENGE_PREFS_QUESTION_NUMBER);
+		questionsValue = args.getInt(PreferenceHelper.CHALLENGE_PREFS_QUESTION_NUMBER);
 		questionsProgressMax = Math.max(MIN_PROGRESS + MIN_QUESTIONS, MAX_QUESTIONS - MIN_QUESTIONS);
 		questionsPercent = ((float) (questionsValue - MIN_QUESTIONS)) / ((float) (MAX_QUESTIONS - MIN_BET));
-		difficultyMinValue = arg.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MIN);
-		difficultyMaxValue = arg.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MAX);
+		difficultyMinValue = args.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MIN);
+		difficultyMaxValue = args.getInt(PreferenceHelper.CHALLENGE_PREFS_DIFFICULTY_MAX);
 		difficultyMin = Difficulty.fromValueToString(difficultyMinValue);
 		difficultyMax = Difficulty.fromValueToString(difficultyMaxValue);
 
@@ -185,10 +187,10 @@ public class QuestionDialog extends DialogFragment {
 
 		// ListView Data
 		questionPackNames = new ArrayList<String>();
-		questionPackNames.addAll(arg.getStringArrayList("question_packs"));
+		questionPackNames.addAll(args.getStringArrayList("question_packs"));
 		questionPackIDs = new ArrayList<Integer>();
-		questionPackIDs.addAll(arg.getIntegerArrayList("question_pack_ids"));
-		questionPacksChecked = arg.getBooleanArray("questions_is_checked");
+		questionPackIDs.addAll(args.getIntegerArrayList("question_pack_ids"));
+		questionPacksChecked = args.getBooleanArray("questions_is_checked");
 		questionPacks = new ArrayList<QuestionSelectData>(questionPackNames.size());
 		for (int i = 0; i < questionPackNames.size(); i++) {
 			questionPacks.add(new QuestionSelectData(questionPackNames.get(i), questionPacksChecked[i], questionPackIDs.get(i)));
@@ -216,7 +218,7 @@ public class QuestionDialog extends DialogFragment {
 		});
 		setListViewHeightBasedOnChildren(lv, 6);
 
-		Button challenge = (Button) v.findViewById(R.id.question_select_button_challenge);
+		challenge = (Button) v.findViewById(R.id.question_select_button_challenge);
 		challenge.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -226,15 +228,20 @@ public class QuestionDialog extends DialogFragment {
 						selectedQuestionPacks.add(questionPack);
 					}
 				}
-				PreferenceHelper.storeChallengePacks(getActivity(), questionPacks);
-				PreferenceHelper.storeChallengeSettings(getActivity(), betPercent, questionsValue, difficultyMinValue, difficultyMaxValue);
-				builder.setQuestionSettings(betValue, questionsValue, difficultyMinValue, difficultyMaxValue);
-				builder.setSelectedQuestionPacks(selectedQuestionPacks);
-				listener.onChallenge(builder);
+				if (selectedQuestionPacks.size() > 0) {
+					PreferenceHelper.storeChallengePacks(getActivity(), questionPacks);
+					PreferenceHelper.storeChallengeSettings(getActivity(), betPercent, questionsValue, difficultyMinValue,
+							difficultyMaxValue);
+					builder.setQuestionSettings(betValue, questionsValue, difficultyMinValue, difficultyMaxValue);
+					builder.setSelectedQuestionPacks(selectedQuestionPacks);
+					listener.onChallenge(builder);
+				} else {
+					Toaster.toastChallengeNoPacksSelected(getActivity());
+				}
 			}
 
 		});
-		Button cancel = (Button) v.findViewById(R.id.question_select_button_cancel);
+		cancel = (Button) v.findViewById(R.id.question_select_button_cancel);
 		cancel.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

@@ -42,7 +42,7 @@ public class ShowStoreActivity extends Activity {
 	// private Button custom;
 	private String[] unlockPackageKeys, PackageKeys, packageInfo, EggKeys;
 	private int[] unlockCost, EggMaxValues;
-	private boolean firstPack;
+	private boolean firstPack, iabFinishedSetup;
 	private Drawable price;
 
 	private SharedPreferences sharedPrefsMoney;
@@ -70,13 +70,12 @@ public class ShowStoreActivity extends Activity {
 		costSmall = (TextView) findViewById(R.id.cost_small);
 		costLarge = (TextView) findViewById(R.id.cost_large);
 		costAll = (TextView) findViewById(R.id.cost_all);
+		iabFinishedSetup = false;
 		buttonCoins1 = (Button) findViewById(R.id.extra_coins1);
 		buttonCoins1.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				purchaseCoins(ShowStoreActivity.this, SKU[0], Cost[0] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[0], Cost[0] + 1,
-				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
 		});
 		buttonCoins2 = (Button) findViewById(R.id.extra_coins2);
@@ -84,8 +83,6 @@ public class ShowStoreActivity extends Activity {
 			public void onClick(View v) {
 				purchaseCoins(ShowStoreActivity.this, SKU[1], Cost[1] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[1], Cost[1] + 1,
-				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
 		});
 		buttonCoins3 = (Button) findViewById(R.id.extra_coins3);
@@ -93,8 +90,6 @@ public class ShowStoreActivity extends Activity {
 			public void onClick(View v) {
 				purchaseCoins(ShowStoreActivity.this, SKU[2], Cost[2] + 1, mPurchaseFinishedListener,
 						"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
-				// mHelper.launchPurchaseFlow(ShowStoreActivity.this, SKU[2], Cost[2] + 1,
-				// mPurchaseFinishedListener,"jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:");
 			}
 		});
 
@@ -124,10 +119,13 @@ public class ShowStoreActivity extends Activity {
 		// provisioned to the user
 		mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
 			public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+				Loggy.d("IAB query finished");
 				if (result.isFailure()) {
 					// handle error
 				} else {
 					// update UI
+					iabFinishedSetup = true;
+					Loggy.d("IAB finished setup = " + iabFinishedSetup);
 					costSmall.setText(inventory.getSkuDetails(SKU[0]).getPrice());
 					costLarge.setText(inventory.getSkuDetails(SKU[1]).getPrice());
 					costAll.setText(inventory.getSkuDetails(SKU[2]).getPrice());
@@ -296,6 +294,16 @@ public class ShowStoreActivity extends Activity {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getString(R.string.info_coins_title)).setCancelable(false);
 			builder.setMessage(getString(R.string.info_coins_message));
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.cancel();
+				}
+			});
+			builder.create().show();
+		} else if (!iabFinishedSetup) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.info_iab_not_setup_title)).setCancelable(false);
+			builder.setMessage(getString(R.string.info_iab_not_setup_message));
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();

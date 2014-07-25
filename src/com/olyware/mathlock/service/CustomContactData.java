@@ -3,7 +3,11 @@ package com.olyware.mathlock.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Typeface;
+
+import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.ContactHelper;
 
 public class CustomContactData implements Comparable<CustomContactData> {
@@ -23,23 +27,27 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		final private static int DefaultImage = 0;
 		final private static int DefaultColor = R.color.lv_txt;
 		private int value, imageResID, textColorID;
+		private Typefaces fonts;
 
 		ChallengeState() {
 			this.value = DefaultValue;
 			this.imageResID = DefaultImage;
 			this.textColorID = DefaultColor;
+			fonts = Typefaces.getInstance(MainActivity.getContext());
 		}
 
 		ChallengeState(int value) {
 			this.value = value;
 			this.imageResID = DefaultImage;
 			this.textColorID = DefaultColor;
+			fonts = Typefaces.getInstance(MainActivity.getContext());
 		}
 
 		ChallengeState(int value, int imageResource, int textColor) {
 			this.value = value;
 			this.imageResID = imageResource;
 			this.textColorID = textColor;
+			fonts = Typefaces.getInstance(MainActivity.getContext());
 		}
 
 		public int getValue() {
@@ -76,6 +84,18 @@ public class CustomContactData implements Comparable<CustomContactData> {
 				return R.drawable.challenge_create_button;
 			default:
 				return 0;
+			}
+		}
+
+		public Typeface getTextTypeface() {
+			switch (value) {
+			case 0:
+			case 2:
+				return fonts.robotoMedium;
+			case 1:
+			case 3:
+			default:
+				return fonts.robotoLight;
 			}
 		}
 
@@ -420,6 +440,10 @@ public class CustomContactData implements Comparable<CustomContactData> {
 
 	public int getStateTextBackgroundResID() {
 		return state.getStateTextBackgroundResID();
+	}
+
+	public Typeface getTextTypeface() {
+		return state.getTextTypeface();
 	}
 
 	public CustomContactData.ChallengeState getState() {

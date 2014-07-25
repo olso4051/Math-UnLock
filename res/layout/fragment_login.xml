@@ -52,7 +52,7 @@
 		            android:paddingRight="@dimen/login_horizontal_margin_half"
 		            android:textColor="@color/grey"
 	            	android:textSize="@dimen/text_size_large"
-		            android:text="OR" />
+		            android:text="@string/or" />
 			
 		        <View
 		            android:layout_width="0dp"
@@ -98,7 +98,7 @@
 		            android:text="@string/fragment_login_button_skip_text" />
 			
 			</LinearLayout>
-		
+			
 	        <TextView
 	            android:id="@+id/fragment_login_text_disclaimer"
 	            style="@style/SpanningView"
