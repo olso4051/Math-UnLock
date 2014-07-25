@@ -17,6 +17,7 @@ import android.view.Window;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.QuestionSelectData;
 import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.service.CustomContactData;
 
 public class PreferenceHelper {
@@ -24,6 +25,9 @@ public class PreferenceHelper {
 	final public static String CHALLENGE_PREFS = "Challenge";
 	final public static String USER_PREFS = "user_info";
 	final public static String LAYOUT_PREFS = "Layout_Size";
+	final public static String TUTORIAL_PREFS = "Tutorial";
+
+	final public static String TUTORIAL_QUESTION = "tutrial_question";
 
 	final public static String LAYOUT_WIDTH = "layout_width";
 	final public static String LAYOUT_HEIGHT = "layout_height";
@@ -412,5 +416,35 @@ public class PreferenceHelper {
 			sh = (int) Math.ceil(25 * ctx.getResources().getDisplayMetrics().density);
 		}
 		return sh;
+	}
+
+	public static void setTutorialQuestion(Context ctx, int question) {
+		SharedPreferences.Editor editPrefsLayout = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE).edit();
+		if (question < 0) {
+			question = 0;
+		}
+		editPrefsLayout.putInt(TUTORIAL_QUESTION, question).commit();
+	}
+
+	public static int getTutorialQuestionNumber(Context ctx) {
+		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsLayout.getInt(TUTORIAL_QUESTION, 0);
+	}
+
+	public static GenericQuestion getTutorialQuestion(Context ctx) {
+		int question = getTutorialQuestionNumber(ctx);
+		String[] questions = ctx.getResources().getStringArray(R.array.tutorial_questions);
+		if (question < questions.length) {
+			String[] subQuestions = ctx.getResources().getStringArray(R.array.tutorial_sub_questions);
+			int answerID = ctx.getResources().getIdentifier("tutorial_answers" + (question + 1), "array", ctx.getPackageName());
+			String[] answers = ctx.getResources().getStringArray(answerID);
+			String subQuestion = "<font color='" + String.format("#%06X", (0xFFFFFF & ctx.getResources().getColor(R.color.grey_on_dark)))
+					+ "'>" + subQuestions[question] + "</font>";
+			String questionText = questions[question] + subQuestion;
+			return new GenericQuestion("tutorial", questionText, answers);
+			// textView.setText(Html.fromHtml(text), TextView.BufferType.SPANNABLE);
+		} else {
+			return null;
+		}
 	}
 }

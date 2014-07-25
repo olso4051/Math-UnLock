@@ -252,12 +252,16 @@ public class ContactHelper {
 				// Search contacts facebook hashes
 				for (int location = 0; location < searches.size(); location++) {
 					String search = searches.get(location).getFacebookHash();
-					if (contact.getFacebookHash() != null && contact.getFacebookHash().equals(search)) {
-						// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
-						Loggy.d("test", "sending facebook friend to listener");
-						listener.onFriendContactFound(i, location);
-						found = true;
-						break;
+					String facebookHash = contact.getFacebookHash();
+					if (facebookHash != null && search != null) {
+						if (!facebookHash.equals("") && !search.equals("") && facebookHash.equals(search)) {
+							Loggy.d("contact facebook = " + contact.getFacebookHash() + " |search = " + search);
+							// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
+							Loggy.d("test", "sending facebook friend to listener");
+							listener.onFriendContactFound(i, location);
+							found = true;
+							break;
+						}
 					}
 				}
 
@@ -268,12 +272,14 @@ public class ContactHelper {
 					for (String phoneHash : phoneHashes) {
 						for (int location = 0; location < searches.size(); location++) {
 							String search = searches.get(location).getPhoneHash();
-							if (phoneHash != null && phoneHash.equals(search)) {
-								// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
-								Loggy.d("test", "sending contacts friend to listener");
-								listener.onFriendContactFound(i, location);
-								found = true;
-								break;
+							if (phoneHash != null && search != null) {
+								if (!phoneHash.equals("") && !search.equals("") && phoneHash.equals(search)) {
+									// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
+									Loggy.d("test", "sending contacts friend to listener");
+									listener.onFriendContactFound(i, location);
+									found = true;
+									break;
+								}
 							}
 						}
 						if (found)

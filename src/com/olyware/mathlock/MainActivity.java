@@ -122,7 +122,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int dMoney;// change in money after a question is answered
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
-	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false;
+	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false,
+			fromTutorial = false;
 
 	private LinearLayout layout;
 	private Clock clock;
@@ -1084,7 +1085,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void setProblemAndAnswer() {
-		if (fromDeepLink) {
+		/*GenericQuestion tutorialQuestion = PreferenceHelper.getTutorialQuestion(this);
+		fromTutorial = false;
+		if (tutorialQuestion != null) {
+			fromTutorial = true;
+			joystick.setProblem(true);
+			questionWorth = 0;
+			questionWorthMax = 0;
+			joystick.resetGuess();
+			joystick.unPauseSelection();
+			problem.setText(Html.fromHtml(tutorialQuestion.getQuestion()), TextView.BufferType.SPANNABLE);
+			problem.setTextColor(defaultTextColor);
+
+			questionDescription.setText(tutorialQuestion.getDescription());
+			answers = tutorialQuestion.getAnswers();
+			setRandomAnswers();
+			joystick.setAnswers(answersRandom, answerLoc);
+			resetQuestionWorth(questionWorthMax);
+		} else */if (fromDeepLink) {
 			joystick.setProblem(true);
 			questionWorth = 0;
 			questionWorthMax = 0;

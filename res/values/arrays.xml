@@ -4,6 +4,45 @@
         <item name="dont_show">Don\'t ask me again</item>
     </string-array>
     
+    <string-array name="tutorial_questions">
+        <item name="tutorial_a1">Press The Lock (1/4)</item>
+        <item name="tutorial_b1">Press AND Hold The Lock (1/4)</item>
+        <item name="tutorial_2">Double Tap The Lock (2/4)</item>
+        <item name="tutorial_3">Challenge Your Friends (3/4)</item>
+        <item name="tutorial_4">Change Settings at any time (4/4)</item>
+    </string-array>
+    <string-array name="tutorial_sub_questions">
+        <item name="tutorial_a1"></item>
+        <item name="tutorial_b1">pressing the lock reveals the answers</item>
+        <item name="tutorial_2">reveals the correct answer\n+ add your favorite apps</item>
+        <item name="tutorial_3"></item>
+        <item name="tutorial_4"></item>
+    </string-array>
+    <string-array name="tutorial_answers1">
+        <item name="answer_1">Slide Here</item>
+        <item name="answer_2">X</item>
+        <item name="answer_3">X</item>
+        <item name="answer_4">X</item>
+    </string-array>
+    <string-array name="tutorial_answers2">
+        <item name="answer_1">Quick Answer</item>
+        <item name="answer_2">X</item>
+        <item name="answer_3">X</item>
+        <item name="answer_4">X</item>
+    </string-array>
+    <string-array name="tutorial_answers3">
+        <item name="answer_1"></item>
+        <item name="answer_2"></item>
+        <item name="answer_3"></item>
+        <item name="answer_4"></item>
+    </string-array>
+    <string-array name="tutorial_answers4">
+        <item name="answer_1"></item>
+        <item name="answer_2"></item>
+        <item name="answer_3"></item>
+        <item name="answer_4"></item>
+    </string-array>
+    
     <string-array name="difficulty_entries">
         <item name="very_easy">Very Easy</item>
         <item name="easy">Easy</item>
