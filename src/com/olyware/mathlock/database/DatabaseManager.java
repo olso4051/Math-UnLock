@@ -67,6 +67,10 @@ public class DatabaseManager {
 			return true;
 	}
 
+	public static String unescape(String description) {
+		return description.replaceAll("\\\\n", "\\\n");
+	}
+
 	public double getPriority(int table, String fromLanguage, String toLanguage, Difficulty minDifficulty, Difficulty maxDifficulty,
 			long notID) {
 		if (db.isOpen()) {

@@ -42,8 +42,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		public void restart();
 	}
 
-	public static List<String> PERMISSIONS = Arrays
-			.asList("email", "public_profile", "user_friends"/*, "user_birthday", "user_location"*/);
+	public static List<String> PERMISSIONS = Arrays.asList("email", "public_profile", "user_friends");
 
 	private String mPrefUserInfo, mPrefUserUsername, mPrefUserUserID, mPrefUserReferrer, mPrefUserLoggedIn, mPrefUserSkipped,
 			mPrefUserFacebookID, mPrefUserFacebookName, mPrefUserFacebookBirth, mPrefUserFacebookGender, mPrefUserFacebookLocation,
@@ -119,6 +118,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
 		authButton.setOnClickListener(this);
 		authButton.setFragment(this);
+		authButton.setReadPermissions(PERMISSIONS);
 
 		if (getArguments().getBoolean("facebook_logout")) {
 			Loggy.d("test", "facebook_logout");

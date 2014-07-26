@@ -365,6 +365,7 @@ public class PreferenceHelper {
 		SharedPreferences.Editor editPrefsLayout = sharedPrefsLayout.edit();
 		Display display = act.getWindowManager().getDefaultDisplay();
 		int sizeY, sizeX;
+		int y = 0;
 		if (android.os.Build.VERSION.SDK_INT < 13) {
 			sizeY = display.getHeight();
 			sizeX = display.getWidth();
@@ -378,7 +379,8 @@ public class PreferenceHelper {
 		View content = act.getWindow().findViewById(Window.ID_ANDROID_CONTENT);
 		int w = content.getWidth();
 		int h = content.getHeight();
-		int y = (int) content.getY();
+		if (android.os.Build.VERSION.SDK_INT >= 11)
+			y = (int) content.getY();
 		Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " |y = " + y);
 		if (w > 0 && h > 0) {
 			int statusBarHeight = sizeY - h;

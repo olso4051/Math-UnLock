@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.Loggy;
 
 public class EquationView extends AutoResizeTextView {
 
@@ -91,6 +92,7 @@ public class EquationView extends AutoResizeTextView {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
+		Loggy.d("layout changed(" + changed + ")left(" + left + ")top(" + top + ")right(" + right + ")bottom(" + bottom + ")");
 		if (layout != null) {
 			layout.setBounds(getTextAreaWidth(), getTextAreaHeight());
 			invalidate();

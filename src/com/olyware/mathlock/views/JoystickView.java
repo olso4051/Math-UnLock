@@ -193,7 +193,9 @@ public class JoystickView extends View {
 		this.ctx = ctx;
 		setFocusable(true);
 		Width = getMeasuredWidth();
+		Loggy.d("joystick", "initView oldHeight = " + Height);
 		Height = getMeasuredHeight();
+		Loggy.d("joystick", "initView Height = " + Height);
 		res = getResources();
 		numberOfChallenges = 0;
 
@@ -352,13 +354,17 @@ public class JoystickView extends View {
 		if (d.size() == apps.size()) {
 			isFirstApp = true;
 		}
-		icon.setBounds(-icon.getIntrinsicWidth() / 2, -icon.getIntrinsicHeight() / 2, icon.getIntrinsicWidth() / 2,
-				icon.getIntrinsicHeight() / 2);
-		d.add(d.size() - 1, icon);
-		invalidate();
+		if (d.size() <= apps.size()) {
+			icon.setBounds(-icon.getIntrinsicWidth() / 2, -icon.getIntrinsicHeight() / 2, icon.getIntrinsicWidth() / 2,
+					icon.getIntrinsicHeight() / 2);
+			Loggy.d("joystick", "add icon at " + (d.size() - 1));
+			d.add(d.size() - 1, icon);
+			invalidate();
+		}
 	}
 
 	public void removeApp(int loc) {
+		Loggy.d("joystick", "d.remove(" + loc + ")");
 		d.remove(loc);
 		if (isFirstApp) {
 			isFirstApp = false;
@@ -367,6 +373,7 @@ public class JoystickView extends View {
 	}
 
 	public void clearApps() {
+		Loggy.d("joystick", "d.clear() then add 2");
 		d.clear();
 		d.add(drawAdd);
 		d.add(drawTrash);
@@ -577,7 +584,9 @@ public class JoystickView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		Width = measure(widthMeasureSpec);
+		Loggy.d("joystick", "onMeasure oldHeight = " + Height);
 		Height = measure(heightMeasureSpec);
+		Loggy.d("joystick", "onMeasure Height = " + Height);
 
 		optionY = Height - radiusOfSettingsIcons;
 
@@ -611,7 +620,11 @@ public class JoystickView extends View {
 		if (specMode == MeasureSpec.UNSPECIFIED) {
 			// Return a default size of 480 if no bounds are specified.
 			result = 480;
+		} else if (specMode == MeasureSpec.AT_MOST) {
+			Loggy.d("measure at_most " + specSize);
+			result = specSize;
 		} else {
+			Loggy.d("measure exactly " + specSize);
 			// As you want to fill the available space
 			// always return the full available bounds.
 			result = specSize;
@@ -652,6 +665,8 @@ public class JoystickView extends View {
 			if (isFirstApp)
 				start = 1;
 			int end = d.size() - 1;
+			int end2 = Math.min(d.size() - 1, apps.size() - 1);
+			Loggy.d("joystick", "start(" + start + ")end(" + end + ")" + ")end2(" + end2 + ")");
 			for (int i = 1 - start; i < end - start; i++)
 				if (apps.get(i).getSelectDrag())
 					end++;
@@ -814,6 +829,7 @@ public class JoystickView extends View {
 
 	private void setAppCenters(boolean sel) {
 		appCenterVert = (barY - barHeight + drawBackBlue.getIntrinsicHeight() / 3) / 2;
+		Loggy.d("joystick", "barY(" + barY + ")barHeight(" + barHeight + ")blueHeight(" + (drawBackBlue.getIntrinsicHeight() / 3) + ")");
 		appCenterHorz = Width / 2;
 		int rApps = drawAdd.getIntrinsicHeight() / 2;
 		int rAppsY = appCenterVert - rApps - drawBackBlue.getIntrinsicHeight() / 3 - pad;
@@ -821,6 +837,11 @@ public class JoystickView extends View {
 		appAngle = Math.atan2(rApps * 3, Math.min(rAppsY, rAppsX));
 		int oldMaxApps = apps.size();
 		int maxApps = (int) Math.floor((3 * Math.PI / 2) / appAngle);
+		Loggy.d("joystick", "rApps(" + rApps + ")rAppsY(" + rAppsY + ")rAppsX(" + rAppsX + ")appAngle(" + appAngle + ")oldMaxApps("
+				+ oldMaxApps + ")maxApps(" + maxApps + ")");
+		if (maxApps < oldMaxApps) {
+			maxApps = oldMaxApps;
+		}
 		if (oldMaxApps < maxApps) {
 			apps.clear();
 			for (int i = 0; i < maxApps; i++) {
@@ -861,8 +882,6 @@ public class JoystickView extends View {
 		selectUnlock = false;
 		selectAppDrag = -1;
 
-		Loggy.d("test", "returnToDefault() - options = " + options);
-		Loggy.d("test", "returnToDefault() - selectSideBar = " + selectSideBar);
 		if (options)
 			showStartAnimation(0, 3000);
 		else if (selectSideBar)
@@ -1203,6 +1222,7 @@ public class JoystickView extends View {
 		float maxH = 0;
 		for (int i = 0; i < NumAnswers; i++) {
 			if (!equation[i]) {
+				Loggy.d("bounds(" + bounds[i].height() + ") layout(" + layout[i].getHeight() + ") answerSize(" + answerSizePix + ")");
 				maxH = Math.max(bounds[i].height(), layout[i].getHeight());
 				maxH = Math.max(maxH, answerSizePix);
 				if ((maxH > ((barY - barHeight) / 2 - pad * 3 - rUnlock)) && (Height > 0)) {
@@ -1266,8 +1286,13 @@ public class JoystickView extends View {
 
 	private boolean isLayoutSplittingWords(String string, StaticLayout layout) {
 		for (int line = 0; line < layout.getLineCount() - 1; line++) {
-			if (string.charAt(layout.getLineEnd(line) - 1) != ' ')
+			/*char before = string.charAt(layout.getLineEnd(line) - 1);
+			char middle = string.charAt(layout.getLineEnd(line));
+			char after = string.charAt(layout.getLineEnd(line) + 1);*/
+			if (string.charAt(layout.getLineEnd(line) - 1) != ' ' && string.charAt(layout.getLineEnd(line) - 1) != '\n') {
+				// Loggy.d(line + " | char before(" + before + ") middle(" + middle + ") after(" + after + ") | " + string);
 				return true;
+			}
 		}
 		return false;
 	}

@@ -1102,7 +1102,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			setRandomAnswers();
 			joystick.setAnswers(answersRandom, answerLoc);
 			resetQuestionWorth(questionWorthMax);
-		} else */if (fromDeepLink) {
+		} else*/if (fromDeepLink) {
 			joystick.setProblem(true);
 			questionWorth = 0;
 			questionWorthMax = 0;
@@ -1386,11 +1386,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		// Display the language question and answers
 		decreaseRate = questions.get(0).getQuestionText().length();
 		for (int i = 0; i < answers.length; i++) {
-			answers[i] = questions.get(i).getCorrectAnswer();
+			answers[i] = DatabaseManager.unescape(questions.get(i).getCorrectAnswer());
 			decreaseRate += answers[i].length();
 		}
 		decreaseRate = decreaseRate * 10;
-		problem.setText(questions.get(0).getQuestionText());
+		problem.setText(DatabaseManager.unescape(questions.get(0).getQuestionText()));
 		return true;
 	}
 
@@ -1543,6 +1543,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				|| s == JoystickSelect.Friends) {
 			PreferenceHelper.storeLayoutParams(this);
 		}
+		Loggy.d("joystick", "description = " + questionDescription.getHeight() + " |Clock = " + clockTextView.getHeight() + " |coins = "
+				+ coins.getHeight());
 		switch (s) {
 		case A:		// A was selected
 		case B:		// B was selected
