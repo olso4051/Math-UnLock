@@ -19,6 +19,7 @@ import com.olyware.mathlock.adapter.QuestionSelectData;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.service.CustomContactData;
+import com.olyware.mathlock.views.JoystickSelect;
 
 public class PreferenceHelper {
 	final public static String MONEY_PREFS = "Packages";
@@ -28,6 +29,7 @@ public class PreferenceHelper {
 	final public static String TUTORIAL_PREFS = "Tutorial";
 
 	final public static String TUTORIAL_QUESTION = "tutrial_question";
+	final public static String TUTORIAL_EXTENDED = "tutrial_extended";
 
 	final public static String LAYOUT_WIDTH = "layout_width";
 	final public static String LAYOUT_HEIGHT = "layout_height";
@@ -421,32 +423,63 @@ public class PreferenceHelper {
 	}
 
 	public static void setTutorialQuestion(Context ctx, int question) {
-		SharedPreferences.Editor editPrefsLayout = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE).edit();
+		SharedPreferences.Editor editPrefsTutorial = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE).edit();
 		if (question < 0) {
 			question = 0;
 		}
-		editPrefsLayout.putInt(TUTORIAL_QUESTION, question).commit();
+		editPrefsTutorial.putInt(TUTORIAL_QUESTION, question).commit();
+	}
+
+	public static void setTutorialDone(Context ctx) {
+		SharedPreferences.Editor editPrefsTutorial = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsTutorial.putInt(TUTORIAL_QUESTION, -1).commit();
 	}
 
 	public static int getTutorialQuestionNumber(Context ctx) {
 		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE);
-		return sharedPrefsLayout.getInt(TUTORIAL_QUESTION, 0);
+		int question = sharedPrefsLayout.getInt(TUTORIAL_QUESTION, 0);
+		boolean extendedTutorial = sharedPrefsLayout.getBoolean(TUTORIAL_EXTENDED, false);
+		if (question >= 0 && question <= 4)
+			return question;
+		else if (extendedTutorial)
+			return question;
+		else
+			return -1;
 	}
 
-	public static GenericQuestion getTutorialQuestion(Context ctx) {
-		int question = getTutorialQuestionNumber(ctx);
+	public static void resetTutorial(Context ctx) {
+		SharedPreferences.Editor editPrefsTutorial = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsTutorial.putInt(TUTORIAL_QUESTION, 0);
+		editPrefsTutorial.putBoolean(TUTORIAL_EXTENDED, true);
+		editPrefsTutorial.commit();
+	}
+
+	public static GenericQuestion getTutorialQuestion(Context ctx, int question) {
 		String[] questions = ctx.getResources().getStringArray(R.array.tutorial_questions);
-		if (question < questions.length) {
+		if (question >= 0 && question < questions.length) {
 			String[] subQuestions = ctx.getResources().getStringArray(R.array.tutorial_sub_questions);
-			int answerID = ctx.getResources().getIdentifier("tutorial_answers" + (question + 1), "array", ctx.getPackageName());
+			int answerID = ctx.getResources().getIdentifier("tutorial_answers_" + (question), "array", ctx.getPackageName());
 			String[] answers = ctx.getResources().getStringArray(answerID);
 			String subQuestion = "<font color='" + String.format("#%06X", (0xFFFFFF & ctx.getResources().getColor(R.color.grey_on_dark)))
 					+ "'>" + subQuestions[question] + "</font>";
-			String questionText = questions[question] + subQuestion;
+			String questionText = questions[question] + "\n" + subQuestion;
 			return new GenericQuestion("tutorial", questionText, answers);
 			// textView.setText(Html.fromHtml(text), TextView.BufferType.SPANNABLE);
 		} else {
 			return null;
 		}
+	}
+
+	public static void setLockscreenFrequency(Context ctx, JoystickSelect s) {
+		SharedPreferences.Editor editPrefs = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
+		if (s == JoystickSelect.A)
+			editPrefs.putString("lockscreen2", "0");
+		else if (s == JoystickSelect.B)
+			editPrefs.putString("lockscreen2", "5");
+		else if (s == JoystickSelect.B)
+			editPrefs.putString("lockscreen2", "6");
+		else if (s == JoystickSelect.B)
+			editPrefs.putString("lockscreen2", "7");
+		editPrefs.commit();
 	}
 }

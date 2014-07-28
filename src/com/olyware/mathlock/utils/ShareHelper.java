@@ -162,6 +162,9 @@ public class ShareHelper {
 							if (postId != null) {
 								Loggy.d("test", "Posted story, id: " + postId);
 								confirmShare(context);
+								String[] EggKeys = context.getResources().getStringArray(R.array.egg_keys);
+								int[] EggMaxValues = context.getResources().getIntArray(R.array.egg_max_values);
+								EggHelper.unlockEgg(context, EggKeys[8], EggMaxValues[8]);
 							} else {
 								// User clicked the Cancel button
 								Loggy.d("test", "Publish cancelled");

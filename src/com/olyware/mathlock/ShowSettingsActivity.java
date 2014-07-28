@@ -139,6 +139,21 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		});
 
 		// set info button to display info
+		Preference tutorialButton = (PreferenceScreen) findPreference("tutorial_button");
+		tutorialButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				PreferenceHelper.resetTutorial(ctx);
+				Intent mainIntent = new Intent(ctx, MainActivity.class);
+				mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(mainIntent);
+				finish();
+				return true;
+			}
+		});
+
+		// set info button to display info
 		Preference infoButton = (PreferenceScreen) findPreference("info_button");
 		infoButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			@Override

@@ -41,6 +41,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -143,7 +144,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink, challengeIDToDisplay;
 	private long ID = 0;
 
-	private int EnabledPackages = 0;
+	private int EnabledPackages = 0, fromTutorialPosition = -1;
 	private boolean loggedIn, info, challenge, locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false, isWallpaperShown = false;
 	final private long MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
@@ -486,6 +487,42 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 				@Override
 				public void OnSelect(JoystickSelect s, boolean vibrate, int Extra) {
+					switch (fromTutorialPosition) {
+					case 0:	// Press the Lock
+						if (s == JoystickSelect.A || s == JoystickSelect.B || s == JoystickSelect.C || s == JoystickSelect.D)
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 1);
+						break;
+					case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
+						if (s == JoystickSelect.QuickUnlock)
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 2);
+						break;
+					case 2: // Challenge your friends \n (slide the icon up)
+						if (s == JoystickSelect.Friends)
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 3);
+						break;
+					case 3: // Change Any Setting at any time \n (slide the icon up)
+						if (s == JoystickSelect.Settings)
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 4);
+						break;
+					case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
+						if (s == JoystickSelect.A || s == JoystickSelect.B || s == JoystickSelect.C || s == JoystickSelect.D) {
+							PreferenceHelper.setLockscreenFrequency(MainActivity.this, s);
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 5);
+						}
+						break;
+					case 5: // Quiz mode for endless questions (slide the icon up)
+						if (s == JoystickSelect.QuizMode)
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 6);
+						break;
+					case 6: // Check your progress (slide the icon up)
+						if (s == JoystickSelect.Progress)
+							PreferenceHelper.setTutorialQuestion(MainActivity.this, 7);
+						break;
+					case 7: // Unlock more question packs (slide the icon up)
+						if (s == JoystickSelect.Store)
+							PreferenceHelper.setTutorialDone(MainActivity.this);
+						break;
+					}
 					JoystickSelected(s, vibrate, Extra);
 				}
 			});
@@ -700,7 +737,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				displayRateShare();
 			else if (sharedPrefs.getBoolean("hints", true)) {
 				setProblemAndAnswer();
-				displayHints(0, false);
+				// displayHints(0, false);
 			}
 
 			// Backup preferences every day
@@ -818,6 +855,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					Loggy.d("test", "post ID = " + postID);
 					if (didFinishNormal && completionGesture.equals("post")) {
 						ShareHelper.confirmShare(MainActivity.this);
+						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
 					}
 				}
 			});
@@ -1085,7 +1123,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void setProblemAndAnswer() {
-		/*GenericQuestion tutorialQuestion = PreferenceHelper.getTutorialQuestion(this);
+		fromTutorialPosition = PreferenceHelper.getTutorialQuestionNumber(ctx);
+		GenericQuestion tutorialQuestion = PreferenceHelper.getTutorialQuestion(this, fromTutorialPosition);
 		fromTutorial = false;
 		if (tutorialQuestion != null) {
 			fromTutorial = true;
@@ -1094,15 +1133,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			questionWorthMax = 0;
 			joystick.resetGuess();
 			joystick.unPauseSelection();
+			joystick.setTutorial(fromTutorialPosition);
+
 			problem.setText(Html.fromHtml(tutorialQuestion.getQuestion()), TextView.BufferType.SPANNABLE);
 			problem.setTextColor(defaultTextColor);
 
 			questionDescription.setText(tutorialQuestion.getDescription());
 			answers = tutorialQuestion.getAnswers();
-			setRandomAnswers();
-			joystick.setAnswers(answersRandom, answerLoc);
+			answerLoc = 0;
+			joystick.setAnswers(answers, answerLoc);
 			resetQuestionWorth(questionWorthMax);
-		} else*/if (fromDeepLink) {
+		} else if (fromDeepLink) {
 			joystick.setProblem(true);
 			questionWorth = 0;
 			questionWorthMax = 0;
@@ -1628,7 +1669,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Missed:	// missed the lock button
 			if (getSharedPreferences("Stats", 0).getLong("totalTime", 0) == 0) {
-				displayHints(0, true);
+				// displayHints(0, true);
 			}
 			break;
 		case QuickUnlock:	// quickUnlock activated
@@ -1897,8 +1938,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										}
 										if (!success)
 											Toaster.sendChallengeFailed(MainActivity.this);
-										else
+										else {
 											Toaster.sendChallengeSuccess(MainActivity.this);
+											Money.increaseMoney(EggHelper
+													.unlockEgg(MainActivity.this, coins, EggKeys[17], EggMaxValues[17]));
+										}
 									}
 								}.execute();
 								success = true;
@@ -1963,10 +2007,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 												CustomContactData.ChallengeState.Active);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
 										setProblemAndAnswer();
+										quizMode = joystick.setQuizMode(!quizMode);
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
 										sendEvent("social", "challenge_accepted", encryptedUserID, (long) bet);
+										Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[18], EggMaxValues[18]));
 									} else {
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
 												.show();
@@ -2026,7 +2072,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						UnlockedPackages = isAnyPackageUnlocked();
 						EnabledPackages = getEnabledPackages();
 						setProblemAndAnswer();
-						displayHints(0, false);
+						// displayHints(0, false);
 					}
 				});
 			} else {
@@ -2054,7 +2100,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					public void onClick(DialogInterface dialog, int id) {
 						dialogOn = false;
 						ShareHelper.loginOrShareFacebook(ctx, uiHelper, progressDialog, ShareHelper.buildShareURL(ctx));
-						fromShare = true;
 					}
 				});
 			}
@@ -2116,7 +2161,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	}
 
-	private void displayHints(int hint, final boolean noMore) {
+	/*private void displayHints(int hint, final boolean noMore) {
 		if (!dialogOn) {
 			final int h = hint;
 			joystick.showHint(h);
@@ -2148,7 +2193,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				dialogOn = true;
 			}
 		}
-	}
+	}*/
 
 	private void provisionPendingMoney() {
 		if (Money != null) {

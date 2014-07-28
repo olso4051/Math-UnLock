@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -52,9 +53,10 @@ public class JoystickView extends View {
 	private Path optionPath, dstPathForSet;
 	private Paint settingsPaint, unlockPaint, transparentBlue;
 
-	private int barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP, Width, Height, dstHeight, spacing, rUnlock,
-			radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc, shareLoc, correctGuess, wrongGuess, selectAppDrag,
-			appCenterVert, appCenterHorz, answerAlpha = 0, pulseFrame = 0, numberOfChallenges;
+	private int optionPathCenterX, optionPathCenterY, tutorial, barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP,
+			Width, Height, dstHeight, spacing, rUnlock, radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc,
+			shareLoc, correctGuess, wrongGuess, selectAppDrag, appCenterVert, appCenterHorz, answerAlpha = 0, pulseFrame = 0,
+			numberOfChallenges;
 	private long tapTimer, lastTimeRevealOrHide = 0, startTimeRevealOrHide = 0, lastTimePulse = 0, startTimePulse = 0;
 	private float answerSizePix, optionX, optionY, appDragX = 0, appDragY = 0, strokeWidth;
 	private double touchX, touchY, startX, startY, appAngle;
@@ -198,6 +200,7 @@ public class JoystickView extends View {
 		Loggy.d("joystick", "initView Height = " + Height);
 		res = getResources();
 		numberOfChallenges = 0;
+		tutorial = 0;
 
 		textSizeSP = 20;
 		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, res.getDisplayMetrics());
@@ -393,8 +396,42 @@ public class JoystickView extends View {
 		return this.quizMode;
 	}
 
+	public void setTutorial(int tutorial) {
+		this.tutorial = tutorial;
+		switch (tutorial) {
+		case 0:	// Press the Lock
+			setSidePaths(Height - pad);
+			break;
+		case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
+			setSidePaths(Height - pad);
+			break;
+		case 2: // Challenge your friends \n (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		case 3: // Change Any Setting at any time \n (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
+			setSidePaths(Height - pad);
+			break;
+		case 5: // Quiz mode for endless questions (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		case 6: // Check your progress (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		case 7: // Unlock more question packs (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		default:
+			setSidePaths(Height - pad);
+			break;
+		}
+		invalidate();
+	}
+
 	public void showHint(int hint) {
-		showHint = true;
+		/*showHint = true;
 		if (bmpHand == null)
 			bmpHand = BitmapFactory.decodeResource(res, R.drawable.swipe_hand);
 		if (bmpArrow == null)
@@ -452,8 +489,32 @@ public class JoystickView extends View {
 
 		rotateArrow.reset();
 		rotateArrow.setTranslate(centerHorz - bmpArrow.getWidth() / 2, centerVert - bmpArrow.getHeight());
-		rotateArrow.postRotate(arrowRotation, centerHorz, centerVert);
+		rotateArrow.postRotate(arrowRotation, centerHorz, centerVert);*/
 
+		switch (hint) {
+		case 0:	// Press the Lock
+			break;
+		case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
+			break;
+		case 2: // Challenge your friends \n (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		case 3: // Change Any Setting at any time \n (slide the icon up)
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			break;
+		case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
+			break;
+		case 5: // Quiz mode for endless questions (slide the icon up)
+			break;
+		case 6: // Check your progress (slide the icon up)
+			break;
+		case 7: // Unlock more question packs (slide the icon up)
+			break;
+		default:
+			setSidePaths(Height - pad);
+			showHint = false;
+			break;
+		}
 		invalidate();
 	}
 
@@ -494,6 +555,7 @@ public class JoystickView extends View {
 	public void resetGuess() {
 		this.correctGuess = -1;
 		this.wrongGuess = -1;
+		this.tutorial = -1;
 	}
 
 	public void setAnswers(String answers[], int correctLoc) {
@@ -632,6 +694,7 @@ public class JoystickView extends View {
 		return result;
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onDraw(Canvas canvas) {
 		for (int i = 0; i < NumAnswers; i++) {
@@ -699,6 +762,8 @@ public class JoystickView extends View {
 				canvas.restore();
 			}
 		}
+
+		// Draw the lock
 		unlockPaint.setAlpha(255);
 		canvas.drawRoundRect(RectForUnlockPulse, (RectForUnlockPulse.right - RectForUnlockPulse.left) / 2f,
 				(RectForUnlockPulse.bottom - RectForUnlockPulse.top) / 2f, unlockPaint);
@@ -706,13 +771,31 @@ public class JoystickView extends View {
 
 		// Draw the option bar text hints
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
-			canvas.drawTextOnPath(res.getString(R.string.swipe_here), optionPath, 0, 0, optionPaintWhite);
-			for (int i = 0; i < selectOptions.length; i++) {
-				if (selectOptions[i]) {
-					int id = res.getIdentifier("option" + i, "string", ctx.getPackageName());
-					canvas.drawTextOnPath(res.getString(id), optionPath, 0, -optionPaintWhite.getTextSize(), optionPaintWhite);
+			boolean drawOnPath = true;
+			if (android.os.Build.VERSION.SDK_INT >= 11 && android.os.Build.VERSION.SDK_INT <= 16) {
+				if (canvas.isHardwareAccelerated()) {
+					drawOnPath = false;
 				}
 			}
+			if (drawOnPath) {
+				canvas.drawTextOnPath(res.getString(R.string.swipe_here), optionPath, 0, 0, optionPaintWhite);
+				for (int i = 0; i < selectOptions.length; i++) {
+					if (selectOptions[i]) {
+						int id = res.getIdentifier("option" + i, "string", ctx.getPackageName());
+						canvas.drawTextOnPath(res.getString(id), optionPath, 0, -optionPaintWhite.getTextSize(), optionPaintWhite);
+					}
+				}
+			} else {
+				canvas.drawText(res.getString(R.string.swipe_here), optionPathCenterX, optionPathCenterY, optionPaintWhite);
+				for (int i = 0; i < selectOptions.length; i++) {
+					if (selectOptions[i]) {
+						int id = res.getIdentifier("option" + i, "string", ctx.getPackageName());
+						canvas.drawText(res.getString(id), optionPathCenterX, optionPathCenterY - optionPaintWhite.getTextSize(),
+								optionPaintWhite);
+					}
+				}
+			}
+
 		}
 
 		// Draw the settings bar background
@@ -766,7 +849,7 @@ public class JoystickView extends View {
 					animateHandler.removeCallbacks(pulseLock);
 					touchX = startX;
 					touchY = startY;
-					if ((startX >= selectLeft[0]) && (startX <= selectRight[0])) {			// info selected
+					if ((startX >= selectLeft[0]) && (startX <= selectRight[0])) {			// friend selected
 						selectOptions[0] = true;
 						optionX = selectLeft[0] + radiusOfSettingsIcons;
 						setArc(180, 150);
@@ -985,8 +1068,9 @@ public class JoystickView extends View {
 					if (quickUnlock) {
 						if (select == correctLoc) {
 							selectAnswers[select] = true;
-							if (send)
+							if (send) {
 								listener.OnSelect(JoystickSelect.fromValue(select), true, -1);
+							}
 						} else {
 							double angle = Math.atan2(appCenterVert - newY, newX - appCenterHorz);
 							if (angle < 0)// because atan2 returns from -pi to pi, we want 0 to 2pi
@@ -1169,6 +1253,38 @@ public class JoystickView extends View {
 					int centerY = (int) (easingFunctionY[pulseFrame] + (barY - barHeight + centerOffset) / 2);
 					RectForUnlockPulse.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
 					RectForUnlock.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
+					switch (tutorial) {
+					case 2: // Challenge your friends \n (slide the icon up)
+						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[0] + selectRight[0]) / 2);
+						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForI.centerY());
+						dstRectForI.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
+								centerY + radiusOfSettingsIcons);
+						break;
+					case 3: // Change Any Setting at any time \n (slide the icon up)
+						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[4] + selectRight[4]) / 2);
+						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForS.centerY());
+						dstRectForS.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
+								centerY + radiusOfSettingsIcons);
+						break;
+					case 5: // Quiz mode for endless questions (slide the icon up)
+						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[3] + selectRight[3]) / 2);
+						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForQ.centerY());
+						dstRectForQ.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
+								centerY + radiusOfSettingsIcons);
+						break;
+					case 6: // Check your progress (slide the icon up)
+						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[2] + selectRight[2]) / 2);
+						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForP.centerY());
+						dstRectForP.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
+								centerY + radiusOfSettingsIcons);
+						break;
+					case 7: // Unlock more question packs (slide the icon up)
+						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[1] + selectRight[1]) / 2);
+						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForE.centerY());
+						dstRectForE.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
+								centerY + radiusOfSettingsIcons);
+						break;
+					}
 				}
 				invalidate();
 				if (percent < 1) {
@@ -1325,8 +1441,11 @@ public class JoystickView extends View {
 	}
 
 	private void setArc(int startDeg, int totalDeg) {
+		RectF optionPathRectF = new RectF(optionX - swipeLengthOption, optionY - swipeLengthOption, optionX + swipeLengthOption, optionY
+				+ swipeLengthOption);
+		optionPathCenterX = (int) (optionPathRectF.centerX());
+		optionPathCenterY = (int) (optionPathRectF.top);
 		optionPath.reset();
-		optionPath.arcTo(new RectF(optionX - swipeLengthOption, optionY - swipeLengthOption, optionX + swipeLengthOption, optionY
-				+ swipeLengthOption), startDeg, totalDeg);
+		optionPath.arcTo(optionPathRectF, startDeg, totalDeg);
 	}
 }

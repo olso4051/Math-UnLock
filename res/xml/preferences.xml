@@ -2,11 +2,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="screen" >
     <PreferenceScreen
-        
         android:key="logout_button"
         android:title="@string/settings_logout" />
     <PreferenceScreen
-        
+        android:key="tutorial_button"
+        android:title="@string/settings_tutorial" />
+    <PreferenceScreen
         android:key="info_button"
         android:title="@string/settings_info" />
     <PreferenceCategory
