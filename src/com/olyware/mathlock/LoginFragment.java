@@ -115,11 +115,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		skip = (Button) view.findViewById(R.id.fragment_login_button_skip);
 		skip.setOnClickListener(this);
 
-		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
-		authButton.setOnClickListener(this);
-		authButton.setFragment(this);
-		authButton.setReadPermissions(PERMISSIONS);
-
 		if (getArguments().getBoolean("facebook_logout")) {
 			Loggy.d("test", "facebook_logout");
 			Session session = Session.getActiveSession();
@@ -127,6 +122,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				session.closeAndClearTokenInformation();
 			}
 		}
+
+		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
+		authButton.setOnClickListener(this);
+		authButton.setFragment(this);
+		authButton.setReadPermissions(PERMISSIONS);
 
 		setAlpha();
 

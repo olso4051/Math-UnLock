@@ -18,6 +18,7 @@
     
     <!-- Challenge Dialog -->
     <string name="fragment_challenge_facebook_prompt">Login with Facebook to Find More Friends</string>
+    <string name="fragment_challenge_facebook_friends_prompt">Grant Access to Facebook Friends to Find More Friends</string>
     <string name="fragment_challenge_waiting">Challenge already sent, waiting for reply</string>
     <string name="fragment_challenge_title">Challenge!</string>
     <string name="fragment_challenge_invite">Invite</string>

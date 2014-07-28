@@ -58,13 +58,12 @@ public class QuestionSelectAdapter extends ArrayAdapter<QuestionSelectData> {
 				public void onClick(View v) {
 					CheckBox cb = (CheckBox) v;
 					QuestionSelectData questionPack = (QuestionSelectData) cb.getTag();
+					boolean checked = !questionPack.isChecked();
 					questionPack.setChecked(cb.isChecked());
 					if (questionPack.getID() == 0) {
 						if (data.size() > 1) {
-							if (questionPack.isChecked()) {
-								for (int i = 0; i < data.size(); i++) {
-									data.get(i).setChecked(true);
-								}
+							for (int i = 0; i < data.size(); i++) {
+								data.get(i).setChecked(checked);
 							}
 						}
 					} else if (data.get(0).getID() == 0) {

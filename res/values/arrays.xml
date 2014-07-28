@@ -5,11 +5,11 @@
     </string-array>
     
     <string-array name="tutorial_questions">
-        <item name="tutorial_0">Press The Lock (1/4)</item>
-        <item name="tutorial_1">Double tap the Lock To Quickly Unlock Your Device (2/4)</item>
-        <item name="tutorial_2">Challenge Your Friends (3/4)</item>
-        <item name="tutorial_3">Change Settings at any time (4/4)</item>
-        <item name="tutorial_4">How often would you like Hiq on your lockscreen</item>
+        <item name="tutorial_0">Press The Lock (1 of 5)</item>
+        <item name="tutorial_1">Double tap the Lock To Quickly Unlock Your Device (2 of 5)</item>
+        <item name="tutorial_2">Challenge Your Friends (3 of 5)</item>
+        <item name="tutorial_3">Change Settings at any time (4 of 5)</item>
+        <item name="tutorial_4">How often would you like Hiq on your lockscreen (5 of 5)</item>
         <item name="tutorial_5">Quiz mode for endless questions</item>
         <item name="tutorial_6">Check your progress</item>
         <item name="tutorial_7">Unlock more question packs</item>
@@ -17,9 +17,9 @@
     <string-array name="tutorial_sub_questions">
         <item name="tutorial_0"></item>
         <item name="tutorial_1">(slide to "+" to add your favorite apps)</item>
-        <item name="tutorial_2">(slide the icon up)</item>
-        <item name="tutorial_3"></item>
-        <item name="tutorial_4">(change this setting in settings / advanced)</item>
+        <item name="tutorial_2">(slide the friend icon up)</item>
+        <item name="tutorial_3">(slide the gear icon up)</item>
+        <item name="tutorial_4">(change setting at any time)</item>
         <item name="tutorial_5">(slide the icon up)</item>
         <item name="tutorial_6">(slide the icon up)</item>
         <item name="tutorial_7">(slide the icon up)</item>

@@ -48,6 +48,8 @@ public class PreferenceHelper {
 	final public static String CHALLENGE_PREFS_DIFFICULTY_MIN = "difficulty_min";
 	final public static String CHALLENGE_PREFS_DIFFICULTY_MAX = "difficulty_max";
 
+	final public static String USER_PREFS_FRIENDS_ASKED = "asked_for_friends";
+
 	final public static String DEFAULT_PREFS_SHARE_HASH = "share_hash_latest";
 
 	public static enum ChallengeStatus {
@@ -357,7 +359,7 @@ public class PreferenceHelper {
 	public static void logout(Context ctx) {
 		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
 		sharedPrefsUsers.edit().putBoolean(ctx.getString(R.string.pref_user_skipped), false)
-				.putBoolean(ctx.getString(R.string.pref_user_logged_in), false).commit();
+				.putBoolean(ctx.getString(R.string.pref_user_logged_in), false).putBoolean(USER_PREFS_FRIENDS_ASKED, false).commit();
 		ContactHelper.removeStoredContacts(ctx);
 	}
 
@@ -462,9 +464,8 @@ public class PreferenceHelper {
 			String[] answers = ctx.getResources().getStringArray(answerID);
 			String subQuestion = "<font color='" + String.format("#%06X", (0xFFFFFF & ctx.getResources().getColor(R.color.grey_on_dark)))
 					+ "'>" + subQuestions[question] + "</font>";
-			String questionText = questions[question] + "\n" + subQuestion;
-			return new GenericQuestion("tutorial", questionText, answers);
-			// textView.setText(Html.fromHtml(text), TextView.BufferType.SPANNABLE);
+			String questionText = questions[question] + "<br/>" + subQuestion;
+			return new GenericQuestion("Tutorial", questionText, answers);
 		} else {
 			return null;
 		}
@@ -481,5 +482,15 @@ public class PreferenceHelper {
 		else if (s == JoystickSelect.B)
 			editPrefs.putString("lockscreen2", "7");
 		editPrefs.commit();
+	}
+
+	public static boolean getAskedForFriendsPermission(Context ctx) {
+		SharedPreferences sharedPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsUser.getBoolean(USER_PREFS_FRIENDS_ASKED, false);
+	}
+
+	public static void setAskedForFriends(Context ctx, boolean asked) {
+		SharedPreferences.Editor editPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsUser.putBoolean(USER_PREFS_FRIENDS_ASKED, asked).commit();
 	}
 }

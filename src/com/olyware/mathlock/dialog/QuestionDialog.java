@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
@@ -59,7 +60,8 @@ public class QuestionDialog extends DialogFragment {
 		this.listener = listener;
 	}
 
-	public static QuestionDialog newInstance(Context ctx, ArrayList<String> questionPacks, ArrayList<Integer> questionPackIDs, long maxBet) {
+	public static QuestionDialog newInstance(Context ctx, ArrayList<String> questionPacks, ArrayList<Integer> questionPackIDs, long maxBet,
+			int maxHeight) {
 		QuestionDialog f = new QuestionDialog();
 
 		Bundle settings = PreferenceHelper.getChallengeSettings(ctx);
@@ -78,6 +80,7 @@ public class QuestionDialog extends DialogFragment {
 			args.putInt("max_bet", Integer.MAX_VALUE);
 		else
 			args.putInt("max_bet", (int) maxBet);
+		args.putInt("height", maxHeight);
 
 		f.setArguments(args);
 
@@ -96,8 +99,10 @@ public class QuestionDialog extends DialogFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_question_select, container, false);
+		View topView = inflater.inflate(R.layout.fragment_question_select_top, container, false);
 
 		Bundle args = getArguments();
+
 		betMax = args.getInt("max_bet");
 		betPercent = args.getFloat(PreferenceHelper.CHALLENGE_PREFS_BET_DEFAULT);
 		betValue = (int) (betMax * betPercent);
@@ -111,9 +116,9 @@ public class QuestionDialog extends DialogFragment {
 		difficultyMax = Difficulty.fromValueToString(difficultyMaxValue);
 
 		// Bet Slider
-		betText = (TextView) v.findViewById(R.id.question_select_bet);
+		betText = (TextView) topView.findViewById(R.id.question_select_bet);
 		betText.setText(String.valueOf(betValue));
-		seekBet = (SeekBar) v.findViewById(R.id.question_select_seekbar_bet);
+		seekBet = (SeekBar) topView.findViewById(R.id.question_select_seekbar_bet);
 		seekBet.setMax(betProgressMax);
 		seekBet.setProgress((int) ((betProgressMax - MIN_BET) * betPercent));
 		seekBet.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -136,9 +141,9 @@ public class QuestionDialog extends DialogFragment {
 		});
 
 		// Number of Questions Slider
-		questionsText = (TextView) v.findViewById(R.id.question_select_questions);
+		questionsText = (TextView) topView.findViewById(R.id.question_select_questions);
 		questionsText.setText(String.valueOf(questionsValue));
-		seekQuestions = (SeekBar) v.findViewById(R.id.question_select_seekbar_questions);
+		seekQuestions = (SeekBar) topView.findViewById(R.id.question_select_seekbar_questions);
 		seekQuestions.setMax(questionsProgressMax);
 		seekQuestions.setProgress((int) ((questionsProgressMax - MIN_QUESTIONS) * questionsPercent));
 		seekQuestions.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -162,11 +167,11 @@ public class QuestionDialog extends DialogFragment {
 		});
 
 		// Difficulty slider
-		difficultyMinText = (TextView) v.findViewById(R.id.question_select_difficulty_min);
+		difficultyMinText = (TextView) topView.findViewById(R.id.question_select_difficulty_min);
 		difficultyMinText.setText(difficultyMin);
-		difficultyMaxText = (TextView) v.findViewById(R.id.question_select_difficulty_max);
+		difficultyMaxText = (TextView) topView.findViewById(R.id.question_select_difficulty_max);
 		difficultyMaxText.setText(difficultyMax);
-		seekDifficulty = (RangeSeekBar) v.findViewById(R.id.question_select_seekbar_difficulty);
+		seekDifficulty = (RangeSeekBar) topView.findViewById(R.id.question_select_seekbar_difficulty);
 		seekDifficulty.setNotifyWhileDragging(true);
 		seekDifficulty.setSelectedMinValue(difficultyMinValue);
 		seekDifficulty.setSelectedMaxValue(difficultyMaxValue);
@@ -184,6 +189,7 @@ public class QuestionDialog extends DialogFragment {
 
 		// Question Packs ListView
 		lv = (ListView) v.findViewById(R.id.question_select_list_view);
+		lv.addHeaderView(topView);
 
 		// ListView Data
 		questionPackNames = new ArrayList<String>();
@@ -202,9 +208,9 @@ public class QuestionDialog extends DialogFragment {
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-				boolean checked = !questionPacks.get(pos).isChecked();
-				questionPacks.get(pos).setChecked(checked);
-				if (questionPacks.get(pos).getID() == 0) {
+				boolean checked = !questionPacks.get(pos - lv.getHeaderViewsCount()).isChecked();
+				questionPacks.get(pos - lv.getHeaderViewsCount()).setChecked(checked);
+				if (questionPacks.get(pos - lv.getHeaderViewsCount()).getID() == 0) {
 					if (questionPacks.size() > 1) {
 						for (int i = 0; i < questionPacks.size(); i++) {
 							questionPacks.get(i).setChecked(checked);
@@ -216,7 +222,7 @@ public class QuestionDialog extends DialogFragment {
 				adapter.notifyDataSetChanged();
 			}
 		});
-		setListViewHeightBasedOnChildren(lv, 6);
+		// setListViewHeightBasedOnChildren(lv, 6);
 
 		challenge = (Button) v.findViewById(R.id.question_select_button_challenge);
 		challenge.setOnClickListener(new OnClickListener() {
@@ -252,6 +258,19 @@ public class QuestionDialog extends DialogFragment {
 		return v;
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		Bundle args = getArguments();
+		int maxHeight = args.getInt("height");
+		if (maxHeight > 0) {
+			Window window = getDialog().getWindow();
+			int width = window.getAttributes().width;
+			int height = (int) (maxHeight * .80d);
+			window.setLayout(width, height);
+		}
+	}
+
 	public void setBuilder(ChallengeBuilder builder) {
 		this.builder = builder;
 	}
@@ -259,21 +278,20 @@ public class QuestionDialog extends DialogFragment {
 	public static void setListViewHeightBasedOnChildren(ListView listView, int minViews) {
 		ListAdapter listAdapter = listView.getAdapter();
 		if (listAdapter == null) {
-			// pre-condition
 			return;
 		}
 
 		int totalHeight = listView.getPaddingTop() + listView.getPaddingBottom();
-		for (int i = 0; i < Math.min(minViews, listAdapter.getCount()); i++) {
-			int lastDivision = 1;
+		for (int i = 0; i < listAdapter.getCount(); i++) {// Math.min(minViews, listAdapter.getCount()); i++) {
+			/*int lastDivision = 1;
 			if (i == minViews - 1)
-				lastDivision = 3;
+				lastDivision = 3;*/
 			View listItem = listAdapter.getView(i, null, listView);
 			if (listItem instanceof ViewGroup) {
 				listItem.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			}
 			listItem.measure(0, 0);
-			totalHeight += listItem.getMeasuredHeight() / lastDivision;
+			totalHeight += listItem.getMeasuredHeight();// / lastDivision;
 		}
 
 		ViewGroup.LayoutParams params = listView.getLayoutParams();

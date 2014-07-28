@@ -13,7 +13,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.provider.ContactsContract;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
@@ -108,15 +107,11 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
+			} else {
+				Toaster.toastAllowFacebookFriends(ctx, true);
 			}
 		} else {
-			Handler h = new Handler(ctx.getMainLooper());
-			h.post(new Runnable() {
-				@Override
-				public void run() {
-					Toaster.toastLoginWithFacebook(ctx);
-				}
-			});
+			Toaster.toastLoginWithFacebook(ctx, true);
 		}
 		allNames.clear();
 		allNames.addAll(ContactHelper.getNamesLowercaseFromContacts(allContacts));

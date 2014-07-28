@@ -53,6 +53,7 @@ import android.widget.Toast;
 
 import com.facebook.AppEventsLogger;
 import com.facebook.LoggingBehavior;
+import com.facebook.Session;
 import com.facebook.Settings;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
@@ -109,7 +110,7 @@ import com.olyware.mathlock.views.JoystickView;
 import com.tapjoy.TapjoyConnect;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
-	final private int startingPmoney = 0, streakToIncrease = 40;
+	final private int startingPmoney = 20000, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000 };
 	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
@@ -543,7 +544,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 							if (!joystick.getQuickUnlock()) {
 								HelpQuestionImage = takeScreenShot();
-								if (!fromChallenge)
+								if (!fromChallenge && !fromTutorial)
 									joystick.askToShare();
 							}
 						} else {
@@ -1550,7 +1551,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					if (done) {
 						sendChallengeComplete(ID);
 					}
-				} else {
+				} else if (!fromTutorial) {
 					dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 							.currentTimeMillis(), startTime - System.currentTimeMillis()));
 					if (correct) {
@@ -1877,6 +1878,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void displayFriends() {
+		final Session session = Session.getActiveSession();
+		if (session != null && session.isOpened()) {
+			if (!session.getPermissions().contains("user_friends") && !PreferenceHelper.getAskedForFriendsPermission(this)) {
+				Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, LoginFragment.PERMISSIONS);
+				session.requestNewReadPermissions(newPermissionsRequest);
+				PreferenceHelper.setAskedForFriends(this, true);
+				return;
+			}
+		}
 		final ChallengeDialog challengeDialog = new ChallengeDialog();
 		challengeDialog.setCancelable(true);
 		challengeDialog.setChallengeDialogListener(new ChallengeDialog.ChallengeDialogListener() {
@@ -1898,7 +1908,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				final QuestionDialog questionDialog = QuestionDialog.newInstance(MainActivity.this,
 						PreferenceHelper.getDisplayableUnlockedPackages(MainActivity.this, dbManager),
 						PreferenceHelper.getDisplayableUnlockedPackageIDs(MainActivity.this, dbManager),
-						MoneyHelper.getMaxBet(MainActivity.this));
+						MoneyHelper.getMaxBet(MainActivity.this), PreferenceHelper.getLayoutHeight(MainActivity.this, 0));
 				questionDialog.setBuilder(builder);
 				questionDialog.setCancelable(true);
 				questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
