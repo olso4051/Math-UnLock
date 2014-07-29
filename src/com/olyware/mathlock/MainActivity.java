@@ -512,8 +512,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						}
 						break;
 					case 5: // Quiz mode for endless questions (slide the icon up)
-						if (s == JoystickSelect.QuizMode || s == JoystickSelect.A)
+						if (s == JoystickSelect.QuizMode || s == JoystickSelect.A) {
 							PreferenceHelper.setTutorialQuestion(MainActivity.this, 6);
+							setProblem = true;
+						}
 						break;
 					case 6: // Check your progress (slide the icon up)
 						if (s == JoystickSelect.Progress || s == JoystickSelect.A)
@@ -762,8 +764,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				fromShare = false;
 			}
 
-			joystick.startAnimations();
-
 			// save money into shared preferences
 			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 
@@ -772,6 +772,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				Loggy.d("test", "onResume Screen is on");
 				trackerGA.set(Fields.SESSION_CONTROL, "start");
 				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
+				joystick.startAnimations();
 				// showWallpaper();
 			}
 		}
@@ -780,7 +781,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public void onBackPressed() {
 		if (loggedIn) {
-			if (locked && UnlockedPackages) {		// if locked then don't allow back button to exit app
+			if (locked && UnlockedPackages && !quizMode) {		// if locked then don't allow back button to exit app
 				return;
 			} else {
 				super.onBackPressed();

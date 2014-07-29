@@ -178,7 +178,7 @@
     <!-- Settings Activity -->
     <string name="settings_logout">Logout</string>
     <string name="settings_login">Login</string>
-    <string name="settings_tutorial">Tutorial</string>
+    <string name="settings_tutorial">Restart Tutorial</string>
     <string name="settings_info">Info</string>
     
     <!-- Questions -->

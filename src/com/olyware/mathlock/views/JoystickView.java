@@ -20,7 +20,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.text.Html;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -31,9 +30,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.Loggy;
 
 public class JoystickView extends View {
-	public static int IN_OUT_DURATION = 250, PULSE_DURATION = 400, PULSE_PAUSE = 3000;
+	public static int IN_OUT_DURATION = 250, PULSE_DURATION = 400, PULSE_PAUSE = 3000, PULSE_ICON_PAUSE = 1200;
 	private final int pad = 5, NumAnswers = 4, NumOptions = 5, startFrames = 30, startFrameTime = 50, frameTimeReveal = 10,
 			pulseFrames = 100;
 	private final long tapLength = 250;
@@ -55,18 +55,19 @@ public class JoystickView extends View {
 
 	private int optionPathCenterX, optionPathCenterY, tutorial, barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP,
 			Width, Height, dstHeight, spacing, rUnlock, radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc,
-			shareLoc, correctGuess, wrongGuess, selectAppDrag, appCenterVert, appCenterHorz, answerAlpha = 0, pulseFrame = 0,
-			numberOfChallenges;
+			shareLoc, correctGuess, wrongGuess, selectAppDrag, appCenterVert, appCenterHorz, alphaAnswer = 0, alphaTutorial = 255,
+			pulseFrame = 0, numberOfChallenges;
 	private long tapTimer, lastTimeRevealOrHide = 0, startTimeRevealOrHide = 0, lastTimePulse = 0, startTimePulse = 0;
 	private float answerSizePix, optionX, optionY, appDragX = 0, appDragY = 0, strokeWidth;
 	private double touchX, touchY, startX, startY, appAngle;
 	private boolean quizMode, quickUnlock, selectUnlock, options = false, selectSideBar = false, showHint = false, problem = true,
-			paused = false, measured = false, isFirstApp = false;
+			paused = false, measured = false, isFirstApp = false, shouldStartAnimations = false;
 	private String shareOldAnswer;
 
 	private int[] selectLeft = new int[5], selectRight = new int[5];
-	private double[] X = new double[NumAnswers], Y = new double[NumAnswers], easingFunctionX = new double[pulseFrames],
-			easingFunctionY = new double[pulseFrames];;
+	private double[] X = new double[NumAnswers], Y = new double[NumAnswers], easingPulseFunctionX = new double[pulseFrames],
+			easingPulseFunctionY = new double[pulseFrames], easingSlideUpFunctionX = new double[pulseFrames],
+			easingSlideUpFunctionY = new double[pulseFrames];
 	private boolean[] selectAnswers = new boolean[NumAnswers], selectOptions = new boolean[NumOptions];
 	private String[] answers = { " ", " ", " ", " ", "?" };
 
@@ -198,7 +199,7 @@ public class JoystickView extends View {
 		Height = getMeasuredHeight();
 		res = getResources();
 		numberOfChallenges = 0;
-		tutorial = 0;
+		tutorial = -1;
 
 		textSizeSP = 20;
 		textSizePix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, res.getDisplayMetrics());
@@ -235,7 +236,7 @@ public class JoystickView extends View {
 			answerTextPaint[i].setTextAlign(Paint.Align.CENTER);
 			answerTextPaint[i].setColor(Color.WHITE);
 			answerTextPaint[i].setTextSize(answerSizePix);
-			answerTextPaint[i].setAlpha(answerAlpha);
+			answerTextPaint[i].setAlpha(alphaAnswer);
 			bounds[i] = new Rect();
 			equation[i] = false;
 			if (answers[i].length() > 1)
@@ -329,8 +330,10 @@ public class JoystickView extends View {
 		d.add(drawTrash);
 		apps = new ArrayList<App>();
 		for (int i = 0; i < pulseFrames; i++) {
-			easingFunctionX[i] = rUnlock * Math.sin(Math.PI * 4 * i / pulseFrames) / 10;
-			easingFunctionY[i] = 0;
+			easingPulseFunctionX[i] = rUnlock * Math.sin(Math.PI * 4 * i / pulseFrames) / 10;
+			easingPulseFunctionY[i] = 0;
+			easingSlideUpFunctionX[i] = 0;
+			easingSlideUpFunctionY[i] = -swipeLengthOption * 2 * Math.pow((double) i / (double) pulseFrames, 2);
 		}
 	}
 
@@ -395,38 +398,47 @@ public class JoystickView extends View {
 		this.tutorial = tutorial;
 		switch (tutorial) {
 		case 0:	// Press the Lock
+			Loggy.d("setSidePaths from setTutorial(0)");
 			setSidePaths(Height - pad);
 			options = false;
 			break;
 		case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
+			Loggy.d("setSidePaths from setTutorial(1)");
 			setSidePaths(Height - pad);
 			options = false;
 			break;
 		case 2: // Challenge your friends \n (slide the icon up)
+			Loggy.d("setSidePaths from setTutorial(2)");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 			options = true;
 			break;
 		case 3: // Change Any Setting at any time \n (slide the icon up)
+			Loggy.d("setSidePaths from setTutorial(3)");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 			options = true;
 			break;
 		case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
+			Loggy.d("setSidePaths from setTutorial(4)");
 			setSidePaths(Height - pad);
 			options = false;
 			break;
 		case 5: // Quiz mode for endless questions (slide the icon up)
+			Loggy.d("setSidePaths from setTutorial(5)");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 			options = true;
 			break;
 		case 6: // Check your progress (slide the icon up)
+			Loggy.d("setSidePaths from setTutorial(6)");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 			options = true;
 			break;
 		case 7: // Unlock more question packs (slide the icon up)
+			Loggy.d("setSidePaths from setTutorial(7)");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 			options = true;
 			break;
 		default:
+			Loggy.d("setSidePaths from setTutorial(default)");
 			setSidePaths(Height - pad);
 			options = false;
 			break;
@@ -524,6 +536,7 @@ public class JoystickView extends View {
 	public void showStartAnimation(int start, int delay) {
 		if (start == 0) {
 			options = true;
+			Loggy.d("setSidePaths from showStartAnimation start==0");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 		}
 		invalidate();
@@ -625,6 +638,8 @@ public class JoystickView extends View {
 	}
 
 	public void startAnimations() {
+		Loggy.d("startAnimations");
+		shouldStartAnimations = true;
 		startTimePulse = 0;
 		animateHandler.removeCallbacksAndMessages(null);
 		animateHandler.post(finishAnimate);
@@ -665,13 +680,18 @@ public class JoystickView extends View {
 
 		dstHeight = radiusOfSettingsIcons * 2 + barHeight;
 
-		if (options || shouldOpenOptionFromTutorial(tutorial))
+		if (options || shouldOpenOptionFromTutorial(tutorial)) {
+			Loggy.d("setSidePaths from onMeasure true");
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
-		else
+		} else {
+			Loggy.d("setSidePaths from onMeasure false");
 			setSidePaths(Height - pad);
+		}
 
 		setMeasuredDimension(Width, Height);
 		initRunnables();
+		if (shouldStartAnimations)
+			startAnimations();
 		measured = true;
 	}
 
@@ -700,7 +720,7 @@ public class JoystickView extends View {
 			if (!quickUnlock || (i == correctLoc)) {
 				canvas.save();
 				// Draw the background for selected answers
-				unlockPaint.setAlpha((wrongGuess < 0 && !quickUnlock) ? answerAlpha : 255);
+				unlockPaint.setAlpha((wrongGuess < 0 && !quickUnlock) ? alphaAnswer : 255);
 				if (selectAnswers[i])
 					canvas.drawBitmap(bmpBack[0], srcRectForBack, RectForAnswers[i], unlockPaint);
 				else if (i == correctGuess)
@@ -712,7 +732,7 @@ public class JoystickView extends View {
 				if (equation[i]) {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
 							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
-					layoutE[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? answerAlpha : 255);
+					layoutE[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alphaAnswer : 255);
 					layoutE[i].draw(canvas);
 				} else {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
@@ -727,7 +747,6 @@ public class JoystickView extends View {
 			if (isFirstApp)
 				start = 1;
 			int end = d.size() - 1;
-			int end2 = Math.min(d.size() - 1, apps.size() - 1);
 			for (int i = 1 - start; i < end - start; i++)
 				if (apps.get(i).getSelectDrag())
 					end++;
@@ -804,17 +823,58 @@ public class JoystickView extends View {
 		canvas.restore();
 
 		// Draw the settings icons
-		canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, optionPaintWhite);
-		if (quizMode)
-			canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, optionPaintWhite);
-		else
-			canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, optionPaintWhite);
-		canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, optionPaintWhite);
-		canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, optionPaintWhite);
+		// Draw the settings icon
+		if (tutorial == 3) {
+			optionPaintWhite.setAlpha(alphaTutorial);
+			canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, optionPaintWhite);
+			optionPaintWhite.setAlpha(255);
+		} else {
+			canvas.drawBitmap(bmpS, srcRectForSmall, dstRectForS, optionPaintWhite);
+		}
+		// Draw the quiz mode icon
+		if (quizMode) {
+			if (tutorial == 5) {
+				optionPaintWhite.setAlpha(alphaTutorial);
+				canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, optionPaintWhite);
+				optionPaintWhite.setAlpha(255);
+			} else {
+				canvas.drawBitmap(bmpQs, srcRectForBig, dstRectForQ, optionPaintWhite);
+			}
+		} else {
+			if (tutorial == 5) {
+				optionPaintWhite.setAlpha(alphaTutorial);
+				canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, optionPaintWhite);
+				optionPaintWhite.setAlpha(255);
+			} else {
+				canvas.drawBitmap(bmpQ, srcRectForBig, dstRectForQ, optionPaintWhite);
+			}
+		}
+		// Draw the progress icon
+		if (tutorial == 6) {
+			optionPaintWhite.setAlpha(alphaTutorial);
+			canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, optionPaintWhite);
+			optionPaintWhite.setAlpha(255);
+		} else {
+			canvas.drawBitmap(bmpP, srcRectForBig, dstRectForP, optionPaintWhite);
+		}
+		// Draw the store icon
+		if (tutorial == 7) {
+			optionPaintWhite.setAlpha(alphaTutorial);
+			canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, optionPaintWhite);
+			optionPaintWhite.setAlpha(255);
+		} else {
+			canvas.drawBitmap(bmpStore, srcRectForBig, dstRectForE, optionPaintWhite);
+		}
 
 		// Draw the Challenges Bubble and Friends selector
 		if (numberOfChallenges > 0) {
-			canvas.drawBitmap(bmpFriendSelected, srcRectForBig, dstRectForI, optionPaintWhite);
+			if (tutorial == 2) {
+				optionPaintWhite.setAlpha(alphaTutorial);
+				canvas.drawBitmap(bmpFriendSelected, srcRectForBig, dstRectForI, optionPaintWhite);
+				optionPaintWhite.setAlpha(255);
+			} else {
+				canvas.drawBitmap(bmpFriendSelected, srcRectForBig, dstRectForI, optionPaintWhite);
+			}
 			String challenges = String.valueOf(numberOfChallenges);
 			optionPaintWhite.getTextBounds(challenges, 0, challenges.length(), challengeBounds);
 			int challengeRadius = (int) (Math.sqrt(Math.pow(challengeBounds.width(), 2) + Math.pow(challengeBounds.height(), 2)) * 7 / 8);
@@ -823,7 +883,13 @@ public class JoystickView extends View {
 			canvas.drawText(challenges, (Width + test.getIntrinsicWidth()) / 2 + challengeBounds.width(), barY - barHeight + textSizePix
 					* 3 / 8, optionPaintWhite);
 		} else {
-			canvas.drawBitmap(bmpFriend, srcRectForBig, dstRectForI, optionPaintWhite);
+			if (tutorial == 2) {
+				optionPaintWhite.setAlpha(alphaTutorial);
+				canvas.drawBitmap(bmpFriend, srcRectForBig, dstRectForI, optionPaintWhite);
+				optionPaintWhite.setAlpha(255);
+			} else {
+				canvas.drawBitmap(bmpFriend, srcRectForBig, dstRectForI, optionPaintWhite);
+			}
 		}
 
 		// Draw hints
@@ -960,11 +1026,15 @@ public class JoystickView extends View {
 		selectUnlock = false;
 		selectAppDrag = -1;
 
-		if (options && tutorial < 0)
+		if (options && !shouldOpenOptionFromTutorial(tutorial)) {
 			showStartAnimation(0, 3000);
-		else if (selectSideBar && tutorial < 0)
+		} else if (selectSideBar && !shouldOpenOptionFromTutorial(tutorial)) {
 			showStartAnimation(1, 0);
-		else {
+		} else if (shouldOpenOptionFromTutorial(tutorial)) {
+			Loggy.d("setSidePaths from returnToDefault");
+			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			options = true;
+		} else {
 			int currentRadius = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
 			RectForUnlockPulse.set(Width / 2 - currentRadius, (barY - barHeight + centerOffset) / 2 - currentRadius, Width / 2
 					+ currentRadius, (barY - barHeight + centerOffset) / 2 + currentRadius);
@@ -1016,6 +1086,7 @@ public class JoystickView extends View {
 				dstRectForS.set((int) touchX - radiusOfSettingsIcons, (int) touchY - radiusOfSettingsIcons, (int) touchX
 						+ radiusOfSettingsIcons, (int) touchY + radiusOfSettingsIcons);
 			} else if (selectSideBar) {
+				Loggy.d("setSidePaths from selectSideBar");
 				setSidePaths((int) Math.max(touchY, Height - radiusOfSettingsIcons * 2 - pad * 3));
 			}
 			if (selectSideBar) {
@@ -1175,11 +1246,18 @@ public class JoystickView extends View {
 		startAnimate = new Runnable() {
 			@Override
 			public void run() {
-				options = false;
-				if (barY + slideInterval > Height - pad) {
-					setSidePaths(Height - pad);
+				if (shouldOpenOptionFromTutorial(tutorial)) {
+					setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+					options = true;
 				} else {
-					setSidePaths(barY + slideInterval);
+					options = false;
+					if (barY + slideInterval > Height - pad) {
+						Loggy.d("setSidePaths from startAnimate");
+						setSidePaths(Height - pad);
+					} else {
+						Loggy.d("setSidePaths from startAnimate");
+						setSidePaths(barY + slideInterval);
+					}
 				}
 				invalidate();
 			}
@@ -1187,8 +1265,14 @@ public class JoystickView extends View {
 		finishAnimate = new Runnable() {
 			@Override
 			public void run() {
-				setSidePaths(Height - pad);
-				options = false;
+				Loggy.d("setSidePaths from finishAnimate");
+				if (shouldOpenOptionFromTutorial(tutorial)) {
+					setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+					options = true;
+				} else {
+					setSidePaths(Height - pad);
+					options = false;
+				}
 				invalidate();
 			}
 		};
@@ -1198,7 +1282,7 @@ public class JoystickView extends View {
 				lastTimeRevealOrHide = System.currentTimeMillis();
 				float percent = (lastTimeRevealOrHide - startTimeRevealOrHide) / (float) IN_OUT_DURATION;
 				if (percent <= 1) {
-					setAlpha(Math.max(answerAlpha, (int) (percent * 255)));
+					setAlpha(Math.max(alphaAnswer, (int) (percent * 255)));
 					invalidate();
 					animateHandler.postDelayed(revealAnswers, frameTimeReveal);
 				} else {
@@ -1215,7 +1299,7 @@ public class JoystickView extends View {
 				lastTimeRevealOrHide = System.currentTimeMillis();
 				float percent = (lastTimeRevealOrHide - startTimeRevealOrHide) / (float) IN_OUT_DURATION;
 				if (percent <= 1) {
-					setAlpha(Math.min(answerAlpha, (int) ((1 - percent) * 255)));
+					setAlpha(Math.min(alphaAnswer, (int) ((1 - percent) * 255)));
 					invalidate();
 					animateHandler.postDelayed(hideAnswers, frameTimeReveal);
 				} else {
@@ -1229,56 +1313,65 @@ public class JoystickView extends View {
 			public void run() {
 				// circlePaint[0].setAlpha(255);
 				float percent = -1;
+				boolean shouldPulseLock = false;
 				if (!selectUnlock) {
+					shouldPulseLock = true;
 					if (startTimePulse == 0)
 						startTimePulse = System.currentTimeMillis();
 					lastTimePulse = System.currentTimeMillis();
 					percent = (lastTimePulse - startTimePulse) / (float) PULSE_DURATION;
 					if (percent < 1 && percent > 0) {
 						pulseFrame = (int) (percent * pulseFrames);
-						/*int size = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
-						//int change = (int) (rUnlockChange * easingFunctionSize[pulseFrame] + rUnlock - size);
-						RectForUnlockPulse.set(RectForUnlockPulse.left - change + strokeWidth / 2, RectForUnlockPulse.top - change
-								+ strokeWidth / 2, RectForUnlockPulse.right + change - strokeWidth / 2, RectForUnlockPulse.bottom + change
-								- strokeWidth / 2);*/
+						alphaTutorial = Math.min(alphaTutorial, (int) ((1 - percent * 1.1) * 255));
+						if (alphaTutorial < 0)
+							alphaTutorial = 0;
 					} else {
 						pulseFrame = 0;
+						alphaTutorial = 255;
 					}
-					int centerX = (int) (easingFunctionX[pulseFrame] + Width / 2);
-					int centerY = (int) (easingFunctionY[pulseFrame] + (barY - barHeight + centerOffset) / 2);
-					RectForUnlockPulse.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
-					RectForUnlock.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
+					int centerX, centerY;
 					switch (tutorial) {
 					case 2: // Challenge your friends \n (slide the icon up)
-						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[0] + selectRight[0]) / 2);
-						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForI.centerY());
+						shouldPulseLock = false;
+						centerX = (int) (easingSlideUpFunctionX[pulseFrame] + (selectLeft[0] + selectRight[0]) / 2);
+						centerY = (int) (easingSlideUpFunctionY[pulseFrame] + dstRectForS.centerY());
 						dstRectForI.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
 								centerY + radiusOfSettingsIcons);
 						break;
 					case 3: // Change Any Setting at any time \n (slide the icon up)
-						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[4] + selectRight[4]) / 2);
-						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForS.centerY());
+						shouldPulseLock = false;
+						centerX = (int) (easingSlideUpFunctionX[pulseFrame] + (selectLeft[4] + selectRight[4]) / 2);
+						centerY = (int) (easingSlideUpFunctionY[pulseFrame] + dstRectForQ.centerY());
 						dstRectForS.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
 								centerY + radiusOfSettingsIcons);
 						break;
 					case 5: // Quiz mode for endless questions (slide the icon up)
-						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[3] + selectRight[3]) / 2);
-						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForQ.centerY());
+						shouldPulseLock = false;
+						centerX = (int) (easingSlideUpFunctionX[pulseFrame] + (selectLeft[3] + selectRight[3]) / 2);
+						centerY = (int) (easingSlideUpFunctionY[pulseFrame] + dstRectForP.centerY());
 						dstRectForQ.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
 								centerY + radiusOfSettingsIcons);
 						break;
 					case 6: // Check your progress (slide the icon up)
-						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[2] + selectRight[2]) / 2);
-						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForP.centerY());
+						shouldPulseLock = false;
+						centerX = (int) (easingSlideUpFunctionX[pulseFrame] + (selectLeft[2] + selectRight[2]) / 2);
+						centerY = (int) (easingSlideUpFunctionY[pulseFrame] + dstRectForE.centerY());
 						dstRectForP.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
 								centerY + radiusOfSettingsIcons);
 						break;
 					case 7: // Unlock more question packs (slide the icon up)
-						centerX = (int) (easingFunctionX[pulseFrame] + (selectLeft[1] + selectRight[1]) / 2);
-						centerY = (int) (easingFunctionY[pulseFrame] + dstRectForE.centerY());
+						shouldPulseLock = false;
+						centerX = (int) (easingSlideUpFunctionX[pulseFrame] + (selectLeft[1] + selectRight[1]) / 2);
+						centerY = (int) (easingSlideUpFunctionY[pulseFrame] + dstRectForI.centerY());
 						dstRectForE.set(centerX - radiusOfSettingsIcons, centerY - radiusOfSettingsIcons, centerX + radiusOfSettingsIcons,
 								centerY + radiusOfSettingsIcons);
 						break;
+					}
+					if (shouldPulseLock) {
+						centerX = (int) (easingSlideUpFunctionX[pulseFrame] + Width / 2);
+						centerY = (int) (easingSlideUpFunctionY[pulseFrame] + (barY - barHeight + centerOffset) / 2);
+						RectForUnlockPulse.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
+						RectForUnlock.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
 					}
 				}
 				invalidate();
@@ -1286,13 +1379,14 @@ public class JoystickView extends View {
 					animateHandler.post(pulseLock);
 				} else {
 					startTimePulse = 0;
-					animateHandler.postDelayed(pulseLock, PULSE_PAUSE);
+					animateHandler.postDelayed(pulseLock, (shouldPulseLock ? PULSE_PAUSE : PULSE_ICON_PAUSE));
 				}
 			}
 		};
 	}
 
 	private void setSidePaths(int side) {
+		Loggy.d("setSidePaths(" + side + ")");
 		barY = side;
 		int middle = (barY - barHeight + centerOffset) / 2;
 		int bottom = barY - barHeight;
@@ -1377,19 +1471,19 @@ public class JoystickView extends View {
 						changeAnswerSize(layoutE[i].getTextSizeSP(), layoutE[i].getTextSizePix());
 				}
 			} else
-				layout[i] = new StaticLayout(Html.fromHtml(answers[i]), answerTextPaint[i], Width / 2 - pad * 2,
-						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
+						false);
 		}
 		invalidate();
 	}
 
 	private void setAlpha(int alpha) {
-		answerAlpha = alpha;// (wrongGuess < 0) ? alpha : 255;
+		alphaAnswer = alpha;// (wrongGuess < 0) ? alpha : 255;
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alpha : 255);
 			if (!equation[i]) {
-				layout[i] = new StaticLayout(Html.fromHtml(answers[i]), answerTextPaint[i], Width / 2 - pad * 2,
-						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
+						false);
 			}
 		}
 	}

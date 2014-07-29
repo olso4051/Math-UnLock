@@ -27,12 +27,12 @@
     <string-array name="tutorial_sub_questions">
         <item name="tutorial_0"><![CDATA[<small><small><font color=\'#999999\'>correct answers turn </font><font color=\'#00FF00\'>GREEN</font><font color=\'#999999\'>, wrong turn </font><font color=\'#FF0000\'>RED</font></small></small>]]></item>
         <item name="tutorial_1"><![CDATA[<small><small><font color=\'#999999\'>slide to "+" to add your favorite apps</font></small></small>]]></item>
-        <item name="tutorial_2"><![CDATA[<small><small><font color=\'#999999\'>slide the friend icon up</font></small></small>]]></item>
-        <item name="tutorial_3"><![CDATA[<small><small><font color=\'#999999\'>slide the gear icon up</font></small></small>]]></item>
+        <item name="tutorial_2"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the friend icon up</font></small></small>]]></item>
+        <item name="tutorial_3"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the gear icon up</font></small></small>]]></item>
         <item name="tutorial_4"><![CDATA[<small><small><font color=\'#999999\'>how often Hiq is used as your locksceen, change this setting at anytime</font></small></small>]]></item>
-        <item name="tutorial_5"><![CDATA[<small><small><font color=\'#999999\'>slide the refresh icon up</font></small></small>]]></item>
-        <item name="tutorial_6"><![CDATA[<small><small><font color=\'#999999\'>slide the progress arrow icon up</font></small></small>]]></item>
-        <item name="tutorial_7"><![CDATA[<small><small><font color=\'#999999\'>slide the cart icon up</font></small></small>]]></item>
+        <item name="tutorial_5"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the refresh icon up</font></small></small>]]></item>
+        <item name="tutorial_6"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the progress arrow icon up</font></small></small>]]></item>
+        <item name="tutorial_7"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the cart icon up</font></small></small>]]></item>
     </string-array>
     <string-array name="tutorial_answers_0">
         <item name="answer_0">Slide Here And Release To Answer</item>
@@ -59,9 +59,9 @@
         <item name="answer_3">X</item>
     </string-array>
     <string-array name="tutorial_answers_4">
-        <item name="answer_0">Always (smartest)</item>
-        <item name="answer_1">Very Often</item><!-- 1 hour timeout -->
-        <item name="answer_2">Often</item><!-- 4 hour timeout -->
+        <item name="answer_0">Always\n(smartest)</item>
+        <item name="answer_1">Very Often</item><!-- 15 min timeout -->
+        <item name="answer_2">Often</item><!-- 1 hour timeout -->
         <item name="answer_3">Not Often</item><!-- 8 hout timeout -->
     </string-array>
     <string-array name="tutorial_answers_5">

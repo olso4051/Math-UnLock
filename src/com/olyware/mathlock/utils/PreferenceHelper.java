@@ -483,9 +483,9 @@ public class PreferenceHelper {
 		if (s == JoystickSelect.A) {
 			editPrefs.putString("lockscreen2", "0");
 		} else if (s == JoystickSelect.B) {
-			editPrefs.putString("lockscreen2", "5");
+			editPrefs.putString("lockscreen2", "3");
 		} else if (s == JoystickSelect.C) {
-			editPrefs.putString("lockscreen2", "6");
+			editPrefs.putString("lockscreen2", "5");
 		} else if (s == JoystickSelect.D) {
 			editPrefs.putString("lockscreen2", "7");
 		}
