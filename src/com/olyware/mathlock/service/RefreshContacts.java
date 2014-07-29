@@ -64,6 +64,7 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 
 	@Override
 	protected Integer doInBackground(Void... v) {
+
 		allFacebookHashes.clear();
 		allFacebookHashes.addAll(ContactHelper.getFirstFacebookHashesFromContacts(allContacts));
 		// Get Contacts from user's facebook

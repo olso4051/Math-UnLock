@@ -459,13 +459,20 @@ public class PreferenceHelper {
 	public static GenericQuestion getTutorialQuestion(Context ctx, int question) {
 		String[] questions = ctx.getResources().getStringArray(R.array.tutorial_questions);
 		if (question >= 0 && question < questions.length) {
+			String[] titleQuestions = ctx.getResources().getStringArray(R.array.tutorial_title_questions);
 			String[] subQuestions = ctx.getResources().getStringArray(R.array.tutorial_sub_questions);
 			int answerID = ctx.getResources().getIdentifier("tutorial_answers_" + (question), "array", ctx.getPackageName());
 			String[] answers = ctx.getResources().getStringArray(answerID);
-			String subQuestion = "<font color='" + String.format("#%06X", (0xFFFFFF & ctx.getResources().getColor(R.color.grey_on_dark)))
-					+ "'>" + subQuestions[question] + "</font>";
-			String questionText = questions[question] + "<br/>" + subQuestion;
-			return new GenericQuestion("Tutorial", questionText, answers);
+			/*String titleQuestion = "<small><font color='"
+					+ String.format("#%06X", (0xFFFFFF & ctx.getResources().getColor(R.color.grey_on_dark))) + "'>"
+					+ titleQuestions[question] + "</font></small>";*/
+			/*String subQuestion = "<small><font color='"
+					+ String.format("#%06X", (0xFFFFFF & ctx.getResources().getColor(R.color.grey_on_dark))) + "'>"
+					+ subQuestions[question] + "</font></small>";*/
+			// String questionText = titleQuestion + "<br/>" + questions[question] + "<br/>" + subQuestions[question];
+			String questionText = questions[question] + "<br/>" + subQuestions[question];
+			// return new GenericQuestion("Tutorial", questionText, answers);
+			return new GenericQuestion(titleQuestions[question], questionText, answers);
 		} else {
 			return null;
 		}
@@ -473,14 +480,15 @@ public class PreferenceHelper {
 
 	public static void setLockscreenFrequency(Context ctx, JoystickSelect s) {
 		SharedPreferences.Editor editPrefs = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
-		if (s == JoystickSelect.A)
+		if (s == JoystickSelect.A) {
 			editPrefs.putString("lockscreen2", "0");
-		else if (s == JoystickSelect.B)
+		} else if (s == JoystickSelect.B) {
 			editPrefs.putString("lockscreen2", "5");
-		else if (s == JoystickSelect.B)
+		} else if (s == JoystickSelect.C) {
 			editPrefs.putString("lockscreen2", "6");
-		else if (s == JoystickSelect.B)
+		} else if (s == JoystickSelect.D) {
 			editPrefs.putString("lockscreen2", "7");
+		}
 		editPrefs.commit();
 	}
 

@@ -4,28 +4,38 @@
         <item name="dont_show">Don\'t ask me again</item>
     </string-array>
     
+    <string-array name="tutorial_title_questions">
+        <item name="tutorial_0">Tutorial 1 of 5</item>
+        <item name="tutorial_1">Tutorial 2 of 5</item>
+        <item name="tutorial_2">Tutorial 3 of 5</item>
+        <item name="tutorial_3">Tutorial 4 of 5</item>
+        <item name="tutorial_4">Tutorial 5 of 5</item>
+        <item name="tutorial_5">Extended Tutorial 1 of 3</item>
+        <item name="tutorial_6">Extended Tutorial 2 of 3</item>
+        <item name="tutorial_7">Extended Tutorial 3 of 3</item>
+    </string-array>
     <string-array name="tutorial_questions">
-        <item name="tutorial_0">Press The Lock (1 of 5)</item>
-        <item name="tutorial_1">Double tap the Lock To Quickly Unlock Your Device (2 of 5)</item>
-        <item name="tutorial_2">Challenge Your Friends (3 of 5)</item>
-        <item name="tutorial_3">Change Settings at any time (4 of 5)</item>
-        <item name="tutorial_4">How often would you like Hiq on your lockscreen (5 of 5)</item>
-        <item name="tutorial_5">Quiz mode for endless questions</item>
-        <item name="tutorial_6">Check your progress</item>
-        <item name="tutorial_7">Unlock more question packs</item>
+        <item name="tutorial_0">Press The Lock</item>
+        <item name="tutorial_1">Double Tap the Lock To Quickly Unlock</item>
+        <item name="tutorial_2">Challenge Your Friends</item>
+        <item name="tutorial_3">Change Settings</item>
+        <item name="tutorial_4">Show Hiq as Your Lockscreen:</item>
+        <item name="tutorial_5">Quiz Mode</item>
+        <item name="tutorial_6">Check Your Progress</item>
+        <item name="tutorial_7">Unlock More Question Packs</item>
     </string-array>
     <string-array name="tutorial_sub_questions">
-        <item name="tutorial_0"></item>
-        <item name="tutorial_1">(slide to "+" to add your favorite apps)</item>
-        <item name="tutorial_2">(slide the friend icon up)</item>
-        <item name="tutorial_3">(slide the gear icon up)</item>
-        <item name="tutorial_4">(change setting at any time)</item>
-        <item name="tutorial_5">(slide the icon up)</item>
-        <item name="tutorial_6">(slide the icon up)</item>
-        <item name="tutorial_7">(slide the icon up)</item>
+        <item name="tutorial_0"><![CDATA[<small><small><font color=\'#999999\'>correct answers turn </font><font color=\'#00FF00\'>GREEN</font><font color=\'#999999\'>, wrong turn </font><font color=\'#FF0000\'>RED</font></small></small>]]></item>
+        <item name="tutorial_1"><![CDATA[<small><small><font color=\'#999999\'>slide to "+" to add your favorite apps</font></small></small>]]></item>
+        <item name="tutorial_2"><![CDATA[<small><small><font color=\'#999999\'>slide the friend icon up</font></small></small>]]></item>
+        <item name="tutorial_3"><![CDATA[<small><small><font color=\'#999999\'>slide the gear icon up</font></small></small>]]></item>
+        <item name="tutorial_4"><![CDATA[<small><small><font color=\'#999999\'>how often Hiq is used as your locksceen, change this setting at anytime</font></small></small>]]></item>
+        <item name="tutorial_5"><![CDATA[<small><small><font color=\'#999999\'>slide the refresh icon up</font></small></small>]]></item>
+        <item name="tutorial_6"><![CDATA[<small><small><font color=\'#999999\'>slide the progress arrow icon up</font></small></small>]]></item>
+        <item name="tutorial_7"><![CDATA[<small><small><font color=\'#999999\'>slide the cart icon up</font></small></small>]]></item>
     </string-array>
     <string-array name="tutorial_answers_0">
-        <item name="answer_0">Slide Here</item>
+        <item name="answer_0">Slide Here And Release To Answer</item>
         <item name="answer_1">X</item>
         <item name="answer_2">X</item>
         <item name="answer_3">X</item>
@@ -49,10 +59,10 @@
         <item name="answer_3">X</item>
     </string-array>
     <string-array name="tutorial_answers_4">
-        <item name="answer_0">Always</item>
-        <item name="answer_1">75%</item><!-- 1 hour timeout -->
-        <item name="answer_2">25%</item><!-- 4 hour timeout -->
-        <item name="answer_3">10%</item><!-- 8 hout timeout -->
+        <item name="answer_0">Always (smartest)</item>
+        <item name="answer_1">Very Often</item><!-- 1 hour timeout -->
+        <item name="answer_2">Often</item><!-- 4 hour timeout -->
+        <item name="answer_3">Not Often</item><!-- 8 hout timeout -->
     </string-array>
     <string-array name="tutorial_answers_5">
         <item name="answer_0">OK</item>

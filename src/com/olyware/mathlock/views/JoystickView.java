@@ -20,6 +20,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.Html;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -30,7 +31,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.olyware.mathlock.R;
-import com.olyware.mathlock.utils.Loggy;
 
 public class JoystickView extends View {
 	public static int IN_OUT_DURATION = 250, PULSE_DURATION = 400, PULSE_PAUSE = 3000;
@@ -195,9 +195,7 @@ public class JoystickView extends View {
 		this.ctx = ctx;
 		setFocusable(true);
 		Width = getMeasuredWidth();
-		Loggy.d("joystick", "initView oldHeight = " + Height);
 		Height = getMeasuredHeight();
-		Loggy.d("joystick", "initView Height = " + Height);
 		res = getResources();
 		numberOfChallenges = 0;
 		tutorial = 0;
@@ -360,14 +358,12 @@ public class JoystickView extends View {
 		if (d.size() <= apps.size()) {
 			icon.setBounds(-icon.getIntrinsicWidth() / 2, -icon.getIntrinsicHeight() / 2, icon.getIntrinsicWidth() / 2,
 					icon.getIntrinsicHeight() / 2);
-			Loggy.d("joystick", "add icon at " + (d.size() - 1));
 			d.add(d.size() - 1, icon);
 			invalidate();
 		}
 	}
 
 	public void removeApp(int loc) {
-		Loggy.d("joystick", "d.remove(" + loc + ")");
 		d.remove(loc);
 		if (isFirstApp) {
 			isFirstApp = false;
@@ -376,7 +372,6 @@ public class JoystickView extends View {
 	}
 
 	public void clearApps() {
-		Loggy.d("joystick", "d.clear() then add 2");
 		d.clear();
 		d.add(drawAdd);
 		d.add(drawTrash);
@@ -401,33 +396,65 @@ public class JoystickView extends View {
 		switch (tutorial) {
 		case 0:	// Press the Lock
 			setSidePaths(Height - pad);
+			options = false;
 			break;
 		case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
 			setSidePaths(Height - pad);
+			options = false;
 			break;
 		case 2: // Challenge your friends \n (slide the icon up)
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			options = true;
 			break;
 		case 3: // Change Any Setting at any time \n (slide the icon up)
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			options = true;
 			break;
 		case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
 			setSidePaths(Height - pad);
+			options = false;
 			break;
 		case 5: // Quiz mode for endless questions (slide the icon up)
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			options = true;
 			break;
 		case 6: // Check your progress (slide the icon up)
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			options = true;
 			break;
 		case 7: // Unlock more question packs (slide the icon up)
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			options = true;
 			break;
 		default:
 			setSidePaths(Height - pad);
+			options = false;
 			break;
 		}
 		invalidate();
+	}
+
+	private boolean shouldOpenOptionFromTutorial(int tutorial) {
+		switch (tutorial) {
+		case 0:	// Press the Lock
+			return false;
+		case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
+			return false;
+		case 2: // Challenge your friends \n (slide the icon up)
+			return true;
+		case 3: // Change Any Setting at any time \n (slide the icon up)
+			return true;
+		case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
+			return false;
+		case 5: // Quiz mode for endless questions (slide the icon up)
+			return true;
+		case 6: // Check your progress (slide the icon up)
+			return true;
+		case 7: // Unlock more question packs (slide the icon up)
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	public void showHint(int hint) {
@@ -491,30 +518,6 @@ public class JoystickView extends View {
 		rotateArrow.setTranslate(centerHorz - bmpArrow.getWidth() / 2, centerVert - bmpArrow.getHeight());
 		rotateArrow.postRotate(arrowRotation, centerHorz, centerVert);*/
 
-		switch (hint) {
-		case 0:	// Press the Lock
-			break;
-		case 1: // Double tap the Lock To Quickly Unlock Your Device \n (slide to "+" to add your favorite apps)
-			break;
-		case 2: // Challenge your friends \n (slide the icon up)
-			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
-			break;
-		case 3: // Change Any Setting at any time \n (slide the icon up)
-			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
-			break;
-		case 4: // How often would you like Hiq on your lockscreen (change this setting in settings / advanced)
-			break;
-		case 5: // Quiz mode for endless questions (slide the icon up)
-			break;
-		case 6: // Check your progress (slide the icon up)
-			break;
-		case 7: // Unlock more question packs (slide the icon up)
-			break;
-		default:
-			setSidePaths(Height - pad);
-			showHint = false;
-			break;
-		}
 		invalidate();
 	}
 
@@ -646,9 +649,7 @@ public class JoystickView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		Width = measure(widthMeasureSpec);
-		Loggy.d("joystick", "onMeasure oldHeight = " + Height);
 		Height = measure(heightMeasureSpec);
-		Loggy.d("joystick", "onMeasure Height = " + Height);
 
 		optionY = Height - radiusOfSettingsIcons;
 
@@ -664,7 +665,7 @@ public class JoystickView extends View {
 
 		dstHeight = radiusOfSettingsIcons * 2 + barHeight;
 
-		if (options)
+		if (options || shouldOpenOptionFromTutorial(tutorial))
 			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
 		else
 			setSidePaths(Height - pad);
@@ -683,10 +684,8 @@ public class JoystickView extends View {
 			// Return a default size of 480 if no bounds are specified.
 			result = 480;
 		} else if (specMode == MeasureSpec.AT_MOST) {
-			Loggy.d("measure at_most " + specSize);
 			result = specSize;
 		} else {
-			Loggy.d("measure exactly " + specSize);
 			// As you want to fill the available space
 			// always return the full available bounds.
 			result = specSize;
@@ -729,7 +728,6 @@ public class JoystickView extends View {
 				start = 1;
 			int end = d.size() - 1;
 			int end2 = Math.min(d.size() - 1, apps.size() - 1);
-			Loggy.d("joystick", "start(" + start + ")end(" + end + ")" + ")end2(" + end2 + ")");
 			for (int i = 1 - start; i < end - start; i++)
 				if (apps.get(i).getSelectDrag())
 					end++;
@@ -912,7 +910,6 @@ public class JoystickView extends View {
 
 	private void setAppCenters(boolean sel) {
 		appCenterVert = (barY - barHeight + drawBackBlue.getIntrinsicHeight() / 3) / 2;
-		Loggy.d("joystick", "barY(" + barY + ")barHeight(" + barHeight + ")blueHeight(" + (drawBackBlue.getIntrinsicHeight() / 3) + ")");
 		appCenterHorz = Width / 2;
 		int rApps = drawAdd.getIntrinsicHeight() / 2;
 		int rAppsY = appCenterVert - rApps - drawBackBlue.getIntrinsicHeight() / 3 - pad;
@@ -920,8 +917,6 @@ public class JoystickView extends View {
 		appAngle = Math.atan2(rApps * 3, Math.min(rAppsY, rAppsX));
 		int oldMaxApps = apps.size();
 		int maxApps = (int) Math.floor((3 * Math.PI / 2) / appAngle);
-		Loggy.d("joystick", "rApps(" + rApps + ")rAppsY(" + rAppsY + ")rAppsX(" + rAppsX + ")appAngle(" + appAngle + ")oldMaxApps("
-				+ oldMaxApps + ")maxApps(" + maxApps + ")");
 		if (maxApps < oldMaxApps) {
 			maxApps = oldMaxApps;
 		}
@@ -965,9 +960,9 @@ public class JoystickView extends View {
 		selectUnlock = false;
 		selectAppDrag = -1;
 
-		if (options)
+		if (options && tutorial < 0)
 			showStartAnimation(0, 3000);
-		else if (selectSideBar)
+		else if (selectSideBar && tutorial < 0)
 			showStartAnimation(1, 0);
 		else {
 			int currentRadius = (int) ((RectForUnlockPulse.right - RectForUnlockPulse.left) / 2);
@@ -1338,7 +1333,6 @@ public class JoystickView extends View {
 		float maxH = 0;
 		for (int i = 0; i < NumAnswers; i++) {
 			if (!equation[i]) {
-				Loggy.d("bounds(" + bounds[i].height() + ") layout(" + layout[i].getHeight() + ") answerSize(" + answerSizePix + ")");
 				maxH = Math.max(bounds[i].height(), layout[i].getHeight());
 				maxH = Math.max(maxH, answerSizePix);
 				if ((maxH > ((barY - barHeight) / 2 - pad * 3 - rUnlock)) && (Height > 0)) {
@@ -1383,8 +1377,8 @@ public class JoystickView extends View {
 						changeAnswerSize(layoutE[i].getTextSizeSP(), layoutE[i].getTextSizePix());
 				}
 			} else
-				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
-						false);
+				layout[i] = new StaticLayout(Html.fromHtml(answers[i]), answerTextPaint[i], Width / 2 - pad * 2,
+						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 		}
 		invalidate();
 	}
@@ -1394,19 +1388,15 @@ public class JoystickView extends View {
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alpha : 255);
 			if (!equation[i]) {
-				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
-						false);
+				layout[i] = new StaticLayout(Html.fromHtml(answers[i]), answerTextPaint[i], Width / 2 - pad * 2,
+						Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
 			}
 		}
 	}
 
 	private boolean isLayoutSplittingWords(String string, StaticLayout layout) {
 		for (int line = 0; line < layout.getLineCount() - 1; line++) {
-			/*char before = string.charAt(layout.getLineEnd(line) - 1);
-			char middle = string.charAt(layout.getLineEnd(line));
-			char after = string.charAt(layout.getLineEnd(line) + 1);*/
 			if (string.charAt(layout.getLineEnd(line) - 1) != ' ' && string.charAt(layout.getLineEnd(line) - 1) != '\n') {
-				// Loggy.d(line + " | char before(" + before + ") middle(" + middle + ") after(" + after + ") | " + string);
 				return true;
 			}
 		}

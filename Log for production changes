@@ -2,6 +2,7 @@ FOR PRODUCTION
 set Loggy to false
 set GoogleAnalytics in MyApplication to dry_run=false
 set IabHelper mDebugLog = false // Optional as Loggy provides the logging function
+set startingPMoney to 0
 
 FOR TESTING ATTRIBUTION
 C:\Program Files\Android\android-sdk\platform-tools>adb shell am broadcast -a co

@@ -33,19 +33,21 @@ public class ChirpAdsService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Loggy.d("onStartCommand intent = " + intent.toString());
-		String pack = intent.getExtras().getString("package");
-		Loggy.d("onStartCommand pack = " + pack);
-		if (!packagesToWatch.contains(new PackageData(pack, 0))) {
-			Loggy.d("add package to watch " + pack);
-			packagesToWatch.add(new PackageData(pack, System.currentTimeMillis()));
+		if (intent != null) {
+			Loggy.d("onStartCommand intent = " + intent.toString());
+			String pack = intent.getExtras().getString("package");
+			Loggy.d("onStartCommand pack = " + pack);
 			if (!packagesToWatch.contains(new PackageData(pack, 0))) {
-				Loggy.d("SHOULD NOT HAPPEN");
-			} else {
-				Loggy.d("GOOD WORK");
+				Loggy.d("add package to watch " + pack);
+				packagesToWatch.add(new PackageData(pack, System.currentTimeMillis()));
+				if (!packagesToWatch.contains(new PackageData(pack, 0))) {
+					Loggy.d("SHOULD NOT HAPPEN");
+				} else {
+					Loggy.d("GOOD WORK");
+				}
 			}
+			startService();
 		}
-		startService();
 		return super.onStartCommand(intent, flags, startId);
 	}
 

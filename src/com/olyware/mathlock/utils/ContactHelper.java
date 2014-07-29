@@ -95,7 +95,6 @@ public class ContactHelper {
 				contactsJSON += "," + contact.getJSON();
 		}
 		contactsJSON += "]";
-		Loggy.d("contacts to store = " + contactsJSON);
 		editorPrefsContacts.putString(CONTACTS, contactsJSON).commit();
 	}
 
@@ -105,7 +104,6 @@ public class ContactHelper {
 		if (!contactsJSON.equals("")) {
 			try {
 				List<CustomContactData> contacts = new ArrayList<CustomContactData>();
-				Loggy.d("contacts to get = " + contactsJSON);
 				JSONArray contactsJSONArray = new JSONArray(contactsJSON);
 				for (int i = 0; i < contactsJSONArray.length(); i++) {
 					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
@@ -210,7 +208,8 @@ public class ContactHelper {
 
 	public static String getPhoneNumberFromString(String phoneNumber) {
 		phoneNumber = phoneNumber.replaceAll("[^\\d]", "");
-		phoneNumber = (phoneNumber.charAt(0) == '1') ? phoneNumber.substring(1) : phoneNumber;
+		if (phoneNumber.length() > 1)
+			phoneNumber = (phoneNumber.charAt(0) == '1') ? phoneNumber.substring(1) : phoneNumber;
 		return phoneNumber;
 	}
 
