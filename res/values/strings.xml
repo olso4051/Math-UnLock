@@ -66,7 +66,7 @@
     <!-- Sharing -->
     <string name="deeldat_api_key">1716a4ac3509884eb5cf0245d392be52</string>
     <string name="share_title">Could You Answer This Question To Unlock Your Phone?</string>
-    <string name="ask_to_share0">Challenge Friends</string>
+    <string name="ask_to_share0">Share Question</string>
     <string name="cancelled">Cancelled</string>
     <string name="error">Error</string>
     <string name="permission_not_granted">Facebook permissions were not granted</string>

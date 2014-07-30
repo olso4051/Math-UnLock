@@ -251,6 +251,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		@Override
 		protected void onPostExecute(Void v) {
 			Loggy.d("test", "database updated");
+			Loggy.d("setProblemAndAnswer from database updated");
 			setProblemAndAnswer();
 			super.onPostExecute(null);
 		}
@@ -527,8 +528,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						break;
 					}
 					JoystickSelected(s, vibrate, Extra);
-					if (setProblem)
+					if (setProblem) {
+						Loggy.d("setProblemAndAnswer from setProblem onSelect");
 						setProblemAndAnswer();
+					}
 				}
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
@@ -726,8 +729,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// startCountdown();
 			// resetTimer();
 			// if (changed)
-			if (!unlocking)
+			if (!unlocking) {
+				Loggy.d("setProblemAndAnswer from not unlocking");
 				setProblemAndAnswer();
+			}
 
 			if (!UnlockedPackages)
 				displayInfo(true);
@@ -738,10 +743,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 					&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
 				displayRateShare();
-			else if (sharedPrefs.getBoolean("hints", true)) {
-				setProblemAndAnswer();
-				// displayHints(0, false);
-			} else if (fromTutorial) {
+			else if (fromTutorial) {
+				Loggy.d("setProblemAndAnswer from tutorial onResume");
 				setProblemAndAnswer();
 			}
 
@@ -1551,6 +1554,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
+						Loggy.d("setProblemAndAnswer from tutorial ABCD");
 						setProblemAndAnswer();
 					}
 				}, 500);
@@ -1571,6 +1575,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
+						Loggy.d("setProblemAndAnswer from correct quiz mode");
 						setProblemAndAnswer();
 					}
 				}, 500);
@@ -1627,9 +1632,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 			break;
 		case Missed:	// missed the lock button
-			if (getSharedPreferences("Stats", 0).getLong("totalTime", 0) == 0) {
-				// displayHints(0, true);
-			}
 			break;
 		case QuickUnlock:	// quickUnlock activated
 			sendEvent("question", "double_tap", "quick_unlock", null);
@@ -1660,6 +1662,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					getDeepLinkToShare());
 			break;
 		case Touch:
+			Loggy.d("setProblemAndAnswer from touch");
 			setProblemAndAnswer();
 			break;
 		case Exit:
@@ -1927,6 +1930,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			@Override
 			public void onActiveStateSelected() {
 				challengeDialog.dismiss();
+				Loggy.d("setProblemAndAnswer from active challenge");
 				setProblemAndAnswer();
 			}
 
@@ -1975,6 +1979,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Accepted,
 												CustomContactData.ChallengeState.Active);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
+										Loggy.d("setProblemAndAnswer from accept challenge");
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
@@ -2040,8 +2045,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 						UnlockedPackages = isAnyPackageUnlocked();
 						EnabledPackages = getEnabledPackages();
+						Loggy.d("setProblemAndAnswer from pick a pack");
 						setProblemAndAnswer();
-						// displayHints(0, false);
 					}
 				});
 			} else {
