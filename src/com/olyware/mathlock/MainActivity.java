@@ -967,7 +967,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		int statusBarHeight = PreferenceHelper.getLayoutStatusBarHeight(this, -1);
 		Loggy.d("w = " + w + " h = " + h + " sh = " + statusBarHeight);
 		if (w > 0 && h > 0 && statusBarHeight >= 0) {
-			BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
+			BitmapDrawable background;
+			try {
+				background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
+			} catch (SecurityException e) {
+				return getDimOrGradient(dimOrGradient);
+			}
 
 			// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
 			Bitmap bitmap = background.getBitmap();
