@@ -236,6 +236,7 @@ public class PreferenceHelper {
 
 	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status,
 			CustomContactData.ChallengeState state, String userName, String hiqUserID, int bet, int diffMin, int diffMax, int questions) {
+
 		Loggy.d("set challengeID(" + challengeID + ") and username(" + userName + ") and user_id(" + hiqUserID + ")");
 		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
 		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_STATUS, status.getValue());
@@ -277,7 +278,10 @@ public class PreferenceHelper {
 
 	public static String getChallengeIDFromHiqUserID(Context ctx, String hiqUserID) {
 		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
-		return sharedPrefsChallenge.getString(hiqUserID, "");
+		if (!hiqUserID.equals(""))
+			return sharedPrefsChallenge.getString(hiqUserID, "");
+		else
+			return "";
 	}
 
 	public static String getChallengeUserName(Context ctx, String challengeID) {
@@ -438,9 +442,9 @@ public class PreferenceHelper {
 	}
 
 	public static int getTutorialQuestionNumber(Context ctx) {
-		SharedPreferences sharedPrefsLayout = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE);
-		int question = sharedPrefsLayout.getInt(TUTORIAL_QUESTION, 0);
-		boolean extendedTutorial = sharedPrefsLayout.getBoolean(TUTORIAL_EXTENDED, false);
+		SharedPreferences sharedPrefsTutorial = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE);
+		int question = sharedPrefsTutorial.getInt(TUTORIAL_QUESTION, 0);
+		boolean extendedTutorial = sharedPrefsTutorial.getBoolean(TUTORIAL_EXTENDED, false);
 		if (question >= 0 && question <= 4)
 			return question;
 		else if (extendedTutorial)
@@ -478,7 +482,8 @@ public class PreferenceHelper {
 		}
 	}
 
-	public static void setLockscreenFrequency(Context ctx, JoystickSelect s) {
+	public static boolean setLockscreenFrequency(Context ctx, JoystickSelect s) {
+		SharedPreferences sharedPrefsTutorial = ctx.getSharedPreferences(TUTORIAL_PREFS, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editPrefs = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
 		if (s == JoystickSelect.A) {
 			editPrefs.putString("lockscreen2", "0");
@@ -490,6 +495,8 @@ public class PreferenceHelper {
 			editPrefs.putString("lockscreen2", "7");
 		}
 		editPrefs.commit();
+
+		return sharedPrefsTutorial.getBoolean(TUTORIAL_EXTENDED, false);
 	}
 
 	public static boolean getAskedForFriendsPermission(Context ctx) {

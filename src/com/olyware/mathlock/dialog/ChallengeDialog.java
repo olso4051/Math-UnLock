@@ -18,8 +18,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.adapter.ChallengeData;
 import com.olyware.mathlock.adapter.ContactArrayAdapter;
 import com.olyware.mathlock.adapter.ContactHashes;
+import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.service.RefreshContacts;
 import com.olyware.mathlock.utils.ChallengeBuilder;
@@ -41,6 +43,7 @@ public class ChallengeDialog extends DialogFragment {
 	private EditText inputSearch;
 	private int lastLength = 0, numFriends = 0;
 	private ChallengeDialogListener listener;
+	private DatabaseManager dbManager;
 	private RefreshContacts refreshContactsTask = null;
 
 	public interface ChallengeDialogListener {
@@ -59,6 +62,10 @@ public class ChallengeDialog extends DialogFragment {
 
 	public void setChallengeDialogListener(ChallengeDialogListener listener) {
 		this.listener = listener;
+	}
+
+	public void setDatabaseManager(DatabaseManager dbManager) {
+		this.dbManager = dbManager;
 	}
 
 	@Override
@@ -125,7 +132,7 @@ public class ChallengeDialog extends DialogFragment {
 			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
-					if (selectedContact.hasHiqUserID()) {
+					if (selectedContact.hasHiqUserID() || selectedContact.isRandom()) {
 						String challengeID = selectedContact.getChallengeID();
 						String displayName = selectedContact.getDisplayName();
 						int bet = PreferenceHelper.getChallengeBet(getActivity(), challengeID);
@@ -211,7 +218,7 @@ public class ChallengeDialog extends DialogFragment {
 								contacts.add(contactData);
 								allContacts.add(contactData);
 							} else {
-								int replaceAddition = 1 + ((replaceID > numFriends) ? 1 : 0);
+								int replaceAddition = 1 + ((replaceID > numFriends) ? 2 : 0);
 								contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
 								contacts.get(replaceID + replaceAddition).addPhoneNumbers(contactData.getPhoneNumbers());
 								allContacts.get(replaceID).addEmails(contactData.getEmails());
@@ -229,7 +236,7 @@ public class ChallengeDialog extends DialogFragment {
 							int replaceAddition = 1;
 							if (!contacts.get(id + 1).isFriend()) {
 								numFriends++;
-								replaceAddition += 1;
+								replaceAddition += 2;
 							}
 							String oldHiqUserID = contacts.get(id + replaceAddition).getHiqUserID();
 							if (!oldHiqUserID.equals(hiqUserID)) {
@@ -262,13 +269,13 @@ public class ChallengeDialog extends DialogFragment {
 									int mergeID = ids.get(0);
 									int mergeReplaceAddition = 1;
 									if (!contacts.get(mergeID + 1).isFriend()) {
-										mergeReplaceAddition += 1;
+										mergeReplaceAddition += 2;
 									}
 									for (int i = 1; i < ids.size(); i++) {
 										int replaceAddition = 1;
 										int id = ids.get(i);
 										if (!contacts.get(id + 1).isFriend()) {
-											replaceAddition += 1;
+											replaceAddition += 2;
 										}
 										contacts.get(mergeID + mergeReplaceAddition).mergeWith(contacts.get(id + replaceAddition));
 										allContacts.get(mergeID).mergeWith(allContacts.get(id));
@@ -277,13 +284,33 @@ public class ChallengeDialog extends DialogFragment {
 										int replaceAddition = 1;
 										int id = ids.get(i);
 										if (!contacts.get(id + 1).isFriend()) {
-											replaceAddition += 1;
+											replaceAddition += 2;
 										}
 										contacts.remove(id + replaceAddition);
 										allContacts.remove(id);
 									}
 								}
 								adapter.notifyDataSetChanged();
+							}
+							if (dbManager != null) {
+								if (!dbManager.isDestroyed()) {
+									ChallengeData randomChallengeData = dbManager.getRandomChallengeID(hashesList);
+									if (!randomChallengeData.getChallengeID().equals("")) {
+										for (int id = 0; id < contacts.size(); id++) {
+											if (contacts.get(id).isRandom()) {
+												String challengeID = randomChallengeData.getChallengeID();
+												contacts.get(id).setHiqUserID(randomChallengeData.getUserID());
+												contacts.get(id).setHiqUserName(
+														PreferenceHelper.getChallengeUserName(getActivity(), challengeID));
+												contacts.get(id).setState(
+														PreferenceHelper.getChallengeStateFromID(getActivity(), challengeID));
+												contacts.get(id).setChallengeID(challengeID);
+												adapter.notifyDataSetChanged();
+												break;
+											}
+										}
+									}
+								}
 							}
 							Loggy.d("storing contacts");
 							ContactHelper.storeContacts(getActivity(), allContacts);
@@ -295,6 +322,7 @@ public class ChallengeDialog extends DialogFragment {
 
 	private void addSectionHeaders() {
 		contacts.add(new CustomContactData(getString(R.string.fragment_challenge_friends), "", 0));
+		contacts.add(new CustomContactData("Random"));
 		contacts.add(new CustomContactData(getString(R.string.fragment_challenge_friends_invite), "", 1));
 	}
 }

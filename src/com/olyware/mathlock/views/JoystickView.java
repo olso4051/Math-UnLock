@@ -792,7 +792,7 @@ public class JoystickView extends View {
 
 		// Draw the option bar text hints
 		if ((selectOptions[0]) || (selectOptions[1]) || (selectOptions[2]) || (selectOptions[3]) || (selectOptions[4])) {
-			boolean drawOnPath = false;// TODO make this true
+			boolean drawOnPath = true;// TODO make this true
 			if (android.os.Build.VERSION.SDK_INT >= 11 && android.os.Build.VERSION.SDK_INT <= 16) {
 				if (canvas.isHardwareAccelerated()) {
 					drawOnPath = false;// TODO make this false
@@ -1383,8 +1383,8 @@ public class JoystickView extends View {
 						break;
 					}
 					if (shouldPulseLock) {
-						centerX = (int) (easingPulseFunctionX[iconFrame] + Width / 2);
-						centerY = (int) (easingPulseFunctionY[iconFrame] + (barY - barHeight + centerOffset) / 2);
+						centerX = (int) (easingPulseFunctionX[pulseFrame] + Width / 2);
+						centerY = (int) (easingPulseFunctionY[pulseFrame] + (barY - barHeight + centerOffset) / 2);
 						RectForUnlockPulse.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
 						RectForUnlock.set(centerX - rUnlock, centerY - rUnlock, centerX + rUnlock, centerY + rUnlock);
 					}
@@ -1551,7 +1551,14 @@ public class JoystickView extends View {
 	private void setArc(int startDeg, int totalDeg) {
 		RectF optionPathRectF = new RectF(optionX - swipeLengthOption, optionY - swipeLengthOption, optionX + swipeLengthOption, optionY
 				+ swipeLengthOption);
-		optionPathCenterX = (int) (optionPathRectF.centerX());
+		int centerX = (int) (optionPathRectF.centerX());
+		Rect bounds = new Rect();
+		optionPaintWhite.getTextBounds(res.getString(R.string.swipe_here), 0, res.getString(R.string.swipe_here).length(), bounds);
+		if (centerX - bounds.width() / 2 < 0)
+			centerX -= centerX - bounds.width() / 2 - pad * 3;
+		else if (centerX + bounds.width() / 2 > Width)
+			centerX += Width - centerX - bounds.width() / 2 - pad * 3;
+		optionPathCenterX = centerX;
 		optionPathCenterY = (int) (optionPathRectF.top);
 		optionPath.reset();
 		optionPath.arcTo(optionPathRectF, startDeg, totalDeg);

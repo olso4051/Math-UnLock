@@ -52,7 +52,6 @@ public class ContactHelper {
 
 	public static RefreshContacts getCustomContactDataAsync(final Context ctx, List<CustomContactData> contacts, boolean refreshPhonebook,
 			final contactDataListener listener) {
-		// TODO user phone number instead of ""
 		RefreshContacts c = new RefreshContacts(ctx, contacts, refreshPhonebook) {
 			@Override
 			protected void onProgressUpdate(CustomContactData... values) {
@@ -248,13 +247,14 @@ public class ContactHelper {
 			for (int i = 0; i < contacts.size(); i++) {
 				boolean found = false;
 				CustomContactData contact = contacts.get(i);
+
 				// Search contacts facebook hashes
 				for (int location = 0; location < searches.size(); location++) {
-					String search = searches.get(location).getFacebookHash();
+					String searchFacebookHash = searches.get(location).getFacebookHash();
 					String facebookHash = contact.getFacebookHash();
-					if (facebookHash != null && search != null) {
-						if (!facebookHash.equals("") && !search.equals("") && facebookHash.equals(search)) {
-							Loggy.d("contact facebook = " + contact.getFacebookHash() + " |search = " + search);
+					if (facebookHash != null && searchFacebookHash != null) {
+						if (!facebookHash.equals("") && !searchFacebookHash.equals("") && facebookHash.equals(searchFacebookHash)) {
+							Loggy.d("contact facebook = " + contact.getFacebookHash() + " |search = " + searchFacebookHash);
 							// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
 							Loggy.d("test", "sending facebook friend to listener");
 							listener.onFriendContactFound(i, location);
@@ -266,13 +266,11 @@ public class ContactHelper {
 
 				// Search contacts phone hashes
 				if (!found) {
-					List<String> phoneHashes = new ArrayList<String>();
-					phoneHashes.addAll(contact.getPhoneHashs());
-					for (String phoneHash : phoneHashes) {
+					for (String phoneHash : contact.getPhoneHashs()) {
 						for (int location = 0; location < searches.size(); location++) {
-							String search = searches.get(location).getPhoneHash();
-							if (phoneHash != null && search != null) {
-								if (!phoneHash.equals("") && !search.equals("") && phoneHash.equals(search)) {
+							String searchPhoneHash = searches.get(location).getPhoneHash();
+							if (phoneHash != null && searchPhoneHash != null) {
+								if (!phoneHash.equals("") && !searchPhoneHash.equals("") && phoneHash.equals(searchPhoneHash)) {
 									// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
 									Loggy.d("test", "sending contacts friend to listener");
 									listener.onFriendContactFound(i, location);
@@ -305,22 +303,27 @@ public class ContactHelper {
 				Loggy.d("test", "start = " + start);
 				for (int i = start; i < contacts.size(); i++) {
 					CustomContactData contact = contacts.get(i);
+
 					// Search contacts facebook hashes
-					if (!search.getFacebookHash().equals("")) {
-						if (contact.getFacebookHash() != null && contact.getFacebookHash().equals(search.getFacebookHash())) {
+					String searchFacebook = search.getFacebookHash();
+					String facebookHash = contact.getFacebookHash();
+					if (facebookHash != null && searchFacebook != null) {
+						if (!facebookHash.equals("") && !searchFacebook.equals("") && facebookHash.equals(searchFacebook)) {
 							if (!indexes.contains(i))
 								indexes.add(i);
 						}
 					}
+
 					// Search contacts phone hashes
-					if (!search.getPhoneHash().equals("")) {
-						List<String> phoneHashes = new ArrayList<String>();
-						phoneHashes.addAll(contact.getPhoneHashs());
-						for (String phoneHash : phoneHashes) {
-							if (phoneHash.equals(search.getPhoneHash())) {
-								if (!indexes.contains(i)) {
-									indexes.add(i);
-									break;
+					String searchPhoneHash = search.getPhoneHash();
+					if (searchPhoneHash != null) {
+						for (String phoneHash : contact.getPhoneHashs()) {
+							if (phoneHash != null) {
+								if (!phoneHash.equals("") && !searchPhoneHash.equals("") && phoneHash.equals(searchPhoneHash)) {
+									if (!indexes.contains(i)) {
+										indexes.add(i);
+										break;
+									}
 								}
 							}
 						}
@@ -334,6 +337,18 @@ public class ContactHelper {
 		return indexes;
 	}
 
+	public static boolean findContact(List<CustomContactData> contacts, String searchHiqUserID) {
+		for (int i = 0; i < contacts.size(); i++) {
+			String hiqUserID = contacts.get(i).getHiqUserID();
+			if (hiqUserID != null && searchHiqUserID != null) {
+				if (!hiqUserID.equals("") && !searchHiqUserID.equals("") && hiqUserID.equals(searchHiqUserID)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static CustomContactData findContact(Context ctx, FindType findType, ContactHashes search) {
 		List<CustomContactData> contacts = new ArrayList<CustomContactData>();
 		contacts.addAll(getStoredContacts(ctx));
@@ -343,22 +358,26 @@ public class ContactHelper {
 		case PhoneAndFacebookHASH:
 			for (int i = 0; i < contacts.size(); i++) {
 				CustomContactData contact = contacts.get(i);
+
 				// Search facebook hashes
-				if (contact.getFacebookHash() != null && !contact.getFacebookHash().equals("") && search.getFacebookHash() != null
-						&& !search.getFacebookHash().equals("")) {
-					if (contact.getFacebookHash().equals(search.getFacebookHash())) {
-						// matchingIndex.get(location).add(i);
+				String searchFacebookHash = search.getFacebookHash();
+				String facebookHash = contact.getFacebookHash();
+				if (facebookHash != null && searchFacebookHash != null) {
+					if (!facebookHash.equals("") && !searchFacebookHash.equals("") && facebookHash.equals(searchFacebookHash)) {
 						return contact;
 					}
 				}
 
-				// Search phone hashes
-				List<String> phoneHashes = new ArrayList<String>();
-				phoneHashes.addAll(contact.getPhoneHashs());
-				if (search.getPhoneHash() != null && !search.getPhoneHash().equals("")) {
-					for (String phoneHash : phoneHashes) {
-						if (phoneHash != null && phoneHash.equals(search.getPhoneHash())) {
-							return contact;
+				// search phone hashes
+				String searchPhoneHash = search.getPhoneHash();
+				if (searchPhoneHash != null) {
+					if (!searchPhoneHash.equals("")) {
+						for (String phoneHash : contact.getPhoneHashs()) {
+							if (phoneHash != null) {
+								if (!phoneHash.equals("") && phoneHash.equals(searchPhoneHash)) {
+									return contact;
+								}
+							}
 						}
 					}
 				}

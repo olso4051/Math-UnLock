@@ -508,7 +508,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						break;
 					case 4: // Lockscreen Frequency
 						if (s == JoystickSelect.A || s == JoystickSelect.B || s == JoystickSelect.C || s == JoystickSelect.D) {
-							PreferenceHelper.setLockscreenFrequency(MainActivity.this, s);
+							boolean continueQuizMode = PreferenceHelper.setLockscreenFrequency(MainActivity.this, s);
+							quizMode = joystick.setQuizMode(continueQuizMode);
 							PreferenceHelper.setTutorialQuestion(MainActivity.this, 5);
 						}
 						break;
@@ -776,6 +777,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				trackerGA.set(Fields.SESSION_CONTROL, "start");
 				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 				joystick.startAnimations();
+				new NotificationHelper(this).clearChallengeResultNotification();
 				// showWallpaper();
 			}
 		}
@@ -967,74 +969,73 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		int statusBarHeight = PreferenceHelper.getLayoutStatusBarHeight(this, -1);
 		Loggy.d("w = " + w + " h = " + h + " sh = " + statusBarHeight);
 		if (w > 0 && h > 0 && statusBarHeight >= 0) {
-			BitmapDrawable background;
 			try {
-				background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
+				BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
+
+				// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
+				Bitmap bitmap = background.getBitmap();
+
+				// set scaling factors
+				int x = bitmap.getWidth() / 2 - w / 2;
+				int y = bitmap.getHeight() / 2 - h / 2 + statusBarHeight;
+				int width = w;
+				int height = h - statusBarHeight;
+
+				Loggy.d("x = " + x + "y = " + y + "width = " + width + "height = " + height);
+				if (x < 0)
+					x = 0;
+				if (width > bitmap.getWidth())
+					width = bitmap.getWidth();
+				if (x + width > bitmap.getWidth())
+					width = bitmap.getWidth() - x;
+
+				if (y < 0)
+					y = 0;
+				if (height > bitmap.getHeight())
+					height = bitmap.getHeight();
+				if (y + height > bitmap.getHeight())
+					height = bitmap.getHeight() - y;
+
+				Loggy.d("x = " + x + "y = " + y + "width = " + width + "height = " + height);
+				if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0 && x + width > 0
+						&& x + width <= bitmap.getWidth() && y + height > 0 && y + height <= bitmap.getHeight()) {
+					// scale the bitmap to fit on the background
+					bitmap = Bitmap.createBitmap(bitmap, x, y, width, height);
+				} else {
+					// Should never happen but user reported y>bitmap.getHeight so here it is and x<0
+					Loggy.d("x,y,width,height wrong");
+					return getDimOrGradient(dimOrGradient);
+				}
+
+				if (!bitmap.isMutable()) {
+					// bitmap not mutable trying to create mutable one"
+					bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+					if (!bitmap.isMutable()) {
+						// bitmap still not mutable return default
+						Loggy.d("not mutable");
+						return getDimOrGradient(dimOrGradient);
+					}
+				}
+
+				Loggy.d("drawing wallpaper with dim and gradients");
+				Canvas canvas = new Canvas(bitmap);
+				canvas.drawBitmap(bitmap, 0, 0, null);
+				Rect dstRectForOpt = new Rect();
+				dstRectForOpt.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
+				Paint optPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+				optPaint.setStyle(Paint.Style.FILL);
+				if (dimOrGradient) {
+					canvas.drawARGB(150, 0, 0, 0);
+				} else {
+					optPaint.setShader(new LinearGradient(0, 0, 0, h, new int[] { Color.argb(150, 0, 0, 0), Color.argb(150, 0, 0, 0),
+							Color.argb(0, 0, 0, 0) }, new float[] { 0, 0.3f, 1 }, TileMode.MIRROR));
+					canvas.drawRect(dstRectForOpt, optPaint);
+				}
+
+				return bitmap;
 			} catch (SecurityException e) {
 				return getDimOrGradient(dimOrGradient);
 			}
-
-			// get wallpaper as a bitmap need two references since the blurred image is put back in the first reference
-			Bitmap bitmap = background.getBitmap();
-
-			// set scaling factors
-			int x = bitmap.getWidth() / 2 - w / 2;
-			int y = bitmap.getHeight() / 2 - h / 2 + statusBarHeight;
-			int width = w;
-			int height = h - statusBarHeight;
-
-			Loggy.d("x = " + x + "y = " + y + "width = " + width + "height = " + height);
-			if (x < 0)
-				x = 0;
-			if (width > bitmap.getWidth())
-				width = bitmap.getWidth();
-			if (x + width > bitmap.getWidth())
-				width = bitmap.getWidth() - x;
-
-			if (y < 0)
-				y = 0;
-			if (height > bitmap.getHeight())
-				height = bitmap.getHeight();
-			if (y + height > bitmap.getHeight())
-				height = bitmap.getHeight() - y;
-
-			Loggy.d("x = " + x + "y = " + y + "width = " + width + "height = " + height);
-			if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0 && x + width > 0
-					&& x + width <= bitmap.getWidth() && y + height > 0 && y + height <= bitmap.getHeight()) {
-				// scale the bitmap to fit on the background
-				bitmap = Bitmap.createBitmap(bitmap, x, y, width, height);
-			} else {
-				// Should never happen but user reported y>bitmap.getHeight so here it is and x<0
-				Loggy.d("x,y,width,height wrong");
-				return getDimOrGradient(dimOrGradient);
-			}
-
-			if (!bitmap.isMutable()) {
-				// bitmap not mutable trying to create mutable one"
-				bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-				if (!bitmap.isMutable()) {
-					// bitmap still not mutable return default
-					Loggy.d("not mutable");
-					return getDimOrGradient(dimOrGradient);
-				}
-			}
-
-			Loggy.d("drawing wallpaper with dim and gradients");
-			Canvas canvas = new Canvas(bitmap);
-			canvas.drawBitmap(bitmap, 0, 0, null);
-			Rect dstRectForOpt = new Rect();
-			dstRectForOpt.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
-			Paint optPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			optPaint.setStyle(Paint.Style.FILL);
-			if (dimOrGradient) {
-				canvas.drawARGB(150, 0, 0, 0);
-			} else {
-				optPaint.setShader(new LinearGradient(0, 0, 0, h, new int[] { Color.argb(150, 0, 0, 0), Color.argb(150, 0, 0, 0),
-						Color.argb(0, 0, 0, 0) }, new float[] { 0, 0.3f, 1 }, TileMode.MIRROR));
-				canvas.drawRect(dstRectForOpt, optPaint);
-			}
-
-			return bitmap;
 		}
 		Loggy.d("bad layout");
 		return getDimOrGradient(dimOrGradient);
@@ -1139,6 +1140,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 				Loggy.d(challengeIDToDisplay);
 				if (!challengeIDToDisplay.equals("")) {
+					new NotificationHelper(MainActivity.this).clearChallengeStatusNotification();
 					ChallengeQuestion question = dbManager.getChallengeQuestion(challengeIDToDisplay);
 					if (question != null) {
 						fromChallenge = true;
@@ -1708,6 +1710,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private void getDeepLinkData(Uri data) {
 		if (data != null) {
+			String scheme = data.getScheme();
+			String host = data.getHost();
+			String path = data.getPath();
+			String coinHash = data.getQueryParameter(getString(R.string.coin_query));
+			Loggy.d("scheme(" + scheme + ")host(" + host + ")path(" + path + ")coins(" + coinHash + ")");
+			if (scheme != null && host != null && path != null && coinHash != null) {
+				if (scheme.equals(getString(R.string.coin_scheme)) && host.equals(getString(R.string.coin_host))
+						&& path.equals(getString(R.string.coin_path))) {
+					MoneyHelper.addPromoCoins(this, coinHash);
+				}
+			}
 			// String scheme = "sharequestion";
 			String target = "http://deeldat.com/f/";
 			String url = data.toString();
@@ -1856,6 +1869,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		sendEvent("social", "challenge_selected", "", null);
 		final ChallengeDialog challengeDialog = new ChallengeDialog();
 		challengeDialog.setCancelable(true);
+		challengeDialog.setDatabaseManager(dbManager);
 		challengeDialog.setChallengeDialogListener(new ChallengeDialog.ChallengeDialogListener() {
 			@Override
 			public void onInviteSelected(String address) {
@@ -1900,9 +1914,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 												if (!dbManager.isDestroyed()) {
 													dbManager.addChallengeQuestions(getChallengeID(), getGenericQuestions(),
 															builder.getUserName());
+													String userID = builder.getUserHash();
+													if (userID.equals(""))
+														userID = getOpponentUserID();
 													PreferenceHelper.storeChallengeStatus(MainActivity.this, getChallengeID(),
 															ChallengeStatus.Undefined, CustomContactData.ChallengeState.Sent,
-															builder.getUserName(), builder.getUserHash(), getBet(), getDifficultyMin(),
+															builder.getUserName(), userID, getBet(), getDifficultyMin(),
 															getDifficultyMax(), getQuestionNumber());
 													success = true;
 													String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
@@ -1987,9 +2004,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										Loggy.d("setProblemAndAnswer from accept challenge");
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
+										new NotificationHelper(MainActivity.this).clearChallengeNotification(challengeID);
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
+
 										sendEvent("social", "challenge_accepted", encryptedUserID, (long) bet);
 										Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[18], EggMaxValues[18]));
 									} else {
@@ -2004,6 +2023,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								@Override
 								protected void onPostExecute(Integer result) {
 									if (result == 0) {
+										new NotificationHelper(MainActivity.this).clearChallengeNotification(challengeID);
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
 												CustomContactData.ChallengeState.None);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();

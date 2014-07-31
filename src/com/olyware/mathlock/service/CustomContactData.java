@@ -13,9 +13,10 @@ import com.olyware.mathlock.utils.ContactHelper;
 public class CustomContactData implements Comparable<CustomContactData> {
 	final private static String FacebookContact = "Facebook";
 	final private static String PhoneContact = "Phonebook";
+	final private static String RandomContact = "Hiq User";
 	private String name, description, hiqUserID, hiqUserName, facebookUserID, facebookName, challengeID;
 	private List<String> emails, phoneNumbers;
-	private boolean isFriend, isContact;
+	private boolean isFriend, isContact, isRandom = false;
 	private int section, contact;
 	private List<Integer> contacts;
 	private ChallengeState state;
@@ -48,6 +49,25 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			this.imageResID = imageResource;
 			this.textColorID = textColor;
 			fonts = Typefaces.getInstance(MainActivity.getContext());
+		}
+
+		public int compare(ChallengeState compareState) {
+			if (value == compareState.value)
+				return 0;
+			else if (value == 0 && compareState.value != 0)
+				return -1;
+			else if (value == 2 && compareState.value != 0 && compareState.value != 2)
+				return -1;
+			else if (value == 1 && compareState.value == 3)
+				return -1;
+			else if (compareState.value == 0 && value != 0)
+				return 1;
+			else if (compareState.value == 2 && value != 0 && value != 2)
+				return 1;
+			else if (compareState.value == 1 && value == 3)
+				return 1;
+			else
+				return 0;
 		}
 
 		public int getValue() {
@@ -143,13 +163,14 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		}
 	}
 
-	public CustomContactData() {
+	private void setDefaults() {
 		this.name = "";
 		this.emails = new ArrayList<String>();
 		this.phoneNumbers = new ArrayList<String>();
 		this.contacts = new ArrayList<Integer>();
 		isFriend = false;
 		isContact = false;
+		isRandom = false;
 		section = -1;
 		contact = -1;
 		hiqUserID = "";
@@ -159,6 +180,18 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		challengeID = "";
 		this.description = "";
 		state = ChallengeState.getDefaultState();
+	}
+
+	public CustomContactData() {
+		setDefaults();
+	}
+
+	public CustomContactData(String name) {
+		setDefaults();
+		this.name = name;
+		isFriend = true;
+		isRandom = true;
+		isContact = true;
 	}
 
 	public CustomContactData(int contact, String userID, String hiqUserName) {
@@ -339,6 +372,9 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	}
 
 	public String getDisplayDescription() {
+		if (isRandom) {
+			return RandomContact;
+		}
 		String display = getDisplayContact();
 		String desc = "";
 		if (hiqUserID.equals("")) {
@@ -402,8 +438,12 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		return facebookUserID;
 	}
 
+	public boolean isRandom() {
+		return isRandom;
+	}
+
 	public boolean isFriend() {
-		return (isFriend && !hiqUserID.equals(""));
+		return ((isFriend && !hiqUserID.equals("")) || isRandom);
 	}
 
 	public boolean isContact() {
@@ -564,15 +604,24 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			else
 				return 1;
 		}
+		int compareState = state.compare(data.state);
 		int compareName = getDisplayName().compareToIgnoreCase(data.getDisplayName());
 		if (isFriend() == data.isFriend()) {
-			// if both are friends or not friends then compare by name
-			if (compareName == 0) {
-				// if both have same name ignoring case then return tie
-				return 0;
+			// if both are friends or not friends then compare by challenge state then name
+			if (isRandom)
+				return 1;
+			else if (data.isRandom)
+				return -1;
+			if (compareState == 0) {
+				if (compareName == 0) {
+					// if both have same name ignoring case then return tie
+					return 0;
+				} else {
+					// sort A-Z
+					return compareName / Math.abs(compareName);
+				}
 			} else {
-				// sort A-Z
-				return compareName / Math.abs(compareName);
+				return compareState;
 			}
 		} else if (isFriend() && !data.isFriend()) {
 			// put friends at top of list

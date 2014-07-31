@@ -32,6 +32,7 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 	final private static String UTM_TERM = "utm_term";
 	final private static String UTM_CAMPAIGN = "utm_campaign";
 	final private static String SHARE_ID = "deeldat_share_id";
+	final private static String PROMO_COIN_ID = "promo_coin";
 
 	// final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
 
@@ -103,6 +104,7 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 		String medium = sharedPrefsGA.getString(UTM_MEDIUM, "");
 		String content = sharedPrefsGA.getString(UTM_CONTENT, "");
 		String shareID = sharedPrefsGA.getString(SHARE_ID, "");
+		String coinHash = sharedPrefsGA.getString(PROMO_COIN_ID, "");
 		Loggy.d("source(" + source + ")medium(" + medium + ")content(" + content + ")shareID(" + shareID + ")");
 		// is this a referral link from share or invite
 		if (source.equals("app") && (medium.equals("share") || medium.equals("invite"))) {
@@ -125,6 +127,8 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 		if (!shareID.equals("")) {
 			new PostDeelDatInstall(context, ShareHelper.DEELDAT_APP_ID, shareID).execute();
 		}
-
+		if (!coinHash.equals("")) {
+			new GetPromoCoins(context, coinHash).execute();
+		}
 	}
 }

@@ -6,9 +6,11 @@ import android.os.Handler;
 import android.widget.TextView;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.service.GetPromoCoins;
 
 public class MoneyHelper {
 
+	final public static long UTC_SEPTEMBER_1 = 1409529600000l;
 	final private static int updateMoneyTime = 1000;
 	final private static String Money = "money";
 	final private static String PaidMoney = "paid_money";
@@ -118,5 +120,33 @@ public class MoneyHelper {
 	public static int getModifiedBet(Context context, int maxBet) {
 		int newMaxBet = getMaxBet(context);
 		return Math.min(newMaxBet, maxBet);
+	}
+
+	public static void addPromoCoins(final Context context, final String coinHash) {
+		sharedPrefsMoney = context.getSharedPreferences(context.getString(R.string.pref_money), Context.MODE_PRIVATE);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		if (System.currentTimeMillis() < UTC_SEPTEMBER_1) {
+			if (coinHash.equals(context.getString(R.string.coin_fountain_1000))) {
+				if (!sharedPrefsMoney.getBoolean(coinHash, false)) {
+					Loggy.d("increase coins");
+					increasePendingMoney(context, 1000);
+					editorPrefsMoney.putBoolean(coinHash, true).commit();
+				}
+			} else if (coinHash.equals(context.getString(R.string.coin_fountain_2000))) {
+				if (!sharedPrefsMoney.getBoolean(coinHash, false)) {
+					Loggy.d("increase coins");
+					increasePendingMoney(context, 2000);
+					editorPrefsMoney.putBoolean(coinHash, true).commit();
+				}
+			} else if (coinHash.equals(context.getString(R.string.coin_fountain_3000))) {
+				if (!sharedPrefsMoney.getBoolean(coinHash, false)) {
+					Loggy.d("increase coins");
+					increasePendingMoney(context, 3000);
+					editorPrefsMoney.putBoolean(coinHash, true).commit();
+				}
+			}
+		} else {
+			new GetPromoCoins(context, coinHash).execute();
+		}
 	}
 }

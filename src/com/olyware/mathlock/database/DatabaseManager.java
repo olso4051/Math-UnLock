@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.ChallengeData;
+import com.olyware.mathlock.adapter.ContactHashes;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.ChallengeQuestionContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
@@ -510,6 +511,31 @@ public class DatabaseManager {
 			return DatabaseModelFactory.buildChallengeIDs(cursor);
 		} else
 			return new HashMap<String, ChallengeData>();
+	}
+
+	public ChallengeData getRandomChallengeID(List<ContactHashes> hashes) {
+		if (db.isOpen()) {
+			String where = "";
+			boolean first = true;
+			for (ContactHashes hash : hashes) {
+				if (first) {
+					first = false;
+					where = ChallengeQuestionContract.USER_ID + " != '" + hash.getHiqUserHash() + "'";
+				} else {
+					where = where + " AND " + ChallengeQuestionContract.USER_ID + " != '" + hash.getHiqUserHash() + "'";
+				}
+			}
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.IDS_AND_SCORE, where, null, null, null, null);
+			Map<String, ChallengeData> challengeIDs = DatabaseModelFactory.buildChallengeIDs(cursor);
+			if (challengeIDs.size() > 0) {
+				for (Map.Entry<String, ChallengeData> entry : challengeIDs.entrySet()) {
+					return entry.getValue();
+				}
+				return new ChallengeData("", "", 0);
+			} else
+				return new ChallengeData("", "", 0);
+		} else
+			return new ChallengeData("", "", 0);
 	}
 
 	public int removeChallengeQuestions(long ID) {
