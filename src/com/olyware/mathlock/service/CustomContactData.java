@@ -1,5 +1,7 @@
 package com.olyware.mathlock.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -501,21 +503,21 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	public String getJSON() {
 		String json = "{";
 		json += "\"" + ContactHelper.CONTACT_IS_FRIEND + "\":\"" + isFriend + "\",";
-		json += "\"" + ContactHelper.CONTACT_HIQ_USER_ID + "\":\"" + hiqUserID + "\",";
-		json += "\"" + ContactHelper.CONTACT_HIQ_NAME + "\":\"" + hiqUserName + "\",";
-		json += "\"" + ContactHelper.CONTACT_FACEBOOK_USER_ID + "\":\"" + facebookUserID + "\",";
-		json += "\"" + ContactHelper.CONTACT_FACEBOOK_NAME + "\":\"" + facebookName + "\",";
-		json += "\"" + ContactHelper.CONTACT_NAME + "\":\"" + name + "\",";
+		json += "\"" + ContactHelper.CONTACT_HIQ_USER_ID + "\":\"" + encodeJSON(hiqUserID) + "\",";
+		json += "\"" + ContactHelper.CONTACT_HIQ_NAME + "\":\"" + encodeJSON(hiqUserName) + "\",";
+		json += "\"" + ContactHelper.CONTACT_FACEBOOK_USER_ID + "\":\"" + encodeJSON(facebookUserID) + "\",";
+		json += "\"" + ContactHelper.CONTACT_FACEBOOK_NAME + "\":\"" + encodeJSON(facebookName) + "\",";
+		json += "\"" + ContactHelper.CONTACT_NAME + "\":\"" + encodeJSON(name) + "\",";
 		json += "\"" + ContactHelper.CONTACT_PHONE + "\":[";
 		boolean first = true;
 		if (phoneNumbers.size() > 0) {
 			json += "\"";
 			for (int i = 0; i < phoneNumbers.size(); i++) {
 				if (first) {
-					json += phoneNumbers.get(i) + "\"";
+					json += encodeJSON(phoneNumbers.get(i)) + "\"";
 					first = false;
 				} else
-					json += ",\"" + phoneNumbers.get(i) + "\"";
+					json += ",\"" + encodeJSON(phoneNumbers.get(i)) + "\"";
 			}
 		}
 		json += "],\"" + ContactHelper.CONTACT_EMAIL + "\":[";
@@ -524,14 +526,22 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			json += "\"";
 			for (int i = 0; i < emails.size(); i++) {
 				if (first) {
-					json += emails.get(i) + "\"";
+					json += encodeJSON(emails.get(i)) + "\"";
 					first = false;
 				} else
-					json += ",\"" + emails.get(i) + "\"";
+					json += ",\"" + encodeJSON(emails.get(i)) + "\"";
 			}
 		}
 		json += "]}";
 		return json;
+	}
+
+	private String encodeJSON(String s) {
+		try {
+			return URLEncoder.encode(s, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
 	}
 
 	public void setHiqUserName(String hiqUserName) {

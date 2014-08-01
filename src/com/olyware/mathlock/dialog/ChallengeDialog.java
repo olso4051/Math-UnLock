@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,6 +14,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -35,6 +37,9 @@ import com.olyware.mathlock.utils.PreferenceHelper;
  */
 public class ChallengeDialog extends DialogFragment {
 
+	final private static String MaxHeight = "max_height";
+	final private static boolean RandomChallenge = false;
+	final private static int RandomAddition = RandomChallenge ? 2 : 1;
 	final public static String TAG = "fragment_challenge";
 	private ListView lv;
 	private SwipeRefreshLayout swipeLayout;
@@ -68,11 +73,22 @@ public class ChallengeDialog extends DialogFragment {
 		this.dbManager = dbManager;
 	}
 
+	public static ChallengeDialog newInstance(Context ctx, int maxHeight) {
+		ChallengeDialog f = new ChallengeDialog();
+
+		Bundle args = new Bundle();
+		args.putInt(MaxHeight, maxHeight);
+
+		f.setArguments(args);
+
+		return f;
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		int style = DialogFragment.STYLE_NORMAL;
+		int style = DialogFragment.STYLE_NO_TITLE;
 		int theme = R.style.ChallengeTheme;
 		setStyle(style, theme);
 	}
@@ -80,7 +96,6 @@ public class ChallengeDialog extends DialogFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_challenge, container, false);
-		getDialog().setTitle(getString(R.string.fragment_challenge_title));
 
 		// search box
 		inputSearch = (EditText) v.findViewById(R.id.challenge_search);
@@ -202,6 +217,19 @@ public class ChallengeDialog extends DialogFragment {
 		super.onStop();
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		Bundle args = getArguments();
+		int maxHeight = args.getInt(MaxHeight);
+		if (maxHeight > 0) {
+			Window window = getDialog().getWindow();
+			int width = window.getAttributes().width;
+			int height = (int) (maxHeight * .80d);
+			window.setLayout(width, height);
+		}
+	}
+
 	private void refreshContacts(boolean refreshPhonebook) {
 		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
@@ -218,7 +246,7 @@ public class ChallengeDialog extends DialogFragment {
 								contacts.add(contactData);
 								allContacts.add(contactData);
 							} else {
-								int replaceAddition = 1 + ((replaceID > numFriends) ? 2 : 0);
+								int replaceAddition = 1 + ((replaceID > numFriends) ? RandomAddition : 0);
 								contacts.get(replaceID + replaceAddition).addEmails(contactData.getEmails());
 								contacts.get(replaceID + replaceAddition).addPhoneNumbers(contactData.getPhoneNumbers());
 								allContacts.get(replaceID).addEmails(contactData.getEmails());
@@ -236,7 +264,7 @@ public class ChallengeDialog extends DialogFragment {
 							int replaceAddition = 1;
 							if (!contacts.get(id + 1).isFriend()) {
 								numFriends++;
-								replaceAddition += 2;
+								replaceAddition += RandomAddition;
 							}
 							String oldHiqUserID = contacts.get(id + replaceAddition).getHiqUserID();
 							if (!oldHiqUserID.equals(hiqUserID)) {
@@ -269,13 +297,13 @@ public class ChallengeDialog extends DialogFragment {
 									int mergeID = ids.get(0);
 									int mergeReplaceAddition = 1;
 									if (!contacts.get(mergeID + 1).isFriend()) {
-										mergeReplaceAddition += 2;
+										mergeReplaceAddition += RandomAddition;
 									}
 									for (int i = 1; i < ids.size(); i++) {
 										int replaceAddition = 1;
 										int id = ids.get(i);
 										if (!contacts.get(id + 1).isFriend()) {
-											replaceAddition += 2;
+											replaceAddition += RandomAddition;
 										}
 										contacts.get(mergeID + mergeReplaceAddition).mergeWith(contacts.get(id + replaceAddition));
 										allContacts.get(mergeID).mergeWith(allContacts.get(id));
@@ -284,7 +312,7 @@ public class ChallengeDialog extends DialogFragment {
 										int replaceAddition = 1;
 										int id = ids.get(i);
 										if (!contacts.get(id + 1).isFriend()) {
-											replaceAddition += 2;
+											replaceAddition += RandomAddition;
 										}
 										contacts.remove(id + replaceAddition);
 										allContacts.remove(id);
@@ -322,7 +350,8 @@ public class ChallengeDialog extends DialogFragment {
 
 	private void addSectionHeaders() {
 		contacts.add(new CustomContactData(getString(R.string.fragment_challenge_friends), "", 0));
-		contacts.add(new CustomContactData("Random"));
+		if (RandomChallenge)
+			contacts.add(new CustomContactData("Random"));
 		contacts.add(new CustomContactData(getString(R.string.fragment_challenge_friends_invite), "", 1));
 	}
 }

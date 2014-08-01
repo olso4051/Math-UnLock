@@ -75,7 +75,9 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 		for (String param : params) {
 			Loggy.d("GAtest", "param = " + param);
 			String[] pair = param.split("="); // $NON-NLS-1$
-			referralParams.put(pair[0], pair[1]);
+			if (pair != null)
+				if (pair.length >= 2)
+					referralParams.put(pair[0], pair[1]);
 		}
 
 		storeReferralParams(context, referralParams);
@@ -128,7 +130,7 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 			new PostDeelDatInstall(context, ShareHelper.DEELDAT_APP_ID, shareID).execute();
 		}
 		if (!coinHash.equals("")) {
-			new GetPromoCoins(context, coinHash).execute();
+			MoneyHelper.addPromoCoins(context, coinHash);
 		}
 	}
 }

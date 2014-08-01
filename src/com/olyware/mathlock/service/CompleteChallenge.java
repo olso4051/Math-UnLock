@@ -21,6 +21,7 @@ import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
+	final private static String InvalidGCM = "Invalid Google Cloud Messaging ID given";
 	private String baseURL;
 	private String success, error, challengeID, userID;
 	private int score, bet;
@@ -73,6 +74,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 			HttpResponse response = httpclient.execute(httpput);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
+			Loggy.d("fullResult from " + endpoint + " = " + fullResult);
 			jsonResponse = new JSONObject(fullResult);
 		} catch (JSONException j) {
 			j.printStackTrace();
@@ -84,7 +86,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 		if (entity != null && fullResult != null && jsonResponse != null) {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
-			if (success.equals("true")) {
+			if (success.equals("true") || error.equals(InvalidGCM)) {
 				PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
 				return 0;
 			} else

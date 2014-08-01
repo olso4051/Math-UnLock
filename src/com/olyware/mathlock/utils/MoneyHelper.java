@@ -144,6 +144,8 @@ public class MoneyHelper {
 					increasePendingMoney(context, 3000);
 					editorPrefsMoney.putBoolean(coinHash, true).commit();
 				}
+			} else {
+				new GetPromoCoins(context, coinHash).execute();
 			}
 		} else {
 			new GetPromoCoins(context, coinHash).execute();

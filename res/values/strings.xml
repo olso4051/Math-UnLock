@@ -7,9 +7,10 @@
     <string name="service_base_url">http://api.learnwithhiq.com/</string>
     
     <!-- App Linking Strings -->
-    <string name="coin_scheme">http</string>
+    <string name="coin_scheme1">http</string>
+    <string name="coin_scheme2">https</string>
     <string name="coin_host">learnwithhiq.com</string>
-    <string name="coin_path">/facebook/question.php</string>
+    <string name="coin_path">/promo/coins.php</string>
     <string name="coin_query">coins</string>
     <string name="coin_fountain_1000">Gwd48jT4F2</string>
     <string name="coin_fountain_2000">SyNsvpQkyz</string>
@@ -22,6 +23,9 @@
     <string name="coming_soon_title">Challenge Your Friends</string>
     <string name="coming_soon_message">Short quiz challenges between friends will be coming soon in a future update.</string>
     <string name="coming_soon_ok">OK</string>
+    
+    <!-- Invites -->
+    <string name="invite_progress_message">Getting Invite Link</string>
     
     <!-- Challenges -->
     <string name="challenge_default_opponent">Someone</string>
@@ -71,6 +75,12 @@
     
     <!-- Chirp Ads -->
     <string name="chirpads_base_url">http://api.chirpads.com/mobile/oninstall/json/?</string>
+    
+    <!-- Bitly URL -->
+    <string name="bitly_base_url">https://api-ssl.bitly.com/v3/shorten?</string>
+    <string name="bitly_query_access_token">access_token</string>
+    <string name="bitly_query_long_url">longURL</string>
+    <string name="bitly_access_token">b40d46e8b9e3ffafedc38c5523c416e3cc9a448c</string>
     
     <!-- Sharing -->
     <string name="deeldat_api_key">1716a4ac3509884eb5cf0245d392be52</string>
@@ -361,7 +371,6 @@
     <string name="settings_math_title">Math Questions</string>
     <string name="settings_custom_title">Custom Questions</string>
     <string name="settings_vocab_title">Vocabulary Questions</string>
-    <string name="share_message">I\'m unlocking my IQ, Download Hiq so we can challenge each other.\n\n</string>
     <string name="share_subject">@string/app_name</string>
     <string name="share_with">Share with…</string>
     <string name="share_with_facebook">Share on Facebook</string>

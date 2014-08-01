@@ -1,5 +1,7 @@
 package com.olyware.mathlock.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -94,6 +96,7 @@ public class ContactHelper {
 				contactsJSON += "," + contact.getJSON();
 		}
 		contactsJSON += "]";
+		SaveHelper.SaveTextFilePublic("stored_contacts.txt", contactsJSON);
 		editorPrefsContacts.putString(CONTACTS, contactsJSON).commit();
 	}
 
@@ -107,21 +110,24 @@ public class ContactHelper {
 				for (int i = 0; i < contactsJSONArray.length(); i++) {
 					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
 					boolean isFriend = contactJSONObject.getBoolean(CONTACT_IS_FRIEND);
-					String hiqUserID = contactJSONObject.getString(CONTACT_HIQ_USER_ID);
-					String hiqName = contactJSONObject.getString(CONTACT_HIQ_NAME);
-					String facebookUserID = contactJSONObject.getString(CONTACT_FACEBOOK_USER_ID);
-					String facebookName = contactJSONObject.getString(CONTACT_FACEBOOK_NAME);
-					String name = contactJSONObject.getString(CONTACT_NAME);
+					String hiqUserID = URLDecoder.decode(contactJSONObject.getString(CONTACT_HIQ_USER_ID), "utf-8");
+					String hiqName = URLDecoder.decode(contactJSONObject.getString(CONTACT_HIQ_NAME), "utf-8");
+					String facebookUserID = URLDecoder.decode(contactJSONObject.getString(CONTACT_FACEBOOK_USER_ID), "utf-8");
+					String facebookName = URLDecoder.decode(contactJSONObject.getString(CONTACT_FACEBOOK_NAME), "utf-8");
+					String name = URLDecoder.decode(contactJSONObject.getString(CONTACT_NAME), "utf-8");
 					JSONArray contactPhoneNumbers = contactJSONObject.getJSONArray(CONTACT_PHONE);
 					JSONArray contactEmails = contactJSONObject.getJSONArray(CONTACT_EMAIL);
+					List<String> emails = JSONHelper.getStringListFromJSONArray(contactEmails);
+					List<String> phoneNumbers = JSONHelper.getStringListFromJSONArray(contactPhoneNumbers);
 					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(ctx, hiqUserID);
 					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromID(ctx, challengeID);
-					contacts.add(new CustomContactData(hiqUserID, hiqName, facebookUserID, facebookName, name,
-							getStringListFromJSONArray(contactEmails), getStringListFromJSONArray(contactPhoneNumbers), isFriend, state,
-							challengeID));
+					contacts.add(new CustomContactData(hiqUserID, hiqName, facebookUserID, facebookName, name, emails, phoneNumbers,
+							isFriend, state, challengeID));
 				}
 				return contacts;
 			} catch (JSONException e) {
+				return new ArrayList<CustomContactData>();
+			} catch (UnsupportedEncodingException e) {
 				return new ArrayList<CustomContactData>();
 			}
 		} else
@@ -137,7 +143,7 @@ public class ContactHelper {
 				JSONArray contactsJSONArray = new JSONArray(contactsJSON);
 				for (int i = 0; i < contactsJSONArray.length(); i++) {
 					JSONObject contactJSONObject = contactsJSONArray.getJSONObject(i);
-					String hiqUserID = contactJSONObject.getString(CONTACT_HIQ_USER_ID);
+					String hiqUserID = URLDecoder.decode(contactJSONObject.getString(CONTACT_HIQ_USER_ID), "utf-8");
 					String challengeID = PreferenceHelper.getChallengeIDFromHiqUserID(ctx, hiqUserID);
 					CustomContactData.ChallengeState state = PreferenceHelper.getChallengeStateFromID(ctx, challengeID);
 					if (state.equals(CustomContactData.ChallengeState.New) || state.equals(CustomContactData.ChallengeState.Active)) {
@@ -146,6 +152,8 @@ public class ContactHelper {
 				}
 				return newChallenges;
 			} catch (JSONException e) {
+				return 0;
+			} catch (UnsupportedEncodingException e) {
 				return 0;
 			}
 		} else

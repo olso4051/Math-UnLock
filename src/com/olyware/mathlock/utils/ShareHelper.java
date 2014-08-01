@@ -28,6 +28,7 @@ import com.olyware.mathlock.LoginFragment;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.service.ConfirmID;
 import com.olyware.mathlock.service.ConfirmID.ConfirmType;
+import com.olyware.mathlock.service.GetBitly;
 import com.olyware.mathlock.service.UploadImage;
 
 public class ShareHelper {
@@ -240,8 +241,31 @@ public class ShareHelper {
 		return new Intent(Intent.ACTION_VIEW, Uri.parse(buildShareFacebookURL(context, title, caption)));
 	}
 
-	public static String getInvite(Context context) {
-		return context.getString(R.string.share_message) + buildInviteURL(context);
+	public static void invite(final Context context, final String address, final ProgressDialog pDialog, final int message) {
+		new GetBitly(context, buildInviteURL(context), false) {
+			@Override
+			protected void onPostExecute(Integer result) {
+				String uri = "smsto:" + address;
+				Intent intentSMS = new Intent(Intent.ACTION_SENDTO, Uri.parse(uri));
+				intentSMS.putExtra("sms_body", getInviteMessage(context, message) + getShortURL());
+				intentSMS.putExtra("compose_mode", true);
+				intentSMS.putExtra("exit_on_sent", true);
+				context.startActivity(intentSMS);
+				if (pDialog != null) {
+					pDialog.dismiss();
+				}
+			}
+		}.execute();
+	}
+
+	public static String getInviteMessage(Context context, int message) {
+		String[] messages = context.getResources().getStringArray(R.array.invite_messages);
+		if (message >= 0 && message < messages.length)
+			return messages[message];
+		else if (messages.length > 0)
+			return messages[0];
+		else
+			return "";
 	}
 
 	public static String buildInviteURL(Context context) {

@@ -1,5 +1,7 @@
 package com.olyware.mathlock.utils;
 
+import java.util.Random;
+
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -18,9 +20,15 @@ public class NotificationHelper {
 	private NotificationManager mNotificationManager;
 	NotificationCompat.Builder builder;
 	private Context ctx;
+	private Random rand;
+	private String[] messages;
+	private int message;
 
 	public NotificationHelper(Context ctx) {
 		this.ctx = ctx;
+		rand = new Random();
+		messages = ctx.getResources().getStringArray(R.array.invite_messages);
+		message = rand.nextInt(messages.length);
 	}
 
 	public void sendNotification(String title, String msg, int number, String titleFacebook, String msgFacebook, int ID) {
@@ -28,7 +36,7 @@ public class NotificationHelper {
 
 		// intent to share app
 		String link = ShareHelper.buildShareURL(ctx);
-		Intent iShare = ShareHelper.getShareIntent(ctx, null, null, ctx.getString(R.string.share_message), link);
+		Intent iShare = ShareHelper.getShareIntent(ctx, null, null, messages[message], link);
 		PendingIntent shareIntent = PendingIntent.getActivity(ctx, 0, iShare, 0);
 
 		// intent to share app on Facebook only
@@ -71,7 +79,7 @@ public class NotificationHelper {
 
 		// intent to share app
 		String link = ShareHelper.buildShareURL(ctx);
-		Intent iShare = ShareHelper.getShareIntent(ctx, null, null, ctx.getString(R.string.share_message), link);
+		Intent iShare = ShareHelper.getShareIntent(ctx, null, null, messages[message], link);
 		PendingIntent shareIntent = PendingIntent.getActivity(ctx, 0, iShare, 0);
 
 		// intent to share app on Facebook only

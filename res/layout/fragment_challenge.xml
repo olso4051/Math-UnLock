@@ -16,7 +16,7 @@
         android:textColor="@color/blue_on_white"
         android:textColorHint="@color/light_grey"
         android:paddingLeft="@dimen/login_vertical_margin"
-        android:layout_marginBottom="@dimen/login_vertical_margin_half"
+        android:layout_marginBottom="@dimen/login_vertical_margin"
         android:background="@drawable/search_edittext_rounded"
         android:drawableRight="@drawable/search"
         android:inputType="text"/>

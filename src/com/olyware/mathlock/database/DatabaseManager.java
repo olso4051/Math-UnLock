@@ -559,7 +559,7 @@ public class DatabaseManager {
 			return 0;
 	}
 
-	public long addChallengeQuestions(String challengeID, List<GenericQuestion> questions, String userName) {
+	public long addChallengeQuestions(String challengeID, String userID, List<GenericQuestion> questions, String userName) {
 		Loggy.d("adding challegne questions");
 		if (db.isOpen()) {
 			Loggy.d("adding challenge questions");
@@ -568,6 +568,7 @@ public class DatabaseManager {
 				Loggy.d("adding challenge question " + question.getQuestion());
 				ContentValues values = new ContentValues();
 				values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
+				values.put(ChallengeQuestionContract.USER_ID, userID);
 				values.put(QuestionContract.QUESTION_TEXT, question.getQuestion());
 				values.put(QuestionContract.ANSWER_CORRECT, question.getAnswers()[0]);
 				values.put(ChallengeQuestionContract.ANSWER_INCORRECT1, question.getAnswers()[1]);
@@ -583,12 +584,14 @@ public class DatabaseManager {
 			return -1;
 	}
 
-	public long addChallengeQuestion(String challengeID, String description, String question, String[] answers, String userName) {
+	public long addChallengeQuestion(String challengeID, String userID, String description, String question, String[] answers,
+			String userName) {
 		Loggy.d("adding challegne questions");
 		if (db.isOpen()) {
 			Loggy.d("adding challenge question " + question);
 			ContentValues values = new ContentValues();
 			values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
+			values.put(ChallengeQuestionContract.USER_ID, userID);
 			values.put(QuestionContract.QUESTION_TEXT, question);
 			values.put(QuestionContract.ANSWER_CORRECT, answers[0]);
 			values.put(ChallengeQuestionContract.ANSWER_INCORRECT1, answers[1]);

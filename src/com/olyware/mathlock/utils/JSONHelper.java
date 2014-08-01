@@ -1,5 +1,7 @@
 package com.olyware.mathlock.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +18,15 @@ public class JSONHelper {
 				return "";
 			else
 				return s;
+		} catch (JSONException e) {
+			return "";
+		}
+	}
+
+	public static String getStringFromJSON2(JSONObject json, String key1, String key2) {
+		try {
+			JSONObject jsonKey1 = json.getJSONObject(key1);
+			return getStringFromJSON(jsonKey1, key2);
 		} catch (JSONException e) {
 			return "";
 		}
@@ -61,5 +72,19 @@ public class JSONHelper {
 		} catch (NumberFormatException e) {
 			return 0;
 		}
+	}
+
+	public static List<String> getStringListFromJSONArray(JSONArray array) {
+		List<String> list = new ArrayList<String>();
+		try {
+			for (int i = 0; i < array.length(); i++) {
+				list.add(URLDecoder.decode(array.getString(i), "utf-8"));
+			}
+		} catch (JSONException e) {
+			return new ArrayList<String>();
+		} catch (UnsupportedEncodingException e) {
+			return new ArrayList<String>();
+		}
+		return list;
 	}
 }

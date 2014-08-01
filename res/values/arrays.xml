@@ -392,4 +392,9 @@
         <item>15000</item>
         <item>30000</item>
     </integer-array>
+    
+    <string-array name="invite_messages">
+        <item>I\'m unlocking my IQ, Download Hiq so we can challenge each other.\n\n</item>
+	    <item>Check out this cool app. It puts fun questions on my lockscreen. We can even challenge each other.\n\n</item>
+    </string-array>
 </resources>

@@ -8,9 +8,7 @@ import android.os.AsyncTask;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.HttpClient;
-import ch.boye.httpclientandroidlib.client.methods.HttpPut;
-import ch.boye.httpclientandroidlib.entity.ContentType;
-import ch.boye.httpclientandroidlib.entity.StringEntity;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
@@ -20,9 +18,8 @@ import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 
 public class GetPromoCoins extends AsyncTask<Void, Integer, Integer> {
-	final private static String ENDPOINT = "promo/coin";
-	final private static String COIN_HASH = "coin_hash";
-	final private static String COIN_RESPONSE = "coin_response";
+	final private static String ENDPOINT = "coin/";
+	final private static String COIN_RESPONSE = "coins";
 	final private static int COIN_MAX = 10000;
 	private String baseURL, coinHash;
 	private int coins = 0;
@@ -47,19 +44,16 @@ public class GetPromoCoins extends AsyncTask<Void, Integer, Integer> {
 	protected Integer doInBackground(Void... v) {
 		// PUT to API with user_id
 		HttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPut httpput = new HttpPut(baseURL + ENDPOINT);
+		Loggy.d("get promo coins from " + baseURL + ENDPOINT + coinHash);
+		HttpPost httppost = new HttpPost(baseURL + ENDPOINT + coinHash);
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
 		try {
-			JSONObject data = new JSONObject();
-			data.put(COIN_HASH, coinHash);
-
-			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
-			httpput.setHeader("Content-Type", "application/json");
-			HttpResponse response = httpclient.execute(httpput);
+			HttpResponse response = httpclient.execute(httppost);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
+			Loggy.d("fullResult = " + fullResult);
 			jsonResponse = new JSONObject(fullResult);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -75,7 +69,7 @@ public class GetPromoCoins extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected void onPostExecute(Integer result) {
-		if (result == 0) {
+		if (result == 0 && getCoins() > 0 && getCoins() <= COIN_MAX) {
 			SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(ctx.getString(R.string.pref_money), Context.MODE_PRIVATE);
 			SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 			Loggy.d("increase coins");

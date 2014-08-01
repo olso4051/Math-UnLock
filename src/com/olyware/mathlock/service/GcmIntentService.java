@@ -117,7 +117,8 @@ public class GcmIntentService extends IntentService {
 					DatabaseManager dbManager = new DatabaseManager(this);
 					if (questions.size() == answers.size()) {
 						for (int i = 0; i < questions.size(); i++) {
-							dbManager.addChallengeQuestion(challengeID, descriptions.get(i), questions.get(i), answers.get(i), userName);
+							dbManager.addChallengeQuestion(challengeID, cUserID, descriptions.get(i), questions.get(i), answers.get(i),
+									userName);
 						}
 					}
 					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Undefined,
