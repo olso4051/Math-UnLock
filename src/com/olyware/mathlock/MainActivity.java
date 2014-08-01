@@ -779,6 +779,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 				joystick.startAnimations();
 				new NotificationHelper(this).clearChallengeResultNotification();
+				new NotificationHelper(this).clearChallengeNotification();
+
 				// showWallpaper();
 			}
 		}
@@ -2005,7 +2007,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										Loggy.d("setProblemAndAnswer from accept challenge");
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
-										new NotificationHelper(MainActivity.this).clearChallengeNotification(challengeID);
+										new NotificationHelper(MainActivity.this).clearChallengeNotification();
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
@@ -2024,7 +2026,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								@Override
 								protected void onPostExecute(Integer result) {
 									if (result == 0) {
-										new NotificationHelper(MainActivity.this).clearChallengeNotification(challengeID);
+										new NotificationHelper(MainActivity.this).clearChallengeNotification();
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
 												CustomContactData.ChallengeState.None);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
@@ -2050,14 +2052,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (!dialogOn) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
-				/*builder.setTitle(R.string.info_title_first);
-				builder.setMessage(getString(R.string.info_message_first)).setCancelable(false);
-				builder.setPositiveButton(R.string.goto_store, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialogOn = false;
-						startActivity(new Intent(getApplicationContext(), ShowStoreActivity.class));
-					}
-				});*/
+				builder.setCancelable(false);
 				builder.setTitle(R.string.question_types_title).setItems(R.array.starting_packages, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						dialogOn = false;
@@ -2077,6 +2072,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				});
 			} else {
 				final String link = ShareHelper.buildShareURL(this);
+				builder.setCancelable(true);
 				builder.setTitle(R.string.info_title);
 				builder.setMessage(R.string.info_message).setCancelable(false);
 				builder.setPositiveButton(R.string.share_with_other, new DialogInterface.OnClickListener() {
@@ -2105,7 +2101,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					}
 				});
 			}
-			builder.setCancelable(true);
 			AlertDialog alert = builder.create();
 			dialogOn = true;
 			alert.show();

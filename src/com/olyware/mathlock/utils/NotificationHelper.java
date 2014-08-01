@@ -151,9 +151,9 @@ public class NotificationHelper {
 		mNotificationManager.notify(CHALLENGE_ID, mBuilder.build());
 	}
 
-	public void clearChallengeNotification(String challengeID) {
+	public void clearChallengeNotification() {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.cancel(challengeID, CHALLENGE_ID);
+		mNotificationManager.cancel(CHALLENGE_ID);
 	}
 
 	public void sendChallengeStatusNotification(String challengeID, ChallengeStatus status) {
