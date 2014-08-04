@@ -46,7 +46,7 @@ public class JoystickView extends View {
 			srcRectForSmall, challengeBounds;
 
 	private TextPaint[] answerTextPaint = new TextPaint[NumAnswers];
-	private TextPaint optionPaintWhite;
+	private TextPaint optionPaintWhite, answerTextPaintBackup;
 	private Path optionPath, dstPathForSet;
 	private Paint settingsPaint, unlockPaint, transparentBlue;
 
@@ -69,6 +69,7 @@ public class JoystickView extends View {
 	private String[] answers = { " ", " ", " ", " ", "?" };
 
 	private StaticLayout[] layout = new StaticLayout[NumAnswers];
+	private StaticLayout[] layoutBackup = new StaticLayout[NumAnswers];
 	private EquationLayout[] layoutE = new EquationLayout[NumAnswers];
 	private boolean[] equation = new boolean[NumAnswers];
 
@@ -228,11 +229,10 @@ public class JoystickView extends View {
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
 
 		challengeBounds = new Rect();
+		answerTextPaintBackup = new TextPaint(optionPaintWhite);
+		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {
-			answerTextPaint[i] = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-			answerTextPaint[i].setTextAlign(Paint.Align.CENTER);
-			answerTextPaint[i].setColor(Color.WHITE);
-			answerTextPaint[i].setTextSize(answerSizePix);
+			answerTextPaint[i] = new TextPaint(answerTextPaintBackup);
 			answerTextPaint[i].setAlpha(alphaAnswer);
 			bounds[i] = new Rect();
 			equation[i] = false;
@@ -379,6 +379,7 @@ public class JoystickView extends View {
 				layoutE[i].setTypeface(font);
 		}
 		optionPaintWhite.setTypeface(font);
+		answerTextPaintBackup.setTypeface(font);
 	}
 
 	public boolean setQuizMode(boolean quizMode) {
@@ -656,7 +657,10 @@ public class JoystickView extends View {
 				} else {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
 							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[i].getHeight() / 2);
-					layout[i].draw(canvas);
+					if (selectUnlock && alphaAnswer == 0)
+						layoutBackup[i].draw(canvas);
+					else
+						layout[i].draw(canvas);
 				}
 				canvas.restore();
 			}
@@ -1374,6 +1378,7 @@ public class JoystickView extends View {
 			}
 		}
 
+		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
@@ -1397,9 +1402,12 @@ public class JoystickView extends View {
 					if (layoutE[i].getTextSizePix() < answerSizePix)
 						changeAnswerSize(layoutE[i].getTextSizeSP(), layoutE[i].getTextSizePix());
 				}
-			} else
+			} else {
 				layout[i] = new StaticLayout(answers[i], answerTextPaint[i], Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
 						false);
+				layoutBackup[i] = new StaticLayout(answers[i], answerTextPaintBackup, Width / 2 - pad * 2, Layout.Alignment.ALIGN_NORMAL,
+						1.0f, 0, false);
+			}
 		}
 		invalidate();
 	}
@@ -1429,6 +1437,7 @@ public class JoystickView extends View {
 			return false;
 		answerSizeSP = Math.max(answerSizeSP - 1, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
+		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
@@ -1438,6 +1447,7 @@ public class JoystickView extends View {
 	private void changeAnswerSize(int SP, float Pix) {
 		answerSizeSP = SP;
 		answerSizePix = Pix;
+		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
@@ -1446,6 +1456,7 @@ public class JoystickView extends View {
 	private void resetAnswerSize() {
 		answerSizeSP = answerSizeSPDefault;
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
+		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
