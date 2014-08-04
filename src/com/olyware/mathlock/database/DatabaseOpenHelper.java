@@ -29,7 +29,7 @@ import com.olyware.mathlock.utils.Loggy;
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "mathunlock.db";
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 6;
 	private static String DATABASE_PATH, DATABASE_FULL_PATH, DATABASE_OLD_FULL_PATH;
 	private static int DATABASE_OLD_VERSION;
 

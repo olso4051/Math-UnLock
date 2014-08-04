@@ -4,7 +4,7 @@
     <string name="app_name">Hiq Lockscreen</string>
     <string name="facebook_app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
-    <string name="service_base_url">http://api.learnwithhiq.com/</string>
+    <string name="service_base_url">http://eb.learnwithhiq.com/</string>
     
     <!-- App Linking Strings -->
     <string name="coin_scheme1">http</string>
@@ -55,7 +55,7 @@
     <string name="fragment_challenge_new_cancel">Delete</string>
     <string name="challenge_accepted">Challenge Accepted!</string>
     <string name="challenge_declined">Challenge Declined</string>
-    <string name="challenge_status_failed">Failed to Respond to Challenge, Try Again Later</string>
+    <string name="challenge_status_failed">Failed to Respond to Challenge, Challenge was removed</string>
     <string name="challenge_send_failed">Failed to Send Challenge. Try again Later</string>
     <string name="challenge_send_success">Challenge Sent, Waiting for Reply</string>
     <string name="challenge_send_no_questions">Select at least 1 question pack</string>

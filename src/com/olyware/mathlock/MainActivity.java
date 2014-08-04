@@ -1527,7 +1527,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
 						joystick.setIncorrectGuess(guessLoc);
 						problem.setTextColor(Color.RED);
-						dMoney = Money.decreaseMoneyNoDebt(questionWorth);
+						dMoney = Money.decreaseMoneyNoDebt(0);
 						dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
 					}
 					MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
@@ -2000,6 +2000,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							new AcceptChallenge(MainActivity.this, challengeID, true) {
 								@Override
 								protected void onPostExecute(Integer result) {
+									new NotificationHelper(MainActivity.this).clearChallengeNotification();
 									if (result == 0) {
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Accepted,
 												CustomContactData.ChallengeState.Active);
@@ -2007,14 +2008,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										Loggy.d("setProblemAndAnswer from accept challenge");
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
-										new NotificationHelper(MainActivity.this).clearChallengeNotification();
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
-
 										sendEvent("social", "challenge_accepted", encryptedUserID, (long) bet);
 										Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[18], EggMaxValues[18]));
 									} else {
+										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
+												CustomContactData.ChallengeState.None);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
 												.show();
 									}
@@ -2025,15 +2026,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							new AcceptChallenge(MainActivity.this, challengeID, false) {
 								@Override
 								protected void onPostExecute(Integer result) {
-									if (result == 0) {
-										new NotificationHelper(MainActivity.this).clearChallengeNotification();
-										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
-												CustomContactData.ChallengeState.None);
-										Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
-									} else {
-										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
-												.show();
-									}
+									new NotificationHelper(MainActivity.this).clearChallengeNotification();
+									PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
+											CustomContactData.ChallengeState.None);
+									Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
 								}
 							}.execute();
 							String encryptedUserID = ContactHelper.getUserID(MainActivity.this);

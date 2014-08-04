@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.olyware.mathlock"
-    android:versionCode="48"
-    android:versionName="2.7.8" >
+    android:versionCode="49"
+    android:versionName="2.7.9" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -134,16 +134,6 @@
 				<action android:name="com.olyware.mathlock.service.NotificationBroadcastReceiver.ACTION_CHALLENGE_DENIED"/>
 			</intent-filter>
 		</receiver>
-		
-		<receiver android:name=".service.ChirpAdsReceiver">
-			<intent-filter> 
-				<action android:name="android.intent.action.PACKAGE_ADDED" />
-				<category android:name="android.intent.category.DEFAULT" /> 
-				<data android:scheme="package" /> 
-			</intent-filter>
-		</receiver>
-		
-		<service android:name=".service.ChirpAdsService" />
 		
 		<!-- Used for Google Play Store Campaign Measurement-->;
 		<service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />

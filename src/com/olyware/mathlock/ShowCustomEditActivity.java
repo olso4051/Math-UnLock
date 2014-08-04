@@ -1,6 +1,5 @@
 package com.olyware.mathlock;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -47,11 +46,13 @@ import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.model.CustomQuestion;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.CSVReader;
 import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.FileDialog;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 
 public class ShowCustomEditActivity extends Activity {
@@ -103,13 +104,19 @@ public class ShowCustomEditActivity extends Activity {
 		}
 	}
 
-	private class addCustomPack extends AsyncTask<ArrayList<String[]>, Integer, Integer> {
+	private class addCustomPack extends AsyncTask<Void, Integer, Integer> {
+		private ArrayList<String[]> newQuestions = new ArrayList<String[]>();
+
+		public addCustomPack(ArrayList<String[]> newQuestions) {
+			this.newQuestions.addAll(newQuestions);
+		}
+
 		@Override
-		protected Integer doInBackground(ArrayList<String[]>... newQuestions) {
+		protected Integer doInBackground(Void... v) {
 			int count = 0;
-			for (int i = 0; i < newQuestions[0].size(); i++) {
-				long id = dbManager.addCustomQuestion(newQuestions[0].get(i));
-				cat = id >= 0 ? newQuestions[0].get(i)[5] : cat;
+			for (int i = 0; i < newQuestions.size(); i++) {
+				long id = dbManager.addCustomQuestion(newQuestions.get(i));
+				cat = id >= 0 ? newQuestions.get(i)[5] : cat;
 				count += id >= 0 ? 1 : 0;
 			}
 			if (count > 0) {
@@ -207,32 +214,39 @@ public class ShowCustomEditActivity extends Activity {
 				int lines = -1;
 				try {
 					FileReader fileR = new FileReader(file);
-					BufferedReader buffer = new BufferedReader(fileR);
-					String line = buffer.readLine();
-					String[] lineEntries = line.split(",");
+					CSVReader csvReader = new CSVReader(fileR);
+					String[] lineEntries = csvReader.readNext();
 					if (lineEntries[0].equals(QuestionContract.QUESTION_TEXT) && lineEntries[1].equals(QuestionContract.ANSWER_CORRECT)
 							&& lineEntries[2].equals(CustomQuestionContract.ANSWER_INCORRECT1)
 							&& lineEntries[3].equals(CustomQuestionContract.ANSWER_INCORRECT2)
 							&& lineEntries[4].equals(CustomQuestionContract.ANSWER_INCORRECT3)
 							&& lineEntries[5].equals(QuestionContract.DIFFICULTY)) {
 						lines++;
-						line = buffer.readLine();
-						while (line != null) {
-							lineEntries = line.split(",");
-							if (lineEntries.length == 6)
-								if (Difficulty.isDifficulty(lineEntries[5]))
+						lineEntries = csvReader.readNext();
+						while (lineEntries != null) {
+							if (lineEntries.length == 6) {
+								if (Difficulty.isDifficulty(lineEntries[5])) {
 									if (testQuestion(lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3], lineEntries[4],
 											fileName)) {
 										tempQuestions.add(new String[] { lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3],
 												lineEntries[4], fileName, lineEntries[5] });
 										lines += 1;
+										Loggy.d("question accepted = " + lineEntries[0]);
+									} else {
+										Loggy.d("question declined = " + lineEntries[0]);
 									}
-							line = buffer.readLine();
+								} else {
+									Loggy.d("question declined difficulty = " + lineEntries[5]);
+								}
+							} else {
+								Loggy.d("question declined length= " + lineEntries.length);
+							}
+							lineEntries = csvReader.readNext();
 						}
 					} else {
 						lines = 0;
 					}
-					buffer.close();
+					csvReader.close();
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -250,7 +264,7 @@ public class ShowCustomEditActivity extends Activity {
 							adapter.notifyDataSetChanged();
 							category.setEnabled(false);
 							list.setEnabled(false);
-							new addCustomPack().execute(tempQuestionsFinal);
+							new addCustomPack(tempQuestionsFinal).execute();
 						}
 					});
 					builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -671,7 +685,8 @@ public class ShowCustomEditActivity extends Activity {
 		boolean same = false;
 		List<String> q = new ArrayList<String>();
 		for (int i = 0; i < question.length; i++) {
-			if ((question[i].length() > MAX_LENGTH) || (question[i].length() == 0))
+			if ((i > 0 && question[i].length() > MAX_LENGTH) || (i == 0 && question[i].length() > MAX_LENGTH * 3)
+					|| (question[i].length() == 0))
 				tooLongShort[i] = true;
 			else
 				tooLongShort[i] = false;
