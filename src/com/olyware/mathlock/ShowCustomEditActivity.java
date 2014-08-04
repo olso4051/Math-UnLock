@@ -52,7 +52,6 @@ import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.FileDialog;
-import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 
 public class ShowCustomEditActivity extends Activity {
@@ -231,15 +230,8 @@ public class ShowCustomEditActivity extends Activity {
 										tempQuestions.add(new String[] { lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3],
 												lineEntries[4], fileName, lineEntries[5] });
 										lines += 1;
-										Loggy.d("question accepted = " + lineEntries[0]);
-									} else {
-										Loggy.d("question declined = " + lineEntries[0]);
 									}
-								} else {
-									Loggy.d("question declined difficulty = " + lineEntries[5]);
 								}
-							} else {
-								Loggy.d("question declined length= " + lineEntries.length);
 							}
 							lineEntries = csvReader.readNext();
 						}
