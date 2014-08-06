@@ -66,9 +66,7 @@ public class GCMHelper {
 		if (checkPlayServices(act)) {
 			SharedPreferences prefsGA = act.getSharedPreferences(CustomInstallReceiver.PREFS_GA, Context.MODE_PRIVATE);
 			regID = getRegistrationId(app);
-			Loggy.d("GAtest", "regID = " + regID);
 			if (regID.equals("")) {
-				Loggy.d("GAtest", "registerInBackground");
 				SharedPreferences.Editor editorGA = prefsGA.edit();
 				editorGA.putBoolean("reg_uploaded", false).commit();
 				registerInBackground(act, app, false);
@@ -98,7 +96,6 @@ public class GCMHelper {
 		final SharedPreferences prefs = getGCMPreferences(context);
 		String registrationId = prefs.getString(context.getString(R.string.gcm_reg_id_property), "");
 		if (registrationId.equals("")) {
-			Loggy.d("GAtest", "Registration not found");
 			return "";
 		}
 		// Check if app was updated; if so, it must clear the registration ID since the existing regID is not guaranteed to work with the
@@ -106,8 +103,6 @@ public class GCMHelper {
 		int registeredVersion = prefs.getInt(context.getString(R.string.gcm_app_version_property), Integer.MIN_VALUE);
 		int currentVersion = getAppVersion(context);
 		if (registeredVersion != currentVersion) {
-			// if (true) {
-			Loggy.d("GAtest", "App version changed");
 			return "";
 		}
 		return registrationId;
@@ -160,8 +155,6 @@ public class GCMHelper {
 
 			@Override
 			protected void onPostExecute(Boolean GCMresult) {
-				// Toast.makeText(act, msg, Toast.LENGTH_LONG).show();
-				// Loggy.d("GAtest", msg);
 				if (!sendToBackend)
 					mCallback.GCMResult(GCMresult);
 			}
@@ -169,7 +162,6 @@ public class GCMHelper {
 	}
 
 	private static void sendRegistrationIdToBackend(final Activity act, String regID) {
-		Loggy.d("sendRegistrationIdToBackend");
 		String username = ContactHelper.getUserName(act);
 		String userID = ContactHelper.getUserID(act);
 		String referral = ContactHelper.getReferrer(act);
@@ -178,8 +170,6 @@ public class GCMHelper {
 		String gender = ContactHelper.getGender(act);
 		String location = ContactHelper.getLocation(act);
 		String email = ContactHelper.getEmail(act);
-		Loggy.d("username(" + username + ")userID(" + userID + ")referral(" + referral + ")faceID(" + faceID + ")birth(" + birth
-				+ ")gender(" + gender + ")location(" + location + ")email(" + email + ")");
 		new RegisterID(act, username, regID, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
@@ -194,7 +184,6 @@ public class GCMHelper {
 	private static void storeRegistrationId(Context act, Context context, String regId) {
 		final SharedPreferences prefs = getGCMPreferences(act);
 		int appVersion = getAppVersion(context);
-		Loggy.d("GAtest", "Saving regId on app version " + appVersion);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString(act.getString(R.string.gcm_reg_id_property), regId);
 		editor.putInt(act.getString(R.string.gcm_app_version_property), appVersion);

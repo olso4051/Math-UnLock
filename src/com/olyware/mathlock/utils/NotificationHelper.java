@@ -161,7 +161,6 @@ public class NotificationHelper {
 		String title = "";
 		String msg = "";
 		String userName = PreferenceHelper.getChallengeUserName(ctx, challengeID);
-		Loggy.d("challenge status challengeID = " + challengeID + " |username = " + userName);
 		if (status == ChallengeStatus.Accepted) {
 			title = ctx.getString(R.string.notification_title_challenge_status_accepted);
 			msg = userName + ctx.getString(R.string.notification_message_challenge_status_accepted);

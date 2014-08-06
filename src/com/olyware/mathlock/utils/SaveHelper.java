@@ -22,11 +22,9 @@ public class SaveHelper {
 			fos.close();
 			return true;
 		} catch (FileNotFoundException e) {
-			Loggy.d("GAtest", "file not found");
 			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
-			Loggy.d("GAtest", "io exception");
 			e.printStackTrace();
 			return false;
 		}
@@ -40,10 +38,8 @@ public class SaveHelper {
 			b = BitmapFactory.decodeStream(fis);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			Loggy.d("GAtest", "file not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			Loggy.d("GAtest", "io exception");
 			e.printStackTrace();
 		}
 		return b;
@@ -65,7 +61,6 @@ public class SaveHelper {
 				stream.write(txt.getBytes());
 				stream.close();
 			} catch (IOException e) {
-				Loggy.d("GAtest", "File did not save" + e.toString());
 				return false;
 			}
 		} else {
@@ -87,7 +82,7 @@ public class SaveHelper {
 		// Get the directory for the user's public pictures directory.
 		File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 		if (!file.mkdirs()) {
-			Loggy.e("GAtest", "Directory not created");
+			// Directory not created
 		}
 		File file2 = new File(file.getAbsolutePath() + "/" + fileName);
 		return file2;

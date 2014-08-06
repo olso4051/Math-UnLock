@@ -18,6 +18,7 @@ import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.PreferenceHelper;
+import com.olyware.mathlock.utils.PreferenceHelper.ChallengeCompleteStatus;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
@@ -25,6 +26,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String success, error, challengeID, userID;
 	private int score, bet;
+	private ChallengeCompleteStatus cStatus;
 	private Context ctx;
 
 	public CompleteChallenge(Context ctx, String challengeID, int score, int bet) {
@@ -33,6 +35,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 		this.challengeID = challengeID;
 		this.score = score;
 		this.bet = bet;
+		this.cStatus = PreferenceHelper.getChallengeCompleteStatus(ctx, challengeID);
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
@@ -52,6 +55,11 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Void... v) {
+		if (cStatus != null && cStatus.equals(ChallengeCompleteStatus.NotSent)) {
+			PreferenceHelper.storeChallengeCompleteStatus(ctx, challengeID, ChallengeCompleteStatus.Sending);
+		} else {
+			return 1;
+		}
 		String endpoint = "challenge/complete";
 
 		// PUT to API challenge
@@ -87,7 +95,6 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
 			if (success.equals("true") || error.equals(InvalidGCM)) {
-				PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
 				return 0;
 			} else
 				return 1;
@@ -98,8 +105,12 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected void onPostExecute(Integer result) {
-		// override in calling class
-		// result == 0 success
+		if (result == 0) {
+			PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
+			PreferenceHelper.storeChallengeCompleteStatus(ctx, challengeID, ChallengeCompleteStatus.Sent);
+		} else {
+			PreferenceHelper.storeChallengeCompleteStatus(ctx, challengeID, ChallengeCompleteStatus.NotSent);
+		}
 	}
 
 	private String getStringFromJSON(JSONObject json, String key) {

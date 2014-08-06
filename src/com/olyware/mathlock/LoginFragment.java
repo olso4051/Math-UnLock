@@ -30,7 +30,6 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import com.olyware.mathlock.service.CustomInstallReceiver;
 import com.olyware.mathlock.service.RegisterID;
 import com.olyware.mathlock.utils.GCMHelper;
-import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
@@ -121,7 +120,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		authButton.setReadPermissions(PERMISSIONS);
 
 		if (getArguments().getBoolean("facebook_logout")) {
-			Loggy.d("test", "facebook_logout");
 			Session session = Session.getActiveSession();
 			if (!session.isClosed()) {
 				session.closeAndClearTokenInformation();
@@ -194,21 +192,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			editUserInfo.putBoolean(mPrefUserSkipped, false).commit();
 			Session session = Session.getActiveSession();
 			if (!session.isOpened() && !session.isClosed()) {
-				Loggy.d("test", "openForRead");
 				session.openForRead(new Session.OpenRequest(this).setPermissions(PERMISSIONS).setCallback(loginCallback));
 			} else if (session.isOpened()) {
 				session.closeAndClearTokenInformation();
 			} else {
-				Loggy.d("test", "openActiveSession");
 				Session.openActiveSession(getActivity(), this, true, PERMISSIONS, loginCallback);
 			}
 		}
 	}
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception, final boolean fromFacebookButton) {
-		Loggy.d("test", "onSessionStateChange + facebookButtonClicked = " + (facebookButtonClicked));
 		if (state.isOpened()) {
-			Loggy.d("test", "Logged in... " + facebookButtonClicked);
 			if (facebookButtonClicked) {
 				facebookButtonClicked = false;
 				// Request user data and show the results
@@ -230,14 +224,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 									.putString(mPrefUserFacebookName, user.getName()).putString(mPrefUserFacebookBirth, birthday)
 									.putString(mPrefUserFacebookGender, gender).putString(mPrefUserFacebookLocation, location)
 									.putString(mPrefUserFacebookEmail, email).putBoolean(mPrefUserSkipped, false).commit();
-							Loggy.d("GAtest", user.toString());
 						}
 						logIn();
 					}
 				}).executeAsync();
 			}
 		} else if (state.isClosed()) {
-			Loggy.d("test", "Logged out... " + facebookButtonClicked);
+			// no need to do anything facebook is logged out
 		}
 	}
 
@@ -277,9 +270,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		new RegisterID(getActivity(), username, regID, userID, referral, birth, gender, location, email, faceID) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				Loggy.d("test", "result=" + result);
-				Loggy.d("test", "success=" + getSuccess());
-				Loggy.d("test", "error=" + getError());
 				if (result == 0) {
 					SharedPreferences prefsGA = getActivity().getSharedPreferences(CustomInstallReceiver.PREFS_GA, Context.MODE_PRIVATE);
 					prefsGA.edit().putBoolean("reg_uploaded", true).commit();

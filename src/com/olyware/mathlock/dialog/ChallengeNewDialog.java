@@ -1,5 +1,7 @@
 package com.olyware.mathlock.dialog;
 
+import java.util.Map;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -24,7 +26,10 @@ public class ChallengeNewDialog extends DialogFragment {
 	final private static String DIFFICULTY = "difficulty";
 	final private static String BET = "bet";
 	final private static String QUESTIONS = "questions";
+	final private static String USE_QUESTION_DESCS = "use_question_descriptions";
+	final private static String QUESTION_DESCS = "question_descriptions";
 	final private static String POSITIVE = "positive_text";
+	final private static String NUETRAL = "nuetral_text";
 	final private static String NEGATIVE = "negative_text";
 	final private static String NAME_TAG = "name_tag";
 	private TextView userNameText, difficultyText, betText, questionsText;
@@ -43,7 +48,7 @@ public class ChallengeNewDialog extends DialogFragment {
 	}
 
 	public static ChallengeNewDialog newInstance(Context ctx, String userName, int bet, int diffMin, int diffMax, int questions,
-			CustomContactData.ChallengeState state) {
+			Map<String, Integer> challengeDescriptions, CustomContactData.ChallengeState state) {
 		ChallengeNewDialog f = new ChallengeNewDialog();
 
 		// Supply index input as an argument.
@@ -55,18 +60,40 @@ public class ChallengeNewDialog extends DialogFragment {
 		args.putString(DIFFICULTY, diff);
 		args.putInt(BET, MoneyHelper.getModifiedBet(ctx, bet));
 		args.putInt(QUESTIONS, questions);
+
+		String questionDescriptions = "";
+		boolean first = true;
+		int totalDescriptions = 0;
+		for (Map.Entry<String, Integer> entry : challengeDescriptions.entrySet()) {
+			String challengeDescription = entry.getKey();
+			int number = entry.getValue();
+			totalDescriptions += number;
+			if (first) {
+				first = false;
+				questionDescriptions = challengeDescription + " - " + number;
+			} else {
+				questionDescriptions += "\n" + challengeDescription + " - " + number;
+			}
+		}
+		args.putBoolean(USE_QUESTION_DESCS, questions == totalDescriptions);
+		args.putString(QUESTION_DESCS, questionDescriptions);
+
 		String pos = ctx.getString(R.string.ok);
+		String nue = "";
 		String neg = ctx.getString(R.string.cancel);
 		String nameTag = ctx.getString(R.string.fragment_challenge_new_from);
 		if (state == CustomContactData.ChallengeState.Sent) {
 			pos = ctx.getString(R.string.fragment_challenge_new_wait);
+			nue = ctx.getString(R.string.fragment_challenge_new_remind);
 			neg = ctx.getString(R.string.fragment_challenge_new_cancel);
 			nameTag = ctx.getString(R.string.fragment_challenge_new_to);
 		} else if (state == CustomContactData.ChallengeState.New) {
 			pos = ctx.getString(R.string.fragment_challenge_new_accept);
+			nue = "";
 			neg = ctx.getString(R.string.fragment_challenge_new_decline);
 		}
 		args.putString(POSITIVE, pos);
+		args.putString(NUETRAL, nue);
 		args.putString(NEGATIVE, neg);
 		args.putString(NAME_TAG, nameTag);
 
@@ -103,7 +130,11 @@ public class ChallengeNewDialog extends DialogFragment {
 		betText.setText(String.valueOf(args.getInt(BET)));
 
 		questionsText = (TextView) v.findViewById(R.id.challenge_new_questions);
-		questionsText.setText(String.valueOf(args.getInt(QUESTIONS)));
+		if (args.getBoolean(USE_QUESTION_DESCS)) {
+			questionsText.setText(args.getString(QUESTION_DESCS));
+		} else {
+			questionsText.setText(String.valueOf(args.getInt(QUESTIONS)));
+		}
 
 		Button posiviteButton = (Button) v.findViewById(R.id.challenge_new_button_positive);
 		posiviteButton.setText(args.getString(POSITIVE));
@@ -113,6 +144,19 @@ public class ChallengeNewDialog extends DialogFragment {
 				listener.onClick(ClickType.Positive);
 			}
 		});
+		String nuetralText = args.getString(NUETRAL);
+		Button nuetralButton = (Button) v.findViewById(R.id.challenge_new_button_nuetral);
+		if (!nuetralText.equals("")) {
+			nuetralButton.setText(args.getString(NUETRAL));
+			nuetralButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					listener.onClick(ClickType.Nuetral);
+				}
+			});
+		} else {
+			nuetralButton.setVisibility(View.GONE);
+		}
 		Button negativeButton = (Button) v.findViewById(R.id.challenge_new_button_negative);
 		negativeButton.setText(args.getString(NEGATIVE));
 		negativeButton.setOnClickListener(new OnClickListener() {

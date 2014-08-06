@@ -79,10 +79,6 @@ public class ShareHelper {
 		new UploadImage(context, image) {
 			@Override
 			protected void onPostExecute(Integer result) {
-				Loggy.d("success = " + getSuccess());
-				Loggy.d("error = " + getError());
-				Loggy.d("url = " + getURL());
-				Loggy.d("hash = " + getHash());
 				PreferenceHelper.storeLatestShareHash(context, getHash());
 				if (result == 0 || getSuccess().equals("true")) {
 					loginOrShareFacebook(context, uiHelper, pDialog, getURL());
@@ -126,13 +122,11 @@ public class ShareHelper {
 		staticProgressDialog = pDialog;
 		Session session = Session.getActiveSession();
 		if (!session.isOpened() && !session.isClosed()) {
-			Loggy.d("test", "openForRead");
 			session.openForRead(new Session.OpenRequest(staticActivity).setPermissions(LoginFragment.PERMISSIONS)
 					.setCallback(loginCallback));
 		} else if (session.isOpened()) {
 			shareFacebook();
 		} else {
-			Loggy.d("test", "openActiveSession");
 			Session.openActiveSession(staticActivity, true, LoginFragment.PERMISSIONS, loginCallback);
 		}
 	}
@@ -161,21 +155,17 @@ public class ShareHelper {
 							// and the post Id.
 							final String postId = values.getString("post_id");
 							if (postId != null) {
-								Loggy.d("test", "Posted story, id: " + postId);
 								confirmShare(context);
 								String[] EggKeys = context.getResources().getStringArray(R.array.egg_keys);
 								int[] EggMaxValues = context.getResources().getIntArray(R.array.egg_max_values);
 								EggHelper.unlockEgg(context, EggKeys[8], EggMaxValues[8]);
 							} else {
 								// User clicked the Cancel button
-								Loggy.d("test", "Publish cancelled");
 							}
 						} else if (error instanceof FacebookOperationCanceledException) {
 							// User clicked the "x" button
-							Loggy.d("test", "Publish cancelled");
 						} else {
 							// Generic, ex: network error
-							Loggy.d("test", "Error posting story");
 						}
 						if (staticProgressDialog != null) {
 							staticProgressDialog.dismiss();
@@ -188,12 +178,7 @@ public class ShareHelper {
 
 	public static void confirmShare(final Context context) {
 		String hash = PreferenceHelper.getLatestShareHash(context);
-		new ConfirmID(context, ConfirmType.SHARE_HASH, hash) {
-			@Override
-			protected void onPostExecute(Integer result) {
-				Loggy.d("Confirmed Share");
-			}
-		}.execute();
+		new ConfirmID(context, ConfirmType.SHARE_HASH, hash).execute();
 	}
 
 	public static Intent getShareIntent(Context context, String subject, Bitmap bitmap, String message, String link) {

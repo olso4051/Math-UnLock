@@ -3,8 +3,6 @@ package com.olyware.mathlock.ui;
 import android.content.Context;
 import android.graphics.Typeface;
 
-import com.olyware.mathlock.utils.Loggy;
-
 public class Typefaces {
 	protected static Typefaces instance;
 	public Typeface robotoLight;
@@ -17,7 +15,7 @@ public class Typefaces {
 			robotoMedium = Typeface.createFromAsset(context.getAssets(), "Roboto-Medium.ttf");
 			robotoCondensed_Regular = Typeface.createFromAsset(context.getAssets(), "RobotoCondensed-Regular.ttf");
 		} catch (Exception e) {
-			Loggy.d("Unable to load typefaces", e);
+			// Unable to load typefaces
 		}
 	}
 

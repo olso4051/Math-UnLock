@@ -27,7 +27,6 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.MathQuestion.ParseMode;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.EZ;
-import com.olyware.mathlock.utils.Loggy;
 
 public class DatabaseModelFactory {
 
@@ -357,7 +356,6 @@ public class DatabaseModelFactory {
 
 	public static Map<String, ChallengeData> buildChallengeIDs(Cursor cursor) {
 		Map<String, ChallengeData> challengeIDs = new HashMap<String, ChallengeData>();
-		Loggy.d("number of challengeIDs = " + cursor.getCount());
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			CursorHelper cursorHelper = new CursorHelper(cursor);
@@ -373,7 +371,6 @@ public class DatabaseModelFactory {
 					lastUserID = userID;
 				}
 				int score = cursorHelper.getInteger(ChallengeQuestionContract.SCORE);
-				Loggy.d("challengeID = " + challengeID + " |score = " + score);
 				if (score < 0) {
 					if (challengeID.equals(lastChallengeID)) {
 						questionsToDo++;
@@ -387,7 +384,6 @@ public class DatabaseModelFactory {
 						questionsToDo = 0;
 					}
 				}
-				Loggy.d("challengeID = " + challengeID + " |lastChallengeID = " + lastChallengeID);
 				if (!challengeID.equals(lastChallengeID)) {
 					challengeIDs.put(lastChallengeID, new ChallengeData(lastChallengeID, lastUserID, lastQuestionsToDo));
 					lastChallengeID = challengeID;
@@ -402,5 +398,27 @@ public class DatabaseModelFactory {
 			cursorHelper.destroy();
 		}
 		return challengeIDs;
+	}
+
+	public static Map<String, Integer> buildChallengeDescriptions(Cursor cursor) {
+		Map<String, Integer> challengeDescriptions = new HashMap<String, Integer>();
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			CursorHelper cursorHelper = new CursorHelper(cursor);
+			while (!cursor.isAfterLast()) {
+				cursorHelper.setCursor(cursor);
+				String challengeDescription = cursorHelper.getString(ChallengeQuestionContract.CHALLENGE_DESCRIPTION);
+				if (challengeDescriptions.containsKey(challengeDescription)) {
+					int previousValue = challengeDescriptions.get(challengeDescription);
+					challengeDescriptions.put(challengeDescription, previousValue + 1);
+				} else {
+					challengeDescriptions.put(challengeDescription, 1);
+				}
+				cursor.moveToNext();
+			}
+			cursor.close();
+			cursorHelper.destroy();
+		}
+		return challengeDescriptions;
 	}
 }

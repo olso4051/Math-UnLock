@@ -53,7 +53,7 @@ public class JoystickView extends View {
 	private int optionPathCenterX, optionPathCenterY, tutorial, barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP,
 			Width, Height, dstHeight, spacing, rUnlock, radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc,
 			shareLoc, correctGuess, wrongGuess, selectAppDrag, appCenterVert, appCenterHorz, alphaAnswer = 0, alphaTutorial = 255,
-			pulseFrame = 0, numberOfChallenges;
+			pulseFrame = 0, numberOfChallenges, backupTries = 0;
 	private long tapTimer, lastTimeRevealOrHide = 0, startTimeRevealOrHide = 0, lastTimePulse = 0, startTimePulse = 0;
 	private float answerSizePix, optionX, optionY, appDragX = 0, appDragY = 0, strokeWidth;
 	private double touchX, touchY, startX, startY, appAngle;
@@ -657,10 +657,17 @@ public class JoystickView extends View {
 				} else {
 					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
 							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[i].getHeight() / 2);
-					if (selectUnlock && alphaAnswer == 0)
-						layoutBackup[i].draw(canvas);
-					else
+					if (selectUnlock && alphaAnswer == 0) {
+						if (backupTries > NumAnswers) {
+							layoutBackup[i].draw(canvas);
+						} else {
+							backupTries++;
+							layout[i].draw(canvas);
+						}
+					} else {
+						backupTries = 0;
 						layout[i].draw(canvas);
+					}
 				}
 				canvas.restore();
 			}
@@ -883,8 +890,10 @@ public class JoystickView extends View {
 			resetGuess();
 			setAlpha(0);
 			invalidate();
-			if (listener != null && paused)
+			if (listener != null && paused) {
 				listener.OnSelect(JoystickSelect.Touch, false, -1);
+			}
+			paused = false;
 		}
 		return true;
 	}

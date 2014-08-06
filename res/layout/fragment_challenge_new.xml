@@ -83,27 +83,44 @@
 		android:layout_gravity="center_horizontal"
 		android:focusableInTouchMode="true"
 		android:paddingTop="@dimen/login_vertical_margin"
-		android:layout_marginLeft="@dimen/login_vertical_margin"
-		android:layout_marginRight="@dimen/login_vertical_margin"
 		android:orientation="horizontal" >
         
 	    <Button
 	        android:id="@+id/challenge_new_button_positive"
-			style="@style/Dialog.Button"
+			android:background="@drawable/login_button"
+        	android:textColor="@color/button_text"
+        	android:paddingLeft="@dimen/login_vertical_margin"
+        	android:paddingRight="@dimen/login_vertical_margin"
+        	android:layout_marginRight="@dimen/login_vertical_margin_half"
+        	android:layout_marginTop="@dimen/login_vertical_margin_half"
+        	android:layout_marginBottom="@dimen/login_vertical_margin"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 	        android:text="@string/fragment_challenge_new_wait" />
 	    
-	    <!-- <Button
+	    <Button
 	        android:id="@+id/challenge_new_button_nuetral"
-			style="@style/Dialog.Button"
+			android:background="@drawable/login_button"
+        	android:textColor="@color/button_text"
+        	android:paddingLeft="@dimen/login_vertical_margin"
+        	android:paddingRight="@dimen/login_vertical_margin"
+        	android:layout_marginLeft="@dimen/login_vertical_margin_half"
+        	android:layout_marginRight="@dimen/login_vertical_margin_half"
+        	android:layout_marginTop="@dimen/login_vertical_margin_half"
+        	android:layout_marginBottom="@dimen/login_vertical_margin"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-	        android:text="@string/fragment_challenge_new_accept" />-->
+	        android:text="@string/fragment_challenge_new_remind" />
 	        
 	    <Button
 	        android:id="@+id/challenge_new_button_negative"
-			style="@style/Dialog.Button"
+			android:background="@drawable/login_button"
+        	android:textColor="@color/button_text"
+        	android:paddingLeft="@dimen/login_vertical_margin"
+        	android:paddingRight="@dimen/login_vertical_margin"
+        	android:layout_marginLeft="@dimen/login_vertical_margin_half"
+        	android:layout_marginTop="@dimen/login_vertical_margin_half"
+        	android:layout_marginBottom="@dimen/login_vertical_margin"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 	        android:text="@string/fragment_challenge_new_cancel" />

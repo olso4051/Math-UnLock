@@ -65,9 +65,6 @@ public class ContactHelper {
 						values[0].getEmails().remove(emailsTemp.size() - 1);
 						listener.onNewContactFound(replaceID, values[0]);
 					} else {
-						Loggy.d("test",
-								"new Friend found, contactID = " + values[0].getContacts().toString() + " userID = "
-										+ values[0].getHiqUserID() + " userName = " + values[0].getDisplayName());
 						listener.onFriendContactFound(values[0].getContact(), values[0].getHiqUserID(), values[0].getHiqUserName());
 					}
 				}
@@ -96,7 +93,6 @@ public class ContactHelper {
 				contactsJSON += "," + contact.getJSON();
 		}
 		contactsJSON += "]";
-		SaveHelper.SaveTextFilePublic("stored_contacts.txt", contactsJSON);
 		editorPrefsContacts.putString(CONTACTS, contactsJSON).commit();
 	}
 
@@ -249,9 +245,6 @@ public class ContactHelper {
 		case NAME:
 			break;
 		case PhoneAndFacebookHASH:
-			Loggy.d("test", "searching contacts");
-			Loggy.d("test", "contacts.size() = " + contacts.size());
-			Loggy.d("test", "searches.size() = " + searches.size());
 			for (int i = 0; i < contacts.size(); i++) {
 				boolean found = false;
 				CustomContactData contact = contacts.get(i);
@@ -262,9 +255,6 @@ public class ContactHelper {
 					String facebookHash = contact.getFacebookHash();
 					if (facebookHash != null && searchFacebookHash != null) {
 						if (!facebookHash.equals("") && !searchFacebookHash.equals("") && facebookHash.equals(searchFacebookHash)) {
-							Loggy.d("contact facebook = " + contact.getFacebookHash() + " |search = " + searchFacebookHash);
-							// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
-							Loggy.d("test", "sending facebook friend to listener");
 							listener.onFriendContactFound(i, location);
 							found = true;
 							break;
@@ -279,8 +269,6 @@ public class ContactHelper {
 							String searchPhoneHash = searches.get(location).getPhoneHash();
 							if (phoneHash != null && searchPhoneHash != null) {
 								if (!phoneHash.equals("") && !searchPhoneHash.equals("") && phoneHash.equals(searchPhoneHash)) {
-									// List<Integer> ints = findContacts(findType, i, contacts, searches.get(location));
-									Loggy.d("test", "sending contacts friend to listener");
 									listener.onFriendContactFound(i, location);
 									found = true;
 									break;
@@ -306,9 +294,6 @@ public class ContactHelper {
 			case NAME:
 				break;
 			case PhoneAndFacebookHASH:
-				Loggy.d("test", "searching contacts");
-				Loggy.d("test", "contacts.size() = " + contacts.size());
-				Loggy.d("test", "start = " + start);
 				for (int i = start; i < contacts.size(); i++) {
 					CustomContactData contact = contacts.get(i);
 
@@ -479,18 +464,6 @@ public class ContactHelper {
 	public static boolean isUserConfirmed(Context ctx) {
 		SharedPreferences sharedPrefsUserInfo = ctx.getSharedPreferences(ctx.getString(R.string.pref_user_info), Context.MODE_PRIVATE);
 		return sharedPrefsUserInfo.getBoolean(ctx.getString(R.string.pref_user_confirmed), false);
-	}
-
-	private static List<String> getStringListFromJSONArray(JSONArray array) {
-		List<String> list = new ArrayList<String>();
-		try {
-			for (int i = 0; i < array.length(); i++) {
-				list.add(array.getString(i));
-			}
-		} catch (JSONException e) {
-			return new ArrayList<String>();
-		}
-		return list;
 	}
 
 	public static enum FindType {

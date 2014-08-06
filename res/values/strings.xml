@@ -4,7 +4,7 @@
     <string name="app_name">Hiq Lockscreen</string>
     <string name="facebook_app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
-    <string name="service_base_url">http://eb.learnwithhiq.com/</string>
+    <string name="service_base_url">http://api.learnwithhiq.com/</string>
     
     <!-- App Linking Strings -->
     <string name="coin_scheme1">http</string>
@@ -51,8 +51,9 @@
     <string name="fragment_challenge_new_questions">Questions</string>
     <string name="fragment_challenge_new_accept">Accept</string>
     <string name="fragment_challenge_new_decline">Decline</string>
-    <string name="fragment_challenge_new_wait">OK</string>
-    <string name="fragment_challenge_new_cancel">Delete</string>
+    <string name="fragment_challenge_new_wait">Wait</string>
+    <string name="fragment_challenge_new_remind">Remind</string>
+    <string name="fragment_challenge_new_cancel">Cancel</string>
     <string name="challenge_accepted">Challenge Accepted!</string>
     <string name="challenge_declined">Challenge Declined</string>
     <string name="challenge_status_failed">Failed to Respond to Challenge, Challenge was removed</string>
@@ -61,6 +62,8 @@
     <string name="challenge_send_no_questions">Select at least 1 question pack</string>
     <string name="challenge_cancel_failed">Failed to Cancel Challenge. Try again Later</string>
     <string name="challenge_canceled">Challenge Canceled</string>
+    <string name="challenge_reminded">Challenge Reminder Sent</string>
+    <string name="challenge_reminded_failed">Failed to Send Challenge Reminder</string>
     
     <!-- Google Analytics Tracking strings -->
     <string name="google_analytics_tracking_id">UA-48722021-1</string>

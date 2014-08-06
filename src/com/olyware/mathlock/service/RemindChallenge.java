@@ -17,18 +17,15 @@ import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.Loggy;
-import com.olyware.mathlock.utils.PreferenceHelper;
-import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
-public class CancelChallenge extends AsyncTask<Void, Integer, Integer> {
+public class RemindChallenge extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
-	private String success, error, challengeID, hiqUserID, userID;
+	private String success, error, challengeID, hiqUserIdToRemind;
 	private Context ctx;
 
-	public CancelChallenge(Context ctx, String challengeID, String hiqUserID, String userID) {
+	public RemindChallenge(Context ctx, String challengeID, String hiqUserIdToRemind) {
 		this.challengeID = challengeID;
-		this.hiqUserID = hiqUserID;
-		this.userID = userID;
+		this.hiqUserIdToRemind = hiqUserIdToRemind;
 		this.ctx = ctx;
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
@@ -49,7 +46,7 @@ public class CancelChallenge extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Void... v) {
-		String endpoint = "challenge/cancel";
+		String endpoint = "challenge/remind";
 
 		// PUT to API accept or decline challenge
 		HttpClient httpclient = HttpClientBuilder.create().build();
@@ -61,8 +58,7 @@ public class CancelChallenge extends AsyncTask<Void, Integer, Integer> {
 		try {
 			JSONObject data = new JSONObject();
 			data.put("challenge_id", challengeID);
-			data.put("user_id_1", hiqUserID);
-			data.put("user_id_2", userID);
+			data.put("user_id_to_remind", hiqUserIdToRemind);
 
 			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
@@ -82,8 +78,6 @@ public class CancelChallenge extends AsyncTask<Void, Integer, Integer> {
 			success = getStringFromJSON(jsonResponse, "success");
 			error = getStringFromJSON(jsonResponse, "error");
 			if (success.equals("true")) {
-				/*DatabaseManager dbManager = new DatabaseManager(ctx.getApplicationContext());
-				dbManager.removeChallengeQuestions(challengeID);*/
 				return 0;
 			} else
 				return 1;
@@ -95,10 +89,9 @@ public class CancelChallenge extends AsyncTask<Void, Integer, Integer> {
 	@Override
 	protected void onPostExecute(Integer result) {
 		if (result == 0) {
-			PreferenceHelper.storeChallengeStatus(ctx, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
-			Toast.makeText(ctx, ctx.getString(R.string.challenge_canceled), Toast.LENGTH_LONG).show();
+			Toast.makeText(ctx, ctx.getString(R.string.challenge_reminded), Toast.LENGTH_LONG).show();
 		} else {
-			Toast.makeText(ctx, ctx.getString(R.string.challenge_cancel_failed), Toast.LENGTH_LONG).show();
+			Toast.makeText(ctx, ctx.getString(R.string.challenge_reminded_failed), Toast.LENGTH_LONG).show();
 		}
 	}
 

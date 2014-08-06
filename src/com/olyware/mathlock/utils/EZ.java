@@ -58,20 +58,16 @@ public class EZ {
 
 			@Override
 			public void onUpdate(int nowBeingRestored, String currentPackage) {
-				Loggy.d("current Package being restored = " + currentPackage);
 				super.onUpdate(nowBeingRestored, currentPackage);
 			}
 
 			@Override
 			public void restoreFinished(int error) {
-				// TODO Auto-generated method stub
 				super.restoreFinished(error);
 			}
 
 			@Override
 			public void restoreStarting(int numPackages) {
-				// TODO Auto-generated method stub
-				Loggy.d("Packages being restored = " + numPackages);
 				super.restoreStarting(numPackages);
 			}
 		};
@@ -115,7 +111,7 @@ public class EZ {
 			if (view instanceof TextView) {
 				((TextView) view).setTypeface(font);
 			} else {
-				Loggy.d("Unable to set typeface: View is not a TextView!");
+				// Unable to set typeface: View is not a TextView!
 			}
 		}
 	}

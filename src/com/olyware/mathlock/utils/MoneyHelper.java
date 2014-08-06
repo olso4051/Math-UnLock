@@ -82,14 +82,11 @@ public class MoneyHelper {
 	}
 
 	public static void increasePendingMoney(Context context, int amount) {
-		Loggy.d("increaseing pending money by " + amount);
-		Loggy.d("pending money before = " + sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0));
 		sharedPrefsMoney = context.getSharedPreferences(context.getString(R.string.pref_money), Context.MODE_PRIVATE);
 		editorPrefsMoney = sharedPrefsMoney.edit();
 		int pending = sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0);
 		editorPrefsMoney.putInt(context.getString(R.string.pref_money_pending), pending + amount);
 		editorPrefsMoney.commit();
-		Loggy.d("pending money after = " + sharedPrefsMoney.getInt(context.getString(R.string.pref_money_pending), 0));
 	}
 
 	public static void decreasePendingMoneyNoDebt(Context context, int amount) {
@@ -128,19 +125,16 @@ public class MoneyHelper {
 		if (System.currentTimeMillis() < UTC_SEPTEMBER_1) {
 			if (coinHash.equals(context.getString(R.string.coin_fountain_1000))) {
 				if (!sharedPrefsMoney.getBoolean(coinHash, false)) {
-					Loggy.d("increase coins");
 					increasePendingMoney(context, 1000);
 					editorPrefsMoney.putBoolean(coinHash, true).commit();
 				}
 			} else if (coinHash.equals(context.getString(R.string.coin_fountain_2000))) {
 				if (!sharedPrefsMoney.getBoolean(coinHash, false)) {
-					Loggy.d("increase coins");
 					increasePendingMoney(context, 2000);
 					editorPrefsMoney.putBoolean(coinHash, true).commit();
 				}
 			} else if (coinHash.equals(context.getString(R.string.coin_fountain_3000))) {
 				if (!sharedPrefsMoney.getBoolean(coinHash, false)) {
-					Loggy.d("increase coins");
 					increasePendingMoney(context, 3000);
 					editorPrefsMoney.putBoolean(coinHash, true).commit();
 				}

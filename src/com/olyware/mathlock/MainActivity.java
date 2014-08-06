@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -81,6 +82,7 @@ import com.olyware.mathlock.service.AcceptChallenge;
 import com.olyware.mathlock.service.CancelChallenge;
 import com.olyware.mathlock.service.CompleteChallenge;
 import com.olyware.mathlock.service.CustomContactData;
+import com.olyware.mathlock.service.RemindChallenge;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.service.SendChallenge;
 import com.olyware.mathlock.ui.Typefaces;
@@ -95,7 +97,6 @@ import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
-import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
@@ -196,7 +197,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private BroadcastReceiver finishBroadcast = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Loggy.d("test", "Logout in progress");
 			// At this point you should start the login activity and finish this one
 			finish();
 		}
@@ -218,7 +218,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		public void onReceive(Context context, Intent intent) {
 			// provision coins to the user
 			if (loggedIn) {
-				Loggy.d("challenge broadcast");
 				provisionPendingMoney();
 				if (joystick != null) {
 					joystick.setNumberOfChallenges(ContactHelper.getNumberOfChallenges(MainActivity.this));
@@ -250,8 +249,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		@Override
 		protected void onPostExecute(Void v) {
-			Loggy.d("test", "database updated");
-			Loggy.d("setProblemAndAnswer from database updated");
 			setProblemAndAnswer();
 			super.onPostExecute(null);
 		}
@@ -271,7 +268,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// save the original wallpaper
 			long time = System.currentTimeMillis();
 			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], wallpaper);
-			Loggy.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
 
 			// blur bitmap
 			final RenderScript rs = RenderScript.create(ctx);
@@ -297,7 +293,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// save bitmap to internal private storage
 			time = System.currentTimeMillis();
 			SaveHelper.SaveBitmapPrivate(ctx, bmps[0], blurred);
-			Loggy.d("test", "save bitmap time = " + (System.currentTimeMillis() - time));
 
 			// convert bitmap to BitmapDrawable so we can set it as the background of a view
 			BitmapDrawable bDrawable = new BitmapDrawable(getResources(), bmps[0]);
@@ -326,8 +321,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Loggy.d("userID = " + ContactHelper.getUserID(this));
-		Loggy.d("GAtest", "onCreate");
 		super.onCreate(savedInstanceState);
 		getDeepLinkData(getIntent().getData());
 		trackerGA = MyApplication.getGaTracker();
@@ -530,7 +523,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					}
 					JoystickSelected(s, vibrate, Extra);
 					if (setProblem) {
-						Loggy.d("setProblemAndAnswer from setProblem onSelect");
 						setProblemAndAnswer();
 					}
 				}
@@ -587,7 +579,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	protected void onPause() {
 		screenViewed = false;
 		if (loggedIn) {
-			Loggy.d("GAtest", "onPause");
 			paused = true;
 
 			ChallengeDialog challengeDialog = (ChallengeDialog) getSupportFragmentManager().findFragmentByTag(ChallengeDialog.TAG);
@@ -629,9 +620,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onStop() {
 		if (loggedIn) {
-			Loggy.d("GAtest", "onStop");
-			/*if (attached)
-				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 			joystick.removeCallbacks();
 		}
 		super.onStop();
@@ -640,7 +628,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onDestroy() {
 		if (loggedIn) {
-			Loggy.d("GAtest", "onDestroy");
 			clock.destroy();
 			if (mHelper != null) {
 				try {
@@ -668,12 +655,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		super.onSaveInstanceState(outState);
 		if (loggedIn)
 			uiHelper.onSaveInstanceState(outState);
-		// outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
 	}
 
 	@Override
 	protected void onResume() {
-		Loggy.d("GAtest", "onResume");
 		long currentTime = System.currentTimeMillis();
 		paused = false;
 		super.onResume();
@@ -727,26 +712,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 
 			// setup the question and answers
-			// resetQuestionWorth(0);
-			// startCountdown();
-			// resetTimer();
-			// if (changed)
 			if (!unlocking) {
-				Loggy.d("setProblemAndAnswer from not unlocking");
 				setProblemAndAnswer();
 			}
 
 			if (!UnlockedPackages)
 				displayInfo(true);
-			else if (challenge)
+			else if (challenge) {
+				challenge = false;
 				displayFriends();
-			else if (info)
+			} else if (info) {
+				info = false;
 				displayInfo(false);
-			else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
+			} else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 					&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
 				displayRateShare();
 			else if (fromTutorial) {
-				Loggy.d("setProblemAndAnswer from tutorial onResume");
 				setProblemAndAnswer();
 			}
 
@@ -774,7 +755,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			if (pm.isScreenOn()) {
-				Loggy.d("test", "onResume Screen is on");
 				trackerGA.set(Fields.SESSION_CONTROL, "start");
 				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 				joystick.startAnimations();
@@ -842,7 +822,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						progressDialog.dismiss();
 						progressDialog = null;
 					}
-					Loggy.d("test", String.format("Error: %s", error.toString()));
 				}
 
 				@Override
@@ -853,18 +832,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					}
 					boolean didFinishNormal = FacebookDialog.getNativeDialogDidComplete(data);
 					String completionGesture = FacebookDialog.getNativeDialogCompletionGesture(data);
-					String postID = FacebookDialog.getNativeDialogPostId(data);
-					if (didFinishNormal)
-						Loggy.d("test", "facebook post didFinishNormal");
-					if (completionGesture.equals("post"))
-						Loggy.d("test", "successful facebook post");
-					if (completionGesture.equals("cancel"))
-						Loggy.d("test", "facebook cancel");
-					if (postID == null)
-						Loggy.d("test", "post ID is null (postID==null) = " + (postID == null));
-					else if (postID.equals("null"))
-						Loggy.d("test", "post ID is null (postID.equals(\"null\") = " + (postID.equals("null")));
-					Loggy.d("test", "post ID = " + postID);
+					// String postID = FacebookDialog.getNativeDialogPostId(data);
 					if (didFinishNormal && completionGesture.equals("post")) {
 						ShareHelper.confirmShare(MainActivity.this);
 						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
@@ -890,7 +858,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						}
 					}
 				} else if (requestCode == INVITE_SENT) {
-					// Loggy.d("test", "invite sent");
+					// never gets called resultCode never equal RESULT_OK
 				}
 			}
 		} else
@@ -970,7 +938,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		int w = PreferenceHelper.getLayoutWidth(this, -1);
 		int h = PreferenceHelper.getLayoutHeight(this, -1);
 		int statusBarHeight = PreferenceHelper.getLayoutStatusBarHeight(this, -1);
-		Loggy.d("w = " + w + " h = " + h + " sh = " + statusBarHeight);
 		if (w > 0 && h > 0 && statusBarHeight >= 0) {
 			try {
 				BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
@@ -984,7 +951,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				int width = w;
 				int height = h - statusBarHeight;
 
-				Loggy.d("x = " + x + "y = " + y + "width = " + width + "height = " + height);
 				if (x < 0)
 					x = 0;
 				if (width > bitmap.getWidth())
@@ -999,14 +965,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (y + height > bitmap.getHeight())
 					height = bitmap.getHeight() - y;
 
-				Loggy.d("x = " + x + "y = " + y + "width = " + width + "height = " + height);
 				if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0 && x + width > 0
 						&& x + width <= bitmap.getWidth() && y + height > 0 && y + height <= bitmap.getHeight()) {
 					// scale the bitmap to fit on the background
 					bitmap = Bitmap.createBitmap(bitmap, x, y, width, height);
 				} else {
 					// Should never happen but user reported y>bitmap.getHeight so here it is and x<0
-					Loggy.d("x,y,width,height wrong");
+					bitmap.recycle();
 					return getDimOrGradient(dimOrGradient);
 				}
 
@@ -1015,12 +980,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 					if (!bitmap.isMutable()) {
 						// bitmap still not mutable return default
-						Loggy.d("not mutable");
+						bitmap.recycle();
 						return getDimOrGradient(dimOrGradient);
 					}
 				}
 
-				Loggy.d("drawing wallpaper with dim and gradients");
 				Canvas canvas = new Canvas(bitmap);
 				canvas.drawBitmap(bitmap, 0, 0, null);
 				Rect dstRectForOpt = new Rect();
@@ -1038,9 +1002,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				return bitmap;
 			} catch (SecurityException e) {
 				return getDimOrGradient(dimOrGradient);
+			} catch (OutOfMemoryError e) {
+				return getDimOrGradient(dimOrGradient);
 			}
 		}
-		Loggy.d("bad layout");
 		return getDimOrGradient(dimOrGradient);
 	}
 
@@ -1117,23 +1082,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				fromChallenge = false;
 				challengeIDToDisplay = "";
 				Map<String, ChallengeData> challengeIDs = dbManager.getChallengeIDs();
-				Loggy.d("challengeIDs.size() = " + challengeIDs.size());
 				for (Map.Entry<String, ChallengeData> entry : challengeIDs.entrySet()) {
 					String challengeID = entry.getKey();
 					int questionsToAnswer = entry.getValue().getNumberOfQuestions();
 					String hiqUserID = entry.getValue().getUserID();
 					ChallengeStatus status = PreferenceHelper.getChallengeStatusFromID(this, challengeID);
-					Loggy.d("hiqUserID = " + hiqUserID + " |challengeIDToDisplay = " + challengeIDToDisplay + " |challengeID = "
-							+ challengeID + " |questions = " + questionsToAnswer + " |status = " + status.getValue());
 					if (status.equals(ChallengeStatus.Accepted) && challengeIDToDisplay.equals("")) {
 						if (questionsToAnswer > 0) {
 							// display challenge Question
 							challengeIDToDisplay = challengeID;
-							Loggy.d("challengeIDToDisplay = " + challengeIDToDisplay);
 						} else {
 							// send challenge complete to the api
 							sendChallengeComplete(challengeID);
-							Loggy.d("sendChallengeComplete challengeID = " + challengeID);
 						}
 					} else if (status.equals(ChallengeStatus.Declined) || status.equals(ChallengeStatus.Done)) {
 						// delete questions from database
@@ -1141,7 +1101,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						PreferenceHelper.removeChallengeID(this, challengeID, hiqUserID);
 					}
 				}
-				Loggy.d(challengeIDToDisplay);
 				if (!challengeIDToDisplay.equals("")) {
 					new NotificationHelper(MainActivity.this).clearChallengeStatusNotification();
 					ChallengeQuestion question = dbManager.getChallengeQuestion(challengeIDToDisplay);
@@ -1271,6 +1230,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private void setDefaultQuestion() {
 		joystick.resetGuess();
 		joystick.setProblem(false);
+		joystick.unPauseSelection();
 		if (!UnlockedPackages) {
 			problem.setText(R.string.none_unlocked);
 			answersRandom = answersNone;
@@ -1474,6 +1434,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			new CompleteChallenge(this, challengeID, score, MoneyHelper.getMaxBet(this)) {
 				@Override
 				protected void onPostExecute(Integer result) {
+					super.onPostExecute(result);
 					if (joystick != null) {
 						joystick.setNumberOfChallenges(ContactHelper.getNumberOfChallenges(MainActivity.this));
 					}
@@ -1564,7 +1525,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						Loggy.d("setProblemAndAnswer from tutorial ABCD");
 						setProblemAndAnswer();
 					}
 				}, 500);
@@ -1585,7 +1545,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						Loggy.d("setProblemAndAnswer from correct quiz mode");
 						setProblemAndAnswer();
 					}
 				}, 500);
@@ -1672,7 +1631,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					getDeepLinkToShare());
 			break;
 		case Touch:
-			Loggy.d("setProblemAndAnswer from touch");
 			setProblemAndAnswer();
 			break;
 		case Exit:
@@ -1704,7 +1662,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			for (int i = 0; i < answers.length; i++) {
 				deepLink += "-" + URLEncoder.encode(answers[i], "utf-8");
 			}
-			Loggy.d("test", "deep link = " + deepLink);
 			return deepLink;
 		} catch (UnsupportedEncodingException e) {
 			return "";
@@ -1717,7 +1674,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			String host = data.getHost();
 			String path = data.getPath();
 			String coinHash = data.getQueryParameter(getString(R.string.coin_query));
-			Loggy.d("scheme(" + scheme + ")host(" + host + ")path(" + path + ")coins(" + coinHash + ")");
 			if (scheme != null && host != null && path != null && coinHash != null) {
 				if ((scheme.equals(getString(R.string.coin_scheme1)) || scheme.equals(getString(R.string.coin_scheme2)))
 						&& host.equals(getString(R.string.coin_host)) && path.equals(getString(R.string.coin_path))) {
@@ -1727,7 +1683,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// String scheme = "sharequestion";
 			String target = "http://deeldat.com/f/";
 			String url = data.toString();
-			Loggy.d("test", "url = " + url);
 			int start = url.indexOf(target);
 			if (start >= 0) {
 				try {
@@ -1738,7 +1693,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					for (int i = 0; i < answers.length; i++) {
 						start = end + 1;
 						end = url.indexOf('-', start);
-						Loggy.d("test", "start = " + start + " | end = " + end);
 						if (end > 0)
 							answersFromDeepLink[i] = URLDecoder.decode(url.substring(start, end), "utf-8");
 						else
@@ -1897,19 +1851,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					questionDialog.setQuestionDialogListener(new QuestionDialogListener() {
 						@Override
 						public void onChallenge(final ChallengeBuilder builder) {
-							Loggy.d("sending challenge...");
 							boolean success = false;
 							questionDialog.dismiss();
 							if (dbManager != null) {
 								if (!dbManager.isDestroyed()) {
-									Loggy.d("sending challenge...database is not null...");
 									List<GenericQuestion> questions = dbManager.createChallengeQuestions(builder);
-									Loggy.d("before sending questions size = " + questions.size());
 									new SendChallenge(MainActivity.this, builder.getUserHash(), questions, builder.getBet(), builder
 											.getDifficultyMin(), builder.getDifficultyMax()) {
 										@Override
 										protected void onPostExecute(Integer result) {
-											Loggy.d("sending challenge...response from server...");
 											boolean success = false;
 											if (result == 0) {
 												if (dbManager != null) {
@@ -1928,7 +1878,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 														encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 																.encryptForURL(encryptedUserID);
 														sendEvent("social", "challenge_sent", encryptedUserID, (long) builder.getBet());
-														Loggy.d("sent challenge");
 													}
 												}
 											}
@@ -1955,16 +1904,21 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			@Override
 			public void onActiveStateSelected() {
 				challengeDialog.dismiss();
-				Loggy.d("setProblemAndAnswer from active challenge");
 				setProblemAndAnswer();
 			}
 
 			@Override
 			public void onSentStateSelected(final String challengeID, final String hiqUserID, String userName, int bet, int diffMin,
 					int diffMax, int questions, CustomContactData.ChallengeState state) {
+				Map<String, Integer> challengeDescriptions = new HashMap<String, Integer>();
+				if (dbManager != null) {
+					if (!dbManager.isDestroyed()) {
+						challengeDescriptions = dbManager.getChallengeDescriptions(challengeID);
+					}
+				}
 				challengeDialog.dismiss();
 				final ChallengeNewDialog challengeNewDialog = ChallengeNewDialog.newInstance(MainActivity.this, userName, bet, diffMin,
-						diffMax, questions, state);
+						diffMax, questions, challengeDescriptions, state);
 				challengeNewDialog.setCancelable(true);
 				challengeNewDialog.setChallengeDialogListener(new OnAcceptOrDeclineListener() {
 					@Override
@@ -1973,6 +1927,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						if (type == ChallengeNewDialog.ClickType.Positive) {
 							// do nothing return to main screen
 						} else if (type == ChallengeNewDialog.ClickType.Nuetral) {
+							new RemindChallenge(MainActivity.this, challengeID, hiqUserID).execute();
+							String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
+							encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper.encryptForURL(encryptedUserID);
+							sendEvent("social", "challenge_remind", encryptedUserID, null);
 						} else if (type == ChallengeNewDialog.ClickType.Negative) {
 							new CancelChallenge(MainActivity.this, challengeID, hiqUserID, ContactHelper.getUserID(MainActivity.this))
 									.execute();
@@ -1988,9 +1946,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			@Override
 			public void onNewStateSelected(final String challengeID, String userName, final int bet, int diffMin, int diffMax,
 					int questions, CustomContactData.ChallengeState state) {
+				Map<String, Integer> challengeDescriptions = new HashMap<String, Integer>();
+				if (dbManager != null) {
+					if (!dbManager.isDestroyed()) {
+						challengeDescriptions = dbManager.getChallengeDescriptions(challengeID);
+					}
+				}
 				challengeDialog.dismiss();
 				final ChallengeNewDialog challengeNewDialog = ChallengeNewDialog.newInstance(MainActivity.this, userName, bet, diffMin,
-						diffMax, questions, state);
+						diffMax, questions, challengeDescriptions, state);
 				challengeNewDialog.setCancelable(true);
 				challengeNewDialog.setChallengeDialogListener(new OnAcceptOrDeclineListener() {
 					@Override
@@ -2005,7 +1969,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Accepted,
 												CustomContactData.ChallengeState.Active);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
-										Loggy.d("setProblemAndAnswer from accept challenge");
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
@@ -2014,8 +1977,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										sendEvent("social", "challenge_accepted", encryptedUserID, (long) bet);
 										Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[18], EggMaxValues[18]));
 									} else {
-										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
-												CustomContactData.ChallengeState.None);
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
 												.show();
 									}
@@ -2027,9 +1988,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								@Override
 								protected void onPostExecute(Integer result) {
 									new NotificationHelper(MainActivity.this).clearChallengeNotification();
-									PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
-											CustomContactData.ChallengeState.None);
-									Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
+									if (result == 0) {
+										PreferenceHelper.storeChallengeStatus(MainActivity.this, challengeID, ChallengeStatus.Declined,
+												CustomContactData.ChallengeState.None);
+										if (joystick != null) {
+											joystick.setNumberOfChallenges(ContactHelper.getNumberOfChallenges(MainActivity.this));
+										}
+										Toast.makeText(MainActivity.this, getString(R.string.challenge_declined), Toast.LENGTH_LONG).show();
+									} else {
+										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
+												.show();
+									}
 								}
 							}.execute();
 							String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
@@ -2062,7 +2031,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 						UnlockedPackages = isAnyPackageUnlocked();
 						EnabledPackages = getEnabledPackages();
-						Loggy.d("setProblemAndAnswer from pick a pack");
 						setProblemAndAnswer();
 					}
 				});
@@ -2070,7 +2038,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				final String link = ShareHelper.buildShareURL(this);
 				builder.setCancelable(true);
 				builder.setTitle(R.string.info_title);
-				builder.setMessage(R.string.info_message).setCancelable(false);
+				builder.setMessage(R.string.info_message);
 				builder.setPositiveButton(R.string.share_with_other, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						String[] messages = getResources().getStringArray(R.array.invite_messages);
@@ -2158,13 +2126,16 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (Money != null) {
 			sharedPrefsMoney = getSharedPreferences("Packages", Context.MODE_PRIVATE);
 			editorPrefsMoney = sharedPrefsMoney.edit();
-			int pendingCoins = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending_paid), 0);
-			Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0) + pendingCoins);
+
+			int pendingPaidMoney = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending_paid), 0);
+			Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0) + pendingPaidMoney);
+
 			int pendingMoney = sharedPrefsMoney.getInt(getString(R.string.pref_money_pending), 0);
 			Money.setMoney(sharedPrefsMoney.getInt("money", 0) + pendingMoney);
-			Loggy.d("pendingCoins = " + pendingCoins + " |pendingMoney = " + pendingMoney);
+
 			editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0);
-			editorPrefsMoney.putInt(getString(R.string.pref_money_pending), 0).commit();
+			editorPrefsMoney.putInt(getString(R.string.pref_money_pending), 0);
+			editorPrefsMoney.commit();
 			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
 		}
 	}

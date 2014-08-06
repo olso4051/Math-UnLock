@@ -29,7 +29,6 @@ import com.olyware.mathlock.service.RefreshContacts;
 import com.olyware.mathlock.utils.ChallengeBuilder;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.ContactHelper.FindType;
-import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.PreferenceHelper;
 
 /**
@@ -155,7 +154,6 @@ public class ChallengeDialog extends DialogFragment {
 						int diffMax = PreferenceHelper.getChallengeDifficultyMax(getActivity(), challengeID);
 						int questions = PreferenceHelper.getChallengeQuestions(getActivity(), challengeID);
 						CustomContactData.ChallengeState state = selectedContact.getState();
-						Loggy.d("selected contact state =" + state.getValue());
 						if (state.equals(CustomContactData.ChallengeState.Active)) {
 							listener.onActiveStateSelected();
 						} else if (state.equals(CustomContactData.ChallengeState.New)) {
@@ -164,8 +162,6 @@ public class ChallengeDialog extends DialogFragment {
 							String hiqUserID = selectedContact.getHiqUserID();
 							listener.onSentStateSelected(challengeID, hiqUserID, displayName, bet, diffMin, diffMax, questions, state);
 						} else if (state.equals(CustomContactData.ChallengeState.None)) {
-							Loggy.d("selected: userName = " + selectedContact.getDisplayName() + " |userID = "
-									+ selectedContact.getHiqUserID());
 							listener.onInactiveSelected(new ChallengeBuilder(selectedContact.getDisplayName(), selectedContact
 									.getHiqUserID()));
 						}
@@ -210,7 +206,6 @@ public class ChallengeDialog extends DialogFragment {
 
 	@Override
 	public void onStop() {
-		Loggy.d("ChallengeDialog onStop");
 		if (refreshContactsTask != null)
 			refreshContactsTask.cancel(true);
 		refreshContactsTask = null;
@@ -233,7 +228,6 @@ public class ChallengeDialog extends DialogFragment {
 	private void refreshContacts(boolean refreshPhonebook) {
 		swipeLayout.setRefreshing(true);
 		numFriends = ContactHelper.getNumberOfFriendsFromContacts(allContacts);
-		Loggy.d("test", "numFriends = " + numFriends);
 		refreshContactsTask = ContactHelper.getCustomContactDataAsync(getActivity(), allContacts, refreshPhonebook,
 				new ContactHelper.contactDataListener() {
 					@Override
@@ -340,7 +334,6 @@ public class ChallengeDialog extends DialogFragment {
 									}
 								}
 							}
-							Loggy.d("storing contacts");
 							ContactHelper.storeContacts(getActivity(), allContacts);
 							swipeLayout.setRefreshing(false);
 						}

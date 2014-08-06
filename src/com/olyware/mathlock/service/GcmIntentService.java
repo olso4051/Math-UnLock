@@ -131,50 +131,54 @@ public class GcmIntentService extends IntentService {
 				} else if (type.equals(CHALLENGE_RESULT)) {
 					String userName;
 					int score, scoreYou;
-					String cUserID = getStringFromMessage(fullMessage, "c_user_id");
-					String oUserID = getStringFromMessage(fullMessage, "o_user_id");
-					int bet = getIntFromMessage(fullMessage, "bet");
-					userID = ContactHelper.getUserID(this);
-					Loggy.d("challenge result userID = " + userID + " |c_user_id = " + cUserID + " |o_user_id = " + oUserID);
-					if (userID.equals(cUserID)) {										// You are c_user
-						userName = getStringFromMessage(fullMessage, "o_username");
-						score = getIntFromMessage(fullMessage, "o_score");
-						scoreYou = getIntFromMessage(fullMessage, "c_score");
-					} else if (userID.equals(oUserID)) {									// You are o_user
-						userName = getStringFromMessage(fullMessage, "c_username");
-						score = getIntFromMessage(fullMessage, "c_score");
-						scoreYou = getIntFromMessage(fullMessage, "o_score");
-					} else {																// couldn't figure out who you are
-						userName = getString(R.string.challenge_default_opponent);			// assume you won
-						int scoreTemp = getIntFromMessage(fullMessage, "o_score");
-						scoreYou = getIntFromMessage(fullMessage, "c_score");
-						if (scoreTemp > scoreYou) {
-							score = scoreYou;
-							scoreYou = scoreTemp;
-						} else {
-							score = scoreTemp;
+					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
+					if (!PreferenceHelper.isChallengeProvisioned(this, challengeID)) {
+						PreferenceHelper.provisionChallengeID(this, challengeID);
+						String cUserID = getStringFromMessage(fullMessage, "c_user_id");
+						String oUserID = getStringFromMessage(fullMessage, "o_user_id");
+						int bet = getIntFromMessage(fullMessage, "bet");
+						userID = ContactHelper.getUserID(this);
+						Loggy.d("challenge result userID = " + userID + " |c_user_id = " + cUserID + " |o_user_id = " + oUserID);
+						if (userID.equals(cUserID)) {										// You are c_user
+							userName = getStringFromMessage(fullMessage, "o_username");
+							score = getIntFromMessage(fullMessage, "o_score");
+							scoreYou = getIntFromMessage(fullMessage, "c_score");
+						} else if (userID.equals(oUserID)) {									// You are o_user
+							userName = getStringFromMessage(fullMessage, "c_username");
+							score = getIntFromMessage(fullMessage, "c_score");
+							scoreYou = getIntFromMessage(fullMessage, "o_score");
+						} else {																// couldn't figure out who you are
+							userName = getString(R.string.challenge_default_opponent);			// assume you won
+							int scoreTemp = getIntFromMessage(fullMessage, "o_score");
+							scoreYou = getIntFromMessage(fullMessage, "c_score");
+							if (scoreTemp > scoreYou) {
+								score = scoreYou;
+								scoreYou = scoreTemp;
+							} else {
+								score = scoreTemp;
+							}
 						}
+						Loggy.d("your score = " + scoreYou + " there score = " + score);
+						NotificationHelper notificationHelper = new NotificationHelper(this);
+						bet = MoneyHelper.getModifiedBet(this, bet);
+						if (scoreYou == score) {
+							// Tie
+							// don't do anything with bet
+						} else if (scoreYou > score) {
+							// Win - add money to account
+							Loggy.d("adding money = " + bet);
+							// PreferenceHelper.increaseMoney(this, bet);
+							MoneyHelper.increasePendingMoney(this, bet);
+						} else {
+							// Loss - subtract money from account
+							Loggy.d("taking money = " + bet);
+							// PreferenceHelper.decreaseMoneyNoDebt(this, bet);
+							MoneyHelper.decreasePendingMoneyNoDebt(this, bet);
+						}
+						notificationHelper.sendChallengeResultNotification(userName, scoreYou, score, bet);
+						Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
+						LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 					}
-					Loggy.d("your score = " + scoreYou + " there score = " + score);
-					NotificationHelper notificationHelper = new NotificationHelper(this);
-					bet = MoneyHelper.getModifiedBet(this, bet);
-					if (scoreYou == score) {
-						// Tie
-						// don't do anything with bet
-					} else if (scoreYou > score) {
-						// Win - add money to account
-						Loggy.d("adding money = " + bet);
-						// PreferenceHelper.increaseMoney(this, bet);
-						MoneyHelper.increasePendingMoney(this, bet);
-					} else {
-						// Loss - subtract money from account
-						Loggy.d("taking money = " + bet);
-						// PreferenceHelper.decreaseMoneyNoDebt(this, bet);
-						MoneyHelper.decreasePendingMoneyNoDebt(this, bet);
-					}
-					notificationHelper.sendChallengeResultNotification(userName, scoreYou, score, bet);
-					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
-					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				} else if (type.equals(CHALLENGE_STATUS)) {
 					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String status = getStringFromMessage(fullMessage, "status");
@@ -190,12 +194,12 @@ public class GcmIntentService extends IntentService {
 					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
 					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				} else if (type.equals(CHALLENGE_CANCEL)) {
-					/*String challengeID = getStringFromMessage(fullMessage, "challenge_id");
+					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					PreferenceHelper.storeChallengeStatus(this, challengeID, ChallengeStatus.Done, CustomContactData.ChallengeState.None);
 					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
-					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);*/
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				} else if (type.equals(CHALLENGE_REMIND)) {
-					/*String challengeID = getStringFromMessage(fullMessage, "challenge_id");
+					String challengeID = getStringFromMessage(fullMessage, "challenge_id");
 					String userName = PreferenceHelper.getChallengeUserName(this, challengeID);
 					int questions = PreferenceHelper.getChallengeQuestions(this, challengeID);
 					int difficultyMin = PreferenceHelper.getChallengeDifficultyMin(this, challengeID);
@@ -204,7 +208,7 @@ public class GcmIntentService extends IntentService {
 					NotificationHelper notificationHelper = new NotificationHelper(this);
 					notificationHelper.sendChallengeNotification(challengeID, userName, questions, difficultyMin, difficultyMax, bet);
 					Intent challengeBroadcastIntent = new Intent(getString(R.string.challenge_receiver_filter));
-					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);*/
+					LocalBroadcastManager.getInstance(this).sendBroadcast(challengeBroadcastIntent);
 				}
 			}
 		}

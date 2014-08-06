@@ -15,7 +15,7 @@
         <item name="tutorial_7">Extended Tutorial 3 of 3</item>
     </string-array>
     <string-array name="tutorial_questions">
-        <item name="tutorial_0">Press The Lock</item>
+        <item name="tutorial_0">Press and Hold The Lock</item>
         <item name="tutorial_1">Double Tap the Lock To Quickly Unlock</item>
         <item name="tutorial_2">Challenge Your Friends</item>
         <item name="tutorial_3">Change Settings</item>

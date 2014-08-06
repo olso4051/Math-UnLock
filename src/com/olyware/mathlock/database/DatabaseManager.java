@@ -38,7 +38,6 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.ChallengeBuilder;
-import com.olyware.mathlock.utils.Loggy;
 
 public class DatabaseManager {
 
@@ -387,7 +386,6 @@ public class DatabaseManager {
 				packIDs.remove(0);
 			}
 			int packs = packIDs.size();
-			Loggy.d("questions = " + questions + " |packs = " + packs + " |");
 			Random rand = new Random();
 			List<GenericQuestion> challengeQuestions = new ArrayList<GenericQuestion>(questions);
 			for (int i = 0; i < questions; i++) {
@@ -426,7 +424,6 @@ public class DatabaseManager {
 					break;
 				}
 			}
-			Loggy.d("challengeQuestions size = " + challengeQuestions.size());
 			return challengeQuestions;
 		} else
 			return null;
@@ -436,7 +433,6 @@ public class DatabaseManager {
 		question.setVariables();
 		String[] answers = question.getAnswers();
 		String genericQuestion = question.getQuestionText();
-		Loggy.d("math question for generic = " + genericQuestion + " answers = " + answers.toString());
 		return new GenericQuestion("Math", genericQuestion, answers);
 	}
 
@@ -473,9 +469,7 @@ public class DatabaseManager {
 		if (db.isOpen()) {
 			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "' AND " + ChallengeQuestionContract.SCORE
 					+ " < 0";
-			Loggy.d("getChallengeQuestion WHERE " + where);
 			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ALL_COLUMNS, where, null, null, null, null);
-			Loggy.d("getChallengeQuestion rows return = " + cursor.getCount());
 			return DatabaseModelFactory.buildChallengeQuestion(cursor);
 		} else
 			return null;
@@ -511,6 +505,15 @@ public class DatabaseManager {
 			return DatabaseModelFactory.buildChallengeIDs(cursor);
 		} else
 			return new HashMap<String, ChallengeData>();
+	}
+
+	public Map<String, Integer> getChallengeDescriptions(String challengeID) {
+		if (db.isOpen()) {
+			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
+			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+			return DatabaseModelFactory.buildChallengeDescriptions(cursor);
+		} else
+			return new HashMap<String, Integer>();
 	}
 
 	public ChallengeData getRandomChallengeID(List<ContactHashes> hashes) {
@@ -560,12 +563,9 @@ public class DatabaseManager {
 	}
 
 	public long addChallengeQuestions(String challengeID, String userID, List<GenericQuestion> questions, String userName) {
-		Loggy.d("adding challegne questions");
 		if (db.isOpen()) {
-			Loggy.d("adding challenge questions");
 			long row = -1;
 			for (GenericQuestion question : questions) {
-				Loggy.d("adding challenge question " + question.getQuestion());
 				ContentValues values = new ContentValues();
 				values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
 				values.put(ChallengeQuestionContract.USER_ID, userID);
@@ -586,9 +586,7 @@ public class DatabaseManager {
 
 	public long addChallengeQuestion(String challengeID, String userID, String description, String question, String[] answers,
 			String userName) {
-		Loggy.d("adding challegne questions");
 		if (db.isOpen()) {
-			Loggy.d("adding challenge question " + question);
 			ContentValues values = new ContentValues();
 			values.put(ChallengeQuestionContract.CHALLENGE_ID, challengeID);
 			values.put(ChallengeQuestionContract.USER_ID, userID);
@@ -606,12 +604,10 @@ public class DatabaseManager {
 	}
 
 	public boolean addChallengeScore(long ID, int score) {
-		Loggy.d("addChallengeScore ID = " + ID + " |score = " + score);
 		if (db.isOpen()) {
 			ContentValues values = new ContentValues();
 			values.put(ChallengeQuestionContract.SCORE, score);
 			String where = BaseContract._ID + "=" + ID + " AND " + ChallengeQuestionContract.SCORE + " < 0";
-			Loggy.d("rows changed from update score = " + db.update(ChallengeQuestionContract.TABLE_NAME, values, where, null));
 			return isChallengeDone(ID);
 		}
 		return false;
@@ -631,7 +627,6 @@ public class DatabaseManager {
 	}
 
 	public boolean isChallengeDone(long ID) {
-		Loggy.d("isChallengeDone ID = " + ID);
 		if (db.isOpen()) {
 			String sql = "SELECT " + ChallengeQuestionContract.CHALLENGE_ID + " FROM " + ChallengeQuestionContract.TABLE_NAME + " WHERE "
 					+ BaseContract._ID + " = " + ID;
@@ -645,7 +640,6 @@ public class DatabaseManager {
 	}
 
 	public boolean isChallengeDone(String challengeID) {
-		Loggy.d("isChallengeDone challengeID = " + challengeID);
 		if (getQuestionsToAnswer(challengeID) == 0)
 			return true;
 		else
@@ -653,12 +647,10 @@ public class DatabaseManager {
 	}
 
 	public int getQuestionsToAnswer(String challengeID) {
-		Loggy.d("getQuestionsToAnswer challengeID = " + challengeID);
 		if (db.isOpen()) {
 			String where = ChallengeQuestionContract.CHALLENGE_ID + " = '" + challengeID + "'";
 			cursor = db.query(ChallengeQuestionContract.TABLE_NAME, ChallengeQuestionContract.IDS_AND_SCORE, where, null, null, null, null);
 			Map<String, ChallengeData> map = DatabaseModelFactory.buildChallengeIDs(cursor);
-			Loggy.d("questions to answer  = " + map.get(challengeID));
 			return map.get(challengeID).getNumberOfQuestions();
 		} else
 			return -1;

@@ -23,6 +23,7 @@ import ch.boye.httpclientandroidlib.entity.StringEntity;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
+import com.facebook.FacebookException;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -79,9 +80,9 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 		if (session != null && session.isOpened()) {
 			if (session.getPermissions().contains("user_friends")) {
 				// Get the user's list of friends
-				Request friendsRequest = new Request(session, "/me/friends");
-				Response response = friendsRequest.executeAndWait();
 				try {
+					Request friendsRequest = new Request(session, "/me/friends");
+					Response response = friendsRequest.executeAndWait();
 					JSONObject responseJSON = new JSONObject(response.getRawResponse());
 					JSONArray data = responseJSON.getJSONArray("data");
 					if (data.length() > 0) {
@@ -106,7 +107,11 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 						}
 					}
 				} catch (JSONException e) {
-					e.printStackTrace();
+					// Do nothing
+				} catch (FacebookException e) {
+					// Do nothing
+				} catch (IllegalArgumentException e) {
+					// Do nothing
 				}
 			} else {
 				Toaster.toastAllowFacebookFriends(ctx, true);

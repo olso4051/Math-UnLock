@@ -32,10 +32,6 @@ public class AppBackupAgent extends BackupAgentHelper {
 
 	@Override
 	public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState) throws IOException {
-		// TODO Auto-generated method stub
-		Loggy.d("Restoring backup data");
-		Loggy.d("new State = " + newState.toString());
-		Loggy.d("data = " + data.toString());
 		super.onRestore(data, appVersionCode, newState);
 	}
 

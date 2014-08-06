@@ -43,6 +43,9 @@ public class PreferenceHelper {
 	final public static String CHALLENGE_PREFS_DIFFMIN = "diff_min";
 	final public static String CHALLENGE_PREFS_DIFFMAX = "diff_max";
 	final public static String CHALLENGE_PREFS_QUESTIONS = "questions";
+	final public static String CHALLENGE_PREFS_PROVISIONED = "provisioned";
+	final public static String CHALLENGE_PREFS_COMPLETE_STATUS = "complete_status";
+
 	final public static String CHALLENGE_PREFS_BET_DEFAULT = "default_bet_percent";
 	final public static String CHALLENGE_PREFS_QUESTION_NUMBER = "num_questions";
 	final public static String CHALLENGE_PREFS_DIFFICULTY_MIN = "difficulty_min";
@@ -80,6 +83,36 @@ public class PreferenceHelper {
 				return Undefined;
 			default:
 				return Undefined;
+			}
+		}
+	}
+
+	public static enum ChallengeCompleteStatus {
+		NotSent(0), Sending(1), Sent(2);
+		private int value;
+
+		private ChallengeCompleteStatus(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		public static int getDefaultValue() {
+			return 0;
+		}
+
+		public static ChallengeCompleteStatus valueOf(int value) {
+			switch (value) {
+			case 0:
+				return NotSent;
+			case 1:
+				return Sending;
+			case 2:
+				return Sent;
+			default:
+				return NotSent;
 			}
 		}
 	}
@@ -221,33 +254,67 @@ public class PreferenceHelper {
 			editorPrefsChallenge.remove(challengeID + CHALLENGE_PREFS_DIFFMIN);
 			editorPrefsChallenge.remove(challengeID + CHALLENGE_PREFS_DIFFMAX);
 			editorPrefsChallenge.remove(challengeID + CHALLENGE_PREFS_QUESTIONS);
+			editorPrefsChallenge.remove(challengeID + CHALLENGE_PREFS_PROVISIONED);
+			editorPrefsChallenge.remove(challengeID + CHALLENGE_PREFS_COMPLETE_STATUS);
 			editorPrefsChallenge.remove(hiqUserID);
 			editorPrefsChallenge.commit();
 		}
 	}
 
 	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status, CustomContactData.ChallengeState state) {
-		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
-		Loggy.d("set challengeID(" + challengeID + ") to status = " + status.getValue() + " state = " + state.getValue());
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_STATUS, status.getValue());
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_STATE, state.getValue());
-		sharedPrefsChallengeEdit.commit();
+		SharedPreferences.Editor editorPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		editorPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_STATUS, status.getValue());
+		editorPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_STATE, state.getValue());
+		editorPrefsChallenge.commit();
 	}
 
 	public static void storeChallengeStatus(Context ctx, String challengeID, ChallengeStatus status,
 			CustomContactData.ChallengeState state, String userName, String hiqUserID, int bet, int diffMin, int diffMax, int questions) {
+		SharedPreferences.Editor editPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_STATUS, status.getValue());
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_STATE, state.getValue());
+		editPrefsChallenge.putString(challengeID + CHALLENGE_PREFS_HIQ_USER_NAME, userName);
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_BET, bet);
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_DIFFMIN, diffMin);
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_DIFFMAX, diffMax);
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_QUESTIONS, questions);
+		editPrefsChallenge.putString(hiqUserID, challengeID);
+		editPrefsChallenge.commit();
+	}
 
-		Loggy.d("set challengeID(" + challengeID + ") and username(" + userName + ") and user_id(" + hiqUserID + ")");
-		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_STATUS, status.getValue());
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_STATE, state.getValue());
-		sharedPrefsChallengeEdit.putString(challengeID + CHALLENGE_PREFS_HIQ_USER_NAME, userName);
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_BET, bet);
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_DIFFMIN, diffMin);
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_DIFFMAX, diffMax);
-		sharedPrefsChallengeEdit.putInt(challengeID + CHALLENGE_PREFS_QUESTIONS, questions);
-		sharedPrefsChallengeEdit.putString(hiqUserID, challengeID);
-		sharedPrefsChallengeEdit.commit();
+	public static void storeChallengeCompleteStatus(Context ctx, String challengeID, ChallengeCompleteStatus cStatus) {
+		if (challengeID == null)
+			return;
+		if (challengeID.equals(""))
+			return;
+		SharedPreferences.Editor editPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsChallenge.putInt(challengeID + CHALLENGE_PREFS_COMPLETE_STATUS, cStatus.getValue());
+		editPrefsChallenge.commit();
+	}
+
+	public static ChallengeCompleteStatus getChallengeCompleteStatus(Context ctx, String challengeID) {
+		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+		return ChallengeCompleteStatus.valueOf(sharedPrefsChallenge.getInt(challengeID + CHALLENGE_PREFS_COMPLETE_STATUS,
+				ChallengeCompleteStatus.getDefaultValue()));
+	}
+
+	public static void provisionChallengeID(Context ctx, String challengeID) {
+		if (challengeID == null)
+			return;
+		if (challengeID.equals(""))
+			return;
+		SharedPreferences.Editor editPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsChallenge.putBoolean(challengeID + CHALLENGE_PREFS_PROVISIONED, true);
+		editPrefsChallenge.commit();
+	}
+
+	public static boolean isChallengeProvisioned(Context ctx, String challengeID) {
+		if (challengeID == null)
+			return false;
+		if (challengeID.equals(""))
+			return false;
+		SharedPreferences sharedPrefsChallenge = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsChallenge.getBoolean(challengeID + CHALLENGE_PREFS_PROVISIONED, false);
 	}
 
 	public static ChallengeStatus getChallengeStatusFromID(Context ctx, String challengeID) {
@@ -313,12 +380,9 @@ public class PreferenceHelper {
 	public static void increaseMoney(Context ctx, int amount) {
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
-		Loggy.d("money before putting in = " + sharedPrefsMoney.getInt("money", 0));
 		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
 		editorPrefsMoney.commit();
 		SharedPreferences sharedPrefsMoney2 = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
-		Loggy.d("money after putting in = " + sharedPrefsMoney.getInt("money", 0));
-		Loggy.d("money after2 putting in = " + sharedPrefsMoney2.getInt("money", 0));
 	}
 
 	public static void decreaseMoneyNoDebt(Context ctx, int amount) {
@@ -389,13 +453,10 @@ public class PreferenceHelper {
 		int h = content.getHeight();
 		if (android.os.Build.VERSION.SDK_INT >= 11)
 			y = (int) content.getY();
-		Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " |y = " + y);
 		if (w > 0 && h > 0) {
 			int statusBarHeight = sizeY - h;
 			if (y >= 0 && y != statusBarHeight)
 				statusBarHeight = y;
-			Loggy.d("content width = " + w + " sizeY = " + sizeY + " | content.getHeight() = " + h + " | statusBarHeight = "
-					+ statusBarHeight);
 			editPrefsLayout.putInt(LAYOUT_STATUSBAR_HEIGHT, statusBarHeight);
 		} else {
 
