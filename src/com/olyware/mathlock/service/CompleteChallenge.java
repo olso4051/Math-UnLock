@@ -55,6 +55,7 @@ public class CompleteChallenge extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Void... v) {
+		Loggy.d("cStatus = " + cStatus.toString());
 		if (cStatus != null && cStatus.equals(ChallengeCompleteStatus.NotSent)) {
 			PreferenceHelper.storeChallengeCompleteStatus(ctx, challengeID, ChallengeCompleteStatus.Sending);
 		} else {

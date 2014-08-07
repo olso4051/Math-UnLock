@@ -97,6 +97,7 @@ import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
+import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.NotificationHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
@@ -1087,6 +1088,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					int questionsToAnswer = entry.getValue().getNumberOfQuestions();
 					String hiqUserID = entry.getValue().getUserID();
 					ChallengeStatus status = PreferenceHelper.getChallengeStatusFromID(this, challengeID);
+					Loggy.d("challenge ID = " + challengeID + " |status = " + status.toString() + " |questions = " + questionsToAnswer);
 					if (status.equals(ChallengeStatus.Accepted) && challengeIDToDisplay.equals("")) {
 						if (questionsToAnswer > 0) {
 							// display challenge Question

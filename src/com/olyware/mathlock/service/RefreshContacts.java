@@ -18,7 +18,6 @@ import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.HttpClient;
 import ch.boye.httpclientandroidlib.client.methods.HttpPost;
-import ch.boye.httpclientandroidlib.entity.ContentType;
 import ch.boye.httpclientandroidlib.entity.StringEntity;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
@@ -215,7 +214,7 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 
 		if (!isCancelled()) {
 			// POST to API to get user_ids of contacts and facebook friends
-			HttpClient httpclient = HttpClientBuilder.create().build();
+			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpPost httppost = new HttpPost(baseURL + FriendsEndpoint);
 			HttpEntity entity;
 			String fullResult;
@@ -253,9 +252,9 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 					Loggy.d(line);
 				}
 				// Loggy.d("JSON to get friends = " + data.toString());
-				httppost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
+				httppost.setEntity(new StringEntity(data.toString(), "UTF-8"));
 				httppost.setHeader("Content-Type", "application/json");
-				HttpResponse response = httpclient.execute(httppost);
+				HttpResponse response = httpClient.execute(httppost);
 				entity = response.getEntity();
 				fullResult = EntityUtils.toString(entity);
 				Loggy.d("fullResult = " + fullResult);
@@ -305,13 +304,5 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 			}
 		}
 		return 1;
-	}
-
-	private String getStringFromJSON(JSONObject json, String key) {
-		try {
-			return json.getString(key);
-		} catch (JSONException j) {
-			return "";
-		}
 	}
 }

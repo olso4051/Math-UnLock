@@ -227,7 +227,7 @@ public class ShareHelper {
 	}
 
 	public static void invite(final Context context, final String address, final ProgressDialog pDialog, final int message) {
-		new GetBitly(context, buildInviteURL(context), false) {
+		new GetBitly(context, buildInviteURL(context, message), false) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				String uri = "smsto:" + address;
@@ -253,9 +253,9 @@ public class ShareHelper {
 			return "";
 	}
 
-	public static String buildInviteURL(Context context) {
+	public static String buildInviteURL(Context context, int message) {
 		String userID = ContactHelper.getUserID(context);
-		String baseLink = URL_INVITE_BASE;
+		String baseLink = URL_INVITE_BASE + message;
 		if (userID.equals("")) {
 			return baseLink;
 		} else {

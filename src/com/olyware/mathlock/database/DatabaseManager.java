@@ -608,6 +608,7 @@ public class DatabaseManager {
 			ContentValues values = new ContentValues();
 			values.put(ChallengeQuestionContract.SCORE, score);
 			String where = BaseContract._ID + "=" + ID + " AND " + ChallengeQuestionContract.SCORE + " < 0";
+			db.update(ChallengeQuestionContract.TABLE_NAME, values, where, null);
 			return isChallengeDone(ID);
 		}
 		return false;

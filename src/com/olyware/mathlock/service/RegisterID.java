@@ -14,6 +14,7 @@ import ch.boye.httpclientandroidlib.entity.StringEntity;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
+import com.facebook.FacebookException;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -106,9 +107,9 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 		final Session session = Session.getActiveSession();
 		if (session != null && session.isOpened()) {
 			// Get the user's list of friends
-			Request meRequest = new Request(session, "/me");
-			Response response = meRequest.executeAndWait();
 			try {
+				Request meRequest = new Request(session, "/me");
+				Response response = meRequest.executeAndWait();
 				JSONObject json = new JSONObject(response.getRawResponse());
 				userName = JSONHelper.getStringFromJSON(json, "name");
 				facebookID = JSONHelper.getStringFromJSON(json, "id");
@@ -116,7 +117,9 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 				email = JSONHelper.getStringFromJSON(json, "email");
 				PreferenceHelper.storeFacebookMe(ctx, facebookID, userName, gender, email);
 			} catch (JSONException e) {
-				e.printStackTrace();
+				// Do Nothing
+			} catch (FacebookException e) {
+				// Do Nothing
 			}
 		}
 
@@ -169,7 +172,7 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 				data.put("phone_hash", phoneNumberEncrypted);
 			}
 
-			Loggy.d("test", "JSON to register: " + data.toString());
+			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httpput.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpClient.execute(httpput);
@@ -185,8 +188,8 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			success = getStringFromJSON(jsonResponse, "success");
-			error = getStringFromJSON(jsonResponse, "error");
+			success = JSONHelper.getStringFromJSON(jsonResponse, "success");
+			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
 			if (success.equals("true"))
 				return 0;
 			else
@@ -200,21 +203,5 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 	protected void onPostExecute(Integer result) {
 		// override in calling class
 		// result == 0 success
-	}
-
-	private String getStringFromJSON(JSONObject json, String key) {
-		try {
-			return json.getString(key);
-		} catch (JSONException e) {
-			return "";
-		}
-	}
-
-	private boolean getBooleanFromJSON(JSONObject json, String key) {
-		try {
-			return json.getBoolean(key);
-		} catch (JSONException e) {
-			return false;
-		}
 	}
 }

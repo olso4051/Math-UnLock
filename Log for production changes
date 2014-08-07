@@ -3,7 +3,7 @@ set Loggy to false
 set GoogleAnalytics in MyApplication to dry_run=false
 set IabHelper mDebugLog = false // Optional as Loggy provides the logging function
 set startingPMoney to 0
-set service_base_url to "http://api.learnwithhiq.com/" in strings
+set service_base_url to "https://api.learnwithhiq.com/" in strings
 
 FOR TESTING ATTRIBUTION
 C:\Program Files\Android\android-sdk\platform-tools>adb shell am broadcast -a com.android.vending.INSTALL_REFERRER
