@@ -175,7 +175,7 @@ public class CoinView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		drawCount = (drawCount + 1) % 3;
+		drawCount = (drawCount + 1) % (3 * 2);
 		for (int i = 0; i < currentCenterX.size(); i++) {
 			int coin = i % 3;
 			canvas.save();
