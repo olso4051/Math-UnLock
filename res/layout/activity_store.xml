@@ -7,6 +7,7 @@
 	<LinearLayout 
 	   	android:layout_width="match_parent"
        	android:layout_height="wrap_content"
+       	android:padding="@dimen/login_vertical_margin_half"
        	android:orientation="horizontal" >
        	<ImageButton
 		    android:id="@+id/back"
@@ -23,6 +24,7 @@
 	    	android:layout_height="fill_parent"
 	    	android:textSize="25sp"
 	    	android:drawableLeft="@drawable/coins"
+	    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 	    	android:text="@string/default_money"/>
     	<TextView
 	    	android:id="@+id/store"
@@ -36,6 +38,7 @@
 	<LinearLayout
 	   	android:layout_width="match_parent"
        	android:layout_height="wrap_content"
+       	android:padding="@dimen/login_vertical_margin_half"
        	android:orientation="horizontal" >
 		<Button
 		    android:id="@+id/extra_coins1"
@@ -58,6 +61,7 @@
 	<LinearLayout
 	   	android:layout_width="match_parent"
        	android:layout_height="wrap_content"
+       	android:padding="@dimen/login_vertical_margin_half"
        	android:orientation="horizontal" >
 		<Button
 		    android:id="@+id/extra_coins2"
@@ -80,6 +84,7 @@
 	<LinearLayout
 	   	android:layout_width="match_parent"
        	android:layout_height="wrap_content"
+       	android:padding="@dimen/login_vertical_margin_half"
        	android:orientation="horizontal" >
 		<Button
 		    android:id="@+id/extra_coins3"
@@ -106,6 +111,7 @@
 	    <LinearLayout
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
+		    android:padding="@dimen/login_vertical_margin_half"
 		    android:orientation="vertical" >
 		    <TextView
 		    	android:id="@+id/packs"
@@ -133,7 +139,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 			<LinearLayout
@@ -155,7 +162,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 			<LinearLayout
@@ -177,7 +185,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 			<LinearLayout
@@ -199,7 +208,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 			<LinearLayout
@@ -221,7 +231,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 			<LinearLayout
@@ -243,7 +254,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 			<LinearLayout
@@ -265,7 +277,8 @@
 			    	android:layout_weight="3"
 			    	android:layout_height="fill_parent"
 			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
 			    	android:text="@string/purchased"/>
 			</LinearLayout>
 		</LinearLayout>

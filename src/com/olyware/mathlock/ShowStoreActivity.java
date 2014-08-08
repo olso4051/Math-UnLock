@@ -42,7 +42,7 @@ public class ShowStoreActivity extends FragmentActivity {
 	// private Button custom;
 	private String[] unlockPackageKeys, PackageKeys, packageInfo, EggKeys;
 	private int[] unlockCost, EggMaxValues;
-	private boolean firstPack, iabFinishedSetup;
+	private boolean iabFinishedSetup;
 	private Drawable price;
 
 	private SharedPreferences sharedPrefsMoney;
@@ -240,8 +240,7 @@ public class ShowStoreActivity extends FragmentActivity {
 	protected void onResume() {
 		super.onResume();
 		setCost();
-		if (!firstPack)
-			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, null, EggKeys[5], EggMaxValues[5]));
+		Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, null, EggKeys[5], EggMaxValues[5]));
 	}
 
 	@Override
@@ -267,32 +266,13 @@ public class ShowStoreActivity extends FragmentActivity {
 		moneyText.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
 	}
 
-	private boolean isPackageUnlocked() {
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		for (int i = 0; i < unlockPackageKeys.length; i++)
-			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false))
-				return true;
-		return false;
-	}
-
 	private void updateMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
 		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
 	}
 
 	private void purchaseCoins(Activity act, String SKU, int id, IabHelper.OnIabPurchaseFinishedListener listener, String key) {
-		firstPack = !isPackageUnlocked();
-		if (firstPack) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.info_coins_title)).setCancelable(false);
-			builder.setMessage(getString(R.string.info_coins_message));
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-				}
-			});
-			builder.create().show();
-		} else if (!iabFinishedSetup) {
+		if (!iabFinishedSetup) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getString(R.string.info_iab_not_setup_title)).setCancelable(false);
 			builder.setMessage(getString(R.string.info_iab_not_setup_message));
@@ -307,26 +287,15 @@ public class ShowStoreActivity extends FragmentActivity {
 	}
 
 	private void buyProduct(String title, final int product, final int amount, final Intent i) {
-		firstPack = !isPackageUnlocked();
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(title).setCancelable(false);
-		if ((product == 0) && (firstPack)) {
-			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.get_pack_first));
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-				}
-			});
-		} else if ((Money.getMoney() + Money.getMoneyPaid() >= amount) || (firstPack)) {
+		if (Money.getMoney() + Money.getMoneyPaid() >= amount) {
 			builder.setMessage(packageInfo[product] + "\n\n" + getString(R.string.purchase_package_message));
 			builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					if (i != null)
 						startActivity(i);
-					else if (firstPack) {
-						purchase(product, 0);
-						finish();
-					} else
+					else
 						purchase(product, amount);
 				}
 			});
@@ -390,22 +359,10 @@ public class ShowStoreActivity extends FragmentActivity {
 				cost[i].setText(String.valueOf(unlockCost[i]));
 		}
 
-		firstPack = !isPackageUnlocked();
-		if (firstPack) {
-			price = getResources().getDrawable(R.drawable.free);
-			price.setBounds(0, 0, price.getIntrinsicWidth(), price.getIntrinsicHeight());
-			for (int a = 1; a < unlockPackageKeys.length - 1; a++) {
-				cost[a].setCompoundDrawables(null, null, price, null);
-				cost[a].setCompoundDrawablePadding(-price.getIntrinsicWidth());
-				cost[a].setText("");
-			}
-		} else {
-			price = getResources().getDrawable(R.drawable.coin);
-			price.setBounds(0, 0, price.getIntrinsicWidth(), price.getIntrinsicHeight());
-			for (int a = 1; a < unlockPackageKeys.length; a++) {
-				cost[a].setCompoundDrawables(null, null, price, null);
-				cost[a].setCompoundDrawablePadding(0);
-			}
+		price = getResources().getDrawable(R.drawable.coin1);
+		price.setBounds(0, 0, price.getIntrinsicWidth(), price.getIntrinsicHeight());
+		for (int a = 1; a < unlockPackageKeys.length; a++) {
+			cost[a].setCompoundDrawables(null, null, price, null);
 		}
 	}
 

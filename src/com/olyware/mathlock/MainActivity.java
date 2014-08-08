@@ -1529,7 +1529,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					public void run() {
 						setProblemAndAnswer();
 					}
-				}, 500);
+				}, MoneyHelper.updateMoneyTime);
 			} else if (EnabledPackages == 0) {
 				this.finish();
 			} else if (attempts >= maxAttempts && !(answerLoc == answer) && !quizMode && maxAttempts < 4) {
@@ -1537,7 +1537,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (Extra == 0)
 					updateStats(false);
 				joystick.pauseSelection();
-				launchHomeScreen(1500);
+				launchHomeScreen(MoneyHelper.updateMoneyTime * 2);
 			} else if ((answerLoc == answer) && quizMode) {
 				displayCorrectOrNot(answerLoc, answer); // Correct
 				if (Extra == 0)
@@ -1549,13 +1549,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					public void run() {
 						setProblemAndAnswer();
 					}
-				}, 500);
+				}, MoneyHelper.updateMoneyTime);
 			} else if ((answerLoc == answer) && !quizMode) {
 				displayCorrectOrNot(answerLoc, answer); // Correct
 				if (Extra == 0)
 					updateStats(true);
 				joystick.pauseSelection();
-				launchHomeScreen(100);
+				launchHomeScreen(MoneyHelper.updateMoneyTime / 2);
 			} else {
 				displayCorrectOrNot(answerLoc, answer); // Incorrect
 				if (Extra == 0)

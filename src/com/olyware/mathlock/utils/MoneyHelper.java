@@ -14,7 +14,7 @@ import com.olyware.mathlock.views.JoystickView;
 public class MoneyHelper {
 
 	final public static long UTC_SEPTEMBER_1 = 1409529600000l;
-	final public static int updateMoneyTime = 1000;
+	final public static int updateMoneyTime = 600;
 	final private static String Money = "money";
 	final private static String PaidMoney = "paid_money";
 

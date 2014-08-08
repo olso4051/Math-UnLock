@@ -2,6 +2,7 @@ package com.olyware.mathlock.views;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -20,10 +21,11 @@ import com.olyware.mathlock.utils.MoneyHelper;
 
 public class CoinView extends View {
 
-	private int Width, Height, startingWidth = -1, startingHeight = -1, endingWidth = -1, endingHeight = -1, currentWidth, currentHeight,
+	final private static int UpdateMoneyTimeFraction = 2;
+	private int Width, Height, startingCenterX = -1, startingCenterY = -1, endingCenterX = -1, endingCenterY = -1, straightLength = -1,
 			coins, drawCount = 0;
 	private List<Drawable> coinDrawables;
-	private List<Integer> currentCenterX, currentCenterY;
+	private List<Integer> currentCenterX, currentCenterY, arcRadius, arcCenterX, arcCenterY, plusOrMinus;
 	private long lastTimePercent;
 	private List<Long> startTimePercent;
 	private float percent = 0;
@@ -31,6 +33,7 @@ public class CoinView extends View {
 	private Runnable startAnimate;
 	private Handler animateHandler;
 	private AnimationDoneListener listener;
+	private Random rand;
 
 	// =========================================
 	// Constructors
@@ -75,6 +78,7 @@ public class CoinView extends View {
 		tempPaint.setTextAlign(Paint.Align.CENTER);
 		tempPaint.setTextSize(100);
 
+		rand = new Random();
 		coinDrawables = new ArrayList<Drawable>();
 		Drawable drawCoin1 = ctx.getResources().getDrawable(R.drawable.coin1);
 		drawCoin1.setBounds(-drawCoin1.getIntrinsicWidth() / 2, -drawCoin1.getIntrinsicHeight() / 2, drawCoin1.getIntrinsicWidth() / 2,
@@ -90,6 +94,10 @@ public class CoinView extends View {
 		coinDrawables.add(drawCoin3);
 
 		coins = 0;
+		arcRadius = new ArrayList<Integer>();
+		arcCenterX = new ArrayList<Integer>();
+		arcCenterY = new ArrayList<Integer>();
+		plusOrMinus = new ArrayList<Integer>();
 		currentCenterX = new ArrayList<Integer>();
 		currentCenterY = new ArrayList<Integer>();
 		startTimePercent = new ArrayList<Long>();
@@ -106,26 +114,35 @@ public class CoinView extends View {
 	// =========================================
 
 	public void setStartingCenter(int startingWidth, int startingHeight) {
-		this.startingWidth = startingWidth;
-		this.startingHeight = startingHeight;
+		this.startingCenterX = startingWidth;
+		this.startingCenterY = startingHeight;
+		setStraightLength();
 	}
 
 	public void setEndingCenter(int endingWidth, int endingHeight) {
-		this.endingWidth = endingWidth;
-		this.endingHeight = endingHeight;
+		this.endingCenterX = endingWidth;
+		this.endingCenterY = endingHeight;
+		setStraightLength();
 	}
 
 	public void setCoinAmount(int coinAmount) {
 		if (coinAmount <= 0)
 			coins = 0;
+		else if (coinAmount < 10)
+			coins = (int) Math.floor((coinAmount + 1) / 1d) - 1;
 		else if (coinAmount < 100)
-			coins = (int) Math.ceil((coinAmount + 1) / 10d) + 0;
+			coins = (int) Math.floor((coinAmount + 10) / 10d) + 8;
 		else if (coinAmount < 1000)
-			coins = (int) Math.ceil((coinAmount + 1) / 100d) + 9;
+			coins = (int) Math.floor((coinAmount + 100) / 100d) + 17;
 		else if (coinAmount < 10000)
-			coins = (int) Math.ceil((coinAmount + 1) / 1000d) + 18;
+			coins = (int) Math.floor((coinAmount + 1000) / 1000d) + 26;
 		else
 			coins = 29;
+		// following equations are the same as above
+		// int x = (int) Math.floor(Math.log10(coinAmount));
+		// int y = (int) Math.pow(10, x);
+		// int z = 9 * x - 1;
+		// coins = (int) Math.floor((coinAmount + y) / y) + z;
 		Loggy.d("coinAmount = " + coinAmount + " |coins = " + coins);
 	}
 
@@ -141,15 +158,26 @@ public class CoinView extends View {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		Width = measure(widthMeasureSpec);
 		Height = measure(heightMeasureSpec);
-		if (startingWidth < 0)
-			startingWidth = Width / 2;
-		if (startingHeight < 0)
-			startingHeight = Height / 2;
-		if (endingWidth < 0)
-			endingWidth = Width / 2;
-		if (endingHeight < 0)
-			endingHeight = Height / 2;
-
+		boolean setLength = false;
+		if (startingCenterX < 0) {
+			startingCenterX = Width / 2;
+			setLength = true;
+		}
+		if (startingCenterY < 0) {
+			startingCenterY = Height / 2;
+			setLength = true;
+		}
+		if (endingCenterX < 0) {
+			endingCenterX = Width / 2;
+			setLength = true;
+		}
+		if (endingCenterY < 0) {
+			endingCenterY = Height / 2;
+			setLength = true;
+		}
+		if (setLength) {
+			setStraightLength();
+		}
 		setMeasuredDimension(Width, Height);
 		initRunnables();
 		startAnimation();
@@ -177,13 +205,13 @@ public class CoinView extends View {
 	protected void onDraw(Canvas canvas) {
 		drawCount = (drawCount + 1) % (3 * 2);
 		for (int i = 0; i < currentCenterX.size(); i++) {
-			int coin = i % 3;
-			canvas.save();
-			canvas.translate(currentCenterX.get(i), currentCenterY.get(i));
-			// d.get(i).setAlpha((wrongGuess < 0&&!quickUnlock) ? answerAlpha : 255);
-			coinDrawables.get(coin).draw(canvas);
-			canvas.restore();
-			// canvas.drawText("coins", currentCenterX.get(i), currentCenterY.get(i), tempPaint);
+			if (currentCenterY.get(i) > endingCenterY) {
+				int coin = (i + (int) Math.floor(drawCount / 2)) % 3;
+				canvas.save();
+				canvas.translate(currentCenterX.get(i), currentCenterY.get(i));
+				coinDrawables.get(coin).draw(canvas);
+				canvas.restore();
+			}
 		}
 	}
 
@@ -201,20 +229,76 @@ public class CoinView extends View {
 			@Override
 			public void run() {
 				lastTimePercent = System.currentTimeMillis();
+				long totalTime = 0;
+				if (startTimePercent.size() > 0)
+					totalTime = lastTimePercent - startTimePercent.get(0);
 				for (int i = 0; i < startTimePercent.size(); i++) {
-					percent = (lastTimePercent - startTimePercent.get(i)) / (float) (MoneyHelper.updateMoneyTime / 3);
+					percent = (lastTimePercent - startTimePercent.get(i)) / (float) (MoneyHelper.updateMoneyTime / UpdateMoneyTimeFraction);
 					if (i >= currentCenterX.size()) {
-						currentCenterX.add((int) (startingWidth + (endingWidth - startingWidth) * percent));
-						currentCenterY.add((int) (startingHeight + (endingHeight - startingHeight) * percent));
+						int h = 0;
+						int pOrM = 1;
+						if (rand != null) {
+							h = rand.nextInt(straightLength / 10);
+							pOrM = rand.nextInt(2) * 2 - 1;
+						}
+						if (h > 0) {
+							int hx = (startingCenterX + endingCenterX) / 2;
+							int hy = (startingCenterY + endingCenterY) / 2;
+							int rad = (straightLength * straightLength + 4 * h * h) / (8 * h);
+							int aCenterX = (int) (hx + pOrM * Math.sqrt(rad * rad - Math.pow(straightLength / 2, 2))
+									* (startingCenterY - endingCenterY) / straightLength);
+							int aCenterY = (int) (hy + pOrM * Math.sqrt(rad * rad - Math.pow(straightLength / 2, 2))
+									* (endingCenterX - startingCenterX) / straightLength);
+							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
+							int centerX = (int) (aCenterX + pOrM
+									* Math.sqrt(-aCenterY * aCenterY + 2 * aCenterY * centerY + rad * rad - centerY * centerY));
+							arcRadius.add(rad);
+							arcCenterX.add(aCenterX);
+							arcCenterY.add(aCenterY);
+							plusOrMinus.add(pOrM);
+							currentCenterY.add(centerY);
+							currentCenterX.add(centerX);
+						} else {
+							arcRadius.add(0);
+							arcCenterX.add(0);
+							arcCenterY.add(0);
+							plusOrMinus.add(1);
+							int centerX = (int) (startingCenterX + (endingCenterX - startingCenterX) * percent);
+							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
+							currentCenterX.add(centerX);
+							currentCenterY.add(centerY);
+						}
 					} else {
-						currentCenterX.set(i, (int) (startingWidth + (endingWidth - startingWidth) * percent));
-						currentCenterY.set(i, (int) (startingHeight + (endingHeight - startingHeight) * percent));
+						if (arcRadius.get(i) > 0) {
+							int rad = arcRadius.get(i);
+							int aCenterX = arcCenterX.get(i);
+							int aCenterY = arcCenterY.get(i);
+							int pOrM = plusOrMinus.get(i);
+							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
+							int centerX = (int) (aCenterX - pOrM
+									* Math.sqrt(-aCenterY * aCenterY + 2 * aCenterY * centerY + rad * rad - centerY * centerY));
+							currentCenterY.set(i, centerY);
+							currentCenterX.set(i, centerX);
+						} else {
+							int centerX = (int) (startingCenterX + (endingCenterX - startingCenterX) * percent);
+							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
+							currentCenterX.add(centerX);
+							currentCenterY.add(centerY);
+						}
 					}
 				}
-				if (percent >= 0 && percent <= 1) {
+				// if (percent >= 0 && percent <= 1) {
+				if (totalTime > 0 && totalTime < MoneyHelper.updateMoneyTime) {
 					invalidate();
-					if (startTimePercent.size() < coins)
-						startTimePercent.add(lastTimePercent);
+					int coinsSent = startTimePercent.size();
+					if (coinsSent < coins && coins > 1) {
+						long maxDelay = MoneyHelper.updateMoneyTime - MoneyHelper.updateMoneyTime / UpdateMoneyTimeFraction;
+						long delayStep = maxDelay / (coins - 1);
+						long nextDelay = delayStep * coinsSent;
+						if (totalTime >= nextDelay) {
+							startTimePercent.add(startTimePercent.get(0) + nextDelay);
+						}
+					}
 					animateHandler.post(startAnimate);
 				} else if (listener != null) {
 					listener.OnDone();
@@ -230,5 +314,10 @@ public class CoinView extends View {
 		startTimePercent.clear();
 		startTimePercent.add(System.currentTimeMillis());
 		animateHandler.post(startAnimate);
+	}
+
+	private void setStraightLength() {
+		if (startingCenterX >= 0 && startingCenterY >= 0 && endingCenterX >= 0 && endingCenterY >= 0)
+			straightLength = (int) Math.sqrt(Math.pow(startingCenterX - endingCenterX, 2) + Math.pow(startingCenterY - endingCenterY, 2));
 	}
 }
