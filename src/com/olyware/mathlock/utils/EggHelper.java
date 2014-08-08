@@ -4,12 +4,14 @@ import java.util.Random;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.views.JoystickView;
 
 public class EggHelper {
 
@@ -19,9 +21,9 @@ public class EggHelper {
 	private static TextView coins;
 	private static Context ctx;
 
-	public static int unlockEgg(Context contex, TextView c, final String Egg, int max) {
+	public static int unlockEgg(FragmentActivity context, TextView c, JoystickView j, final String Egg, int max) {
 
-		ctx = contex;
+		ctx = context;
 		coins = c;
 		sharedPrefsEggs = ctx.getSharedPreferences("Eggs", 0);
 		int amount;
@@ -33,7 +35,7 @@ public class EggHelper {
 
 			editorPrefsEggs = sharedPrefsEggs.edit();
 			editorPrefsEggs.putBoolean(Egg, true).commit();
-			MoneyHelper.setMoney(ctx, coins, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));// setMoney();
+			MoneyHelper.setMoney(context, coins, j, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));
 
 			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
 

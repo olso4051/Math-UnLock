@@ -3,15 +3,18 @@ package com.olyware.mathlock.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.dialog.CoinAnimationFragment;
 import com.olyware.mathlock.service.GetPromoCoins;
+import com.olyware.mathlock.views.JoystickView;
 
 public class MoneyHelper {
 
 	final public static long UTC_SEPTEMBER_1 = 1409529600000l;
-	final private static int updateMoneyTime = 1000;
+	final public static int updateMoneyTime = 1000;
 	final private static String Money = "money";
 	final private static String PaidMoney = "paid_money";
 
@@ -39,7 +42,7 @@ public class MoneyHelper {
 		}
 	};
 
-	public static void setMoney(Context context, TextView c, int m, int p) {
+	public static void setMoney(FragmentActivity context, TextView c, JoystickView j, int m, int p) {
 		coins = c;
 		money = m;
 		Pmoney = p;
@@ -51,9 +54,23 @@ public class MoneyHelper {
 
 		timerHandler.removeCallbacks(updateMoney);
 		int total = Integer.parseInt(coins.getText().toString());
+		int difference = Pmoney + money - total;
 		if ((total - money - Pmoney != 0)) {
 			updateMoneyStep = Math.max(1, Math.abs(updateMoneyTime / (total - money - Pmoney)));
 			timerHandler.postDelayed(updateMoney, updateMoneyStep);
+			if (j != null) {
+				Loggy.d("jCenterX(" + j.getLockCenterX() + ")jcenterY(" + j.getLockCenterY() + ")jtop(" + j.getParentTop() + ")cleft("
+						+ c.getLeft() + ")ctop(" + c.getTop() + ")cheight(" + c.getHeight() + ")");
+				int startCenterX = j.getLockCenterX();
+				int startCenterY = j.getLockCenterY() + j.getParentTop();
+				int endCenterX = c.getLeft();
+				int endCenterY = c.getTop() + c.getHeight() / 2;
+				if (startCenterX > 0 && startCenterY > 0 && endCenterX > 0 && endCenterY > 0) {
+					CoinAnimationFragment coinDialog = CoinAnimationFragment.newInstance(context, difference, startCenterX, startCenterY,
+							endCenterX, endCenterY);
+					context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commit();
+				}
+			}
 		}
 	}
 

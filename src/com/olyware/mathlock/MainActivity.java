@@ -739,20 +739,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 
 			if (fromSettings) {
-				Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[0], EggMaxValues[0]));
+				Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[0], EggMaxValues[0]));
 				fromSettings = false;
 			}
 			if (fromPlay) {
-				Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[9], EggMaxValues[9]));
+				Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[9], EggMaxValues[9]));
 				fromPlay = false;
 			}
 			if (fromShare) {
-				Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[8], EggMaxValues[8]));
+				Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[8], EggMaxValues[8]));
 				fromShare = false;
 			}
 
 			// save money into shared preferences
-			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+			MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
 
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			if (pm.isScreenOn()) {
@@ -836,7 +836,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					// String postID = FacebookDialog.getNativeDialogPostId(data);
 					if (didFinishNormal && completionGesture.equals("post")) {
 						ShareHelper.confirmShare(MainActivity.this);
-						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[8], EggMaxValues[8]));
+						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, joystick, EggKeys[8], EggMaxValues[8]));
 					}
 				}
 			});
@@ -849,7 +849,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						Intent test = pm.getLaunchIntentForPackage(pack.packageName);
 						if (test != null) {
 							if (data.getComponent().equals(test.getComponent())) {
-								Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[14], EggMaxValues[14]));
+								Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[14], EggMaxValues[14]));
 								sharedPrefsApps.edit().putInt("size", apps.size() + 1).putString("app" + apps.size(), pack.packageName)
 										.commit();
 								apps.add(pack);
@@ -1493,7 +1493,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						dMoney = Money.decreaseMoneyNoDebt(0);
 						dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
 					}
-					MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+					MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
 				}
 			}
 		}
@@ -1594,7 +1594,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case QuizMode:		// quiz Mode was selected
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
-			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[3], EggMaxValues[3]));
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
 			break;
 		case Settings:		// settings was selected
@@ -1611,7 +1611,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			resetQuestionWorth(0);
 			answerLoc = 2;
 			joystick.moveCorrect(answerLoc);
-			Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[13], EggMaxValues[13]));
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[13], EggMaxValues[13]));
 			break;
 		case AddApp:	// add app was selected
 			selectApp();
@@ -1887,7 +1887,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 												Toaster.sendChallengeFailed(MainActivity.this);
 											else {
 												Toaster.sendChallengeSuccess(MainActivity.this);
-												Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[17],
+												Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, joystick, EggKeys[17],
 														EggMaxValues[17]));
 											}
 										}
@@ -1977,7 +1977,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
 										sendEvent("social", "challenge_accepted", encryptedUserID, (long) bet);
-										Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, EggKeys[18], EggMaxValues[18]));
+										Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, joystick, EggKeys[18],
+												EggMaxValues[18]));
 									} else {
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_status_failed), Toast.LENGTH_LONG)
 												.show();
@@ -2138,18 +2139,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0);
 			editorPrefsMoney.putInt(getString(R.string.pref_money_pending), 0);
 			editorPrefsMoney.commit();
-			MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+			MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
 		}
 	}
 
 	private void updatePaidMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
-		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
 	}
 
 	private void updateMoney(int amount) {
 		Money.increaseMoney(amount);
-		MoneyHelper.setMoney(this, coins, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
 	}
 
 	private void selectApp() {

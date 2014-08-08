@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -29,7 +30,7 @@ import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.MoneyHelper;
 import com.olyware.mathlock.utils.Purchase;
 
-public class ShowStoreActivity extends Activity {
+public class ShowStoreActivity extends FragmentActivity {
 	final private static String SCREEN_LABEL = "Store Screen";
 	private int[] Cost;
 	private String[] SKU;
@@ -164,13 +165,13 @@ public class ShowStoreActivity extends Activity {
 				if (result.isSuccess()) {
 					if (purchase.getSku().equals(SKU[0])) {
 						updateMoney(Cost[0]);
-						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[10], EggMaxValues[10]));
+						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, null, EggKeys[10], EggMaxValues[10]));
 					} else if (purchase.getSku().equals(SKU[1])) {
 						updateMoney(Cost[1]);
-						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[11], EggMaxValues[11]));
+						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, null, EggKeys[11], EggMaxValues[11]));
 					} else if (purchase.getSku().equals(SKU[2])) {
 						updateMoney(Cost[2]);
-						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, EggKeys[12], EggMaxValues[12]));
+						Money.increaseMoney(EggHelper.unlockEgg(ShowStoreActivity.this, moneyText, null, EggKeys[12], EggMaxValues[12]));
 					}
 				} else {
 					// handle error
@@ -240,7 +241,7 @@ public class ShowStoreActivity extends Activity {
 		super.onResume();
 		setCost();
 		if (!firstPack)
-			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, EggKeys[5], EggMaxValues[5]));
+			Money.increaseMoney(EggHelper.unlockEgg(this, moneyText, null, EggKeys[5], EggMaxValues[5]));
 	}
 
 	@Override
@@ -276,7 +277,7 @@ public class ShowStoreActivity extends Activity {
 
 	private void updateMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
-		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
 	}
 
 	private void purchaseCoins(Activity act, String SKU, int id, IabHelper.OnIabPurchaseFinishedListener listener, String key) {
@@ -372,7 +373,7 @@ public class ShowStoreActivity extends Activity {
 
 	private void setCost() {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		MoneyHelper.setMoney(this, moneyText, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
 		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
 			cost[0].setText(getString(R.string.purchased));
 			for (int i = 0; i < unlockPackageKeys.length; i++) {

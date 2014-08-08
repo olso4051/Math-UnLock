@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.View;
@@ -29,7 +30,7 @@ public class Clock {
 
 	final private Coins Money = new Coins(0, 0);
 
-	private Context ctx;
+	private FragmentActivity ctx;
 
 	private final BroadcastReceiver m_timeChangedReceiver = new BroadcastReceiver() {
 		@Override
@@ -43,7 +44,7 @@ public class Clock {
 		}
 	};
 
-	public Clock(Context ctx, TextView clock) {
+	public Clock(FragmentActivity ctx, TextView clock) {
 		this.ctx = ctx;
 		this.clock = clock;
 		this.coins = null;
@@ -65,7 +66,7 @@ public class Clock {
 		setTime();
 	}
 
-	public Clock(Context ctx, TextView clock, TextView coins) {
+	public Clock(FragmentActivity ctx, TextView clock, TextView coins) {
 		this.ctx = ctx;
 		this.clock = clock;
 		this.coins = coins;
@@ -99,7 +100,7 @@ public class Clock {
 
 	private void toggleClockDate() {
 		if (coins != null)
-			Money.increaseMoney(EggHelper.unlockEgg(ctx, coins, EggKeys[4], EggMaxValues[4]));
+			Money.increaseMoney(EggHelper.unlockEgg(ctx, coins, null, EggKeys[4], EggMaxValues[4]));
 		else
 			EggHelper.unlockEgg(ctx, EggKeys[4], EggMaxValues[4]);
 

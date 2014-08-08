@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -21,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -54,7 +54,7 @@ import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.FileDialog;
 import com.olyware.mathlock.utils.MoneyHelper;
 
-public class ShowCustomEditActivity extends Activity {
+public class ShowCustomEditActivity extends FragmentActivity {
 
 	private final String FTYPE = ".csv";
 	final private static String SCREEN_LABEL = "Custom Screen";
@@ -151,14 +151,14 @@ public class ShowCustomEditActivity extends Activity {
 		protected void onPostExecute(Integer result) {
 			if (result > 0) {
 				sendEvent("custom_question", "add_pack", cat, (long) result);
-				Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, EggKeys[16], EggMaxValues[16]));
+				Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, null, EggKeys[16], EggMaxValues[16]));
 				SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 				SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 				Money.decreaseMoneyAndPaidWithDebt(result);
 				editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
 				editorPrefsMoney.putInt("money", Money.getMoney());
 				editorPrefsMoney.commit();
-				MoneyHelper.setMoney(ShowCustomEditActivity.this, moneyText, Money.getMoney(), Money.getMoneyPaid());
+				MoneyHelper.setMoney(ShowCustomEditActivity.this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
 				adapter.notifyDataSetChanged();
 				adapterCategories.notifyDataSetChanged();
 				Toast.makeText(ShowCustomEditActivity.this, "Uploaded " + result + " question(s)", Toast.LENGTH_LONG).show();
@@ -606,7 +606,7 @@ public class ShowCustomEditActivity extends Activity {
 			builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					sendEvent("custom_question", "add_question", question[0], (long) difficulty);
-					Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, EggKeys[15], EggMaxValues[15]));
+					Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, null, EggKeys[15], EggMaxValues[15]));
 					dbManager.addCustomQuestion(question, difficulty);
 					resetContentView(R.layout.activity_custom_edit2, null, -1);
 				}

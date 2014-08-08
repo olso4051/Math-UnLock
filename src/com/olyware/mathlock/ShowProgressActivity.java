@@ -3,10 +3,10 @@ package com.olyware.mathlock;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -30,7 +30,7 @@ import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.views.GraphView;
 
-public class ShowProgressActivity extends Activity {
+public class ShowProgressActivity extends FragmentActivity {
 	final private static String SCREEN_LABEL = "Progress Screen";
 	private LinearLayout layout;
 	private Typefaces typefaces;
@@ -141,7 +141,7 @@ public class ShowProgressActivity extends Activity {
 		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
 		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
-		Money.increaseMoney(EggHelper.unlockEgg(this, coins, EggKeys[6], EggMaxValues[6]));
+		Money.increaseMoney(EggHelper.unlockEgg(this, coins, null, EggKeys[6], EggMaxValues[6]));
 	}
 
 	@Override

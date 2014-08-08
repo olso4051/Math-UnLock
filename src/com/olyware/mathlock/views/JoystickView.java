@@ -337,9 +337,16 @@ public class JoystickView extends View {
 		return quickUnlock;
 	}
 
-	public int getHeightToLock(int padding) {
-		int bottom = (barY - barHeight) / 2 + rUnlock + padding;
-		return (Height < bottom) ? Height : bottom;
+	public int getParentTop() {
+		return ((View) getParent()).getTop();
+	}
+
+	public int getLockCenterY() {
+		return (int) RectForUnlock.centerY();
+	}
+
+	public int getLockCenterX() {
+		return (int) RectForUnlock.centerX();
 	}
 
 	public void setOnJostickSelectedListener(JoystickSelectListener listener) {
