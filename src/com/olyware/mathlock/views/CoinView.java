@@ -25,7 +25,8 @@ public class CoinView extends View {
 	private int Width, Height, startingCenterX = -1, startingCenterY = -1, endingCenterX = -1, endingCenterY = -1, straightLength = -1,
 			coins, drawCount = 0;
 	private List<Drawable> coinDrawables;
-	private List<Integer> currentCenterX, currentCenterY, arcRadius, arcCenterX, arcCenterY, plusOrMinus;
+	private List<Integer> currentCenterX, currentCenterY, plusOrMinus;
+	private List<Long> arcRadius, arcCenterX, arcCenterY;
 	private long lastTimePercent;
 	private List<Long> startTimePercent;
 	private float percent = 0;
@@ -94,9 +95,9 @@ public class CoinView extends View {
 		coinDrawables.add(drawCoin3);
 
 		coins = 0;
-		arcRadius = new ArrayList<Integer>();
-		arcCenterX = new ArrayList<Integer>();
-		arcCenterY = new ArrayList<Integer>();
+		arcRadius = new ArrayList<Long>();
+		arcCenterX = new ArrayList<Long>();
+		arcCenterY = new ArrayList<Long>();
 		plusOrMinus = new ArrayList<Integer>();
 		currentCenterX = new ArrayList<Integer>();
 		currentCenterY = new ArrayList<Integer>();
@@ -234,56 +235,70 @@ public class CoinView extends View {
 					totalTime = lastTimePercent - startTimePercent.get(0);
 				for (int i = 0; i < startTimePercent.size(); i++) {
 					percent = (lastTimePercent - startTimePercent.get(i)) / (float) (MoneyHelper.updateMoneyTime / UpdateMoneyTimeFraction);
+
 					if (i >= currentCenterX.size()) {
 						int h = 0;
 						int pOrM = 1;
 						if (rand != null) {
-							h = rand.nextInt(straightLength / 10);
+							h = rand.nextInt(straightLength / 10) + 10;
 							pOrM = rand.nextInt(2) * 2 - 1;
 						}
 						if (h > 0) {
 							int hx = (startingCenterX + endingCenterX) / 2;
 							int hy = (startingCenterY + endingCenterY) / 2;
-							int rad = (straightLength * straightLength + 4 * h * h) / (8 * h);
-							int aCenterX = (int) (hx + pOrM * Math.sqrt(rad * rad - Math.pow(straightLength / 2, 2))
+							long rad = (straightLength * straightLength + 4 * h * h) / (8 * h);
+							long aCenterX = (long) (hx + pOrM * Math.sqrt(rad * rad - Math.pow(straightLength / 2, 2))
 									* (startingCenterY - endingCenterY) / straightLength);
-							int aCenterY = (int) (hy + pOrM * Math.sqrt(rad * rad - Math.pow(straightLength / 2, 2))
+							long aCenterY = (long) (hy + pOrM * Math.sqrt(rad * rad - Math.pow(straightLength / 2, 2))
 									* (endingCenterX - startingCenterX) / straightLength);
 							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
-							int centerX = (int) (aCenterX + pOrM
-									* Math.sqrt(-aCenterY * aCenterY + 2 * aCenterY * centerY + rad * rad - centerY * centerY));
-							arcRadius.add(rad);
-							arcCenterX.add(aCenterX);
-							arcCenterY.add(aCenterY);
-							plusOrMinus.add(pOrM);
+							int centerX = 0;
+							if (aCenterX == 0 || aCenterY == 0) {
+								// if rad*rad overflowed this will be true
+								arcRadius.add(0l);
+								arcCenterX.add(0l);
+								arcCenterY.add(0l);
+								plusOrMinus.add(1);
+								centerX = (int) (startingCenterX + (endingCenterX - startingCenterX) * percent);
+
+							} else {
+								arcRadius.add(rad);
+								arcCenterX.add(aCenterX);
+								arcCenterY.add(aCenterY);
+								plusOrMinus.add(pOrM);
+								centerX = (int) (aCenterX + pOrM
+										* Math.sqrt(-aCenterY * aCenterY + 2 * aCenterY * centerY + rad * rad - centerY * centerY));
+							}
 							currentCenterY.add(centerY);
 							currentCenterX.add(centerX);
 						} else {
-							arcRadius.add(0);
-							arcCenterX.add(0);
-							arcCenterY.add(0);
+							arcRadius.add(0l);
+							arcCenterX.add(0l);
+							arcCenterY.add(0l);
 							plusOrMinus.add(1);
-							int centerX = (int) (startingCenterX + (endingCenterX - startingCenterX) * percent);
-							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
-							currentCenterX.add(centerX);
-							currentCenterY.add(centerY);
+							currentCenterX.add((int) (startingCenterX + (endingCenterX - startingCenterX) * percent));
+							currentCenterY.add((int) (startingCenterY + (endingCenterY - startingCenterY) * percent));
 						}
 					} else {
 						if (arcRadius.get(i) > 0) {
-							int rad = arcRadius.get(i);
-							int aCenterX = arcCenterX.get(i);
-							int aCenterY = arcCenterY.get(i);
+							long rad = arcRadius.get(i);
+							long aCenterX = arcCenterX.get(i);
+							long aCenterY = arcCenterY.get(i);
 							int pOrM = plusOrMinus.get(i);
 							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
-							int centerX = (int) (aCenterX - pOrM
-									* Math.sqrt(-aCenterY * aCenterY + 2 * aCenterY * centerY + rad * rad - centerY * centerY));
+							int centerX = -100;
+							if (centerY > 0) {
+								centerX = (int) (aCenterX - pOrM
+										* Math.sqrt(-aCenterY * aCenterY + 2 * aCenterY * centerY + rad * rad - centerY * centerY));
+								if (centerX == 0) {
+									centerX = (int) (startingCenterX + (endingCenterX - startingCenterX) * percent);
+								}
+							}
 							currentCenterY.set(i, centerY);
 							currentCenterX.set(i, centerX);
 						} else {
-							int centerX = (int) (startingCenterX + (endingCenterX - startingCenterX) * percent);
-							int centerY = (int) (startingCenterY + (endingCenterY - startingCenterY) * percent);
-							currentCenterX.add(centerX);
-							currentCenterY.add(centerY);
+							currentCenterX.set(i, (int) (startingCenterX + (endingCenterX - startingCenterX) * percent));
+							currentCenterY.set(i, (int) (startingCenterY + (endingCenterY - startingCenterY) * percent));
 						}
 					}
 				}
@@ -312,6 +327,12 @@ public class CoinView extends View {
 	// =========================================
 	private void startAnimation() {
 		startTimePercent.clear();
+		arcRadius.clear();
+		arcCenterX.clear();
+		arcCenterY.clear();
+		plusOrMinus.clear();
+		currentCenterY.clear();
+		currentCenterX.clear();
 		startTimePercent.add(System.currentTimeMillis());
 		animateHandler.post(startAnimate);
 	}
