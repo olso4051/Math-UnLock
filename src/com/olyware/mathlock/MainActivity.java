@@ -752,7 +752,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 
 			// save money into shared preferences
-			MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
+			MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), 0);
 
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			if (pm.isScreenOn()) {
@@ -1464,13 +1464,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						problem.setTextColor(Color.RED);
 					}
 					boolean done = false;
-					if (joystick.getQuickUnlock() || !correct)
-						done = dbManager.addChallengeScore(ID, 0);
-					else
-						done = dbManager.addChallengeScore(ID, getChallengeScore(startTime));
+					int score = getChallengeScore(startTime);
+					int missed = 0;
+					if (joystick.getQuickUnlock() || !correct) {
+						score = 0;
+						missed = ChallengeQuestion.MAX_SCORE;
+						done = dbManager.addChallengeScore(ID, score);
+					} else {
+						missed = ChallengeQuestion.MAX_SCORE - score;
+						done = dbManager.addChallengeScore(ID, score);
+					}
 					if (done) {
 						sendChallengeComplete(ID);
 					}
+
+					MoneyHelper.setMoney(this, null, joystick, score * 20 / ChallengeQuestion.MAX_SCORE, 0, missed * 20
+							/ ChallengeQuestion.MAX_SCORE);
 				} else if (fromTutorial) {
 					if (correct) {
 						problem.setTextColor(Color.GREEN);
@@ -1481,19 +1490,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				} else {
 					dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 							.currentTimeMillis(), startTime - System.currentTimeMillis()));
+					int missed = 0;
 					if (correct) {
 						sendEvent("question", "question_answered", "correct", (long) questionWorth);
 						problem.setTextColor(Color.GREEN);
 						dMoney = Money.increaseMoney(questionWorth);
 						dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
+						missed = questionWorthMax - questionWorth;
 					} else {
 						sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
 						joystick.setIncorrectGuess(guessLoc);
 						problem.setTextColor(Color.RED);
 						dMoney = Money.decreaseMoneyNoDebt(0);
 						dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
+						missed = questionWorthMax;
 					}
-					MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
+					MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), missed);
 				}
 			}
 		}
@@ -2139,18 +2151,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			editorPrefsMoney.putInt(getString(R.string.pref_money_pending_paid), 0);
 			editorPrefsMoney.putInt(getString(R.string.pref_money_pending), 0);
 			editorPrefsMoney.commit();
-			MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
+			MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), 0);
 		}
 	}
 
 	private void updatePaidMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
-		MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), 0);
 	}
 
 	private void updateMoney(int amount) {
 		Money.increaseMoney(amount);
-		MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), 0);
 	}
 
 	private void selectApp() {

@@ -35,7 +35,7 @@ public class EggHelper {
 
 			editorPrefsEggs = sharedPrefsEggs.edit();
 			editorPrefsEggs.putBoolean(Egg, true).commit();
-			MoneyHelper.setMoney(context, coins, j, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));
+			MoneyHelper.setMoney(context, coins, j, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0), 0);
 
 			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
 

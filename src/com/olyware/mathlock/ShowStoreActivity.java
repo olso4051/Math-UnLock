@@ -268,7 +268,7 @@ public class ShowStoreActivity extends FragmentActivity {
 
 	private void updateMoney(int amount) {
 		Money.increaseMoneyPaid(amount);
-		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid(), 0);
 	}
 
 	private void purchaseCoins(Activity act, String SKU, int id, IabHelper.OnIabPurchaseFinishedListener listener, String key) {
@@ -342,7 +342,7 @@ public class ShowStoreActivity extends FragmentActivity {
 
 	private void setCost() {
 		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
+		MoneyHelper.setMoney(this, moneyText, null, Money.getMoney(), Money.getMoneyPaid(), 0);
 		if (sharedPrefsMoney.getBoolean("unlock_all", false)) {
 			cost[0].setText(getString(R.string.purchased));
 			for (int i = 0; i < unlockPackageKeys.length; i++) {

@@ -42,34 +42,46 @@ public class MoneyHelper {
 		}
 	};
 
-	public static void setMoney(FragmentActivity context, TextView c, JoystickView j, int m, int p) {
-		coins = c;
-		money = m;
-		Pmoney = p;
-		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
-		editorPrefsMoney = sharedPrefsMoney.edit();
-		editorPrefsMoney.putInt(Money, money);
-		editorPrefsMoney.putInt(PaidMoney, Pmoney);
-		editorPrefsMoney.commit();
+	public static void setMoney(FragmentActivity context, TextView c, JoystickView j, int m, int p, int coinsMissed) {
+		if (c != null) {
+			coins = c;
+			money = m;
+			Pmoney = p;
+			sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+			editorPrefsMoney = sharedPrefsMoney.edit();
+			editorPrefsMoney.putInt(Money, money);
+			editorPrefsMoney.putInt(PaidMoney, Pmoney);
+			editorPrefsMoney.commit();
 
-		timerHandler.removeCallbacks(updateMoney);
-		int total = Integer.parseInt(coins.getText().toString());
-		int difference = Pmoney + money - total;
-		if ((total - money - Pmoney != 0)) {
-			updateMoneyStep = Math.max(1, Math.abs(updateMoneyTime / (total - money - Pmoney)));
-			timerHandler.postDelayed(updateMoney, updateMoneyStep);
+			timerHandler.removeCallbacks(updateMoney);
+			int total = Integer.parseInt(coins.getText().toString());
+			int difference = Pmoney + money - total;
+			if ((total - money - Pmoney != 0)) {
+				updateMoneyStep = Math.max(1, Math.abs(updateMoneyTime / (total - money - Pmoney)));
+				timerHandler.postDelayed(updateMoney, updateMoneyStep);
+			}
 			if (j != null) {
-				Loggy.d("jCenterX(" + j.getLockCenterX() + ")jcenterY(" + j.getLockCenterY() + ")jtop(" + j.getParentTop() + ")cleft("
-						+ c.getLeft() + ")ctop(" + c.getTop() + ")cheight(" + c.getHeight() + ")");
 				int startCenterX = j.getLockCenterX();
 				int startCenterY = j.getLockCenterY() + j.getParentTop();
 				int endCenterX = c.getLeft();
 				int endCenterY = c.getTop() + c.getHeight() / 2;
-				if (startCenterX > 0 && startCenterY > 0 && endCenterX > 0 && endCenterY > 0) {
-					CoinAnimationFragment coinDialog = CoinAnimationFragment.newInstance(context, difference, startCenterX, startCenterY,
-							endCenterX, endCenterY);
+				if (startCenterX > 0 && startCenterY > 0 && endCenterX > 0 && endCenterY > 0 && (difference > 0 || coinsMissed > 0)) {
+					CoinAnimationFragment coinDialog = CoinAnimationFragment.newInstance(context, difference, coinsMissed, startCenterX,
+							startCenterY, endCenterX, endCenterY);
 					context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commit();
 				}
+			}
+		} else if (j != null) {
+			int startCenterX = j.getLockCenterX();
+			int startCenterY = j.getLockCenterY() + j.getParentTop();
+			int endCenterX = j.getWidth() * 3 / 4;
+			int endCenterY = 0;
+			int difference = m + p;
+			Loggy.d("difference = " + difference + " |coinsMissed = " + coinsMissed);
+			if (startCenterX > 0 && startCenterY > 0 && endCenterX > 0 && (difference > 0 || coinsMissed > 0)) {
+				CoinAnimationFragment coinDialog = CoinAnimationFragment.newInstance(context, difference, coinsMissed, startCenterX,
+						startCenterY, endCenterX, endCenterY);
+				context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commit();
 			}
 		}
 	}

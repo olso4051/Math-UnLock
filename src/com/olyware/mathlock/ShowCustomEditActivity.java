@@ -158,7 +158,7 @@ public class ShowCustomEditActivity extends FragmentActivity {
 				editorPrefsMoney.putInt("paid_money", Money.getMoneyPaid());
 				editorPrefsMoney.putInt("money", Money.getMoney());
 				editorPrefsMoney.commit();
-				MoneyHelper.setMoney(ShowCustomEditActivity.this, moneyText, null, Money.getMoney(), Money.getMoneyPaid());
+				MoneyHelper.setMoney(ShowCustomEditActivity.this, moneyText, null, Money.getMoney(), Money.getMoneyPaid(), 0);
 				adapter.notifyDataSetChanged();
 				adapterCategories.notifyDataSetChanged();
 				Toast.makeText(ShowCustomEditActivity.this, "Uploaded " + result + " question(s)", Toast.LENGTH_LONG).show();
