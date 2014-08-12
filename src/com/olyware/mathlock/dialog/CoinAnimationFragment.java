@@ -52,7 +52,8 @@ public class CoinAnimationFragment extends Fragment {
 			public void OnDone() {
 				if (getActivity() != null) {
 					try {
-						getActivity().getSupportFragmentManager().beginTransaction().remove(CoinAnimationFragment.this).commit();
+						getActivity().getSupportFragmentManager().beginTransaction().remove(CoinAnimationFragment.this)
+								.commitAllowingStateLoss();
 					} catch (IllegalStateException e) {
 
 					}

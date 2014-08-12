@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.olyware.mathlock"
-    android:versionCode="58"
-    android:versionName="2.8.8" >
+    android:versionCode="59"
+    android:versionName="2.8.9" >
 
     <uses-sdk
         android:minSdkVersion="8"

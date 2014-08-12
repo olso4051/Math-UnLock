@@ -306,7 +306,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPrefs.edit().putBoolean("from_login", true).commit();
 		if (loginFragment != null)
-			getSupportFragmentManager().beginTransaction().remove(loginFragment).commit();
+			getSupportFragmentManager().beginTransaction().remove(loginFragment).commitAllowingStateLoss();
 		if (android.os.Build.VERSION.SDK_INT < 11) {
 			Intent i = new Intent(this, MainActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -352,7 +352,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				Bundle args = new Bundle();
 				args.putBoolean("facebook_logout", getIntent().getBooleanExtra("facebook_logout", false));
 				loginFragment.setArguments(args);
-				getSupportFragmentManager().beginTransaction().add(android.R.id.content, loginFragment).commit();
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, loginFragment).commitAllowingStateLoss();
 			} else {
 				// Or set the fragment from restored state info
 				loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentById(android.R.id.content);

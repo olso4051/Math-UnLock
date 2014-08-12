@@ -68,7 +68,7 @@ public class MoneyHelper {
 				if (startCenterX > 0 && startCenterY > 0 && endCenterX > 0 && endCenterY > 0 && (difference > 0 || coinsMissed > 0)) {
 					CoinAnimationFragment coinDialog = CoinAnimationFragment.newInstance(context, difference, coinsMissed, startCenterX,
 							startCenterY, endCenterX, endCenterY);
-					context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commit();
+					context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commitAllowingStateLoss();
 				}
 			}
 		} else if (j != null) {
@@ -81,7 +81,7 @@ public class MoneyHelper {
 			if (startCenterX > 0 && startCenterY > 0 && endCenterX > 0 && (difference > 0 || coinsMissed > 0)) {
 				CoinAnimationFragment coinDialog = CoinAnimationFragment.newInstance(context, difference, coinsMissed, startCenterX,
 						startCenterY, endCenterX, endCenterY);
-				context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commit();
+				context.getSupportFragmentManager().beginTransaction().add(android.R.id.content, coinDialog).commitAllowingStateLoss();
 			}
 		}
 	}

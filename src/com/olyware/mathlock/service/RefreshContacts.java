@@ -82,7 +82,12 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 				try {
 					Request friendsRequest = new Request(session, "/me/friends");
 					Response response = friendsRequest.executeAndWait();
-					JSONObject responseJSON = new JSONObject(response.getRawResponse());
+					String rawResponse = "";
+					if (response != null)
+						rawResponse = response.getRawResponse();
+					if (rawResponse == null)
+						rawResponse = "";
+					JSONObject responseJSON = new JSONObject(rawResponse);
 					JSONArray data = responseJSON.getJSONArray("data");
 					if (data.length() > 0) {
 						for (int i = 0; i < data.length(); i++) {
