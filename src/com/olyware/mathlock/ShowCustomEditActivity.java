@@ -607,7 +607,7 @@ public class ShowCustomEditActivity extends FragmentActivity {
 				public void onClick(DialogInterface dialog, int id) {
 					sendEvent("custom_question", "add_question", question[0], (long) difficulty);
 					Money.increaseMoney(EggHelper.unlockEgg(ShowCustomEditActivity.this, moneyText, null, EggKeys[15], EggMaxValues[15]));
-					dbManager.addCustomQuestion(question, difficulty);
+					dbManager.addCustomQuestion(question, difficulty, 0, 0);
 					resetContentView(R.layout.activity_custom_edit2, null, -1);
 				}
 			});

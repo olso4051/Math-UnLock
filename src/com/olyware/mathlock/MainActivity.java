@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -82,6 +83,7 @@ import com.olyware.mathlock.service.AcceptChallenge;
 import com.olyware.mathlock.service.CancelChallenge;
 import com.olyware.mathlock.service.CompleteChallenge;
 import com.olyware.mathlock.service.CustomContactData;
+import com.olyware.mathlock.service.CustomInstallReceiver;
 import com.olyware.mathlock.service.RemindChallenge;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.service.SendChallenge;
@@ -125,7 +127,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
 	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false,
-			fromTutorial = false;
+			fromTutorial = false, fromSwisher = false;
 
 	private LinearLayout layout;
 	private Clock clock;
@@ -148,7 +150,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int EnabledPackages = 0, fromTutorialPosition = -1;
 	private boolean loggedIn, info, challenge, locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false, isWallpaperShown = false;
-	final private long MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
+	final private long SECOND = 1000l, MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
 
 	private int answerLoc = 0;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
@@ -227,19 +229,27 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	};
 
+	private void setPackageKeys() {
+		if (dbManager != null) {
+			if (!dbManager.isDestroyed()) {
+				customCategories = dbManager.getAllCustomCategories();
+				PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+				displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
+				for (String cat : customCategories) {
+					PackageKeys.add(getString(R.string.custom_enable) + cat);
+					displayAllPackageKeys.add(cat);
+				}
+				UnlockedPackages = isAnyPackageUnlocked();
+				EnabledPackages = getEnabledPackages();
+			}
+		}
+	}
+
 	private class OpenDatabase extends AsyncTask<Void, Integer, Void> {
 		@Override
 		protected Void doInBackground(Void... voids) {
 			dbManager = new DatabaseManager(getApplicationContext());
-			customCategories = dbManager.getAllCustomCategories();
-			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
-			for (String cat : customCategories) {
-				PackageKeys.add(getString(R.string.custom_enable) + cat);
-				displayAllPackageKeys.add(cat);
-			}
-			UnlockedPackages = isAnyPackageUnlocked();
-			EnabledPackages = getEnabledPackages();
+			setPackageKeys();
 			return null;
 		}
 
@@ -480,7 +490,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			joystick.setOnJostickSelectedListener(new JoystickSelectListener() {
 				@Override
 				public void OnSelect(JoystickSelect s, boolean vibrate, int Extra) {
-					boolean setProblem = false;
 					switch (fromTutorialPosition) {
 					case 0:	// Press the Lock
 						if (s == JoystickSelect.A)
@@ -493,7 +502,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					case 2: // Challenge your friends \n (slide the icon up)
 						if (s == JoystickSelect.Friends || s == JoystickSelect.A) {
 							PreferenceHelper.setTutorialQuestion(MainActivity.this, 3);
-							setProblem = true;
 						}
 						break;
 					case 3: // Change Any Setting at any time \n (slide the icon up)
@@ -510,7 +518,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					case 5: // Quiz mode for endless questions (slide the icon up)
 						if (s == JoystickSelect.QuizMode || s == JoystickSelect.A) {
 							PreferenceHelper.setTutorialQuestion(MainActivity.this, 6);
-							setProblem = true;
 						}
 						break;
 					case 6: // Check your progress (slide the icon up)
@@ -523,9 +530,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						break;
 					}
 					JoystickSelected(s, vibrate, Extra);
-					if (setProblem) {
-						setProblemAndAnswer();
-					}
 				}
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
@@ -543,11 +547,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							questionWorth = 0;
 							/*if (attached)
 								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
-							if (!joystick.getQuickUnlock()) {
-								HelpQuestionImage = takeScreenShot();
+							if (!joystick.getQuickUnlock() && (System.currentTimeMillis() - startTime > SECOND) && questionWorthMax > 0) {
 								if (rand != null)
-									if (!fromChallenge && !fromTutorial && rand.nextBoolean())
+									if (!fromChallenge && !fromTutorial && !fromSwisher && rand.nextBoolean()) {
+										HelpQuestionImage = takeScreenShot();
 										joystick.askToShare();
+									}
 							}
 						} else {
 							timerHandler.postDelayed(this, decreaseRate);
@@ -1081,6 +1086,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else if (dbManager != null) {
 			if (!dbManager.isDestroyed()) {
 				fromChallenge = false;
+				fromSwisher = false;
 				challengeIDToDisplay = "";
 				Map<String, ChallengeData> challengeIDs = dbManager.getChallengeIDs();
 				for (Map.Entry<String, ChallengeData> entry : challengeIDs.entrySet()) {
@@ -1130,6 +1136,39 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						joystick.setAnswers(answersRandom, answerLoc);
 						resetQuestionWorth(questionWorthMax);
 					}
+				} else if (PreferenceHelper.isSwisherPackOn(this)) {
+					fromSwisher = true;
+					joystick.setProblem(true);
+					if (!PreferenceHelper.isSwisherPackAdded(this, dbManager)) {
+						PreferenceHelper.addSwisherPack(this, dbManager);
+						setPackageKeys();
+					}
+					int fromSwisherCount = PreferenceHelper.getSwisherPackCount(ctx);
+					currentPack = getString(R.string.custom) + " " + PreferenceHelper.SWISHER_FILENAME;
+					CustomQuestion question = dbManager.getSwisherQuestion(fromSwisherCount);
+					if (question == null)
+						setDefaultQuestion();
+					ID = question.getID();
+
+					// Set the new difficulty based on what question was picked
+					difficulty = 0;
+					questionWorthMax = 10;
+					decreaseRate = 500;
+
+					questionDescription
+							.setText(getString(R.string.question_description_prefix) + " | " + PreferenceHelper.SWISHER_FILENAME);
+
+					problem.setText(question.getQuestionText());
+					problem.setTextColor(defaultTextColor);
+
+					joystick.resetGuess();
+					joystick.unPauseSelection();
+
+					answers = question.getAnswers();
+					setRandomAnswers();
+
+					joystick.setAnswers(answersRandom, answerLoc);
+					resetQuestionWorth(questionWorthMax);
 				} else if (EnabledPackages > 0) {
 					joystick.setProblem(true);
 					final String EnabledPackageKeys[] = new String[EnabledPackages];
@@ -1211,7 +1250,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						}
 						// failed to load a question
 						if (!success)
-							return;
+							setDefaultQuestion();
 					}
 
 					setRandomAnswers();
@@ -1490,22 +1529,25 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				} else {
 					dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 							.currentTimeMillis(), startTime - System.currentTimeMillis()));
-					int missed = 0;
+					int conisMissed = 0;
 					if (correct) {
 						sendEvent("question", "question_answered", "correct", (long) questionWorth);
 						problem.setTextColor(Color.GREEN);
 						dMoney = Money.increaseMoney(questionWorth);
 						dbManager.decreasePriority(currentTableName, fromLanguage, toLanguage, ID);
-						missed = questionWorthMax - questionWorth;
+						conisMissed = questionWorthMax - questionWorth;
 					} else {
 						sendEvent("question", "question_answered", "incorrect", (long) questionWorth);
 						joystick.setIncorrectGuess(guessLoc);
 						problem.setTextColor(Color.RED);
 						dMoney = Money.decreaseMoneyNoDebt(0);
 						dbManager.increasePriority(currentTableName, fromLanguage, toLanguage, ID);
-						missed = questionWorthMax;
+						conisMissed = questionWorthMax;
 					}
-					MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), missed);
+					if (PreferenceHelper.isSwisherPackOn(this)) {
+						PreferenceHelper.incrementSwisherPackCount(this);
+					}
+					MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), conisMissed);
 				}
 			}
 		}
@@ -1691,7 +1733,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (scheme != null && host != null && path != null && coinHash != null) {
 				if ((scheme.equals(getString(R.string.coin_scheme1)) || scheme.equals(getString(R.string.coin_scheme2)))
 						&& host.equals(getString(R.string.coin_host)) && path.equals(getString(R.string.coin_path))) {
-					MoneyHelper.addPromoCoins(this, coinHash);
+					if (coinHash.toLowerCase(Locale.ENGLISH).equals(CustomInstallReceiver.SWISHER_KEY)) {
+						PreferenceHelper.turnSwisherPackOn(this);
+					} else {
+						MoneyHelper.addPromoCoins(this, coinHash);
+					}
 				}
 			}
 			// String scheme = "sharequestion";
@@ -2033,7 +2079,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			if (first) {
 				builder.setCancelable(false);
-				builder.setTitle(R.string.question_types_title).setItems(R.array.starting_packages, new DialogInterface.OnClickListener() {
+				if (PreferenceHelper.isSwisherPackOn(this)) {
+					builder.setTitle(R.string.question_types_swisher_title);
+				} else {
+					builder.setTitle(R.string.question_types_title);
+				}
+				builder.setItems(R.array.starting_packages, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						dialogOn = false;
 						SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);

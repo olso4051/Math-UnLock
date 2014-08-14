@@ -3,6 +3,7 @@ package com.olyware.mathlock.service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.BroadcastReceiver;
@@ -17,6 +18,7 @@ import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.MoneyHelper;
+import com.olyware.mathlock.utils.PreferenceHelper;
 import com.olyware.mathlock.utils.ShareHelper;
 
 /*
@@ -33,6 +35,7 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 	final private static String UTM_CAMPAIGN = "utm_campaign";
 	final private static String SHARE_ID = "deeldat_share_id";
 	final private static String PROMO_COIN_ID = "promo_coin";
+	final public static String SWISHER_KEY = "kara_swisher";
 
 	// final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
 
@@ -130,7 +133,11 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 			new PostDeelDatInstall(context, ShareHelper.DEELDAT_APP_ID, shareID).execute();
 		}
 		if (!coinHash.equals("")) {
-			MoneyHelper.addPromoCoins(context, coinHash);
+			if (coinHash.toLowerCase(Locale.ENGLISH).equals(SWISHER_KEY)) {
+				PreferenceHelper.turnSwisherPackOn(context);
+			} else {
+				MoneyHelper.addPromoCoins(context, coinHash);
+			}
 		}
 	}
 }

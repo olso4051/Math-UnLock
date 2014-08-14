@@ -254,7 +254,7 @@ public class DatabaseModelFactory {
 				priority, timeStep, timeSteps);
 	}
 
-	public static CustomQuestion buildCustomQuestion(Cursor cursor, int weightSum) {
+	public static CustomQuestion buildCustomQuestion(Cursor cursor, int weightSum, int count) {
 		Random rand = new Random();
 		int selection = 0;
 		if (weightSum > 0)
@@ -262,13 +262,17 @@ public class DatabaseModelFactory {
 		int cumulativeWeight = 0;
 		cursor.moveToFirst();
 		CursorHelper cursorHelper = new CursorHelper(cursor);
-		while (!cursor.isLast()) {
-			cursorHelper.setCursor(cursor);
-			cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
-			if (cumulativeWeight >= selection) {
-				break;
+		if (count >= 0) {
+			cursor.moveToPosition(count);
+		} else {
+			while (!cursor.isLast()) {
+				cursorHelper.setCursor(cursor);
+				cumulativeWeight += cursorHelper.getInteger(QuestionContract.PRIORITY);
+				if (cumulativeWeight >= selection) {
+					break;
+				}
+				cursor.moveToNext();
 			}
-			cursor.moveToNext();
 		}
 		cursorHelper.setCursor(cursor);
 		long id = cursorHelper.getLong(QuestionContract._ID);

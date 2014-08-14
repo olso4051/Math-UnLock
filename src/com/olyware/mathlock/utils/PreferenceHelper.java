@@ -1,7 +1,18 @@
 package com.olyware.mathlock.utils;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -17,6 +28,9 @@ import android.view.Window;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.adapter.QuestionSelectData;
 import com.olyware.mathlock.database.DatabaseManager;
+import com.olyware.mathlock.database.contracts.CustomQuestionContract;
+import com.olyware.mathlock.database.contracts.QuestionContract;
+import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.views.JoystickSelect;
@@ -27,6 +41,15 @@ public class PreferenceHelper {
 	final public static String USER_PREFS = "user_info";
 	final public static String LAYOUT_PREFS = "Layout_Size";
 	final public static String TUTORIAL_PREFS = "Tutorial";
+	final public static String SWISHER_PREFS = "Swisher";
+
+	final public static String SWISHER_ON = "swisher_enabled";
+	final public static String SWISHER_JSON = "swisher_json";
+	final public static String SWISHER_COUNT = "swisher_count";
+	final public static String SWISHER_TOTAL = "swisher_total";
+	final public static String SWISHER_FILENAME_WITH_EXTENSION = "Kara Swisher Trivia.csv";
+	final public static String SWISHER_FILENAME = "Kara Swisher Trivia";
+	final public static int SWISHER_MAX_COUNT = 3;
 
 	final public static String TUTORIAL_QUESTION = "tutrial_question";
 	final public static String TUTORIAL_EXTENDED = "tutrial_extended";
@@ -377,13 +400,13 @@ public class PreferenceHelper {
 		return sharedPrefsChallenge.getInt(challengeID + CHALLENGE_PREFS_QUESTIONS, 1);
 	}
 
-	public static void increaseMoney(Context ctx, int amount) {
+	/*public static void increaseMoney(Context ctx, int amount) {
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 		editorPrefsMoney.putInt("money", sharedPrefsMoney.getInt("money", 0) + amount);
 		editorPrefsMoney.commit();
 		SharedPreferences sharedPrefsMoney2 = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
-	}
+	}*/
 
 	public static void decreaseMoneyNoDebt(Context ctx, int amount) {
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
@@ -557,7 +580,7 @@ public class PreferenceHelper {
 		}
 		editPrefs.commit();
 
-		return sharedPrefsTutorial.getBoolean(TUTORIAL_EXTENDED, false);
+		return true;// sharedPrefsTutorial.getBoolean(TUTORIAL_EXTENDED, false);
 	}
 
 	public static boolean getAskedForFriendsPermission(Context ctx) {
@@ -568,5 +591,161 @@ public class PreferenceHelper {
 	public static void setAskedForFriends(Context ctx, boolean asked) {
 		SharedPreferences.Editor editPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
 		editPrefsUser.putBoolean(USER_PREFS_FRIENDS_ASKED, asked).commit();
+	}
+
+	public static boolean isSwisherPackAdded(Context ctx, DatabaseManager dbManager) {
+		Loggy.d("is swisher pack added");
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		if (!sharedPrefsSwisher.getBoolean(SWISHER_ON, false))
+			return false;
+		else
+			return dbManager.isSwisherPackAdded();
+	}
+
+	public static void addSwisherPack(Context ctx, DatabaseManager dbManager) {
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		if (!sharedPrefsSwisher.getBoolean(SWISHER_ON, false))
+			return;
+		Loggy.d("add swisher pack");
+		List<String[]> questions = getSwisherQuestions(ctx);
+		for (int i = 0; i < questions.size(); i++) {
+			dbManager.addSwisherQuestion(questions.get(i));
+		}
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		SharedPreferences.Editor editPrefs = sharedPrefs.edit();
+		editPrefs.putBoolean(ctx.getString(R.string.custom_enable) + SWISHER_FILENAME, true).commit();
+	}
+
+	public static int getSwisherPackCount(Context ctx) {
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsSwisher.getInt(SWISHER_COUNT, 0);
+	}
+
+	public static void incrementSwisherPackCount(Context ctx) {
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editPrefsSwisher = sharedPrefsSwisher.edit();
+		int count = sharedPrefsSwisher.getInt(SWISHER_COUNT, 0) + 1;
+		Loggy.d("swisher count incremented to " + count);
+		if (count >= sharedPrefsSwisher.getInt(SWISHER_TOTAL, 0)) {
+			turnSwisherPackOff(ctx);
+		} else {
+			editPrefsSwisher.putInt(SWISHER_COUNT, count).commit();
+		}
+	}
+
+	public static boolean isSwisherPackDone(Context ctx) {
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		Loggy.d("is SwisherPackON " + sharedPrefsSwisher.getBoolean(SWISHER_ON, false));
+		return sharedPrefsSwisher.getBoolean(SWISHER_ON, false);
+	}
+
+	public static boolean isSwisherPackOn(Context ctx) {
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		Loggy.d("is SwisherPackON " + sharedPrefsSwisher.getBoolean(SWISHER_ON, false));
+		return sharedPrefsSwisher.getBoolean(SWISHER_ON, false);
+	}
+
+	public static void turnSwisherPackOff(Context ctx) {
+		Loggy.d("turn swisher pack off");
+		SharedPreferences.Editor editPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsSwisher.putBoolean(SWISHER_ON, false).putInt(SWISHER_COUNT, -1).commit();
+	}
+
+	public static void turnSwisherPackOn(Context ctx) {
+		Loggy.d("turn swisher pack on");
+		SharedPreferences.Editor editPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsSwisher.putBoolean(SWISHER_ON, true).putInt(SWISHER_COUNT, 0).commit();
+		ArrayList<String[]> tempQuestions = new ArrayList<String[]>();
+		try {
+			InputStream is = ctx.getAssets().open(SWISHER_FILENAME_WITH_EXTENSION);
+			// FileReader fileR = new FileReader(descriptor.getFileDescriptor());
+			Reader fileR = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			CSVReader csvReader = new CSVReader(fileR);
+			String[] lineEntries = csvReader.readNext();
+			if (lineEntries[0].equals(QuestionContract.QUESTION_TEXT) && lineEntries[1].equals(QuestionContract.ANSWER_CORRECT)
+					&& lineEntries[2].equals(CustomQuestionContract.ANSWER_INCORRECT1)
+					&& lineEntries[3].equals(CustomQuestionContract.ANSWER_INCORRECT2)
+					&& lineEntries[4].equals(CustomQuestionContract.ANSWER_INCORRECT3)
+					&& lineEntries[5].equals(QuestionContract.DIFFICULTY)) {
+				lineEntries = csvReader.readNext();
+				while (lineEntries != null) {
+					if (lineEntries.length == 6) {
+						if (Difficulty.isDifficulty(lineEntries[5])) {
+							tempQuestions.add(new String[] { lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3],
+									lineEntries[4], SWISHER_FILENAME, lineEntries[5] });
+						}
+					}
+					lineEntries = csvReader.readNext();
+				}
+			}
+			csvReader.close();
+			is.close();
+		} catch (FileNotFoundException e) {
+			Loggy.d("file not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			Loggy.d("io exception");
+			e.printStackTrace();
+		}
+		String questionsJSON = "[";
+		boolean first = true;
+		for (String[] question : tempQuestions) {
+			if (first) {
+				questionsJSON += getJSONFromStringArray(question);
+				first = false;
+			} else
+				questionsJSON += "," + getJSONFromStringArray(question);
+		}
+		questionsJSON += "]";
+		Loggy.d("questions json = " + questionsJSON);
+		int totalSwisherQuestions = tempQuestions.size();
+		if (totalSwisherQuestions > SWISHER_MAX_COUNT)
+			totalSwisherQuestions = SWISHER_MAX_COUNT;
+		Loggy.d("questions count = " + totalSwisherQuestions);
+		editPrefsSwisher.putString(SWISHER_JSON, questionsJSON).putInt(SWISHER_TOTAL, totalSwisherQuestions).commit();
+	}
+
+	private static String getJSONFromStringArray(String[] strings) {
+		String JSON = "[";
+		boolean first = true;
+		for (String s : strings) {
+			if (first) {
+				JSON += JSONHelper.encodeJSON(s);
+				first = false;
+			} else
+				JSON += "," + JSONHelper.encodeJSON(s);
+		}
+		JSON += "]";
+		return JSON;
+	}
+
+	public static List<String[]> getSwisherQuestions(Context ctx) {
+		Loggy.d("get swisher questions");
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		String swisherJSON = sharedPrefsSwisher.getString(SWISHER_JSON, "");
+		if (!swisherJSON.equals("")) {
+			try {
+				List<String[]> questions = new ArrayList<String[]>();
+				JSONArray swisherJSONArray = new JSONArray(swisherJSON);
+				for (int i = 0; i < swisherJSONArray.length(); i++) {
+					JSONArray swisherQuestionJSONArray = swisherJSONArray.getJSONArray(i);
+					String question = URLDecoder.decode(swisherQuestionJSONArray.getString(0), "utf-8");
+					String answer1 = URLDecoder.decode(swisherQuestionJSONArray.getString(1), "utf-8");
+					String answer2 = URLDecoder.decode(swisherQuestionJSONArray.getString(2), "utf-8");
+					String answer3 = URLDecoder.decode(swisherQuestionJSONArray.getString(3), "utf-8");
+					String answer4 = URLDecoder.decode(swisherQuestionJSONArray.getString(4), "utf-8");
+					String filename = URLDecoder.decode(swisherQuestionJSONArray.getString(5), "utf-8");
+					String diff = URLDecoder.decode(swisherQuestionJSONArray.getString(6), "utf-8");
+					questions.add(new String[] { question, answer1, answer2, answer3, answer4, filename, diff });
+				}
+				Loggy.d("questions.size() = " + questions.size());
+				return questions;
+			} catch (JSONException e) {
+				return new ArrayList<String[]>();
+			} catch (UnsupportedEncodingException e) {
+				return new ArrayList<String[]>();
+			}
+		} else
+			return new ArrayList<String[]>();
 	}
 }

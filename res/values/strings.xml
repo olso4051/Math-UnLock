@@ -207,7 +207,8 @@
     <string name="question_description_prefix">Hiq Lockscreen</string>
     <string name="question_description_challenge_prefix">Challenge From\u0020</string>
     <string name="question_description_share">Shared Question</string>
-    <string name="question_types_title">What Types of Questions Would You Like to Start With</string>
+    <string name="question_types_title">Your First Question Pack is Free, Choose Your Favorite Subject</string>
+    <string name="question_types_swisher_title">Kara Swisher Trivia Unlocked! Choose Another Subject For Free</string>
     
     <!-- Saving Bitmaps -->
     <string name="blurred_background">blurred_background</string>

@@ -38,6 +38,7 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.utils.ChallengeBuilder;
+import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class DatabaseManager {
 
@@ -252,7 +253,15 @@ public class DatabaseManager {
 			return null;
 	}
 
+	public CustomQuestion getSwisherQuestion(int count) {
+		return getCustomQuestion(PreferenceHelper.SWISHER_FILENAME, Difficulty.VERY_EASY, Difficulty.INSANE, -1, count);
+	}
+
 	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
+		return getCustomQuestion(category, minDifficulty, maxDifficulty, notID, -1);
+	}
+
+	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID, int count) {
 		if (db.isOpen()) {
 			String diff = " AND difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 					+ String.valueOf(minDifficulty.getValue());
@@ -290,7 +299,7 @@ public class DatabaseManager {
 					}
 				}
 			}
-			return DatabaseModelFactory.buildCustomQuestion(cursor, sum);
+			return DatabaseModelFactory.buildCustomQuestion(cursor, sum, count);
 		} else
 			return null;
 	}
@@ -323,12 +332,17 @@ public class DatabaseManager {
 			return 0;
 	}
 
-	public long addCustomQuestion(String[] question) {
+	public long addSwisherQuestion(String[] question) {
 		return addCustomQuestion(new String[] { question[0], question[1], question[2], question[3], question[4], question[5] },
-				Integer.parseInt(question[6]));
+				Integer.parseInt(question[6]), 500, 10);
 	}
 
-	public long addCustomQuestion(String[] question, int difficulty) {
+	public long addCustomQuestion(String[] question) {
+		return addCustomQuestion(new String[] { question[0], question[1], question[2], question[3], question[4], question[5] },
+				Integer.parseInt(question[6]), 0, 0);
+	}
+
+	public long addCustomQuestion(String[] question, int difficulty, int timeStep, int timeSteps) {
 		if (db.isOpen()) {
 			String select = "Select count(1) FROM " + CustomQuestionContract.TABLE_NAME;
 			String where = " WHERE " + QuestionContract.QUESTION_TEXT + " = '" + question[0].replaceAll("'", "''") + "'" + " AND "
@@ -348,8 +362,8 @@ public class DatabaseManager {
 				values.put(CustomQuestionContract.ANSWER_INCORRECT3, question[4]);
 				values.put(QuestionContract.DIFFICULTY, difficulty);
 				values.put(QuestionContract.PRIORITY, QuestionContract.DEFAULT_PRIORITY);
-				values.put(QuestionContract.TIME_STEP, 0);
-				values.put(QuestionContract.TIME_STEPS, 0);
+				values.put(QuestionContract.TIME_STEP, timeStep);
+				values.put(QuestionContract.TIME_STEPS, timeSteps);
 				values.put(CustomQuestionContract.CATEGORY, question[5]);
 				return db.insert(CustomQuestionContract.TABLE_NAME, null, values);
 			} else
@@ -655,6 +669,15 @@ public class DatabaseManager {
 			return map.get(challengeID).getNumberOfQuestions();
 		} else
 			return -1;
+	}
+
+	public boolean isSwisherPackAdded() {
+		if (db.isOpen()) {
+			String where = CustomQuestionContract.CATEGORY + " = '" + PreferenceHelper.SWISHER_FILENAME + "'";
+			cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
+			return cursor.moveToFirst();
+		} else
+			return false;
 	}
 
 	public long getTotalDifficulty() {

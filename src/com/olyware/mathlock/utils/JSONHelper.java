@@ -2,6 +2,7 @@ package com.olyware.mathlock.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -87,4 +88,13 @@ public class JSONHelper {
 		}
 		return list;
 	}
+
+	public static String encodeJSON(String s) {
+		try {
+			return URLEncoder.encode(s, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
+	}
+
 }
