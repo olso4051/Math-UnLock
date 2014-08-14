@@ -1,5 +1,34 @@
 question_text,answer_correct,answer_incorrect1,answer_incorrect2,answer_incorrect3,difficulty
-"""Yes, yes, everyone needs a ___, right? No, I don't"" - Business Insider","nemesis","hug","puppy","fight",0
-"""Kara responded when asked What's the difference between Re/code so far and AllThingsD?"" - Business Insider","A different name","everything","not much, haha","only the people",0
-"""The internet just needs to ___ and get out of the way..."" - Cannes tech brunch","shut the f*%$ up","settle down","stop","give me a break",0
-"""But enough looking back: ___"" - AllThingsD","On to the next thing.","Get back on the horse","Move on","Let's get some food",0
+"""The internet just needs to ___ and get out of the way...""",shut the f*%$ up,settle down,stop,give me a break,4
+"""my gravestone is going to say ___"" - SFGate","""Fun! Fun! Fun! Death.""","""I had fun every day.""","""lived life to the fullest.""","""I'm Dead.""",5
+"""I don't think you can look at my history and say they ___ in Silicon Valley."" - New York Magazine",love me to death,hate me,trust me,despise me,3
+"""Yes, yes, everyone needs a ___, right? No, I don't"" - Business Insider",nemesis,hug,puppy,fight,0
+"Where did Kara say ""Never turn down an opportunity to have sex or go on television.""",Internapalooza,Mobile Beat Conference,Makers Conference,Mobile World Congress,4
+"""But enough looking back: ___"" - AllThingsD",On to the next thing.,Get back on the horse,Move on,Let's get some food,0
+"Where was ""People make a bigger deal of it, but I think I just work harder than other people."" published?",Media Bistro,Yahoo! Tech,Wall Street Journal,Fast Company,0
+"""Kara responded how when asked what's the difference between Re/code so far and AllThingsD?"" - Business Insider",A different name,everything,"not much, haha",only the people,0
+"""The ___ is/are always what reporters tell each other when they get back to the newsroom"" - SFGate",truth,lies,facts,scoop,1
+What does Kara Swisher call herself?,Sherlock Homo,Fried Oreo Lover,Popular,A Shipwreck,1
+"""up to the women to lean in ___ they're supposed to do."" - TechCrunch",or whatever the f%!$,and decide what,or change what,and do what,1
+"Where was ""I'm focused on getting to a place where we can prove that journalism can make good money on the web."" published?",Modern Luxury,Forbes,Wall Street Journal,AllThingsD,1
+"On Style ""I don't have bad taste; ___"" - SFGate",I have no taste,I have good taste,everyone else has bad taste,I don't know what taste is,1
+Kara said which quote?,up to the women to lean in or whatever the f&#! they're supposed to do.,You always need to balance the build versus buy,People need someone to go to when they have problems!,put up or shut up,2
+What show did Kara make a cameo in?,Silicon Valley,American Inventor,Girls,Modern Marvels,2
+"Where was ""I am a big proponent of being in touch with everyone even when I do not have a story to ask about"" published?",New York Magazine,Re/Code,TechCrunch,Wired,2
+"""Smart people know it's a ____ game, and I'm still going to be here."" - New York Magazine",Longer,Waiting,Tight,Fun,2
+"""People are worried about what's going to happen to ___ and they should be."" - Modern Luxury",Journalism,Technology,The Internet,Their Children,2
+"Where did Kara say ""The internet just needs to shut the f*&^ up and get out of the way...""",Cannes Tech Brunch,DLD,Code Conference,Code Mobile,2
+"""It's like arguing gay marriage: I've had it. It's done, you're wrong. ___"" - Modern Luxury","Wrong, wrong, wrong",You're dumb,You don't get it,There is no argument,3
+"""Geeks always have ___"" - Instagram",Minty Fresh Breath,Tic Tacs,A Pen,A Tablet,3
+"""Being ___ was an issue."" - New York Magazine",Gay,Smart,Female,A Writer,3
+"Kara Swisher's favorite ""trashy"" TV show is",Devious Maids,Mistresses,Scandal,Desperate Housewives,3
+Kara Swisher took a leave of absence to write a book about what?,AOL,Venture Capitalists,Lesbians,Technology,3
+"Where did Kara say ""...at some point, we're going to have to start pissing people off more.""",SXSW,Mobile Beat Conference,Makers Conference,Code Conference,0
+"""When people get ____, people lick them up and down all day, ..."" - New York Magazine",Rich,Older,Famous,Successful,4
+"Where was ""So for some reason she's got it in her head that I leak to Valleywag all the time."" published?",New York Magazine,Wall Street Journal,TechCrunch,Reuters,4
+"""Just how ___ should the technology press be?"" - New York Magazine",Hostile,Cold,Hateful,Friendly,4
+"""It's a ___ fest out there ladies, and not in a good way"" - TechCrunch",Sausage,Fun,Geek,Nerd,1
+Who did Kara Swisher interview at the Makers Conference?,Martha Stewart,Lena Dunham,Jennifer Aniston,Wendy Clark,5
+"Where was the quote regarding her children published? ""They go around the house like 'I'm so awesome.'""",Forbes,Wall Street Journal,New York Magazine,New York Times,5
+What would be Kara Swisher's ideal dessert?,A Bacon Donut,Brownie Ice Cream Sundae,Fruit,Apple Pie,5
+What was the hashtag for Kara Swisher's 50th Birthday Party?,#FiftyShadesOfSwisher,#SwishersRus,#Swisherfish,#SwisherRocks,5

@@ -838,11 +838,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					}
 					boolean didFinishNormal = FacebookDialog.getNativeDialogDidComplete(data);
 					String completionGesture = FacebookDialog.getNativeDialogCompletionGesture(data);
-					// String postID = FacebookDialog.getNativeDialogPostId(data);
-					if (didFinishNormal && completionGesture.equals("post")) {
-						ShareHelper.confirmShare(MainActivity.this);
-						Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, joystick, EggKeys[8], EggMaxValues[8]));
-					}
+					if (completionGesture != null)
+						if (didFinishNormal && completionGesture.equals("post")) {
+							ShareHelper.confirmShare(MainActivity.this);
+							Money.increaseMoney(EggHelper.unlockEgg(MainActivity.this, coins, joystick, EggKeys[8], EggMaxValues[8]));
+						}
 				}
 			});
 			if (resultCode == RESULT_OK) {

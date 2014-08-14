@@ -703,6 +703,7 @@ public class PreferenceHelper {
 			totalSwisherQuestions = SWISHER_MAX_COUNT;
 		Loggy.d("questions count = " + totalSwisherQuestions);
 		editPrefsSwisher.putString(SWISHER_JSON, questionsJSON).putInt(SWISHER_TOTAL, totalSwisherQuestions).commit();
+		MoneyHelper.addPromoCoins(ctx, ctx.getString(R.string.coin_fountain_3000));
 	}
 
 	private static String getJSONFromStringArray(String[] strings) {

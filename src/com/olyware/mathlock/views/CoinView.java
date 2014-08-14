@@ -339,7 +339,6 @@ public class CoinView extends View {
 								vx = rand.nextInt(vxDefault * 2 + 1) - vxDefault;
 								vy = rand.nextInt(vyDefault + 1) - vyDefault * 3;
 							}
-							Loggy.d("vx = " + vx + " |vy = " + vy);
 							velocityX.add(vx);
 							velocityY.add(vy);
 							arcRadius.add(0l);

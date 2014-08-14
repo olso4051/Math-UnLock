@@ -334,7 +334,7 @@ public class DatabaseManager {
 
 	public long addSwisherQuestion(String[] question) {
 		return addCustomQuestion(new String[] { question[0], question[1], question[2], question[3], question[4], question[5] },
-				Integer.parseInt(question[6]), 500, 10);
+				Integer.parseInt(question[6]), 750, 10);
 	}
 
 	public long addCustomQuestion(String[] question) {
