@@ -263,8 +263,10 @@ public class DatabaseManager {
 
 	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID, int count) {
 		if (db.isOpen()) {
-			String diff = " AND difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
-					+ String.valueOf(minDifficulty.getValue());
+			String diff = "";
+			if (!category.equals(PreferenceHelper.SWISHER_FILENAME))
+				diff = " AND difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
+						+ String.valueOf(minDifficulty.getValue());
 			String where = CustomQuestionContract.CATEGORY + " = '" + category.replaceAll("'", "''") + "'";
 			String notIDs = " AND " + BaseContract._ID + " != " + notID;
 			cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where + diff + notIDs, null, null,
