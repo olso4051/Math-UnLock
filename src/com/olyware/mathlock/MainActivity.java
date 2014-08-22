@@ -153,9 +153,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private long SECOND = 1000l, HOUR4 = 14400000l, MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
 
 	private int answerLoc = 0;		// {correct answer location}
-	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
+	private String[] answers = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
+	private String[] urls = answersNone;
 	private String[] answersFromDeepLink = new String[4];
-	private String answersRandom[] = { "4", "2", "3", "1" };	// {answers in random order}
+	private String[] answersRandom = { "4", "2", "3", "1" };	// {answers in random order}
+	private String[] urlsRandom = answersNone;
 	private int attempts = 1;
 
 	private Vibrator vib;
@@ -717,8 +719,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				this.stopService(sIntent);
 			}
 
-			// get sponsored questions once every 4 hours
-			if (PreferenceHelper.getLastSponsoredRequestTime(this) <= currentTime - 0/*HOUR4*/) {
+			// get sponsored questions once in awhile
+			if (PreferenceHelper.shouldGetSponsoredQuestion(this, currentTime)) {
 				PreferenceHelper.getSponsoredQuestions(this);
 				PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
 			}
@@ -1057,6 +1059,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		fromTutorialPosition = PreferenceHelper.getTutorialQuestionNumber(ctx);
 		GenericQuestion tutorialQuestion = PreferenceHelper.getTutorialQuestion(this, fromTutorialPosition);
 		fromTutorial = false;
+		urls = answersNone;
 		if (tutorialQuestion != null) {
 			fromTutorial = true;
 			quizMode = joystick.setQuizMode(true);
@@ -1072,6 +1075,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			questionDescription.setText(tutorialQuestion.getDescription());
 			answers = tutorialQuestion.getAnswers();
+
 			answerLoc = 0;
 			joystick.setAnswers(answers, answerLoc);
 			resetQuestionWorth(questionWorthMax);
@@ -1086,6 +1090,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			questionDescription.setText(getString(R.string.question_description_prefix) + " | "
 					+ getString(R.string.question_description_share));
 			answers = answersFromDeepLink;
+
 			setRandomAnswers();
 			joystick.setAnswers(answersRandom, answerLoc);
 			resetQuestionWorth(questionWorthMax);
@@ -1130,6 +1135,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						decreaseRate = 0;
 
 						answers = question.getAnswers();
+
 						problem.setText(question.getQuestionText());
 						problem.setTextColor(defaultTextColor);
 
@@ -1206,11 +1212,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					joystick.unPauseSelection();
 
 					answers = questions.get(0).getAnswers();
+					urls = questions.get(0).getURLs();
 					setRandomAnswers();
 
 					joystick.setAnswers(answersRandom, answerLoc);
 					resetQuestionWorth(questionWorthMax);
 				} else if (EnabledPackages > 0) {
+					if (quizMode) {
+						if (PreferenceHelper.shouldGetSponsoredQuestion(this, System.currentTimeMillis())) {
+							PreferenceHelper.getSponsoredQuestion(this);
+						}
+					}
 					joystick.setProblem(true);
 					final String EnabledPackageKeys[] = new String[EnabledPackages];
 					final int location[] = new int[EnabledPackages];
@@ -1338,9 +1350,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		for (int i = 0; i < 4; i++) {
 			if (i == answerLoc) {
 				answersRandom[i] = answers[0];
+				urlsRandom[i] = urls[0];
 				offset = 0;
 			} else {
 				answersRandom[i] = answers[i + offset];
+				urlsRandom[i] = urls[i + offset];
 			}
 		}
 	}
@@ -1639,7 +1653,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}, MoneyHelper.updateMoneyTime);
 			} else if (fromSponsored) {
 				displayCorrectOrNot(answer, answer);
-				PreferenceHelper.removeSponsoredQuestion(this, answer);
+				PreferenceHelper.removeSponsoredQuestion(this, answersRandom[answer]);
+				if (!urlsRandom[answer].equals("")) {
+					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlsRandom[answer]));
+					startActivity(browserIntent);
+				}
 				joystick.pauseSelection();
 				mHandler.removeCallbacksAndMessages(null);
 				mHandler.postDelayed(new Runnable() {

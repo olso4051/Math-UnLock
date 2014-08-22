@@ -45,6 +45,7 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 	private boolean phonebookRefresh;
 	private String baseURL;
 	private Context ctx;
+	private HttpPost httppost;
 
 	public RefreshContacts(Context ctx, List<CustomContactData> contacts, boolean phonebookRefresh) {
 		this.ctx = ctx;
@@ -220,7 +221,7 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 		if (!isCancelled()) {
 			// POST to API to get user_ids of contacts and facebook friends
 			HttpClient httpClient = HttpClientBuilder.create().build();
-			HttpPost httppost = new HttpPost(baseURL + FriendsEndpoint);
+			httppost = new HttpPost(baseURL + FriendsEndpoint);
 			HttpEntity entity;
 			String fullResult;
 			JSONArray jsonResponse;
@@ -288,6 +289,13 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 			}
 		}
 		return 0;
+	}
+
+	@Override
+	protected void onCancelled() {
+		super.onCancelled();
+		if (httppost != null)
+			httppost.abort();
 	}
 
 	private int getFriendsFromJSON(JSONArray json) {

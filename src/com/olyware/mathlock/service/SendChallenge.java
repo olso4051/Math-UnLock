@@ -26,7 +26,7 @@ import com.olyware.mathlock.utils.Loggy;
 
 public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 	final private static String Endpoint = "challenge";
-	final private static String RandomOpponent = "random";
+	final public static String RandomHiqUserID = "random";
 	final private static String OpponentUserID = "o_user_id";
 	final private static String ChallengerUserID = "c_user_id";
 	final private static String ChallengeID = "challenge_id";
@@ -51,7 +51,7 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 		Loggy.d("SendChallenge");
 		userID = ContactHelper.getUserID(act);
 		if (opponentUserID.equals(""))
-			this.opponentUserID = RandomOpponent;
+			this.opponentUserID = RandomHiqUserID;
 		else
 			this.opponentUserID = opponentUserID;
 		this.genericQuestions = new ArrayList<GenericQuestion>(questions.size());
@@ -206,7 +206,7 @@ public class SendChallenge extends AsyncTask<Void, Integer, Integer> {
 		if (entity != null && fullResult != null && jsonResponse != null) {
 			success = JSONHelper.getStringFromJSON(jsonResponse, Success);
 			error = JSONHelper.getStringFromJSON(jsonResponse, Error);
-			if (opponentUserID.equals(RandomOpponent))
+			if (opponentUserID.equals(RandomHiqUserID))
 				opponentUserID = JSONHelper.getStringFromJSON(jsonResponse, OpponentUserID);
 			challengeID = JSONHelper.getStringFromJSON(jsonResponse, ChallengeID);
 			bet = JSONHelper.getIntFromJSON(jsonResponse, Bet);

@@ -37,7 +37,7 @@ import com.olyware.mathlock.utils.PreferenceHelper;
 public class ChallengeDialog extends DialogFragment {
 
 	final private static String MaxHeight = "max_height";
-	final private static boolean RandomChallenge = false;
+	final private static boolean RandomChallenge = true;
 	final private static int RandomAddition = RandomChallenge ? 2 : 1;
 	final public static String TAG = "fragment_challenge";
 	private ListView lv;
@@ -146,6 +146,10 @@ public class ChallengeDialog extends DialogFragment {
 			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 				CustomContactData selectedContact = contacts.get(pos);
 				if (selectedContact.isContact()) {
+					if (refreshContactsTask != null) {
+						refreshContactsTask.cancel(true);
+						swipeLayout.setRefreshing(false);
+					}
 					if (selectedContact.hasHiqUserID() || selectedContact.isRandom()) {
 						String challengeID = selectedContact.getChallengeID();
 						String displayName = selectedContact.getDisplayName();

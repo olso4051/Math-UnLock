@@ -1,7 +1,5 @@
 package com.olyware.mathlock.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +9,7 @@ import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.ui.Typefaces;
 import com.olyware.mathlock.utils.ContactHelper;
+import com.olyware.mathlock.utils.JSONHelper;
 
 public class CustomContactData implements Comparable<CustomContactData> {
 	final private static String FacebookContact = "Facebook";
@@ -191,6 +190,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	public CustomContactData(String name) {
 		setDefaults();
 		this.name = name;
+		hiqUserID = SendChallenge.RandomHiqUserID;
 		isFriend = true;
 		isRandom = true;
 		isContact = true;
@@ -206,6 +206,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.emails = new ArrayList<String>();
 		this.phoneNumbers = new ArrayList<String>();
 		isFriend = false;
+		isRandom = false;
 		section = -1;
 		facebookUserID = "";
 		facebookName = "";
@@ -224,6 +225,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.emails = new ArrayList<String>();
 		this.phoneNumbers = new ArrayList<String>();
 		isFriend = false;
+		isRandom = false;
 		section = -1;
 		contact = -1;
 		facebookUserID = "";
@@ -241,6 +243,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers.add(ContactHelper.getPhoneNumberFromString(phoneNumber));
 		isFriend = false;
 		isContact = true;
+		isRandom = false;
 		contacts = new ArrayList<Integer>();
 		section = -1;
 		contact = -1;
@@ -266,6 +269,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.facebookUserID = facebookUserID;
 		this.facebookName = facebookName;
 		isContact = true;
+		isRandom = false;
 		contacts = new ArrayList<Integer>();
 		section = -1;
 		contact = -1;
@@ -282,6 +286,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers.addAll(ContactHelper.getPhoneNumbersFromStrings(phoneNumbers));
 		isFriend = false;
 		isContact = true;
+		isRandom = false;
 		contacts = new ArrayList<Integer>();
 		section = -1;
 		contact = -1;
@@ -300,6 +305,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers = new ArrayList<String>();
 		isFriend = true;
 		isContact = true;
+		isRandom = false;
 		contacts = new ArrayList<Integer>();
 		section = -1;
 		contact = -1;
@@ -317,6 +323,7 @@ public class CustomContactData implements Comparable<CustomContactData> {
 		this.phoneNumbers = new ArrayList<String>();
 		this.isFriend = false;
 		this.isContact = false;
+		isRandom = false;
 		this.section = section;
 		name = title;
 		this.description = description;
@@ -503,21 +510,21 @@ public class CustomContactData implements Comparable<CustomContactData> {
 	public String getJSON() {
 		String json = "{";
 		json += "\"" + ContactHelper.CONTACT_IS_FRIEND + "\":\"" + isFriend + "\",";
-		json += "\"" + ContactHelper.CONTACT_HIQ_USER_ID + "\":\"" + encodeJSON(hiqUserID) + "\",";
-		json += "\"" + ContactHelper.CONTACT_HIQ_NAME + "\":\"" + encodeJSON(hiqUserName) + "\",";
-		json += "\"" + ContactHelper.CONTACT_FACEBOOK_USER_ID + "\":\"" + encodeJSON(facebookUserID) + "\",";
-		json += "\"" + ContactHelper.CONTACT_FACEBOOK_NAME + "\":\"" + encodeJSON(facebookName) + "\",";
-		json += "\"" + ContactHelper.CONTACT_NAME + "\":\"" + encodeJSON(name) + "\",";
+		json += "\"" + ContactHelper.CONTACT_HIQ_USER_ID + "\":\"" + JSONHelper.encodeJSON(hiqUserID) + "\",";
+		json += "\"" + ContactHelper.CONTACT_HIQ_NAME + "\":\"" + JSONHelper.encodeJSON(hiqUserName) + "\",";
+		json += "\"" + ContactHelper.CONTACT_FACEBOOK_USER_ID + "\":\"" + JSONHelper.encodeJSON(facebookUserID) + "\",";
+		json += "\"" + ContactHelper.CONTACT_FACEBOOK_NAME + "\":\"" + JSONHelper.encodeJSON(facebookName) + "\",";
+		json += "\"" + ContactHelper.CONTACT_NAME + "\":\"" + JSONHelper.encodeJSON(name) + "\",";
 		json += "\"" + ContactHelper.CONTACT_PHONE + "\":[";
 		boolean first = true;
 		if (phoneNumbers.size() > 0) {
 			json += "\"";
 			for (int i = 0; i < phoneNumbers.size(); i++) {
 				if (first) {
-					json += encodeJSON(phoneNumbers.get(i)) + "\"";
+					json += JSONHelper.encodeJSON(phoneNumbers.get(i)) + "\"";
 					first = false;
 				} else
-					json += ",\"" + encodeJSON(phoneNumbers.get(i)) + "\"";
+					json += ",\"" + JSONHelper.encodeJSON(phoneNumbers.get(i)) + "\"";
 			}
 		}
 		json += "],\"" + ContactHelper.CONTACT_EMAIL + "\":[";
@@ -526,22 +533,14 @@ public class CustomContactData implements Comparable<CustomContactData> {
 			json += "\"";
 			for (int i = 0; i < emails.size(); i++) {
 				if (first) {
-					json += encodeJSON(emails.get(i)) + "\"";
+					json += JSONHelper.encodeJSON(emails.get(i)) + "\"";
 					first = false;
 				} else
-					json += ",\"" + encodeJSON(emails.get(i)) + "\"";
+					json += ",\"" + JSONHelper.encodeJSON(emails.get(i)) + "\"";
 			}
 		}
 		json += "]}";
 		return json;
-	}
-
-	private String encodeJSON(String s) {
-		try {
-			return URLEncoder.encode(s, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			return s;
-		}
 	}
 
 	public void setHiqUserName(String hiqUserName) {

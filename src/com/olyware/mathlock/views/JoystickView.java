@@ -1160,8 +1160,8 @@ public class JoystickView extends View {
 					if (((tapTimer + tapLength) > System.currentTimeMillis()) && (!quickUnlock)) {
 						quickUnlock = true;
 						centerOffset = drawBackBlue.getIntrinsicHeight() / 3;
-						listener.OnSelect(JoystickSelect.QuickUnlock, false, -1);		// send a quickUnlock mode activated signal back to
-						// mainActivity
+						// send a quickUnlock mode activated signal back to mainActivity
+						listener.OnSelect(JoystickSelect.QuickUnlock, false, -1);
 					}
 					startX = (RectForUnlock.right + RectForUnlock.left) / 2;
 					startY = (RectForUnlock.top + RectForUnlock.bottom) / 2;
