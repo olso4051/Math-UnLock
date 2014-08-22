@@ -115,6 +115,12 @@
     <string name="share_base_url_facebook_picture_readable">http://learnwithhiq.com/images/icon3.png</string>
     <string name="share_base_url_facebook_redirect">&amp;redirect_uri=http://www.facebook.com</string>
     
+    <!-- Sponsored -->
+    <string name="sponsored">Sponsored</string>
+    <string name="sponsored_by">Sponsored By\u0020</string>
+    <string name="sponsored_questions">\u0020question\u0020</string>
+    <string name="sponsored_quiz">\u0020Quiz</string>
+    
     <!-- Notifications -->
     <string name="notification_title_streak">Questions in a row right!</string>
     <string name="notification_title_streak_facebook1">I just got</string>

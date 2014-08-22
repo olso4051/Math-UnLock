@@ -121,7 +121,7 @@ public class ShowStoreActivity extends FragmentActivity {
 			public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
 				if (result.isFailure()) {
 					// handle error
-				} else {
+				} else if (costSmall != null && costLarge != null && costAll != null && mHelper != null) {
 					// update UI
 					iabFinishedSetup = true;
 					costSmall.setText(inventory.getSkuDetails(SKU[0]).getPrice());

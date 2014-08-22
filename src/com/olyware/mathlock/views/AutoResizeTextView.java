@@ -115,9 +115,10 @@ public class AutoResizeTextView extends TextView {
 		float maxH = Math.max(bounds.height(), textSizePix);
 		maxH = Math.max(layout.getHeight(), maxH);
 		if ((maxH > Height - textSizePix) && (Height > 0)) {
-			decreaseTextSize();
-			setDimensions();
-			return;
+			if (decreaseTextSize()) {
+				setDimensions();
+				return;
+			}
 		}
 		setTextSize(textSizeSP);
 		invalidate();
@@ -129,10 +130,13 @@ public class AutoResizeTextView extends TextView {
 		invalidate();
 	}
 
-	private void decreaseTextSize() {
+	private boolean decreaseTextSize() {
+		if (textSizeSP == 1)
+			return false;
 		textSizeSP = Math.max(textSizeSP - 1, 1);
 		textSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSizeSP, getResources().getDisplayMetrics());
 		textPaint.setTextSize(textSizePix);
+		return true;
 	}
 
 	private void resetTextSize() {

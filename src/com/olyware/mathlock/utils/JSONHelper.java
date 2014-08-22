@@ -75,6 +75,11 @@ public class JSONHelper {
 		}
 	}
 
+	public static String[] getStringArrayFromJSONArray(JSONArray array) {
+		List<String> list = getStringListFromJSONArray(array);
+		return list.toArray(new String[list.size()]);
+	}
+
 	public static List<String> getStringListFromJSONArray(JSONArray array) {
 		List<String> list = new ArrayList<String>();
 		try {
@@ -97,4 +102,11 @@ public class JSONHelper {
 		}
 	}
 
+	public static String decodeJSON(String s) {
+		try {
+			return URLDecoder.decode(s, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
+	}
 }

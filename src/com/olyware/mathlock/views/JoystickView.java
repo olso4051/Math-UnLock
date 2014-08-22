@@ -52,8 +52,8 @@ public class JoystickView extends View {
 
 	private int optionPathCenterX, optionPathCenterY, tutorial, barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP,
 			Width, Height, dstHeight, spacing, rUnlock, radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc,
-			shareLoc, correctGuess, wrongGuess, selectAppDrag, appCenterVert, appCenterHorz, alphaAnswer = 0, alphaTutorial = 255,
-			pulseFrame = 0, numberOfChallenges, backupTries = 0;
+			shareLoc, sponsoredLoc, correctGuess, wrongGuess, selectAppDrag, appCenterVert, appCenterHorz, alphaAnswer = 0,
+			alphaTutorial = 255, pulseFrame = 0, numberOfChallenges, backupTries = 0;
 	private long tapTimer, lastTimeRevealOrHide = 0, startTimeRevealOrHide = 0, lastTimePulse = 0, startTimePulse = 0;
 	private float answerSizePix, optionX, optionY, appDragX = 0, appDragY = 0, strokeWidth;
 	private double touchX, touchY, startX, startY, appAngle;
@@ -315,6 +315,7 @@ public class JoystickView extends View {
 		tapTimer = 0;
 		correctLoc = 0;
 		shareLoc = -1;
+		sponsoredLoc = -1;
 		quickUnlock = false;
 		centerOffset = 0;
 		d = new ArrayList<Drawable>();
@@ -502,13 +503,14 @@ public class JoystickView extends View {
 	}
 
 	public void setAnswers(String answers[], int correctLoc) {
-		setAnswers(answers, correctLoc, -1);
+		setAnswers(answers, correctLoc, -1, -1);
 	}
 
-	public void setAnswers(String answers[], int correctLoc, int shareLoc) {
+	public void setAnswers(String answers[], int correctLoc, int shareLoc, int sponsoredLoc) {
 		this.answers = new String[] { answers[0], answers[1], answers[2], answers[3], res.getString(R.string.unknown) };
 		this.correctLoc = correctLoc;
 		this.shareLoc = shareLoc;
+		this.sponsoredLoc = sponsoredLoc;
 		this.quickUnlock = false;
 		centerOffset = 0;
 		if (measured) {
@@ -528,7 +530,7 @@ public class JoystickView extends View {
 	}
 
 	public void askToShare() {
-		if (shareLoc < 0) {
+		if (shareLoc < 0 && sponsoredLoc < 0) {
 			Random rand = new Random();
 			int loc = rand.nextInt(3);
 			if (loc >= correctLoc) {
@@ -537,7 +539,7 @@ public class JoystickView extends View {
 			shareLoc = loc;
 			shareOldAnswer = answers[loc];
 			answers[loc] = res.getString(R.string.ask_to_share0);
-			setAnswers(answers, correctLoc, shareLoc);
+			setAnswers(answers, correctLoc, shareLoc, -1);
 		}
 	}
 
@@ -548,8 +550,26 @@ public class JoystickView extends View {
 		}
 	}
 
+	public void askForSponsored(int questions, String description) {
+		if (shareLoc < 0 && sponsoredLoc < 0) {
+			Random rand = new Random();
+			int loc = rand.nextInt(3);
+			if (loc >= correctLoc) {
+				loc++;
+			}
+			sponsoredLoc = loc;
+			answers[loc] = questions + res.getString(R.string.sponsored_questions) + description + res.getString(R.string.sponsored_quiz);
+			setAnswers(answers, correctLoc, -1, sponsoredLoc);
+		}
+	}
+
+	public boolean isAskingForSponsored() {
+		return (sponsoredLoc >= 0);
+	}
+
 	public void moveCorrect(int loc) {
 		shareLoc = -1;
+		sponsoredLoc = -1;
 		if (correctLoc != loc) {
 			String temp = answers[loc];
 			answers[loc] = answers[correctLoc];
@@ -1103,8 +1123,11 @@ public class JoystickView extends View {
 						if (send) {
 							if (select == shareLoc) {
 								listener.OnSelect(JoystickSelect.Share, true, 0);
-							} else
+							} else if (select == sponsoredLoc) {
+								listener.OnSelect(JoystickSelect.Sponsored, true, select);
+							} else {
 								listener.OnSelect(JoystickSelect.fromValue(select), true, 0);
+							}
 						} else {
 							selectAnswers[select] = true;
 						}

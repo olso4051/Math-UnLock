@@ -127,7 +127,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
 	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false,
-			fromTutorial = false, fromSwisher = false;
+			fromTutorial = false, fromDontShare = false, fromSponsored = false;
 
 	private LinearLayout layout;
 	private Clock clock;
@@ -150,7 +150,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int EnabledPackages = 0, fromTutorialPosition = -1;
 	private boolean loggedIn, info, challenge, locked, unlocking, UnlockedPackages = false;
 	private boolean dialogOn = false, dontShow = false, paused = false, isWallpaperShown = false;
-	final private long SECOND = 1000l, MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
+	final private long SECOND = 1000l, HOUR4 = 14400000l, MONTH = 2592000000l, WEEK = 604800000l, DAY = 86400000l;
 
 	private int answerLoc = 0;		// {correct answer location}
 	private String answers[] = { "3", "1", "2", "4" };	// {correct answer, wrong answers...}
@@ -549,7 +549,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 							if (!joystick.getQuickUnlock() && (System.currentTimeMillis() - startTime > SECOND) && questionWorthMax > 0) {
 								if (rand != null)
-									if (!fromChallenge && !fromTutorial && !fromSwisher && rand.nextBoolean()) {
+									if (!fromChallenge && !fromTutorial && !fromDontShare && rand.nextBoolean()) {
 										HelpQuestionImage = takeScreenShot();
 										joystick.askToShare();
 									}
@@ -715,6 +715,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				this.startService(sIntent);
 			} else {
 				this.stopService(sIntent);
+			}
+
+			// get sponsored questions once every 4 hours
+			if (PreferenceHelper.getLastSponsoredRequestTime(this) <= currentTime - 0/*HOUR4*/) {
+				PreferenceHelper.getSponsoredQuestions(this);
+				PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
 			}
 
 			// setup the question and answers
@@ -1086,7 +1092,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else if (dbManager != null) {
 			if (!dbManager.isDestroyed()) {
 				fromChallenge = false;
-				fromSwisher = false;
+				fromDontShare = false;
+				fromSponsored = false;
 				challengeIDToDisplay = "";
 				Map<String, ChallengeData> challengeIDs = dbManager.getChallengeIDs();
 				for (Map.Entry<String, ChallengeData> entry : challengeIDs.entrySet()) {
@@ -1137,7 +1144,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						resetQuestionWorth(questionWorthMax);
 					}
 				} else if (PreferenceHelper.isSwisherPackOn(this)) {
-					fromSwisher = true;
+					fromDontShare = true;
 					joystick.setProblem(true);
 					if (!PreferenceHelper.isSwisherPackAdded(this, dbManager)) {
 						PreferenceHelper.addSwisherPack(this, dbManager);
@@ -1146,8 +1153,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					int fromSwisherCount = PreferenceHelper.getSwisherPackCount(ctx);
 					currentPack = getString(R.string.custom) + " " + PreferenceHelper.SWISHER_FILENAME;
 					CustomQuestion question = dbManager.getSwisherQuestion(fromSwisherCount);
-					if (question == null)
+					if (question == null) {
 						setDefaultQuestion();
+						return;
+					}
 					ID = question.getID();
 
 					// Set the new difficulty based on what question was picked
@@ -1165,6 +1174,38 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					joystick.unPauseSelection();
 
 					answers = question.getAnswers();
+					setRandomAnswers();
+
+					joystick.setAnswers(answersRandom, answerLoc);
+					resetQuestionWorth(questionWorthMax);
+				} else if (PreferenceHelper.isSponsoredQuestionsStored(this) && PreferenceHelper.isSponsoredQuestionsStarted(this)) {
+					fromDontShare = true;
+					fromSponsored = true;
+					joystick.setProblem(true);
+					currentPack = getString(R.string.sponsored);
+					List<GenericQuestion> questions = PreferenceHelper.getStoredSponsoredQuestions(this);
+					if (questions.size() == 0) {
+						PreferenceHelper.resetSponsoredQuestions(this);
+						setDefaultQuestion();
+						return;
+					}
+					ID = -1;
+
+					// Set the new difficulty based on what question was picked
+					difficulty = 0;
+					questionWorthMax = 10;
+					decreaseRate = 1000;
+
+					questionDescription.setText(getString(R.string.question_description_prefix) + " | "
+							+ PreferenceHelper.getSponsoredQuestionSponsor(this));
+
+					problem.setText(questions.get(0).getQuestion());
+					problem.setTextColor(defaultTextColor);
+
+					joystick.resetGuess();
+					joystick.unPauseSelection();
+
+					answers = questions.get(0).getAnswers();
 					setRandomAnswers();
 
 					joystick.setAnswers(answersRandom, answerLoc);
@@ -1256,6 +1297,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					setRandomAnswers();
 
 					joystick.setAnswers(answersRandom, answerLoc);
+					if (!PreferenceHelper.isSponsoredQuestionsStarted(this) && PreferenceHelper.isSponsoredQuestionsStored(this)) {
+						int size = PreferenceHelper.getSponsoredQuestionsCount(this);
+						if (size > 0)
+							joystick.askForSponsored(size, PreferenceHelper.getSponsoredQuestionsDescription(this));
+					}
 					problem.setTextColor(defaultTextColor);
 					questionDescription.setText(getString(R.string.question_description_prefix) + " | " + currentPack);
 					resetQuestionWorth(questionWorthMax);
@@ -1300,6 +1346,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void resetQuestionWorth(int value) {
+		joystick.resetAskToShare();
 		startTime = System.currentTimeMillis();
 		questionWorth = value;
 		timerHandler.removeCallbacks(reduceWorth);
@@ -1526,6 +1573,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						joystick.setIncorrectGuess(guessLoc);
 						problem.setTextColor(Color.RED);
 					}
+				} else if (fromSponsored) {
+					problem.setTextColor(Color.GREEN);
+					dMoney = Money.increaseMoney(questionWorth);
+					MoneyHelper.setMoney(this, coins, joystick, Money.getMoney(), Money.getMoneyPaid(), questionWorthMax - questionWorth);
 				} else {
 					dbManager.addStat(new Statistic(currentPack, String.valueOf(correct), Difficulty.fromValue(difficulty), System
 							.currentTimeMillis(), startTime - System.currentTimeMillis()));
@@ -1570,12 +1621,25 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case B:		// B was selected
 		case C:		// C was selected
 		case D:		// D was selected
+			if (joystick.isAskingForSponsored() && Extra != 1)
+				PreferenceHelper.resetSponsoredQuestions(this);
 			if (fromDeepLink)
 				fromDeepLink = false;
 			int answer = JoystickSelect.fromValue(s);
 			timerHandler.removeCallbacks(reduceWorth);
 			if (fromTutorial) {
 				displayCorrectOrNot(answerLoc, answer);
+				joystick.pauseSelection();
+				mHandler.removeCallbacksAndMessages(null);
+				mHandler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						setProblemAndAnswer();
+					}
+				}, MoneyHelper.updateMoneyTime);
+			} else if (fromSponsored) {
+				displayCorrectOrNot(answer, answer);
+				PreferenceHelper.removeSponsoredQuestion(this, answer);
 				joystick.pauseSelection();
 				mHandler.removeCallbacksAndMessages(null);
 				mHandler.postDelayed(new Runnable() {
@@ -1620,23 +1684,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			}
 			break;
 		case Friends:		// friends was selected
-			/*unlocking = false;
-			startActivity(new Intent(this, FriendActivity.class));*/
-			/*if (!dialogOn) {
-				dialogOn = true;
-				final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(R.string.coming_soon_title);
-				builder.setMessage(R.string.coming_soon_message).setCancelable(false);
-				builder.setPositiveButton(R.string.coming_soon_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialogOn = false;
-					}
-				});
-				builder.create().show();
-			}*/
 			displayFriends();
-			/*unlocking = false;
-			startActivity(new Intent(this,ChallengeActivity.class));*/
 			break;
 		case Store:		// Store was selected
 			unlocking = false;
@@ -1704,6 +1752,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case ShouldDimScreen:
 			backgroundState = 1;
 			backgroundTransition.startTransition(JoystickView.IN_OUT_DURATION);
+			break;
+		case Sponsored:
+			PreferenceHelper.setSponsoredQuestionsStarted(this);
+			answerLoc = Extra;
+			JoystickSelected(JoystickSelect.fromValue(Extra), false, 1);
 			break;
 		default:
 			break;
