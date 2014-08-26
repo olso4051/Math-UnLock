@@ -532,7 +532,7 @@ public class DatabaseManager {
 			return new HashMap<String, Integer>();
 	}
 
-	public ChallengeData getRandomChallengeID(List<ContactHashes> hashes) {
+	public ChallengeData getRandomChallengeData(List<ContactHashes> hashes) {
 		if (db.isOpen()) {
 			String where = "";
 			boolean first = true;

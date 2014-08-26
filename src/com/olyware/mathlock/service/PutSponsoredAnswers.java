@@ -1,5 +1,6 @@
 package com.olyware.mathlock.service;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,7 +51,7 @@ public class PutSponsoredAnswers extends AsyncTask<Void, Integer, Integer> {
 			JSONObject data = new JSONObject();
 			data.put("user_id", userID);
 			data.put("hash", hash);
-			data.put("answers", answers);
+			data.put("answers", new JSONArray(answers));
 
 			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());
 			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));

@@ -46,12 +46,43 @@ public class JSONHelper {
 		}
 	}
 
+	public static List<String> getStringListFromJSON2(JSONObject json, String key1, String key2) {
+		try {
+			JSONArray array = json.getJSONArray(key1);
+			List<String> result = new ArrayList<String>(array.length());
+			for (int i = 0; i < array.length(); i++) {
+				result.add((new JSONObject(array.getString(i))).getString(key2));
+			}
+			return result;
+		} catch (JSONException e) {
+			return new ArrayList<String>();
+		}
+	}
+
 	public static List<String[]> getStringArrayListFromJSON(JSONObject json, String key) {
 		try {
 			JSONArray array = json.getJSONArray(key);
 			List<String[]> result = new ArrayList<String[]>(array.length());
 			for (int i = 0; i < array.length(); i++) {
 				JSONArray innerArray = array.getJSONArray(i);
+				String[] results = new String[innerArray.length()];
+				for (int j = 0; j < innerArray.length(); j++) {
+					results[j] = innerArray.getString(j);
+				}
+				result.add(results);
+			}
+			return result;
+		} catch (JSONException e) {
+			return new ArrayList<String[]>();
+		}
+	}
+
+	public static List<String[]> getStringArrayListFromJSON2(JSONObject json, String key, String key2) {
+		try {
+			JSONArray array = json.getJSONArray(key);
+			List<String[]> result = new ArrayList<String[]>(array.length());
+			for (int i = 0; i < array.length(); i++) {
+				JSONArray innerArray = array.getJSONObject(i).getJSONArray(key2);
 				String[] results = new String[innerArray.length()];
 				for (int j = 0; j < innerArray.length(); j++) {
 					results[j] = innerArray.getString(j);

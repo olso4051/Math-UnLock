@@ -144,7 +144,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private List<Integer> streakToNotify, totalToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys;
 	private int[] EggMaxValues;
-	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink, challengeIDToDisplay;
+	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink, challengeIDToDisplay, sponsoredHash;
 	private long ID = 0;
 
 	private int EnabledPackages = 0, fromTutorialPosition = -1;
@@ -1213,14 +1213,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 					answers = questions.get(0).getAnswers();
 					urls = questions.get(0).getURLs();
+					sponsoredHash = questions.get(0).getHash();
 					setRandomAnswers();
 
 					joystick.setAnswers(answersRandom, answerLoc);
 					resetQuestionWorth(questionWorthMax);
 				} else if (EnabledPackages > 0) {
 					if (quizMode) {
-						if (PreferenceHelper.shouldGetSponsoredQuestion(this, System.currentTimeMillis())) {
+						PreferenceHelper.incrementQuizModeQuestionsAnswered(this);
+						long currentTime = System.currentTimeMillis();
+						if (PreferenceHelper.shouldGetSponsoredApp(this, currentTime)) {
 							PreferenceHelper.getSponsoredQuestion(this);
+							PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
 						}
 					}
 					joystick.setProblem(true);
@@ -1653,7 +1657,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}, MoneyHelper.updateMoneyTime);
 			} else if (fromSponsored) {
 				displayCorrectOrNot(answer, answer);
-				PreferenceHelper.removeSponsoredQuestion(this, answersRandom[answer]);
+				PreferenceHelper.removeSponsoredQuestion(this, sponsoredHash, answersRandom[answer]);
 				if (!urlsRandom[answer].equals("")) {
 					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlsRandom[answer]));
 					startActivity(browserIntent);

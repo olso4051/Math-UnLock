@@ -23,12 +23,13 @@ public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String userID;
 	private String questionHash, sponsor, description, error;
-	private List<String> questions;
+	private List<String> questionHashes, questions;
 	private List<String[]> answers, urls;
 
 	public GetSponsoredQuestions(Context ctx, String userID) {
 		baseURL = ctx.getString(R.string.service_base_url);
 		this.userID = userID;
+		this.questionHashes = new ArrayList<String>();
 		this.questions = new ArrayList<String>();
 		this.answers = new ArrayList<String[]>();
 		this.urls = new ArrayList<String[]>();
@@ -53,6 +54,13 @@ public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 			return description;
 		else
 			return "";
+	}
+
+	public List<String> getQuestionHashes() {
+		if (questionHashes != null)
+			return questionHashes;
+		else
+			return new ArrayList<String>();
 	}
 
 	public List<String> getQuestions() {
@@ -109,9 +117,10 @@ public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 			questionHash = JSONHelper.getStringFromJSON(jsonResponse, "hash");
 			sponsor = JSONHelper.getStringFromJSON(jsonResponse, "sponsor");
 			description = JSONHelper.getStringFromJSON(jsonResponse, "description");
-			questions = JSONHelper.getStringListFromJSON(jsonResponse, "questions");
-			answers = JSONHelper.getStringArrayListFromJSON(jsonResponse, "answers");
-			urls = JSONHelper.getStringArrayListFromJSON(jsonResponse, "urls");
+			questionHashes = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "question_hash");
+			questions = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "text");
+			answers = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "answers");
+			urls = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "urls");
 			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
 			if (!questionHash.equals(""))
 				return 0;

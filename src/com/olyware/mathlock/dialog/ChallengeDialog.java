@@ -320,7 +320,7 @@ public class ChallengeDialog extends DialogFragment {
 							}
 							if (dbManager != null) {
 								if (!dbManager.isDestroyed()) {
-									ChallengeData randomChallengeData = dbManager.getRandomChallengeID(hashesList);
+									ChallengeData randomChallengeData = dbManager.getRandomChallengeData(hashesList);
 									if (!randomChallengeData.getChallengeID().equals("")) {
 										for (int id = 0; id < contacts.size(); id++) {
 											if (contacts.get(id).isRandom()) {
