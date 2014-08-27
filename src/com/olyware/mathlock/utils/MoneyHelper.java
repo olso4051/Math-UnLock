@@ -17,6 +17,7 @@ public class MoneyHelper {
 	final public static int updateMoneyTime = 600;
 	final private static String Money = "money";
 	final private static String PaidMoney = "paid_money";
+	final private static String BoughtAnything = "bought_anything";
 
 	private static int updateMoneyStep = 1000;
 	private static SharedPreferences sharedPrefsMoney;
@@ -131,6 +132,11 @@ public class MoneyHelper {
 		editorPrefsMoney.commit();
 	}
 
+	public static int getPaidMoney(Context context) {
+		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+		return sharedPrefsMoney.getInt(PaidMoney, 0);
+	}
+
 	public static int getTotalMoney(Context context) {
 		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
 		return sharedPrefsMoney.getInt(Money, 0) + sharedPrefsMoney.getInt(PaidMoney, 0);
@@ -146,6 +152,17 @@ public class MoneyHelper {
 	public static int getModifiedBet(Context context, int maxBet) {
 		int newMaxBet = getMaxBet(context);
 		return Math.min(newMaxBet, maxBet);
+	}
+
+	public static boolean hasBoughtAnything(Context context) {
+		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+		return sharedPrefsMoney.getBoolean(BoughtAnything, false);
+	}
+
+	public static void BoughtSomething(Context context) {
+		sharedPrefsMoney = context.getSharedPreferences("Packages", 0);
+		editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsMoney.putBoolean(BoughtAnything, true).commit();
 	}
 
 	public static void addPromoCoins(final Context context, final String coinHash) {

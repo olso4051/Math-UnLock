@@ -145,14 +145,17 @@ public class ShowStoreActivity extends FragmentActivity {
 					// handle error
 					return;
 				} else if (purchase.getSku().equals(SKU[0])) {
+					MoneyHelper.BoughtSomething(ShowStoreActivity.this);
 					sendTransaction(purchase.getOrderId(), 0.99 * .7);
 					sendItem(purchase.getOrderId(), getString(R.string.extra_coins1), purchase.getSku(), "coins", 0.99);
 					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 				} else if (purchase.getSku().equals(SKU[1])) {
+					MoneyHelper.BoughtSomething(ShowStoreActivity.this);
 					sendTransaction(purchase.getOrderId(), 1.99 * .7);
 					sendItem(purchase.getOrderId(), getString(R.string.extra_coins2), purchase.getSku(), "coins", 1.99);
 					mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 				} else if (purchase.getSku().equals(SKU[2])) {
+					MoneyHelper.BoughtSomething(ShowStoreActivity.this);
 					sendTransaction(purchase.getOrderId(), 2.99 * .7);
 					sendItem(purchase.getOrderId(), getString(R.string.extra_coins3), purchase.getSku(), "coins", 2.99);
 					mHelper.consumeAsync(purchase, mConsumeFinishedListener);

@@ -158,6 +158,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private String[] answersFromDeepLink = new String[4];
 	private String[] answersRandom = { "4", "2", "3", "1" };	// {answers in random order}
 	private String[] urlsRandom = answersNone;
+	private int[] answerLocs = { 0, 1, 2, 3 };
 	private int attempts = 1;
 
 	private Vibrator vib;
@@ -1336,14 +1337,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		joystick.unPauseSelection();
 		if (!UnlockedPackages) {
 			problem.setText(R.string.none_unlocked);
-			answersRandom = answersNone;
 		} else if (dbManager == null) {
 			problem.setText(R.string.db_loading);
-			answersRandom = answersNone;
 		} else {
 			problem.setText(R.string.none_enabled);
-			answersRandom = answersNone;
 		}
+		answersRandom = answersNone;
 		questionDescription.setText(getString(R.string.question_description_prefix));
 		joystick.setAnswers(answersRandom, 0);
 	}
@@ -1355,10 +1354,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (i == answerLoc) {
 				answersRandom[i] = answers[0];
 				urlsRandom[i] = urls[0];
+				answerLocs[i] = 0;
 				offset = 0;
 			} else {
 				answersRandom[i] = answers[i + offset];
 				urlsRandom[i] = urls[i + offset];
+				answerLocs[i] = i + offset;
 			}
 		}
 	}
@@ -1657,7 +1658,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}, MoneyHelper.updateMoneyTime);
 			} else if (fromSponsored) {
 				displayCorrectOrNot(answer, answer);
-				PreferenceHelper.removeSponsoredQuestion(this, sponsoredHash, answersRandom[answer]);
+				PreferenceHelper.removeSponsoredQuestion(this, sponsoredHash, answerLocs[answer]);
 				if (!urlsRandom[answer].equals("")) {
 					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlsRandom[answer]));
 					startActivity(browserIntent);

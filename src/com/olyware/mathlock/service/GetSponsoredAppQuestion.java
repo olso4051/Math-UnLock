@@ -11,7 +11,7 @@ import android.os.AsyncTask;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.HttpClient;
-import ch.boye.httpclientandroidlib.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
 import ch.boye.httpclientandroidlib.entity.ContentType;
 import ch.boye.httpclientandroidlib.entity.StringEntity;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
@@ -24,7 +24,7 @@ import com.olyware.mathlock.utils.Loggy;
 public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String userID;
-	private String questionHash, sponsor, description, error;
+	private String packHash, sponsor, description, error;
 	private List<String> installedPacks, questionHashes, questions;
 	private List<String[]> answers, urls;
 
@@ -38,9 +38,9 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 		this.urls = new ArrayList<String[]>();
 	}
 
-	public String getQuestionHash() {
-		if (questionHash != null)
-			return questionHash;
+	public String getPackHash() {
+		if (packHash != null)
+			return packHash;
 		else
 			return "";
 	}
@@ -98,7 +98,7 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 	protected Integer doInBackground(Void... v) {
 		// PUT to API with user_id
 		HttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPut httpput = new HttpPut(baseURL + "question");
+		HttpPost httpPost = new HttpPost(baseURL + "question");
 		HttpEntity entity;
 		String fullResult;
 		JSONObject jsonResponse;
@@ -112,9 +112,9 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 			data.put("installed_packs", installedPacksArray);
 			Loggy.d("JSON to question = " + data.toString());
 
-			httpput.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
-			httpput.setHeader("Content-Type", "application/json");
-			HttpResponse response = httpclient.execute(httpput);
+			httpPost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
+			httpPost.setHeader("Content-Type", "application/json");
+			HttpResponse response = httpclient.execute(httpPost);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
 			jsonResponse = new JSONObject(fullResult);
@@ -123,7 +123,7 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			questionHash = JSONHelper.getStringFromJSON(jsonResponse, "hash");
+			packHash = JSONHelper.getStringFromJSON(jsonResponse, "hash");
 			sponsor = JSONHelper.getStringFromJSON(jsonResponse, "sponsor");
 			description = JSONHelper.getStringFromJSON(jsonResponse, "description");
 			questionHashes = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "question_hash");
@@ -131,7 +131,7 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 			answers = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "answers");
 			urls = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "urls");
 			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
-			if (!questionHash.equals(""))
+			if (!packHash.equals(""))
 				return 0;
 			else
 				return 1;

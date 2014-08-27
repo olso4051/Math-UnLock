@@ -36,7 +36,6 @@ import com.olyware.mathlock.database.contracts.QuestionContract;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.service.CustomContactData;
-import com.olyware.mathlock.service.GetSponsoredQuestions;
 import com.olyware.mathlock.service.PutSponsoredAnswers;
 import com.olyware.mathlock.views.JoystickSelect;
 
@@ -95,8 +94,8 @@ public class PreferenceHelper {
 	final public static String USER_PREFS_SPONSORED_STARTED = "started";
 
 	final public static long SPONSORED_PACK_INTERVAL = 0l;// 14400000l;
-	final public static long SPONSORED_APP_INTERVAL = 60000l;// 14400000l;
-	final public static int SPONSORED_APP_QUESTION_INTERVAL = 20;// 20;
+	final public static long SPONSORED_APP_INTERVAL = 10000l;// 60000l;
+	final public static int SPONSORED_APP_QUESTION_INTERVAL = 4;// 20;
 
 	final public static String DEFAULT_PREFS_SHARE_HASH = "share_hash_latest";
 
@@ -448,20 +447,38 @@ public class PreferenceHelper {
 	}
 
 	public static boolean shouldGetSponsoredQuestion(Context ctx, long currentTime) {
+		/*if (!MoneyHelper.hasBoughtAnything(ctx)) {
+			int paidMoney = MoneyHelper.getPaidMoney(ctx);
+			if (paidMoney == 0) {*/
 		long lastTime = getLastSponsoredRequestTime(ctx);
 		if (lastTime <= currentTime - SPONSORED_PACK_INTERVAL) {
 			return (getSponsoredQuestionsCount(ctx) == 0);
 		} else
 			return false;
+		/*} else {
+			return false;
+		}
+		} else {
+		return false;
+		}*/
 	}
 
 	public static boolean shouldGetSponsoredApp(Context ctx, long currentTime) {
+		/*if (!MoneyHelper.hasBoughtAnything(ctx)) {
+		int paidMoney = MoneyHelper.getPaidMoney(ctx);
+		if (paidMoney == 0) {*/
 		long lastTime = getLastSponsoredAppRequestTime(ctx);
 		int questions = getTotalQuizModeQuestions(ctx);
 		if (lastTime <= currentTime - SPONSORED_APP_INTERVAL && questions > SPONSORED_APP_QUESTION_INTERVAL) {
 			return (getSponsoredQuestionsCount(ctx) == 0);
 		} else
 			return false;
+		/*} else {
+		return false;
+		}
+		} else {
+		return false;
+		}*/
 	}
 
 	public static long getLastSponsoredRequestTime(Context ctx) {
@@ -529,7 +546,7 @@ public class PreferenceHelper {
 			@Override
 			protected void onPostExecute(Integer result) {
 				if (result == 0) {
-					storeSponsoredQuestions(ctx, getQuestionHash(), getSponsor(), getDescription(), getQuestions(), getAnswers(), getURLs());
+					storeSponsoredQuestions(ctx, getPackHash(), getSponsor(), getDescription(), getQuestionHashes(), getQuestions(), getAnswers(), getURLs());
 				}
 			}
 		}.execute();*/
@@ -553,30 +570,22 @@ public class PreferenceHelper {
 	public static void getSponsoredQuestions(final Context ctx) {
 		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
 		String userID = sharedPrefsUsers.getString(ctx.getString(R.string.pref_user_userid), "");
-		new GetSponsoredQuestions(ctx, userID) {
+		/*new GetSponsoredQuestions(ctx, userID) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				if (result == 0) {
-					storeSponsoredQuestions(ctx, getQuestionHash(), getSponsor(), getDescription(), getQuestionHashes(), getQuestions(),
+					storeSponsoredQuestions(ctx, getPackHash(), getSponsor(), getDescription(), getQuestionHashes(), getQuestions(),
 							getAnswers(), getURLs());
 				}
 			}
-		}.execute();
-		String hash = "1234";
-		String sponsor = "Kyle Olson";
-		String desc = "Bike";
+		}.execute();*/
+		String hash = "";
+		String sponsor = "";
+		String desc = "";
 		List<String> questionHashes = new ArrayList<String>();
-		questionHashes.add("abcd");
-		questionHashes.add("efgh");
 		List<String> questions = new ArrayList<String>();
-		questions.add("How many bikes do I own?");
-		questions.add("How many wheels do you own?");
 		List<String[]> answers = new ArrayList<String[]>();
-		answers.add(new String[] { "7", "6", "3", "2" });
-		answers.add(new String[] { "14", "16", "13", "11" });
 		List<String[]> urls = new ArrayList<String[]>();
-		urls.add(new String[] { "", "", "", "" });
-		urls.add(new String[] { "", "", "", "" });
 		storeSponsoredQuestions(ctx, hash, sponsor, desc, questionHashes, questions, answers, urls);
 	}
 
@@ -673,7 +682,6 @@ public class PreferenceHelper {
 
 	public static boolean isSponsoredQuestionsStarted(Context ctx) {
 		SharedPreferences sharedPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
-		Loggy.d("is started = " + sharedPrefsUser.getBoolean(USER_PREFS_SPONSORED_STARTED, false));
 		return sharedPrefsUser.getBoolean(USER_PREFS_SPONSORED_STARTED, false);
 	}
 
@@ -681,22 +689,21 @@ public class PreferenceHelper {
 		SharedPreferences sharedPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
 		String questionsJSON = sharedPrefsUser.getString(USER_PREFS_SPONSORED_QUESTIONS, "");
 		Loggy.d("questionsJSON = " + questionsJSON);
-		Loggy.d("is stored = " + !questionsJSON.equals(""));
 		return !questionsJSON.equals("");
 	}
 
 	public static void setSponsoredQuestionsStarted(Context ctx) {
-		Loggy.d("set started = true");
 		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
 		editPrefsUsers.putBoolean(USER_PREFS_SPONSORED_STARTED, true).commit();
 	}
 
-	public static void removeSponsoredQuestion(Context ctx, String hash, String answer) {
+	public static void removeSponsoredQuestion(Context ctx, String hash, int answer) {
 		SharedPreferences sharedPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
 		String packHash = sharedPrefsUser.getString(USER_PREFS_SPONSORED_HASH, "");
 		String sponsor = sharedPrefsUser.getString(USER_PREFS_SPONSORED_SPONSOR, "");
 		List<GenericQuestion> questions = getStoredSponsoredQuestions(ctx);
-		if (hash != null && answer != null && questions.size() > 0 && !hash.equals("")) {
+		if (hash != null && questions.size() > 0 && !hash.equals("")) {
+			Loggy.d("answer location = " + answer);
 			storeSponsoredAnswers(ctx, hash, answer);
 			questions.remove(0);
 			if (questions.size() == 0) {
@@ -739,12 +746,12 @@ public class PreferenceHelper {
 		return sharedPrefsUser.getString(USER_PREFS_SPONSORED_ANSWERS_STORED, "");
 	}
 
-	public static void storeSponsoredAnswers(Context ctx, String hash, String answer) {
+	public static void storeSponsoredAnswers(Context ctx, String hash, int answer) {
 		try {
 			String storedAnswers = getStoredSponsoredAnswers(ctx);
 			JSONArray answers;
 			JSONObject answerJSON = new JSONObject();
-			answerJSON.put("hash", hash);
+			answerJSON.put("question_hash", hash);
 			answerJSON.put("answer", answer);
 			if (!storedAnswers.equals("")) {
 				answers = new JSONArray(storedAnswers);

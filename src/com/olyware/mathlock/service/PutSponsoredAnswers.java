@@ -40,7 +40,7 @@ public class PutSponsoredAnswers extends AsyncTask<Void, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Void... v) {
-		String endpoint = "questions/answer";
+		String endpoint = "question/answer";
 
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -50,7 +50,7 @@ public class PutSponsoredAnswers extends AsyncTask<Void, Integer, Integer> {
 		try {
 			JSONObject data = new JSONObject();
 			data.put("user_id", userID);
-			data.put("hash", hash);
+			data.put("pack_hash", hash);
 			data.put("answers", new JSONArray(answers));
 
 			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());

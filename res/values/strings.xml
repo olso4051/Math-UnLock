@@ -4,7 +4,7 @@
     <string name="app_name">Hiq Lockscreen</string>
     <string name="facebook_app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
-    <string name="service_base_url">https://api.learnwithhiq.com/</string>
+    <string name="service_base_url">http://dev.learnwithhiq.com/</string>
     
     <!-- App Linking Strings -->
     <string name="coin_scheme1">http</string>
@@ -306,8 +306,8 @@
     <string name="enable_vibration_summary">Vibrate on key presses</string>
     <string name="enable_vocab_summary">Vocab questions</string>
     <string name="extras">Extras</string>
-    <string name="extra_coins1"> 1,000 Coins</string>
-    <string name="extra_coins2"> 5,000 Coins</string>
+    <string name="extra_coins1">1,000 Coins</string>
+    <string name="extra_coins2">5,000 Coins</string>
     <string name="extra_coins3">10,000 Coins</string>
     <string name="get_pack_first">Start by unlocking a FREE question pack first!</string>
     <string name="go_negative">Go In Debt</string>
