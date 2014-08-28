@@ -3,11 +3,12 @@ package com.olyware.mathlock.service;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomPackData {
-	private String filename, name, ID, userID, downloads;
+public class CustomPackData implements Comparable<CustomPackData> {
+	private String filename, name, ID, userID;
+	private int downloads;
 	private List<String> tags;
 
-	public CustomPackData(String filename, String name, String ID, String userID, String downloads, List<String> tags) {
+	public CustomPackData(String filename, String name, String ID, String userID, int downloads, List<String> tags) {
 		this.filename = filename;
 		// this.name = name;
 		int end = filename.indexOf('.');
@@ -38,13 +39,8 @@ public class CustomPackData {
 		return userID;
 	}
 
-	public String getDownloads() {
-		if (downloads == null)
-			return "0";
-		else if (downloads.equals(""))
-			return "0";
-		else
-			return downloads;
+	public int getDownloads() {
+		return downloads;
 	}
 
 	public List<String> getTags() {
@@ -52,5 +48,18 @@ public class CustomPackData {
 			return new ArrayList<String>(0);
 		else
 			return tags;
+	}
+
+	@Override
+	public int compareTo(CustomPackData data) {
+		int compareName = getName().compareToIgnoreCase(data.getName());
+		if (compareName == 0) {
+			// if both have same name ignoring case then return tie
+			return 0;
+		} else {
+			// sort A-Z
+			return compareName / Math.abs(compareName);
+		}
+
 	}
 }

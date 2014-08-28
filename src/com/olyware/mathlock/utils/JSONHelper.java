@@ -12,13 +12,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSONHelper {
+	private static String getCleanedString(String s) {
+		s = decodeJSON(s);
+		if (s == null)
+			return "";
+		else if (s.toLowerCase(Locale.ENGLISH).equals("null"))
+			return "";
+		else
+			return s;
+	}
+
 	public static String getStringFromJSON(JSONObject json, String key) {
 		try {
-			String s = json.getString(key);
-			if (s.toLowerCase(Locale.ENGLISH).equals("null"))
-				return "";
-			else
-				return s;
+			return getCleanedString(json.getString(key));
 		} catch (JSONException e) {
 			return "";
 		}
@@ -36,11 +42,7 @@ public class JSONHelper {
 	public static List<String> getStringListFromJSON(JSONObject json, String key) {
 		try {
 			JSONArray array = json.getJSONArray(key);
-			List<String> result = new ArrayList<String>(array.length());
-			for (int i = 0; i < array.length(); i++) {
-				result.add(array.getString(i));
-			}
-			return result;
+			return getStringListFromJSONArray(array);
 		} catch (JSONException e) {
 			return new ArrayList<String>();
 		}
@@ -51,7 +53,7 @@ public class JSONHelper {
 			JSONArray array = json.getJSONArray(key1);
 			List<String> result = new ArrayList<String>(array.length());
 			for (int i = 0; i < array.length(); i++) {
-				result.add((new JSONObject(array.getString(i))).getString(key2));
+				result.add(getStringFromJSON(new JSONObject(array.getString(i)), key2));
 			}
 			return result;
 		} catch (JSONException e) {
@@ -65,10 +67,7 @@ public class JSONHelper {
 			List<String[]> result = new ArrayList<String[]>(array.length());
 			for (int i = 0; i < array.length(); i++) {
 				JSONArray innerArray = array.getJSONArray(i);
-				String[] results = new String[innerArray.length()];
-				for (int j = 0; j < innerArray.length(); j++) {
-					results[j] = innerArray.getString(j);
-				}
+				String[] results = getStringArrayFromJSONArray(innerArray);
 				result.add(results);
 			}
 			return result;
@@ -83,10 +82,7 @@ public class JSONHelper {
 			List<String[]> result = new ArrayList<String[]>(array.length());
 			for (int i = 0; i < array.length(); i++) {
 				JSONArray innerArray = array.getJSONObject(i).getJSONArray(key2);
-				String[] results = new String[innerArray.length()];
-				for (int j = 0; j < innerArray.length(); j++) {
-					results[j] = innerArray.getString(j);
-				}
+				String[] results = getStringArrayFromJSONArray(innerArray);
 				result.add(results);
 			}
 			return result;
@@ -115,14 +111,12 @@ public class JSONHelper {
 		List<String> list = new ArrayList<String>();
 		try {
 			for (int i = 0; i < array.length(); i++) {
-				list.add(URLDecoder.decode(array.getString(i), "utf-8"));
+				list.add(getCleanedString(array.getString(i)));
 			}
+			return list;
 		} catch (JSONException e) {
 			return new ArrayList<String>();
-		} catch (UnsupportedEncodingException e) {
-			return new ArrayList<String>();
 		}
-		return list;
 	}
 
 	public static String encodeJSON(String s) {

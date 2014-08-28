@@ -17,6 +17,7 @@ import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.JSONHelper;
 
 public class GetCustomPacks extends AsyncTask<String, Integer, Integer> {
 	private ArrayList<CustomPackData> customPackDataList = new ArrayList<CustomPackData>();
@@ -72,34 +73,18 @@ public class GetCustomPacks extends AsyncTask<String, Integer, Integer> {
 			try {
 				for (int i = 0; i < json.length(); i++) {
 					JSONObject obj = (JSONObject) json.get(i);
-					list.add(new CustomPackData(getStringFromJSON(obj, "filename"), getStringFromJSON(obj, "name"), getStringFromJSON(obj,
-							"id"), getStringFromJSON(obj, "user_id"), getStringFromJSON(obj, "downloads"), getStringListFromJSON(obj,
-							"tags")));
+					String filename = JSONHelper.getStringFromJSON(obj, "filename");
+					String name = JSONHelper.getStringFromJSON(obj, "name");
+					String ID = JSONHelper.getStringFromJSON(obj, "id");
+					String userID = JSONHelper.getStringFromJSON(obj, "user_id");
+					int downloads = JSONHelper.getIntFromJSON(obj, "downloads");
+					List<String> tags = JSONHelper.getStringListFromJSON(obj, "tag");
+					list.add(new CustomPackData(filename, name, ID, userID, downloads, tags));
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}
 		return list;
-	}
-
-	private String getStringFromJSON(JSONObject json, String key) {
-		try {
-			return json.getString(key);
-		} catch (JSONException e) {
-			return "";
-		}
-	}
-
-	private List<String> getStringListFromJSON(JSONObject json, String key) {
-		List<String> strings = new ArrayList<String>();
-		try {
-			JSONArray array = json.getJSONArray(key);
-			for (int i = 0; i < array.length(); i++)
-				strings.add(array.getString(i));
-			return strings;
-		} catch (JSONException e) {
-			return strings;
-		}
 	}
 }

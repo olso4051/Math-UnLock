@@ -1,6 +1,7 @@
 package com.olyware.mathlock;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -51,6 +52,7 @@ public class SearchableCustomPackActivity extends Activity {
 					lastLength = cs.length();
 					products.clear();
 					products.addAll(allProducts);
+					Collections.sort(products);
 					adapter.getFilter().filter(cs);
 				}
 			}
@@ -72,7 +74,7 @@ public class SearchableCustomPackActivity extends Activity {
 
 		// Listview Data
 		products = new ArrayList<CustomPackData>();
-		products.add(new CustomPackData("null", "Finding Available Packs", "-1", "-1", "0", new ArrayList<String>(0)));
+		products.add(new CustomPackData("null", "Finding Available Packs", "-1", "-1", 0, new ArrayList<String>(0)));
 		allProducts = new ArrayList<CustomPackData>();
 		allProducts.addAll(products);
 		downloadedPackIDs = new ArrayList<String>();
@@ -103,6 +105,7 @@ public class SearchableCustomPackActivity extends Activity {
 								}
 								if (result == 0) {
 									addInstalledCustomPackID(data.getID());
+
 								}
 							}
 						}.execute(data.getID(), data.getUserID(), data.getName());

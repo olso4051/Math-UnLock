@@ -18,6 +18,7 @@ import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.JSONHelper;
+import com.olyware.mathlock.utils.Loggy;
 
 public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
@@ -116,13 +117,20 @@ public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 		if (entity != null && fullResult != null && jsonResponse != null) {
 			packHash = JSONHelper.getStringFromJSON(jsonResponse, "hash");
 			sponsor = JSONHelper.getStringFromJSON(jsonResponse, "sponsor");
-			description = JSONHelper.getStringFromJSON(jsonResponse, "description");
+			description = JSONHelper.getStringFromJSON(jsonResponse, "type");
 			questionHashes = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "question_hash");
 			questions = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "text");
 			answers = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "answers");
 			urls = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "urls");
 			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
-			if (!packHash.equals(""))
+			Loggy.d("packHash = " + packHash);
+			Loggy.d("sponsor = " + sponsor);
+			Loggy.d("desc = " + description);
+			Loggy.d("qhashes = " + questionHashes.get(0));
+			Loggy.d("qs = " + questions.get(0));
+			Loggy.d("as = [" + answers.get(0)[0] + " , " + answers.get(0)[1] + " , " + answers.get(0)[2] + " , " + answers.get(0)[3] + "]");
+			Loggy.d("urls = [" + urls.get(0)[0] + " , " + urls.get(0)[1] + " , " + urls.get(0)[2] + " , " + urls.get(0)[3] + "]");
+			if (questionHashes.size() > 0)
 				return 0;
 			else
 				return 1;
