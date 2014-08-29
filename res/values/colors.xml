@@ -8,16 +8,25 @@
     <color name="grey">#9a9a9a</color>
     <color name="grey_on_dark">#999999</color>
     <color name="light_grey">#cccccc</color>
-    <color name="blue">#0099cc</color>
+    <!-- OLD BLUE COLORS -->
+    <!-- <color name="blue">#0099cc</color>-->
+    <!-- <color name="dark_blue">#002d5f</color>
     <color name="blue_on_white">#005cb5</color>
-    <color name="dark_blue">#002d5f</color>
     <color name="light_blue">#6b9dcf</color>
-    <color name="light_light_blue">#e6f2fe</color>
+    <color name="light_light_blue">#e6f2fe</color> -->
+    
+    <!-- NEW BLUE COLORS -->
+    <!-- <color name="blue">#0099cc</color>-->
+    <color name="dark_blue">#1f3b44</color>
+    <color name="blue_on_white">#436978</color>
+    <color name="light_blue">#538fa6</color>
+    <color name="light_light_blue">#e2eef3</color>
+    
     <color name="transparent">#00000000</color>
     
-    <color name="button_background_default">#005cb5</color>
-    <color name="button_background_pressed">#003c76</color>
-    <color name="button_background_disabled">#5880a6</color>
+    <color name="button_background_default">@color/blue_on_white</color>
+    <color name="button_background_pressed">#2e4d58</color>
+    <color name="button_background_disabled">#73919b</color>
     <color name="button_text">#ffffff</color>
     <color name="button_intro_default">#00000000</color>
     <color name="button_intro_pressed">#37ffffff</color>

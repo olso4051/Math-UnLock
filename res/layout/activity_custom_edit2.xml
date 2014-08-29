@@ -60,6 +60,6 @@
 	    android:id="@+id/list1"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
-	    android:divider="@color/blue"
+	    android:divider="@color/light_blue"
 	    android:dividerHeight="3dp" />
 </LinearLayout>

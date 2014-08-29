@@ -15,6 +15,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
 
@@ -109,7 +110,7 @@ public class GraphView extends View {
 		GraphPaint.setStrokeWidth(3);
 
 		LinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		LinePaint.setColor(Color.CYAN);
+		LinePaint.setColor(ctx.getResources().getColor(R.color.light_blue));
 		LinePaint.setStyle(Paint.Style.STROKE);
 		LinePaint.setStrokeWidth(5);
 	}

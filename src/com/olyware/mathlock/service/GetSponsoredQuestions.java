@@ -18,7 +18,6 @@ import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.JSONHelper;
-import com.olyware.mathlock.utils.Loggy;
 
 public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
@@ -123,13 +122,13 @@ public class GetSponsoredQuestions extends AsyncTask<Void, Integer, Integer> {
 			answers = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "answers");
 			urls = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "urls");
 			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
-			Loggy.d("packHash = " + packHash);
+			/*Loggy.d("packHash = " + packHash);
 			Loggy.d("sponsor = " + sponsor);
 			Loggy.d("desc = " + description);
 			Loggy.d("qhashes = " + questionHashes.get(0));
 			Loggy.d("qs = " + questions.get(0));
 			Loggy.d("as = [" + answers.get(0)[0] + " , " + answers.get(0)[1] + " , " + answers.get(0)[2] + " , " + answers.get(0)[3] + "]");
-			Loggy.d("urls = [" + urls.get(0)[0] + " , " + urls.get(0)[1] + " , " + urls.get(0)[2] + " , " + urls.get(0)[3] + "]");
+			Loggy.d("urls = [" + urls.get(0)[0] + " , " + urls.get(0)[1] + " , " + urls.get(0)[2] + " , " + urls.get(0)[3] + "]");*/
 			if (questionHashes.size() > 0)
 				return 0;
 			else
