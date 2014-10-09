@@ -13,7 +13,7 @@ Setup
     
     google play services lib
     
-    Playhaven Android SDK [Downlad here](http://help.analytics.upsight.com/api-sdk-reference/downloads/)
+    Playhaven Android SDK http://help.analytics.upsight.com/api-sdk-reference/downloads/
     
       Need to include google play services lib to this project
       
