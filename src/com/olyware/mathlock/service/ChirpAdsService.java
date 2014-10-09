@@ -9,6 +9,8 @@ import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.IBinder;
 
 import com.google.analytics.tracking.android.Fields;
@@ -16,6 +18,8 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.utils.Loggy;
+import com.olyware.mathlock.utils.NotificationHelper;
+import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class ChirpAdsService extends Service {
 
@@ -36,8 +40,18 @@ public class ChirpAdsService extends Service {
 		if (intent != null) {
 			String pack = intent.getExtras().getString("package");
 			if (!packagesToWatch.contains(new PackageData(pack, 0))) {
-				packagesToWatch.add(new PackageData(pack, System.currentTimeMillis()));
+				PackageData pd = new PackageData(pack, System.currentTimeMillis());
+				packagesToWatch.add(pd);
+				PreferenceHelper.addPackToOpen(this, pd);
 			}
+			try {
+				ApplicationInfo packInfo = this.getPackageManager().getApplicationInfo(pack, 0);
+				NotificationHelper.sendNotification(getApplicationContext(), packInfo);
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+			}
+			// new AutoClick(this, pack, false).execute();
+
 			startService();
 		}
 		return super.onStartCommand(intent, flags, startId);
@@ -92,6 +106,8 @@ public class ChirpAdsService extends Service {
 						if (i >= 0 && i < packagesToWatch.size()) {
 							long time = packagesToWatch.get(i).getTimeToOpen();
 							trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
+							NotificationHelper.clearAppNotification(getApplicationContext());
+							PreferenceHelper.removePackToOpen(getApplicationContext(), pkg);
 							packagesToWatch.remove(i);
 							if (packagesToWatch.size() == 0) {
 								timer.cancel();

@@ -1,6 +1,5 @@
 package com.olyware.mathlock.service;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -15,20 +14,22 @@ import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.utils.JSONHelper;
 
 public class GetCoins extends AsyncTask<String, Integer, Integer> {
 	private String baseURL;
-	private String coins, error;
+	private String error;
+	private int coins;
 
 	public GetCoins(Context ctx) {
 		baseURL = ctx.getString(R.string.service_base_url);
 	}
 
 	public int getCoins() {
-		if (coins != null)
-			return Integer.parseInt(coins);
-		else
+		if (coins < 0)
 			return 0;
+		else
+			return coins;
 	}
 
 	public String getError() {
@@ -67,12 +68,9 @@ public class GetCoins extends AsyncTask<String, Integer, Integer> {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
-			coins = getStringFromJSON(jsonResponse, "success");
-			error = getStringFromJSON(jsonResponse, "error");
-			if (!coins.equals(""))
-				return 0;
-			else
-				return 1;
+			coins = JSONHelper.getIntFromJSON(jsonResponse, "coins");
+			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
+			return 0;
 		} else {
 			return 1;
 		}
@@ -82,13 +80,5 @@ public class GetCoins extends AsyncTask<String, Integer, Integer> {
 	protected void onPostExecute(Integer result) {
 		// override in calling class
 		// result == 0 success
-	}
-
-	private String getStringFromJSON(JSONObject json, String key) {
-		try {
-			return json.getString(key);
-		} catch (JSONException e) {
-			return "";
-		}
 	}
 }

@@ -12,8 +12,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 import com.google.analytics.tracking.android.CampaignTrackingReceiver;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
+import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.Loggy;
@@ -41,6 +45,14 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		if (sharedPrefs.getBoolean("first_open_install", true)) {
+			Loggy.d("first open_install");
+			Tracker trackerGA = MyApplication.getGaTracker();
+			trackerGA.send(MapBuilder.createEvent("acquisition", "install", "done", 0l).build());
+			sharedPrefs.edit().putBoolean("first_open_install", false).commit();
+		}
+
 		// Workaround for Android security issue: http://code.google.com/p/android/issues/detail?id=16006
 		try {
 			final Bundle extras = intent.getExtras();

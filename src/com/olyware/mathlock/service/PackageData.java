@@ -1,5 +1,8 @@
 package com.olyware.mathlock.service;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.olyware.mathlock.utils.Loggy;
 
 public class PackageData {
@@ -23,6 +26,25 @@ public class PackageData {
 	public long getTimeToOpen() {
 		Loggy.d("getTimeToOpen = " + (System.currentTimeMillis() - startTime));
 		return System.currentTimeMillis() - startTime;
+	}
+
+	public JSONObject getJSON() {
+		JSONObject data = new JSONObject();
+		try {
+			data.put("pack", pack);
+			data.put("startTime", startTime);
+			return data;
+		} catch (JSONException j) {
+			return data;
+		}
+	}
+
+	public static String getPackFromJSON(JSONObject json) {
+		try {
+			return json.getString("pack");
+		} catch (JSONException e) {
+			return "";
+		}
 	}
 
 	@Override

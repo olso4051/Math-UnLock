@@ -1,5 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+	tools:ignore="TypographyDashes">
+    
+    <string-array name="package_names">
+		<item name="1">com.orbitz</item>
+		<item name="2">com.machinezone.gow</item>
+		<item name="3">com.onavo.android.onavoid</item>
+		<item name="4">com.poshmark.app</item>
+		<item name="5">com.scopely.slotsvacation</item>
+		<item name="6">air.com.sgn.cookiejam.gp</item>
+		<item name="7">com.asiandate</item>
+		<item name="8">com.kongregate.mobile.tyrant.google</item>
+		<item name="9">com.stubhub</item>
+		<item name="10">com.itonline.anastasiadate</item>
+		<item name="11">com.cheeky</item>
+		<item name="12">com.superhippo.pirates</item>
+		<item name="13">com.cervomedia.spw</item>
+		<item name="14">com.priceline.android.negotiator</item>
+    </string-array>
+    
+    <string-array name="package_name_links">
+		<item name="1">http://api.chirpads.com/tracking/impressionclick/0c778435-d5c0-4f27-a3cd-2342566009f9/</item>
+		<item name="2">http://api.chirpads.com/tracking/impressionclick/639c3b12-16cb-46c0-9229-77c8d50cf4c4/</item>
+		<item name="3">http://api.chirpads.com/tracking/impressionclick/feb88bf3-1620-4453-8d74-87b4aa3a328b/</item>
+		<item name="4">http://api.chirpads.com/tracking/impressionclick/487a17f0-1936-4ca8-9000-7842375e2cca/</item>
+		<item name="5">http://api.chirpads.com/tracking/impressionclick/ac4c2189-6f5b-41f4-84bb-79fab2eedefe/</item>
+		<item name="6">http://api.chirpads.com/tracking/impressionclick/5ddd4e53-0a74-4370-ae02-272e6dd913de/</item>
+		<item name="7">http://api.chirpads.com/tracking/impressionclick/49fcdf76-92b9-4ec8-b948-66b4eff5ec8a/</item>
+		<item name="8">http://api.chirpads.com/tracking/impressionclick/b6f6abbb-a188-4e5f-8b79-d1d39c708d92/</item>
+		<item name="9">http://api.chirpads.com/tracking/impressionclick/6a45f0ea-78b2-4bb2-8bd0-bccb8b1c84a3/</item>
+		<item name="10">http://api.chirpads.com/tracking/impressionclick/4097863d-8ef2-4b35-953a-67a30d0ac682/</item>
+		<item name="11">http://api.chirpads.com/tracking/impressionclick/87e1e4db-a19c-4fcd-b751-45f5d70a1b2d/</item>
+		<item name="12">http://api.chirpads.com/tracking/impressionclick/e250c002-3130-42a9-8120-97fe71958ca8/</item>
+		<item name="13">http://api.chirpads.com/tracking/impressionclick/56a85142-50a1-4830-b31c-e88dd24cfd16/</item>
+		<item name="14">http://api.chirpads.com/tracking/impressionclick/19fd6dba-8feb-465f-a2b0-5479527d0a9d/</item>
+    </string-array>
+    
     <string-array name="dont_show_again">
         <item name="dont_show">Don\'t ask me again</item>
     </string-array>
@@ -263,6 +300,14 @@
         <item>unlock_language</item>
 		<item>unlock_engineer</item>
 		<item>unlock_hiqh_trivia</item>
+    </string-array>
+    <string-array name="unlock_sub_package_keys">
+        <item>unlock_all_subscription</item>
+        <item>unlock_math_subscription</item>
+        <item>unlock_vocab_subscription</item>
+        <item>unlock_language_subscription</item>
+		<item>unlock_engineer_subscription</item>
+		<item>unlock_hiqh_trivia_subscription</item>
     </string-array>
     <integer-array name="unlock_cost">
         <item>10000</item>

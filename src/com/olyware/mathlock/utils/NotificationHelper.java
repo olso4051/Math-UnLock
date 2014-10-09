@@ -6,7 +6,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.NotificationCompat;
 
 import com.olyware.mathlock.MainActivity;
@@ -15,7 +19,8 @@ import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.utils.PreferenceHelper.ChallengeStatus;
 
 public class NotificationHelper {
-	final static public int STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3, CHALLENGE_ID = 4, CHALLENGE_RESULT_ID = 5, CHALLENGE_STATUS_ID = 6;
+	final static public int APP_ID = 0, STREAK_ID = 1, TOTAL_ID = 2, COIN_ID = 3, CHALLENGE_ID = 4, CHALLENGE_RESULT_ID = 5,
+			CHALLENGE_STATUS_ID = 6;
 	final static public String EXTRA_OPEN_CHALLENGE = "open_challenge";
 	private NotificationManager mNotificationManager;
 	NotificationCompat.Builder builder;
@@ -227,5 +232,46 @@ public class NotificationHelper {
 	public void clearChallengeResultNotification() {
 		mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(CHALLENGE_RESULT_ID);
+	}
+
+	public static void sendNotification(Context ctx, ApplicationInfo pack) {
+		NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		PackageManager pm = ctx.getPackageManager();
+
+		// icon
+		Drawable icon = pack.loadIcon(pm);
+
+		// name
+		String name = (String) pack.loadLabel(pm);
+		if (name == null)
+			name = "Application Installed";
+		Loggy.d("pack = " + pack.packageName + " name = " + name);
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx);
+		mBuilder.setSmallIcon(R.drawable.ic_notification_small_ad);
+		mBuilder.setLargeIcon(((BitmapDrawable) icon).getBitmap());
+		mBuilder.setContentTitle(name);
+		mBuilder.setContentText(ctx.getString(R.string.notification_message));
+		mBuilder.setAutoCancel(true);
+
+		// intent to accept notification
+		Intent iMain = new Intent(NotificationBroadcastReceiver.ACTION_REMIND_INSTALLED);
+		iMain.putExtra(NotificationBroadcastReceiver.ACTION_REMIND_CLICKED, true);
+		iMain.putExtra(NotificationBroadcastReceiver.ACTION_REMIND_PACKAGE, pack.packageName);
+		// PendingIntent mainIntent = PendingIntent.getBroadcast(ctx, 0, iMain, PendingIntent.FLAG_CANCEL_CURRENT);
+		mBuilder.setContentIntent(PendingIntent.getBroadcast(ctx, 1, iMain, PendingIntent.FLAG_CANCEL_CURRENT));
+
+		// intent when notification cleared
+		Intent iDelete = new Intent(NotificationBroadcastReceiver.ACTION_REMIND_INSTALLED);
+		iDelete.putExtra(NotificationBroadcastReceiver.ACTION_REMIND_CLICKED, false);
+		iDelete.putExtra(NotificationBroadcastReceiver.ACTION_REMIND_PACKAGE, pack.packageName);
+		// PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, iDelete, PendingIntent.FLAG_CANCEL_CURRENT);
+		mBuilder.setDeleteIntent(PendingIntent.getBroadcast(ctx, 2, iDelete, PendingIntent.FLAG_CANCEL_CURRENT));
+		notificationManager.notify(APP_ID, mBuilder.build());
+	}
+
+	public static void clearAppNotification(Context ctx) {
+		NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.cancel(APP_ID);
 	}
 }

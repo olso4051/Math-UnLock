@@ -26,7 +26,7 @@ import com.olyware.mathlock.utils.PreferenceHelper;
 public class ShowSettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	final private static String SCREEN_LABEL = "Settings Screen";
 	private String mPrefUserInfo, mPrefUserSkipped, mPrefUserLoggedIn;
-	private String[] unlockPackageKeys, settingsPackageKeys;
+	private String[] unlockPackageKeys, unlockSubPackageKeys, settingsPackageKeys;
 	private List<String> categories;
 	private int fromOldValueIndex, toOldValueIndex;
 	private ListPreference fromLanguage, toLanguage, maxDiff, minDiff, lockscreen2;
@@ -63,6 +63,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		unlockSubPackageKeys = getResources().getStringArray(R.array.unlock_sub_package_keys);
 		settingsPackageKeys = getResources().getStringArray(R.array.settings_keys);
 		mPrefUserInfo = getString(R.string.pref_user_info);
 		mPrefUserSkipped = getString(R.string.pref_user_skipped);
@@ -99,7 +100,8 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			Preference Pref_Packages = findPreference(settingsPackageKeys[i - 1]);
 			boolean set = false;
 			if (i < unlockPackageKeys.length)
-				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false) || sharedPrefsMoney.getBoolean("unlock_all", false))
+				if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false) || sharedPrefsMoney.getBoolean(unlockSubPackageKeys[i], false)
+						|| sharedPrefsMoney.getBoolean("unlock_all", false))
 					set = true;
 				else
 					set = Pref_Packages.isEnabled();

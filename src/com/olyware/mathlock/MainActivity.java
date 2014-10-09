@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -80,10 +82,12 @@ import com.olyware.mathlock.model.MathQuestion;
 import com.olyware.mathlock.model.Statistic;
 import com.olyware.mathlock.model.VocabQuestion;
 import com.olyware.mathlock.service.AcceptChallenge;
+import com.olyware.mathlock.service.AutoClick;
 import com.olyware.mathlock.service.CancelChallenge;
 import com.olyware.mathlock.service.CompleteChallenge;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.service.CustomInstallReceiver;
+import com.olyware.mathlock.service.PostDeelDatPlayhaven;
 import com.olyware.mathlock.service.RemindChallenge;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.service.SendChallenge;
@@ -111,13 +115,19 @@ import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
+import com.playhaven.android.PlayHaven;
+import com.playhaven.android.PlayHavenException;
+import com.playhaven.android.push.GCMRegistrationRequest;
+import com.playhaven.android.req.OpenRequest;
+import com.playhaven.android.req.RequestListener;
+import com.playhaven.android.view.FullScreen;
 import com.tapjoy.TapjoyConnect;
 
-public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse {
+public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse, RequestListener {
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
-	final private static int[] Cost = { 1000, 5000, 10000 };
-	final private static String[] SKU = { "coins1000", "coins5000", "coins10000" };
+	final private static int[] Cost = { 1000, 5000, 10000, 0, 1 };
+	final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1" };
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
@@ -127,7 +137,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private int difficultyMax = 0, difficultyMin = 0, difficulty = 0;
 	private long startTime = 0;
 	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false,
-			fromTutorial = false, fromDontShare = false, fromSponsored = false;
+			fromTutorial = false, fromDontShare = false, fromSponsored = false, moreGamesAvailable = false, fromAskToOpen = false;
 
 	private LinearLayout layout;
 	private Clock clock;
@@ -144,7 +154,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private List<Integer> streakToNotify, totalToNotify;
 	private String[] unlockPackageKeys, LanguageEntries, LanguageValues, EggKeys;
 	private int[] EggMaxValues;
-	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink, challengeIDToDisplay, sponsoredHash;
+	private String currentPack, currentTableName, fromLanguage, toLanguage, questionFromDeepLink, challengeIDToDisplay, sponsoredHash,
+			packToOpen = "";
 	private long ID = 0;
 
 	private int EnabledPackages = 0, fromTutorialPosition = -1;
@@ -336,8 +347,27 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		try {
+			PlayHaven.configure(this, R.string.playhaven_token, R.string.playhaven_secret, R.string.gcm_api_id);
+			if (!sharedPrefs.getBoolean(MyApplication.PUSH_PREF_KEY, true)) {
+				(new GCMRegistrationRequest()).deregister(this);
+			} else {
+				(new GCMRegistrationRequest()).register(this);
+			}
+			OpenRequest open = new OpenRequest();
+			open.setResponseHandler(this);
+			open.send(this);
+		} catch (PlayHavenException e) {
+			Loggy.e("We have encountered an error", e);
+		}
 		getDeepLinkData(getIntent().getData());
 		trackerGA = MyApplication.getGaTracker();
+		if (sharedPrefs.getBoolean("first_open", true)) {
+			Loggy.d("first open");
+			sendEvent("acquisition", "open", "done", 0l);
+			sharedPrefs.edit().putBoolean("first_open", false).commit();
+		}
 		TapjoyConnect.requestTapjoyConnect(this, "937ee2a5-b377-4ed3-8156-16f635e69749", "m7lfX2V6hofuY9pKz34t");
 
 		// Add code to print out the key hash
@@ -424,6 +454,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						additionalSkuList.add(SKU[0]);
 						additionalSkuList.add(SKU[1]);
 						additionalSkuList.add(SKU[2]);
+						additionalSkuList.add(SKU[3]);
+						additionalSkuList.add(SKU[4]);
 						mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 					}
 				}
@@ -438,10 +470,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						// check for non-consumed purchases
 						if (inventory.hasPurchase(SKU[0])) {
 							mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						} else if (inventory.hasPurchase(SKU[1])) {
+						}
+						if (inventory.hasPurchase(SKU[1])) {
 							mHelper.consumeAsync(inventory.getPurchase(SKU[1]), mConsumeFinishedListener);
-						} else if (inventory.hasPurchase(SKU[2])) {
+						}
+						if (inventory.hasPurchase(SKU[2])) {
 							mHelper.consumeAsync(inventory.getPurchase(SKU[2]), mConsumeFinishedListener);
+						}
+						if (inventory.hasPurchase(SKU[3])) {
+							PreferenceHelper.unlockSubscription(MainActivity.this, 2);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 2);
+						}
+						if (inventory.hasPurchase(SKU[4])) {
+							PreferenceHelper.unlockSubscription(MainActivity.this, 3);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 3);
 						}
 					}
 				}
@@ -548,20 +592,30 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						questionWorth -= 1;
 						if (questionWorth <= 0) {
 							questionWorth = 0;
-							/*if (attached)
-								getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
-							if (!joystick.getQuickUnlock() && (System.currentTimeMillis() - startTime > SECOND) && questionWorthMax > 0) {
-								if (rand != null)
-									if (!fromChallenge && !fromTutorial && !fromDontShare && rand.nextBoolean()) {
-										HelpQuestionImage = takeScreenShot();
-										joystick.askToShare();
-									}
-							}
 						} else {
 							timerHandler.postDelayed(this, decreaseRate);
-							/*if (attached)
-								getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
 						}
+						int mult = unlocking ? 2 : 4;
+						if (!joystick.getQuickUnlock() && (System.currentTimeMillis() - startTime > SECOND * mult || questionWorth == 0)
+								&& questionWorthMax > 0) {
+							if (rand != null) {
+								if (!fromChallenge && !fromTutorial && !fromDontShare && !fromAskToOpen) {
+									if (rand.nextBoolean()) {
+										if (rand.nextBoolean()) {
+											HelpQuestionImage = takeScreenShot();
+											joystick.askToShare(getString(R.string.ask_to_share0));
+										} else {
+											joystick.askToShare(getString(R.string.store));
+										}
+									} else {
+										joystick.askMoreGames();
+									}
+								}
+							} else {
+								rand = new Random();
+							}
+						}
+
 					}
 				}
 			};
@@ -742,7 +796,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			} else if ((!sharedPrefsMoney.getBoolean("dontShowLastTime", false))
 					&& (sharedPrefsMoney.getLong("lastTime", 0) <= currentTime - MONTH))
 				displayRateShare();
-			else if (fromTutorial) {
+			else if (fromTutorial || (!PreferenceHelper.getPackToOpen(this).equals("") && packToOpen.equals(""))) {
 				setProblemAndAnswer();
 			}
 
@@ -929,12 +983,21 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	}
 
-	private void launchHomeScreen(int delay) {
+	private void launchHomeScreen(int delay, final boolean ad) {
 		mHandler.removeCallbacksAndMessages(null);
 		timerHandler.removeCallbacks(reduceWorth);
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
+				if (ad) {
+					sharedPrefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+					long currentTime = System.currentTimeMillis();
+					if (currentTime - sharedPrefs.getLong("ad_time", 0) > HOUR4) {
+						sharedPrefs.edit().putLong("ad_time", currentTime).commit();
+						startActivity(FullScreen
+								.createIntent(MainActivity.this, getResources().getString(R.string.playhaven_moregames_tag)));
+					}
+				}
 				finish();
 			}
 		}, delay); // launch home screen after delay time [ms]
@@ -953,6 +1016,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		int w = PreferenceHelper.getLayoutWidth(this, -1);
 		int h = PreferenceHelper.getLayoutHeight(this, -1);
 		int statusBarHeight = PreferenceHelper.getLayoutStatusBarHeight(this, -1);
+		Loggy.d("w =" + w + "|h = " + h + "|statusBarHeight = " + statusBarHeight);
 		if (w > 0 && h > 0 && statusBarHeight >= 0) {
 			try {
 				BitmapDrawable background = (BitmapDrawable) WallpaperManager.getInstance(this).getDrawable();
@@ -980,6 +1044,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (y + height > bitmap.getHeight())
 					height = bitmap.getHeight() - y;
 
+				Loggy.d("x = " + x + "|y = " + y + "|height = " + height + "|width = " + width);
 				if (x >= 0 && x <= bitmap.getWidth() && y >= 0 && y <= bitmap.getHeight() && width > 0 && height > 0 && x + width > 0
 						&& x + width <= bitmap.getWidth() && y + height > 0 && y + height <= bitmap.getHeight()) {
 					// scale the bitmap to fit on the background
@@ -1059,7 +1124,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private void setProblemAndAnswer() {
 		fromTutorialPosition = PreferenceHelper.getTutorialQuestionNumber(ctx);
 		GenericQuestion tutorialQuestion = PreferenceHelper.getTutorialQuestion(this, fromTutorialPosition);
+		packToOpen = PreferenceHelper.getPackToOpen(this);
+		String packName = "";
+		try {
+			PackageManager pm = getPackageManager();
+			ApplicationInfo packInfo = pm.getApplicationInfo(packToOpen, 0);
+			packName = (String) packInfo.loadLabel(pm);
+			if (packName == null) {
+				PreferenceHelper.removePackToOpen(this, packToOpen);
+				packName = "";
+				packToOpen = "";
+			}
+		} catch (NameNotFoundException e) {
+			PreferenceHelper.removePackToOpen(this, packToOpen);
+			packToOpen = "";
+			packName = "";
+		}
 		fromTutorial = false;
+		fromAskToOpen = false;
 		urls = answersNone;
 		if (tutorialQuestion != null) {
 			fromTutorial = true;
@@ -1079,6 +1161,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			answerLoc = 0;
 			joystick.setAnswers(answers, answerLoc);
+			resetQuestionWorth(questionWorthMax);
+		} else if (!packToOpen.equals("") && !packName.equals("")) {
+			fromAskToOpen = true;
+			joystick.setProblem(true);
+			questionWorth = 0;
+			questionWorthMax = 0;
+			joystick.resetGuess();
+			joystick.unPauseSelection();
+			problem.setText(getString(R.string.ask_to_open) + packName);
+			problem.setTextColor(defaultTextColor);
+			questionDescription.setText(getString(R.string.question_description_prefix) + " | "
+					+ getString(R.string.ask_to_open_description));
+			answers = new String[] { "Yes", "No", "", "" };
+
+			setRandomAnswers();
+			joystick.setAnswers(answersRandom, answerLoc);
 			resetQuestionWorth(questionWorthMax);
 		} else if (fromDeepLink) {
 			joystick.setProblem(true);
@@ -1185,7 +1283,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 					joystick.setAnswers(answersRandom, answerLoc);
 					resetQuestionWorth(questionWorthMax);
-				} else if (PreferenceHelper.isSponsoredQuestionsStored(this) && PreferenceHelper.isSponsoredQuestionsStarted(this)) {
+				} else if (!unlocking && PreferenceHelper.isSponsoredQuestionsStored(this)
+						&& PreferenceHelper.isSponsoredQuestionsStarted(this)) {
 					fromDontShare = true;
 					fromSponsored = true;
 					joystick.setProblem(true);
@@ -1310,9 +1409,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						if (!success)
 							setDefaultQuestion();
 					}
-
 					setRandomAnswers();
-
 					joystick.setAnswers(answersRandom, answerLoc);
 					if (!PreferenceHelper.isSponsoredQuestionsStarted(this) && PreferenceHelper.isSponsoredQuestionsStored(this)) {
 						int size = PreferenceHelper.getSponsoredQuestionsCount(this);
@@ -1348,19 +1445,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void setRandomAnswers() {
-		answerLoc = rand.nextInt(4);			// set a random location for the correct answer
-		int offset = 1;
+		long seed = System.nanoTime();
+		List<String> aRandom = Arrays.asList(answers);
+		List<String> uRandom = Arrays.asList(urls);
+		List<Integer> iRandom = Arrays.asList(new Integer[] { 0, 1, 2, 3 });
+		Collections.shuffle(aRandom, new Random(seed));
+		Collections.shuffle(uRandom, new Random(seed));
+		Collections.shuffle(iRandom, new Random(seed));
+		answerLoc = iRandom.indexOf(0);
+		answersRandom = aRandom.toArray(new String[aRandom.size()]);
+		urlsRandom = uRandom.toArray(new String[uRandom.size()]);
 		for (int i = 0; i < 4; i++) {
-			if (i == answerLoc) {
-				answersRandom[i] = answers[0];
-				urlsRandom[i] = urls[0];
-				answerLocs[i] = 0;
-				offset = 0;
-			} else {
-				answersRandom[i] = answers[i + offset];
-				urlsRandom[i] = urls[i + offset];
-				answerLocs[i] = i + offset;
-			}
+			answerLocs[i] = iRandom.get(i);
 		}
 	}
 
@@ -1555,6 +1651,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			sendEvent("lockscreen_tutorial", "set_lockscreen_timeout", guessLoc + "", null);
 			correctLoc = guessLoc;
 		}
+		if (joystick.clickedMoreGames(guessLoc)) {
+			correctLoc = guessLoc;
+		}
 		boolean correct = (correctLoc == guessLoc);
 		if (dbManager != null) {
 			if (!dbManager.isDestroyed()) {
@@ -1656,6 +1755,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						setProblemAndAnswer();
 					}
 				}, MoneyHelper.updateMoneyTime);
+			} else if (fromAskToOpen) {
+				displayCorrectOrNot(answerLoc, answer);
+				joystick.pauseSelection();
+				final String pack = packToOpen;
+				final Context ctx = this;
+				final boolean open = answerLoc == answer;
+				new AutoClick(this, pack, false) {
+					@Override
+					protected void onPostExecute(AutoClickResult result) {
+						if (open) {
+							PackageManager pm = ctx.getPackageManager();
+							Intent launchIntent = pm.getLaunchIntentForPackage(pack);
+							ctx.startActivity(launchIntent);
+						}
+					}
+				}.execute();
+				PreferenceHelper.removePackToOpen(this, pack);
+				finish();
 			} else if (fromSponsored) {
 				displayCorrectOrNot(answer, answer);
 				PreferenceHelper.removeSponsoredQuestion(this, sponsoredHash, answerLocs[answer]);
@@ -1678,7 +1795,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (Extra == 0)
 					updateStats(false);
 				joystick.pauseSelection();
-				launchHomeScreen(MoneyHelper.updateMoneyTime * 2);
+				launchHomeScreen(MoneyHelper.updateMoneyTime * 2, true);
 			} else if ((answerLoc == answer) && quizMode) {
 				displayCorrectOrNot(answerLoc, answer); // Correct
 				if (Extra == 0)
@@ -1696,7 +1813,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (Extra == 0)
 					updateStats(true);
 				joystick.pauseSelection();
-				launchHomeScreen(MoneyHelper.updateMoneyTime / 2);
+				launchHomeScreen(MoneyHelper.updateMoneyTime / 2, false);
 			} else {
 				displayCorrectOrNot(answerLoc, answer); // Incorrect
 				if (Extra == 0)
@@ -1779,6 +1896,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case Sponsored:
 			PreferenceHelper.setSponsoredQuestionsStarted(this);
 			answerLoc = Extra;
+			JoystickSelected(JoystickSelect.fromValue(Extra), false, 1);
+			break;
+		case MoreGames:
+			startActivity(FullScreen.createIntent(this, getResources().getString(R.string.playhaven_moregames_tag)));
+			new PostDeelDatPlayhaven(this).execute();
 			JoystickSelected(JoystickSelect.fromValue(Extra), false, 1);
 			break;
 		default:
@@ -2356,5 +2478,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (loginFragment != null) {
 			loginFragment.GCMRegistrationDone(result);
 		}
+	}
+
+	@Override
+	public void handleResponse(Context context, String json) {
+		/**
+		 * Now that the Open is complete, tell the Badge to update
+		 */
+		// ((MoreGames) findViewById(R.id.more)).load(this);
+		moreGamesAvailable = true;
+	}
+
+	@Override
+	public void handleResponse(Context context, PlayHavenException e) {
+		// Log.d(TAG, "Error during open request", e);
+		moreGamesAvailable = false;
 	}
 }

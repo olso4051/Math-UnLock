@@ -38,6 +38,7 @@ import com.olyware.mathlock.model.GenericQuestion;
 import com.olyware.mathlock.service.CustomContactData;
 import com.olyware.mathlock.service.GetSponsoredAppQuestion;
 import com.olyware.mathlock.service.GetSponsoredQuestions;
+import com.olyware.mathlock.service.PackageData;
 import com.olyware.mathlock.service.PutSponsoredAnswers;
 import com.olyware.mathlock.views.JoystickSelect;
 
@@ -48,6 +49,8 @@ public class PreferenceHelper {
 	final public static String LAYOUT_PREFS = "Layout_Size";
 	final public static String TUTORIAL_PREFS = "Tutorial";
 	final public static String SWISHER_PREFS = "Swisher";
+
+	final public static String MONEY_PREFS_PACKS = "packs_to_open";
 
 	final public static String SWISHER_ON = "swisher_enabled";
 	final public static String SWISHER_JSON = "swisher_json";
@@ -95,9 +98,9 @@ public class PreferenceHelper {
 	final public static String USER_PREFS_SPONSORED_URLS = "urls";
 	final public static String USER_PREFS_SPONSORED_STARTED = "started";
 
-	final public static long SPONSORED_PACK_INTERVAL = 0l;// 14400000l;
-	final public static long SPONSORED_APP_INTERVAL = 5000l;// 60000l;
-	final public static int SPONSORED_APP_QUESTION_INTERVAL = 4;// 20;
+	final public static long SPONSORED_PACK_INTERVAL = 14400000l; // 4 hours
+	final public static long SPONSORED_APP_INTERVAL = 40000l; // 40 seconds
+	final public static int SPONSORED_APP_QUESTION_INTERVAL = 15;
 
 	final public static String DEFAULT_PREFS_SHARE_HASH = "share_hash_latest";
 
@@ -163,10 +166,61 @@ public class PreferenceHelper {
 		}
 	}
 
+	public static void addPackToOpen(Context ctx, PackageData pd) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		try {
+			JSONArray pds = new JSONArray(sharedPrefsMoney.getString(MONEY_PREFS_PACKS, "[]"));
+			SharedPreferences.Editor editPrefsMoney = sharedPrefsMoney.edit();
+			pds.put(pd.getJSON());
+			editPrefsMoney.putString(MONEY_PREFS_PACKS, pds.toString()).commit();
+			return;
+		} catch (JSONException j) {
+			return;
+		}
+	}
+
+	public static String getPackToOpen(Context ctx) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		try {
+			JSONArray pds = new JSONArray(sharedPrefsMoney.getString(MONEY_PREFS_PACKS, "[]"));
+			if (pds.length() > 0) {
+				JSONObject pd = pds.getJSONObject(0);
+				return PackageData.getPackFromJSON(pd);
+			} else {
+				return "";
+			}
+		} catch (JSONException j) {
+			return "";
+		}
+	}
+
+	public static void removePackToOpen(Context ctx, String pack) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		try {
+			JSONArray pds = new JSONArray(sharedPrefsMoney.getString(MONEY_PREFS_PACKS, "[]"));
+			if (pds.length() > 0) {
+				JSONArray pdsNew = new JSONArray();
+				for (int i = 0; i < pds.length(); i++) {
+					JSONObject pd = pds.getJSONObject(i);
+					if (!pack.equals(PackageData.getPackFromJSON(pd)))
+						pdsNew.put(pd);
+				}
+				SharedPreferences.Editor editPrefsMoney = sharedPrefsMoney.edit();
+				editPrefsMoney.putString(MONEY_PREFS_PACKS, pdsNew.toString()).commit();
+				return;
+			} else {
+				return;
+			}
+		} catch (JSONException j) {
+			return;
+		}
+	}
+
 	public static ArrayList<String> getDisplayableUnlockedPackages(Context ctx, DatabaseManager dbManager) {
 		ArrayList<String> list = new ArrayList<String>();
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		String[] unlockPackageKeys = ctx.getResources().getStringArray(R.array.unlock_package_keys);
+		String[] unlockSubPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
 		List<String> displayPackageKeys = EZ.list(ctx.getResources().getStringArray(R.array.display_packages));
 		displayPackageKeys.addAll(dbManager.getAllCustomCategories());
 
@@ -176,7 +230,8 @@ public class PreferenceHelper {
 			// list.add(displayPackageKeys.get(0)); // All
 			for (int i = 1; i < displayPackageKeys.size(); i++) {
 				if (i < unlockPackageKeys.length) {
-					if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
+					if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)
+							|| sharedPrefsMoney.getBoolean(unlockSubPackageKeys[i], false)) {
 						list.add(displayPackageKeys.get(i));
 					}
 				} else {
@@ -193,6 +248,7 @@ public class PreferenceHelper {
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		String[] unlockPackageKeys = ctx.getResources().getStringArray(R.array.unlock_package_keys);
+		String[] unlockSubPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
 		List<String> displayPackageKeys = EZ.list(ctx.getResources().getStringArray(R.array.display_packages));
 		displayPackageKeys.addAll(dbManager.getAllCustomCategories());
 		List<Integer> displayPackageIDs = new ArrayList<Integer>(displayPackageKeys.size());
@@ -205,7 +261,8 @@ public class PreferenceHelper {
 			// list.add(displayPackageIDs.get(0)); // All
 			for (int i = 1; i < displayPackageKeys.size(); i++) {
 				if (i < unlockPackageKeys.length) {
-					if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)) {
+					if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)
+							|| sharedPrefsMoney.getBoolean(unlockSubPackageKeys[i], false)) {
 						list.add(displayPackageIDs.get(i));
 					}
 				} else {
@@ -216,6 +273,37 @@ public class PreferenceHelper {
 				list.add(0, displayPackageIDs.get(0));
 		}
 		return list;
+	}
+
+	public static void unlockSubscription(Context ctx, int product) {
+		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
+		String[] PackageKeys = ctx.getResources().getStringArray(R.array.enable_package_keys);
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsMoney.putBoolean(unlockSubscriptionPackageKeys[product], true);		// unlocks the product
+		editorPrefsMoney.commit();
+
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+		editorPrefs.putBoolean(PackageKeys[product - 1], true);
+		editorPrefs.commit();
+	}
+
+	public static void lockSubscription(Context ctx, int product) {
+		String[] unlockPackageKeys = ctx.getResources().getStringArray(R.array.unlock_package_keys);
+		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
+		String[] PackageKeys = ctx.getResources().getStringArray(R.array.enable_package_keys);
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
+		editorPrefsMoney.putBoolean(unlockSubscriptionPackageKeys[product], false);		// locks the product
+		editorPrefsMoney.commit();
+
+		if (!sharedPrefsMoney.getBoolean(unlockPackageKeys[product], false)) {
+			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+			SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+			editorPrefs.putBoolean(PackageKeys[product - 1], false);
+			editorPrefs.commit();
+		}
 	}
 
 	public static boolean[] getChallengePacksChecked(Context ctx, ArrayList<String> questionPacks) {
@@ -786,6 +874,11 @@ public class PreferenceHelper {
 		sharedPrefsUsers.edit().putBoolean(ctx.getString(R.string.pref_user_skipped), false)
 				.putBoolean(ctx.getString(R.string.pref_user_logged_in), false).putBoolean(USER_PREFS_FRIENDS_ASKED, false).commit();
 		ContactHelper.removeStoredContacts(ctx);
+	}
+
+	public static String getUserID(Context ctx) {
+		SharedPreferences sharedPrefsUser = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsUser.getString(ctx.getString(R.string.pref_user_userid), "");
 	}
 
 	@SuppressLint("NewApi")

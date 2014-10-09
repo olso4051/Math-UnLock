@@ -1,7 +1,7 @@
 package com.olyware.mathlock.views;
 
 public enum JoystickSelect {
-	Vibrate, A, B, C, D, Question, Friends, Store, Progress, QuizMode, Settings, Missed, QuickUnlock, AddApp, SelectApp, DeleteApp, Share, Sponsored, Touch, Exit, ReturnToDefault, ShouldDimScreen;
+	Vibrate, A, B, C, D, Question, Friends, Store, Progress, QuizMode, Settings, Missed, QuickUnlock, AddApp, SelectApp, DeleteApp, Share, Sponsored, MoreGames, Touch, Exit, ReturnToDefault, ShouldDimScreen;
 	public static JoystickSelect fromValue(int s) {
 		switch (s) {
 		case -1:
@@ -48,6 +48,8 @@ public enum JoystickSelect {
 			return ShouldDimScreen;
 		case 20:
 			return Sponsored;
+		case 21:
+			return MoreGames;
 		default:
 			return Vibrate;
 		}
@@ -99,6 +101,8 @@ public enum JoystickSelect {
 			return 19;
 		case Sponsored:
 			return 20;
+		case MoreGames:
+			return 21;
 		default:
 			return -1;
 		}

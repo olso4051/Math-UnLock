@@ -4,7 +4,10 @@
     <string name="app_name">Hiq Lockscreen</string>
     <string name="facebook_app_id">650274738378817</string>
     <string name="crash_toast_text">Hiq crashed, we\'ll fix it don\'t worry</string>
-    <string name="service_base_url">http://dev.learnwithhiq.com/</string>
+    <string name="service_base_url">https://api.learnwithhiq.com/</string>
+    <string name="playhaven_token">524bfe2228a84603b24fb15a37d9acb9</string>
+    <string name="playhaven_secret">50c431445fd8405eb62c809880c2ea53</string>
+    <string name="playhaven_moregames_tag">moregames_hiq</string>
     
     <!-- App Linking Strings -->
     <string name="coin_scheme1">http</string>
@@ -70,6 +73,10 @@
 	<string name="enable_tracking">Google Analytics</string>
 	<string name="enable_tracking_summary">sends app usage data to the developer to help the make app as cool as possible. We won\'t gather any personal information</string>
 	
+	<!-- Push Notifications -->
+	<string name="enable_push">Push Notifications</string>
+	<string name="enable_push_summary">Get notifications from the developers about new updates</string>
+	
 	<!-- Google Cloud Messaging -->
     <string name="gcm_api_id">101819117475</string>
     <string name="gcm_reg_id_property">registration_id</string>
@@ -78,6 +85,9 @@
     
     <!-- Chirp Ads -->
     <string name="chirpads_base_url">http://api.chirpads.com/mobile/oninstall/json/?</string>
+    <string name="notification_message">Successfully Installed!</string>
+    <string name="ask_to_open">Open newly installed app\u0020</string>
+    <string name="ask_to_open_description">Apps</string>
     
     <!-- Bitly URL -->
     <string name="bitly_base_url">https://api-ssl.bitly.com/v3/shorten?</string>
@@ -89,6 +99,7 @@
     <string name="deeldat_api_key">1716a4ac3509884eb5cf0245d392be52</string>
     <string name="share_title">Could You Answer This Question To Unlock Your Phone?</string>
     <string name="ask_to_share0">Share Question</string>
+    <string name="ask_more_games">More Games</string>
     <string name="cancelled">Cancelled</string>
     <string name="error">Error</string>
     <string name="permission_not_granted">Facebook permissions were not granted</string>
@@ -260,6 +271,7 @@
     <string name="cost_small">$1</string>
     <string name="cost_large">$2</string>
     <string name="cost_all">$3</string>
+    <string name="per_month">/month</string>
     <string name="custom_pack_edit">Edit Custom Pack</string>
     <string name="custom_answer_text">Correct Answer</string>
     <string name="custom_question_text">Question</string>
@@ -409,9 +421,9 @@
     <string name="unlock_custom">Custom Pack</string>
     <string name="unlock_engineer">Engineering Pack</string>
     <string name="unlock_hiqh_trivia">Hiq Trivia Pack</string>
-    <string name="unlock_language">Language Pack</string>
+    <string name="unlock_language">Language FREE trial</string>
     <string name="unlock_math">Math Pack</string>
-    <string name="unlock_vocab">Vocab Pack</string>
+    <string name="unlock_vocab">Vocab FREE trial</string>
     <string name="update">Update</string>
     <string name="update_question">Update Question!</string>
     <string name="worth">Question Worth </string>

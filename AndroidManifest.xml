@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.olyware.mathlock"
-    android:versionCode="61"
-    android:versionName="2.9.1" >
+    android:versionCode="75"
+    android:versionName="3.0.5" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="10"
         android:targetSdkVersion="19" />
 
     <uses-feature
@@ -135,6 +135,11 @@
 			</intent-filter>
 		</receiver>
 		
+		<receiver android:name=".utils.NotificationBroadcastReceiver">
+			<intent-filter>
+				<action android:name="com.olyware.mathlock.utils.NotificationBroadcastReceiver.ACTION_REMIND_INSTALLED"/>
+			</intent-filter>
+		</receiver>
 		<receiver android:name=".service.ChirpAdsReceiver">
 			<intent-filter> 
 				<action android:name="android.intent.action.PACKAGE_ADDED" />
@@ -187,12 +192,34 @@
 		    android:name="com.tapjoy.mraid.view.Browser"
 		    android:configChanges="orientation|keyboardHidden|screenSize" />
 
+		<!-- FOR UPSIGHT -->
+		<activity android:configChanges="orientation|keyboardHidden|screenSize" android:name="com.playhaven.android.view.FullScreen" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:windowSoftInputMode="adjustResize">
+            <!-- Support FullScreen.createIntent -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <!-- Support Uri.parse -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="localhost" android:pathPattern="/full" android:scheme="playhaven"/>
+            </intent-filter>
+        </activity>
+
+        <receiver android:name="com.playhaven.android.push.PushReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="com.playhaven.android"/>
+            </intent-filter>
+        </receiver>
+        
         <meta-data
             android:name="com.google.android.backup.api_key"
     		android:value="AEdPqrEAAAAImXbdgOeV5XdSON5zQBYbgeDfC4N9HkDgWEaSIA" />
         <meta-data
             android:name="com.google.android.gms.version"
-			android:value="3265130" />
+			android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>

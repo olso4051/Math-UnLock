@@ -11,6 +11,7 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger.LogLevel;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.playhaven.android.push.GCMRegistrationRequest;
 
 @ReportsCrashes(formKey = "", // will not be used
 mailTo = "olso4051@umn.edu", mode = ReportingInteractionMode.TOAST, resToastText = R.string.crash_toast_text)
@@ -28,6 +29,7 @@ public class MyApplication extends Application {
 
 	// Key used to store a user's tracking preferences in SharedPreferences.
 	private static final String TRACKING_PREF_KEY = "analytics_tracking";
+	public static final String PUSH_PREF_KEY = "push_notifications";
 
 	@Override
 	public void onCreate() {
@@ -66,6 +68,12 @@ public class MyApplication extends Application {
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if (key.equals(TRACKING_PREF_KEY)) {
 					mGa.setAppOptOut(!sharedPreferences.getBoolean(key, true));
+				} else if (key.equals(PUSH_PREF_KEY)) {
+					if (!sharedPreferences.getBoolean(key, true)) {
+						(new GCMRegistrationRequest()).deregister(MyApplication.this);
+					} else {
+						(new GCMRegistrationRequest()).register(MyApplication.this);
+					}
 				}
 			}
 		});

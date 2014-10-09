@@ -77,6 +77,12 @@
 		        android:title="@string/enable_tracking"
 		        android:summary="@string/enable_tracking_summary"
 		        android:defaultValue="true"/>
+	        <CheckBoxPreference
+	            
+		        android:key="push_notifications"
+		        android:title="@string/enable_push"
+		        android:summary="@string/enable_push_summary"
+		        android:defaultValue="true"/>
 	        <!-- <ListPreference
 		        android:key="sponsored"
 		        android:title="@string/enable_sponsored"
