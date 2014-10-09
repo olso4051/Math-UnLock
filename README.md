@@ -21,4 +21,6 @@ Setup
       
   Publishing
   
-    make sure to un-check "Android Dependencies" from all extrernal libraries added to the project
+    1. make sure to un-check "Android Dependencies" from all extrernal libraries added to the project. RC->Build Path->Configure Build Path->un-chekc "Android Dependencies"
+    
+    2. always upload a beta version and test that opening and running the app from the play store works. There is sometimes a change when Google upacks the apk and re-packs it so that it force closes on open. If this happens go back to step 1. of Publishing and try again.
