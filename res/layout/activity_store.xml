@@ -263,6 +263,29 @@
 		       	android:layout_height="wrap_content"
 		       	android:orientation="horizontal" >
 				<Button
+				    android:id="@+id/unlock_hiq_expansion" 
+				    android:layout_height="wrap_content"
+					android:layout_width="0dp"
+					android:layout_weight="4"
+					android:text="@string/unlock_hiq_expansion"
+					android:textSize="20sp"
+					android:textStyle="bold"/>
+				<TextView
+			    	android:id="@+id/hiq_expansion_cost"
+			    	android:gravity="center_vertical|right"
+			    	android:layout_width="0dp"
+			    	android:layout_weight="3"
+			    	android:layout_height="fill_parent"
+			    	android:textSize="20sp"
+			    	android:drawableRight="@drawable/coin1"
+			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
+			    	android:text="@string/purchased"/>
+			</LinearLayout>
+			<LinearLayout
+			   	android:layout_width="match_parent"
+		       	android:layout_height="wrap_content"
+		       	android:orientation="horizontal" >
+				<Button
 				    android:id="@+id/unlock_custom"
 				    android:layout_height="wrap_content"
 					android:layout_width="0dp"

@@ -49,6 +49,10 @@ public class PreferenceHelper {
 	final public static String LAYOUT_PREFS = "Layout_Size";
 	final public static String TUTORIAL_PREFS = "Tutorial";
 	final public static String SWISHER_PREFS = "Swisher";
+	final public static String CUSTOM_PACKS_PREFS = "Custom_Packs";
+
+	final public static String CUSTOM_PACKS_LOADED = "loaded_packs";
+	final public static String CUSTOM_PACKS_VERSION = "packs_version";
 
 	final public static String MONEY_PREFS_PACKS = "packs_to_open";
 
@@ -279,14 +283,18 @@ public class PreferenceHelper {
 		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
 		String[] PackageKeys = ctx.getResources().getStringArray(R.array.enable_package_keys);
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
+		boolean unlocked = sharedPrefsMoney.getBoolean(unlockSubscriptionPackageKeys[product], false);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 		editorPrefsMoney.putBoolean(unlockSubscriptionPackageKeys[product], true);		// unlocks the product
 		editorPrefsMoney.commit();
 
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-		SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
-		editorPrefs.putBoolean(PackageKeys[product - 1], true);
-		editorPrefs.commit();
+		// if the first time being unlocked
+		if (!unlocked) {
+			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+			SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
+			editorPrefs.putBoolean(PackageKeys[product - 1], true);
+			editorPrefs.commit();
+		}
 	}
 
 	public static void lockSubscription(Context ctx, int product) {
@@ -302,6 +310,12 @@ public class PreferenceHelper {
 			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 			SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
 			editorPrefs.putBoolean(PackageKeys[product - 1], false);
+			if (product == 6) {
+				String[] customPacks = ctx.getResources().getStringArray(R.array.enable_custom_packs);
+				for (String customPack : customPacks) {
+					editorPrefs.putBoolean(customPack, false);
+				}
+			}
 			editorPrefs.commit();
 		}
 	}
@@ -1078,9 +1092,8 @@ public class PreferenceHelper {
 		ArrayList<String[]> tempQuestions = new ArrayList<String[]>();
 		try {
 			InputStream is = ctx.getAssets().open(SWISHER_FILENAME_WITH_EXTENSION);
-			// FileReader fileR = new FileReader(descriptor.getFileDescriptor());
-			Reader fileR = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-			CSVReader csvReader = new CSVReader(fileR);
+			Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			CSVReader csvReader = new CSVReader(reader);
 			String[] lineEntries = csvReader.readNext();
 			if (lineEntries[0].equals(QuestionContract.QUESTION_TEXT) && lineEntries[1].equals(QuestionContract.ANSWER_CORRECT)
 					&& lineEntries[2].equals(CustomQuestionContract.ANSWER_INCORRECT1)
@@ -1163,4 +1176,77 @@ public class PreferenceHelper {
 		} else
 			return new ArrayList<String[]>();
 	}
+
+	/*public static boolean updateCustomPacks(Context ctx) {
+		SharedPreferences sharedPrefsCustom = ctx.getSharedPreferences(CUSTOM_PACKS_PREFS, Context.MODE_PRIVATE);
+		try {
+			PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
+			Loggy.d("loaded = " + sharedPrefsCustom.getBoolean(CUSTOM_PACKS_LOADED, false));
+			Loggy.d("versionCode = " + packageInfo.versionCode);
+			Loggy.d("saved versionCode = " + sharedPrefsCustom.getInt(CUSTOM_PACKS_VERSION, Integer.MIN_VALUE));
+			if (sharedPrefsCustom.getBoolean(CUSTOM_PACKS_LOADED, false)
+					&& packageInfo.versionCode <= sharedPrefsCustom.getInt(CUSTOM_PACKS_VERSION, Integer.MIN_VALUE))
+				return false;
+			else
+				return true;
+		} catch (NameNotFoundException e) {
+			return false;
+		}
+
+	}*/
+
+	/*public static void loadCustomPacks(Context ctx, DatabaseManager dbManager) {
+		ArrayList<String[]> tempQuestions = new ArrayList<String[]>();
+		String[] customPacks = ctx.getResources().getStringArray(R.array.custom_packs);
+		dbManager.removeCustomQuestion(customPacks);
+		for (String customPack : customPacks) {
+			try {
+				InputStream is = ctx.getAssets().open(customPack + ".csv");
+				Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+				CSVReader csvReader = new CSVReader(reader);
+				String[] lineEntries = csvReader.readNext();
+				if (lineEntries[1].equals(QuestionContract.QUESTION_TEXT) && lineEntries.length >= 7) {
+					Loggy.d("fix csv header");
+					lineEntries[0] = lineEntries[1];
+					lineEntries[1] = lineEntries[2];
+					lineEntries[2] = lineEntries[3];
+					lineEntries[3] = lineEntries[4];
+					lineEntries[4] = lineEntries[5];
+					lineEntries[5] = lineEntries[6];
+				}
+				if (lineEntries[0].equals(QuestionContract.QUESTION_TEXT) && lineEntries[1].equals(QuestionContract.ANSWER_CORRECT)
+						&& lineEntries[2].equals(CustomQuestionContract.ANSWER_INCORRECT1)
+						&& lineEntries[3].equals(CustomQuestionContract.ANSWER_INCORRECT2)
+						&& lineEntries[4].equals(CustomQuestionContract.ANSWER_INCORRECT3)
+						&& lineEntries[5].equals(QuestionContract.DIFFICULTY)) {
+					lineEntries = csvReader.readNext();
+					while (lineEntries != null) {
+						if (lineEntries.length == 6) {
+							if (Difficulty.isDifficulty(lineEntries[5])) {
+								tempQuestions.add(new String[] { lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3],
+										lineEntries[4], customPack, lineEntries[5] });
+							}
+						}
+						lineEntries = csvReader.readNext();
+					}
+				}
+				csvReader.close();
+				is.close();
+				for (int i = 0; i < tempQuestions.size(); i++) {
+					dbManager.addCustomQuestion(tempQuestions.get(i));
+				}
+				tempQuestions.clear();
+				Loggy.d("succeed on " + customPack);
+			} catch (IOException e) {
+				Loggy.d("failed on " + customPack);
+			}
+		}
+		try {
+			SharedPreferences sharedPrefsCustom = ctx.getSharedPreferences(CUSTOM_PACKS_PREFS, Context.MODE_PRIVATE);
+			PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
+			sharedPrefsCustom.edit().putBoolean(CUSTOM_PACKS_LOADED, true).putInt(CUSTOM_PACKS_VERSION, packageInfo.versionCode).commit();
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+	}*/
 }

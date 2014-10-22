@@ -37,6 +37,35 @@
 		<item name="14">http://api.chirpads.com/tracking/impressionclick/19fd6dba-8feb-465f-a2b0-5479527d0a9d/</item>
     </string-array>
     
+    <string-array name="custom_packs">
+		<item>Analogy</item>
+		<item>Antonyms 1</item>
+		<item>Antonyms 2</item>
+		<item>English Vocab 2</item>
+		<item>Math (Grade 6)</item>
+		<item>Math (Grade 7)</item>
+		<item>Science (Grade 8)</item>
+		<item>Science 1</item>
+		<item>Science 2</item>
+		<item>Science 3</item>
+		<item>Science 4</item>
+		<item>Synonyms 1</item>
+    </string-array>
+    <string-array name="enable_custom_packs">
+		<item>enable_custom_Analogy</item>
+		<item>enable_custom_Antonyms 1</item>
+		<item>enable_custom_Antonyms 2</item>
+		<item>enable_custom_English Vocab 2</item>
+		<item>enable_custom_Math (Grade 6)</item>
+		<item>enable_custom_Math (Grade 7)</item>
+		<item>enable_custom_Science (Grade 8)</item>
+		<item>enable_custom_Science 1</item>
+		<item>enable_custom_Science 2</item>
+		<item>enable_custom_Science 3</item>
+		<item>enable_custom_Science 4</item>
+		<item>enable_custom_Synonyms 1</item>
+    </string-array>
+    
     <string-array name="dont_show_again">
         <item name="dont_show">Don\'t ask me again</item>
     </string-array>
@@ -300,6 +329,7 @@
         <item>unlock_language</item>
 		<item>unlock_engineer</item>
 		<item>unlock_hiqh_trivia</item>
+		<item>unlock_hiq_expansion</item>
     </string-array>
     <string-array name="unlock_sub_package_keys">
         <item>unlock_all_subscription</item>
@@ -308,6 +338,7 @@
         <item>unlock_language_subscription</item>
 		<item>unlock_engineer_subscription</item>
 		<item>unlock_hiqh_trivia_subscription</item>
+		<item>unlock_hiq_expansion_subscription</item>
     </string-array>
     <integer-array name="unlock_cost">
         <item>10000</item>
@@ -316,6 +347,7 @@
         <item>5000</item>
 		<item>1500</item>
 		<item>1500</item>
+		<item>5000</item>
     </integer-array>
     <string name="custom_enable">enable_custom_</string>
     <string-array name="enable_package_keys">
@@ -324,6 +356,7 @@
         <item>enable_language</item>
 		<item>enable_engineer</item>
 		<item>enable_hiqh_trivia</item>
+		<item>enable_hiq_expansion</item>
     </string-array>
 
     <string name="all">All</string>
@@ -332,6 +365,7 @@
     <string name="language">Language</string>
 	<string name="engineer">Engineer</string>
 	<string name="hiqh_trivia">Hiq Trivia</string>
+	<string name="hiq_expansion">Expansion</string>
 	<string name="custom">Custom</string>
     <string-array name="starting_packages">
         <item>@string/math</item>
@@ -347,6 +381,7 @@
         <item>@string/language</item>
 		<item>@string/engineer</item>
 		<item>@string/hiqh_trivia</item>
+		<item>@string/hiq_expansion</item>
     </string-array>
     <string name="custom_settings">settings_custom</string>
     <string-array name="settings_keys">
@@ -364,6 +399,7 @@
         <item>Learn a new language by translating the thousands of words and sentences in 17 different languages</item>
 		<item>Complete science and engineering related equations to keep fresh</item>
 		<item>Fun trivia questions</item>
+		<item>Unlock all the extra packs under Custom Questions in Settings.</item>
     </string-array>
     
     <string-array name="egg_keys">

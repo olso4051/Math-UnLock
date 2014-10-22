@@ -1,5 +1,6 @@
 package com.olyware.mathlock;
 
+import java.util.Arrays;
 import java.util.List;
 
 import android.content.Context;
@@ -268,8 +269,13 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 			// customEdit.setSummary(getString(R.string.custom_pack_edit));
 			customEdit.setKey("settings_custom2");
 			customEdit.setIntent(new Intent(this, ShowCustomEditActivity.class));
+			customEdit.setEnabled(true);
+			prefCat.setEnabled(true);
 			prefCat.addPreference(customEdit);
 			categories = dbManager.getAllCustomCategories();
+			String[] customPacks = ctx.getResources().getStringArray(R.array.custom_packs);
+			List<String> customCats = Arrays.asList(customPacks);
+			SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 			for (String cat : categories) {
 				CheckBoxPreference pref = new CheckBoxPreference(this);
 				// pref.setLayoutResource(R.layout.preference_layout);
@@ -277,6 +283,11 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				pref.setTitle(getString(R.string.enable));
 				pref.setSummary(getString(R.string.enable_custom_summary) + " " + cat);
 				pref.setDefaultValue(false);
+				if (!customCats.contains(cat) || sharedPrefsMoney.getBoolean(unlockSubPackageKeys[6], false)) {
+					pref.setEnabled(true);
+				} else {
+					pref.setEnabled(false);
+				}
 				prefCat.addPreference(pref);
 			}
 		}

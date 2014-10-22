@@ -8,6 +8,7 @@
     <string name="playhaven_token">524bfe2228a84603b24fb15a37d9acb9</string>
     <string name="playhaven_secret">50c431445fd8405eb62c809880c2ea53</string>
     <string name="playhaven_moregames_tag">moregames_hiq</string>
+    <string name="playhaven_interstitial_tag">interstitial_ad</string>
     
     <!-- App Linking Strings -->
     <string name="coin_scheme1">http</string>
@@ -420,6 +421,7 @@
     <string name="unlock_all">All Packs</string>
     <string name="unlock_custom">Custom Pack</string>
     <string name="unlock_engineer">Engineering Pack</string>
+    <string name="unlock_hiq_expansion">Expansion FREE trial</string>
     <string name="unlock_hiqh_trivia">Hiq Trivia Pack</string>
     <string name="unlock_language">Language FREE trial</string>
     <string name="unlock_math">Math Pack</string>

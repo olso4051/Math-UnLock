@@ -334,6 +334,18 @@ public class DatabaseManager {
 			return 0;
 	}
 
+	public int removeCustomQuestion(String[] cats) {
+		if (db.isOpen()) {
+			int rows = 0;
+			for (String cat : cats) {
+				String where = CustomQuestionContract.CATEGORY + " = '" + cat.replaceAll("'", "''") + "'";
+				rows += db.delete(CustomQuestionContract.TABLE_NAME, where, null);
+			}
+			return rows;
+		} else
+			return 0;
+	}
+
 	public long addSwisherQuestion(String[] question) {
 		return addCustomQuestion(new String[] { question[0], question[1], question[2], question[3], question[4], question[5] },
 				Integer.parseInt(question[6]), 750, 10);
@@ -353,9 +365,12 @@ public class DatabaseManager {
 					+ CustomQuestionContract.ANSWER_INCORRECT2 + " = '" + question[3].replaceAll("'", "''") + "'" + " AND "
 					+ CustomQuestionContract.ANSWER_INCORRECT3 + " = '" + question[4].replaceAll("'", "''") + "'" + " AND "
 					+ CustomQuestionContract.CATEGORY + " = '" + question[5].replaceAll("'", "''") + "'";
-			cursor = db.rawQuery(select + where, null);
+			Cursor cursor = db.rawQuery(select + where, null);
 			cursor.moveToFirst();
-			if (cursor.getInt(0) == 0) {
+			int count = cursor.getInt(0);
+			cursor.close();
+			cursor = null;
+			if (count == 0) {
 				ContentValues values = new ContentValues();
 				values.put(QuestionContract.QUESTION_TEXT, question[0]);
 				values.put(QuestionContract.ANSWER_CORRECT, question[1]);

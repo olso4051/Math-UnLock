@@ -146,6 +146,7 @@ public class ShowStoreActivity extends FragmentActivity {
 					additionalSkuList.add(SKU[2]);
 					additionalSkuList.add(SKU[3]);
 					additionalSkuList.add(SKU[4]);
+					additionalSkuList.add(SKU[5]);
 					mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 				}
 			}
@@ -162,12 +163,14 @@ public class ShowStoreActivity extends FragmentActivity {
 					costSmall.setText(inventory.getSkuDetails(SKU[0]).getPrice());
 					costLarge.setText(inventory.getSkuDetails(SKU[1]).getPrice());
 					costAll.setText(inventory.getSkuDetails(SKU[2]).getPrice());
-					for (int i = 2; i <= 3; i++) {
-						if (!sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false)
-								&& !sharedPrefsMoney.getBoolean(unlockSubPackageKeys[i], false)) {
-							cost[i].setText(inventory.getSkuDetails(SKU[i + 1]).getPrice() + getString(R.string.per_month));
+					int[] subs = { 2, 3, 6 };
+					int[] SKUsubs = { 3, 4, 5 };
+					for (int i = 0; i < subs.length; i++) {
+						if (!sharedPrefsMoney.getBoolean(unlockPackageKeys[subs[i]], false)
+								&& !sharedPrefsMoney.getBoolean(unlockSubPackageKeys[subs[i]], false)) {
+							cost[subs[i]].setText(inventory.getSkuDetails(SKU[SKUsubs[i]]).getPrice() + getString(R.string.per_month));
 						} else {
-							cost[i].setText(getString(R.string.purchased));
+							cost[subs[i]].setText(getString(R.string.purchased));
 						}
 					}
 					// check for non-consumed purchases
@@ -189,6 +192,11 @@ public class ShowStoreActivity extends FragmentActivity {
 						PreferenceHelper.unlockSubscription(ShowStoreActivity.this, 3);
 					} else {
 						PreferenceHelper.lockSubscription(ShowStoreActivity.this, 3);
+					}
+					if (inventory.hasPurchase(SKU[5])) {
+						PreferenceHelper.unlockSubscription(ShowStoreActivity.this, 6);
+					} else {
+						PreferenceHelper.lockSubscription(ShowStoreActivity.this, 6);
 					}
 				}
 			}
@@ -224,6 +232,11 @@ public class ShowStoreActivity extends FragmentActivity {
 					sendTransaction(purchase.getOrderId(), 1.00 * .7);
 					sendItem(purchase.getOrderId(), "Language Subscription", purchase.getSku(), "subscriptions", 1.00);
 					PreferenceHelper.unlockSubscription(ShowStoreActivity.this, 3);
+				} else if (purchase.getSku().equals(SKU[5])) {
+					MoneyHelper.BoughtSomething(ShowStoreActivity.this);
+					sendTransaction(purchase.getOrderId(), 3.00 * .7);
+					sendItem(purchase.getOrderId(), "Expansion Subscription", purchase.getSku(), "subscriptions", 3.00);
+					PreferenceHelper.unlockSubscription(ShowStoreActivity.this, 6);
 				}
 			}
 		};
@@ -338,12 +351,15 @@ public class ShowStoreActivity extends FragmentActivity {
 
 	private void buyProduct(String title, final int product, final int amount, final Intent i) {
 		// if language or vocab launch subscription purchase flow
-		if (product == 2 || product == 3) {
+		if (product == 2 || product == 3 || product == 6) {
 			if (!iabFinishedSetup) {
 				alertIabNotSetup();
 			} else {
-				mHelper.launchSubscriptionPurchaseFlow(ShowStoreActivity.this, SKU[product + 1], Cost[product + 1] + 1,
-						mPurchaseFinishedListener, PURCHASE_KEY);
+				int SKUsub = product + 1;
+				if (product == 6)
+					SKUsub = 5;
+				mHelper.launchSubscriptionPurchaseFlow(ShowStoreActivity.this, SKU[SKUsub], Cost[SKUsub] + 1, mPurchaseFinishedListener,
+						PURCHASE_KEY);
 			}
 		} else {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -415,7 +431,7 @@ public class ShowStoreActivity extends FragmentActivity {
 			if (sharedPrefsMoney.getBoolean(unlockPackageKeys[i], false) || sharedPrefsMoney.getBoolean(unlockSubPackageKeys[i], false)) {
 				cost[i].setText(getString(R.string.purchased));
 				buy[i].setEnabled(false);
-			} else if (i != 2 && i != 3) {
+			} else if (i != 2 && i != 3 && i != 6) {
 				cost[i].setText(String.valueOf(unlockCost[i]));
 			}
 		}

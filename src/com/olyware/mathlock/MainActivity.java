@@ -126,8 +126,8 @@ import com.tapjoy.TapjoyConnect;
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse, RequestListener {
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
-	final private static int[] Cost = { 1000, 5000, 10000, 0, 1 };
-	final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1" };
+	final private static int[] Cost = { 1000, 5000, 10000, 0, 1, 2 };
+	final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1", "expansion" };
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
@@ -263,6 +263,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		@Override
 		protected Void doInBackground(Void... voids) {
 			dbManager = new DatabaseManager(getApplicationContext());
+			Loggy.d("done opening database");
+			/*if (PreferenceHelper.updateCustomPacks(MainActivity.this)) {
+				Loggy.d("updateCustomPacks");
+				PreferenceHelper.loadCustomPacks(MainActivity.this, dbManager);
+			}*/
 			setPackageKeys();
 			return null;
 		}
@@ -456,6 +461,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						additionalSkuList.add(SKU[2]);
 						additionalSkuList.add(SKU[3]);
 						additionalSkuList.add(SKU[4]);
+						additionalSkuList.add(SKU[5]);
 						mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 					}
 				}
@@ -486,6 +492,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							PreferenceHelper.unlockSubscription(MainActivity.this, 3);
 						} else {
 							PreferenceHelper.lockSubscription(MainActivity.this, 3);
+						}
+						if (inventory.hasPurchase(SKU[5])) {
+							PreferenceHelper.unlockSubscription(MainActivity.this, 6);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 6);
 						}
 					}
 				}
@@ -992,10 +1003,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (ad) {
 					sharedPrefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 					long currentTime = System.currentTimeMillis();
-					if (currentTime - sharedPrefs.getLong("ad_time", 0) > HOUR4) {
+					if (currentTime - sharedPrefs.getLong("ad_time", 0) > HOUR4 / 4) {
 						sharedPrefs.edit().putLong("ad_time", currentTime).commit();
-						startActivity(FullScreen
-								.createIntent(MainActivity.this, getResources().getString(R.string.playhaven_moregames_tag)));
+						startActivity(FullScreen.createIntent(MainActivity.this,
+								getResources().getString(R.string.playhaven_interstitial_tag)));
+						// startActivity(FullScreen.createIntent(MainActivity.this,
+						// getResources().getString(R.string.playhaven_moregames_tag)));
 					}
 				}
 				finish();
