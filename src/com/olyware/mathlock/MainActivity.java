@@ -1353,7 +1353,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					difficulty = difficultyMax;
 
 					for (int i = 0; i < PackageKeys.size(); i++) {
-						if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) {
+						if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5) {
 							EnabledPackageKeys[count] = PackageKeys.get(i);
 							location[count] = i;
 							weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
@@ -1629,7 +1629,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public int getEnabledPackages() {
 		int count = 0;
 		for (int i = 0; i < PackageKeys.size(); i++) {
-			if (sharedPrefs.getBoolean(PackageKeys.get(i), false))
+			if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5)
 				count++;
 		}
 		return count;
