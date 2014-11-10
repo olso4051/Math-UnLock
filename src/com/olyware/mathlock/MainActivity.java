@@ -578,6 +578,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						if (s == JoystickSelect.A || s == JoystickSelect.B || s == JoystickSelect.C || s == JoystickSelect.D) {
 							boolean continueQuizMode = PreferenceHelper.setLockscreenFrequency(MainActivity.this, s);
 							quizMode = joystick.setQuizMode(continueQuizMode);
+							setQuizeMode(findViewById(R.id.txtQzMode));
 							PreferenceHelper.setTutorialQuestion(MainActivity.this, 5);
 						}
 						break;
@@ -600,6 +601,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
 			quizMode = joystick.setQuizMode(!locked && !fromLogin);
+			setQuizeMode(findViewById(R.id.txtQzMode));
 			if (fromLogin)
 				sharedPrefs.edit().putBoolean("from_login", false).commit();
 
@@ -754,6 +756,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			joystick.setNumberOfChallenges(ContactHelper.getNumberOfChallenges(this));
 			if (locked && quizMode && !fromTutorial)
 				quizMode = joystick.setQuizMode(false);
+			setQuizeMode(findViewById(R.id.txtQzMode));
 
 			// get settings
 			sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1170,6 +1173,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		if (tutorialQuestion != null) {
 			fromTutorial = true;
 			quizMode = joystick.setQuizMode(true);
+			setQuizeMode(findViewById(R.id.txtQzMode));
 			joystick.setProblem(true);
 			questionWorth = 0;
 			questionWorthMax = 0;
@@ -1862,6 +1866,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
+			setQuizeMode(findViewById(R.id.txtQzMode));
 			break;
 		case Settings:		// settings was selected
 			fromSettings = true;
@@ -2253,6 +2258,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
+										setQuizeMode(findViewById(R.id.txtQzMode));
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
@@ -2530,11 +2536,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else if (view.getId() == R.id.txtQzMode) {
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
-			if (quizMode)
-				((TextView) view).setText("Quiz");
-			else
-				((TextView) view).setText("Quiz mode");
 			quizMode = joystick.setQuizMode(!quizMode);
+			setQuizeMode(view);
 
 		} else if (view.getId() == R.id.txtStore) {
 			unlocking = false;
@@ -2545,5 +2548,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			startActivity(new Intent(this, ShowSettingsActivity.class));
 		}
 
+	}
+
+	private void setQuizeMode(View view) {
+		if (quizMode)
+			((TextView) view).setBackgroundColor(getResources().getColor(R.color.light_blue_selector));
+		else
+			((TextView) view).setBackgroundColor(getResources().getColor(android.R.color.transparent));
 	}
 }

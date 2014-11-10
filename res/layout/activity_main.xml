@@ -87,50 +87,53 @@
         android:layout_height="wrap_content"
         android:background="#D9FFFFFF"
         android:orientation="horizontal"
-        android:padding="5dp"
         android:weightSum="4" >
 
         <TextView
             android:id="@+id/txtStore"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:drawablePadding="10dp"
             android:drawableTop="@drawable/packs"
             android:gravity="center"
             android:text="Store"
+            android:padding="5dp"
             android:textColor="#A0A0A0" />
 
         <TextView
             android:id="@+id/txtProgress"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:drawablePadding="10dp"
             android:drawableTop="@drawable/progress_icon"
             android:gravity="center"
             android:text="Progress"
+            android:padding="5dp"
             android:textColor="#A0A0A0" />
 
         <TextView
             android:id="@+id/txtQzMode"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:drawablePadding="10dp"
             android:drawableTop="@drawable/qz_mode"
             android:gravity="center"
+            android:padding="5dp"
             android:text="Quiz mode"
             android:textColor="#A0A0A0" />
 
         <TextView
             android:id="@+id/txtFriends"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:drawablePadding="10dp"
             android:drawableTop="@drawable/friends_icon"
             android:gravity="center"
+            android:padding="5dp"
             android:text="Friends"
             android:textColor="#A0A0A0" />
     </LinearLayout>
