@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.MyApplication;
@@ -39,7 +38,7 @@ public class EggHelper {
 
 			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
 
-			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
+			// Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else
 			amount = 0;
 		return amount;
@@ -61,7 +60,7 @@ public class EggHelper {
 
 			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
 
-			Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
+			// Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else
 			amount = 0;
 		return amount;

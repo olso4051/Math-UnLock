@@ -5,26 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+
     <LinearLayout
         android:id="@+id/layout_top_and_question"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1.25"
         android:orientation="vertical"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp" >
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" >
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
+
             <TextView
                 android:id="@+id/clock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="left|bottom"
                 android:maxLines="2"
                 android:text="@string/clock"
                 android:textColor="@color/white"
                 android:textSize="@dimen/text_size_huge" />
+
             <TextView
                 android:id="@+id/money"
                 android:layout_width="wrap_content"
@@ -32,32 +37,102 @@
                 android:layout_gravity="right|bottom"
                 android:text="@string/default_money"
                 android:textColor="@color/white"
-                android:textSize="@dimen/text_size_extra_large" />
-		</FrameLayout>
-		<TextView
-			android:id="@+id/description"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="right"
-			android:text="@string/question_description_prefix"
-			android:textColor="@color/grey_on_dark"
-			android:textSize="@dimen/text_size_small" />
+                android:textSize="@dimen/text_size_extra_large"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/setting_gear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|top"
+                android:layout_margin="5dp"
+                android:src="@drawable/settings_icon" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/question_description_prefix"
+            android:textColor="@color/grey_on_dark"
+            android:textSize="@dimen/text_size_small"
+            android:visibility="gone" />
+
         <com.olyware.mathlock.views.EquationView
             android:id="@+id/problem"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
             custom:textSizeDefault="@dimen/text_size_large" />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_weight="4"
         android:orientation="vertical" >
+
         <com.olyware.mathlock.views.JoystickView
             android:id="@+id/joystick"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             custom:textSizeDefault="@dimen/text_size_large" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pnlBottomBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#D9FFFFFF"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:weightSum="4" >
+
+        <TextView
+            android:id="@+id/txtStore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="10dp"
+            android:drawableTop="@drawable/packs"
+            android:gravity="center"
+            android:text="Store"
+            android:textColor="#A0A0A0" />
+
+        <TextView
+            android:id="@+id/txtProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="10dp"
+            android:drawableTop="@drawable/progress_icon"
+            android:gravity="center"
+            android:text="Progress"
+            android:textColor="#A0A0A0" />
+
+        <TextView
+            android:id="@+id/txtQzMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="10dp"
+            android:drawableTop="@drawable/qz_mode"
+            android:gravity="center"
+            android:text="Quiz mode"
+            android:textColor="#A0A0A0" />
+
+        <TextView
+            android:id="@+id/txtFriends"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="10dp"
+            android:drawableTop="@drawable/friends_icon"
+            android:gravity="center"
+            android:text="Friends"
+            android:textColor="#A0A0A0" />
+    </LinearLayout>
+
 </LinearLayout>

@@ -49,6 +49,7 @@ import android.text.Html;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -123,7 +124,8 @@ import com.playhaven.android.req.RequestListener;
 import com.playhaven.android.view.FullScreen;
 import com.tapjoy.TapjoyConnect;
 
-public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse, RequestListener {
+public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse, RequestListener,
+		OnClickListener {
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000, 0, 1, 2 };
@@ -413,6 +415,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			uiHelper = new UiLifecycleHelper(this, null);
 			uiHelper.onCreate(savedInstanceState);
 
+			findViewById(R.id.txtFriends).setOnClickListener(this);
+			findViewById(R.id.txtProgress).setOnClickListener(this);
+			findViewById(R.id.txtQzMode).setOnClickListener(this);
+			findViewById(R.id.txtStore).setOnClickListener(this);
+			findViewById(R.id.setting_gear).setOnClickListener(this);
+
 			IntentFilter logoutFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
 			LocalBroadcastManager.getInstance(this).registerReceiver(finishBroadcast, logoutFilter);
 			IntentFilter screenOnFilter = new IntentFilter(getString(R.string.screen_on_receiver_filter));
@@ -638,6 +646,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// Check device for Play Services APK. If check succeeds, proceed with GCM registration.
 			GCMHelper.registerAndStoreGCM(this, getApplicationContext());
 		}
+		// joystick.askToShare(getString(R.string.ask_to_share0)); // Pai added
 	}
 
 	@Override
@@ -886,7 +895,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if (loggedIn) {
-			joystick.showStartAnimation(0, 3000);
+			// PAI COMMENTED - new UI on oct 27th- 2014 start here //
+			// joystick.showStartAnimation(0, 3000);
+			// PAI COMMENTED - new UI on oct 27th- 2014 ends here //
 			return false;
 		} else
 			return super.onCreateOptionsMenu(menu);
@@ -2506,5 +2517,33 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void handleResponse(Context context, PlayHavenException e) {
 		// Log.d(TAG, "Error during open request", e);
 		moreGamesAvailable = false;
+	}
+
+	@Override
+	public void onClick(View view) {
+
+		if (view.getId() == R.id.txtFriends) {
+			displayFriends();
+		} else if (view.getId() == R.id.txtProgress) {
+			unlocking = false;
+			startActivity(new Intent(this, ShowProgressActivity.class));
+		} else if (view.getId() == R.id.txtQzMode) {
+			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
+			if (quizMode)
+				((TextView) view).setText("Quiz");
+			else
+				((TextView) view).setText("Quiz mode");
+			quizMode = joystick.setQuizMode(!quizMode);
+
+		} else if (view.getId() == R.id.txtStore) {
+			unlocking = false;
+			startActivity(new Intent(this, ShowStoreActivity.class));
+		} else if (view.getId() == R.id.setting_gear) {
+			fromSettings = true;
+			unlocking = false;
+			startActivity(new Intent(this, ShowSettingsActivity.class));
+		}
+
 	}
 }
