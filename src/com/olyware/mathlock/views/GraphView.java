@@ -80,17 +80,17 @@ public class GraphView extends View {
 		textStatsSizeSP = 20;
 		textStatsSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textStatsSizeSP, getResources().getDisplayMetrics());
 		TextStatsPaintL = new Paint(Paint.ANTI_ALIAS_FLAG);
-		TextStatsPaintL.setColor(Color.WHITE);
+		TextStatsPaintL.setColor(Color.BLACK);
 		TextStatsPaintL.setTextAlign(Paint.Align.LEFT);
 		TextStatsPaintL.setTextSize(textStatsSizePix);
 		TextStatsPaintL.setTypeface(font);
 		TextStatsPaintR = new Paint(Paint.ANTI_ALIAS_FLAG);
-		TextStatsPaintR.setColor(Color.WHITE);
+		TextStatsPaintR.setColor(getResources().getColor(R.color.graph_text_color_blue));
 		TextStatsPaintR.setTextAlign(Paint.Align.RIGHT);
 		TextStatsPaintR.setTextSize(textStatsSizePix);
 		TextStatsPaintR.setTypeface(font);
 		TextStatsPaintC = new Paint(Paint.ANTI_ALIAS_FLAG);
-		TextStatsPaintC.setColor(Color.WHITE);
+		TextStatsPaintC.setColor(Color.BLACK);
 		TextStatsPaintC.setTextAlign(Paint.Align.CENTER);
 		TextStatsPaintC.setTextSize(textStatsSizePix);
 		TextStatsPaintC.setTypeface(font);
@@ -98,14 +98,14 @@ public class GraphView extends View {
 		movingAverage = 20;
 		setStats(0, 0, 0, 0, 0, 0, 0, 0, 0, "0 / 0");
 		padVert = textStatsSizePix / 2;
-		padHorz = 7;
+		padHorz = 30;
 		padScrollPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, padHorz, getResources().getDisplayMetrics());
 		textBounds = new Rect();
 		Xlabel = new Path();
 		percentPath = new Path();
 
 		GraphPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		GraphPaint.setColor(Color.WHITE);
+		GraphPaint.setColor(getResources().getColor(R.color.light_white_seperator));
 		GraphPaint.setStyle(Paint.Style.STROKE);
 		GraphPaint.setStrokeWidth(3);
 
@@ -216,15 +216,16 @@ public class GraphView extends View {
 		int padNum = Stats.length + 1;
 		int StatsNum = Stats.length;
 
-		canvas.drawText("100", left - padHorz, padVert + textStatsSizePix / 2, TextStatsPaintR);
-		canvas.drawText("75", left - padHorz, (bottom - padVert) / 4 + padVert + textStatsSizePix / 2, TextStatsPaintR);
-		canvas.drawText("50", left - padHorz, (bottom - padVert) / 2 + padVert + textStatsSizePix / 2, TextStatsPaintR);
-		canvas.drawText("25", left - padHorz, (bottom - padVert) * 3 / 4 + padVert + textStatsSizePix / 2, TextStatsPaintR);
-		canvas.drawText("0", left - padHorz, bottom + textStatsSizePix / 2, TextStatsPaintR);
-		canvas.drawTextOnPath("Percent", Xlabel, 0, 0, TextStatsPaintC);
-		canvas.drawText("Time", Width / 2, bottom + textStatsSizePix + padVert, TextStatsPaintC);
+		canvas.drawText("100", padScrollPix, padVert + textStatsSizePix / 2, TextStatsPaintC);
+		canvas.drawText("75", padScrollPix, (bottom - padVert) / 4 + padVert + textStatsSizePix / 2, TextStatsPaintC);
+		canvas.drawText("50", padScrollPix, (bottom - padVert) / 2 + padVert + textStatsSizePix / 2, TextStatsPaintC);
+		canvas.drawText("25", padScrollPix, (bottom - padVert) * 3 / 4 + padVert + textStatsSizePix / 2, TextStatsPaintC);
+		canvas.drawText("0", padScrollPix, bottom + textStatsSizePix / 2, TextStatsPaintC);
+		canvas.drawText("%", padScrollPix, bottom + textStatsSizePix * 2 + padVert, TextStatsPaintC);
+		// canvas.drawTextOnPath("Percent", Xlabel, 0, 0, TextStatsPaintC);
+		// canvas.drawText("Time", Width / 2, bottom + textStatsSizePix + padVert, TextStatsPaintC);
 
-		canvas.drawRect(left, top, right, bottom, GraphPaint);
+		// canvas.drawRect(left, top, right, bottom, GraphPaint);
 		// canvas.drawLine(left + padVert, 0, left + padVert, bottom - padVert / 2, GraphPaint);
 		// canvas.drawLine(Width - padVert, 0, Width - padVert, bottom - padVert / 2, GraphPaint);
 		if (!percentPath.isEmpty())
@@ -232,9 +233,12 @@ public class GraphView extends View {
 		// canvas.drawLine(left + padVert, bottom - padVert, Width - padVert, bottom - padVert, GraphPaint);
 		// canvas.drawLine(left + padVert, padVert / 2, Width - padVert, padVert / 2, GraphPaint);
 
-		canvas.drawText("All Time Stats", Width / 2, Height - textStatsSizePix * StatsNum - padVert * padNum, TextLabelPaint);
+		canvas.drawLine(0, Height - textStatsSizePix * StatsNum - padVert * padNum, Width, Height - textStatsSizePix * StatsNum - padVert
+				* padNum, GraphPaint);
+		// canvas.drawText("All Time Stats", Width / 2, Height - textStatsSizePix * StatsNum - padVert * padNum, TextLabelPaint);
 		for (int i = 0; i < StatsNum; i++) {
-			canvas.drawText(Stats[i], 0, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1), TextStatsPaintL);
+			canvas.drawText(Stats[i], padScrollPix, Height - textStatsSizePix * (StatsNum - i - 1) - padVert * (padNum - i - 1),
+					TextStatsPaintL);
 			canvas.drawText(StatsValues[i], Width - padScrollPix, Height - textStatsSizePix * (StatsNum - i - 1) - padVert
 					* (padNum - i - 1), TextStatsPaintR);
 		}

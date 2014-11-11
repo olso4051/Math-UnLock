@@ -36,6 +36,10 @@
 
     <!-- New UI refresh -->
     <color name="dim_white">#A0A0A0</color>
-    <color name="light_blue_selector">#8C0000FF</color>
+    <color name="light_blue_selector">#800000FF</color>
+    <color name="graph_text_color_blue">#538FA6</color>
+    <color name="light_white_seperator">#979797</color>
+    <color name="bottom_bar_background">#D9FFFFFF</color>
+    <color name="light_blue_background">#F2538FA6</color>
 
 </resources>

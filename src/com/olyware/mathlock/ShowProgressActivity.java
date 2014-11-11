@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -24,21 +26,20 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
-import com.olyware.mathlock.utils.Clock;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.views.GraphView;
 
-public class ShowProgressActivity extends FragmentActivity {
+public class ShowProgressActivity extends Fragment {
 	final private static String SCREEN_LABEL = "Progress Screen";
 	private LinearLayout layout;
 	private Typefaces typefaces;
 	private Coins Money = new Coins(0, 0);
 	private SharedPreferences sharedPrefsMoney, sharedPrefsStats;
-	private ImageButton back;
-	private Clock clock;
-	private TextView coins;
+	// private ImageButton back;
+	// private Clock clock;
+	// private TextView coins;
 	private Spinner spinTime, spinPackage, spinDifficulty;
 	private GraphView graphView;
 	private String[] unlockPackageKeys, EggKeys;
@@ -55,7 +56,7 @@ public class ShowProgressActivity extends FragmentActivity {
 		@Override
 		protected Integer doInBackground(Void... voids) {
 			publishProgress(0);
-			dbManager = new DatabaseManager(getApplicationContext());
+			dbManager = new DatabaseManager(getActivity().getApplicationContext());
 			customCategories = dbManager.getAllCustomCategories();
 			for (String cat : customCategories)
 				displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
@@ -78,12 +79,11 @@ public class ShowProgressActivity extends FragmentActivity {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_progress);
+	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.activity_progress, null);
 
-		layout = (LinearLayout) findViewById(R.id.layout);
-		typefaces = Typefaces.getInstance(this);
+		layout = (LinearLayout) view.findViewById(R.id.layout);
+		typefaces = Typefaces.getInstance(getActivity());
 		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
@@ -95,57 +95,104 @@ public class ShowProgressActivity extends FragmentActivity {
 
 		new OpenDatabase().execute();
 
-		back = (ImageButton) findViewById(R.id.back);
-		back.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				finish();
-			}
-		});
+		// back = (ImageButton) view.findViewById(R.id.back);
+		// back.setOnClickListener(new OnClickListener() {
+		// public void onClick(View v) {
+		// getActivity().finish();
+		// }
+		// });
+		view.findViewById(R.id.crossImage).setOnClickListener((MainActivity) getActivity());
 
-		coins = (TextView) findViewById(R.id.money);
-		clock = new Clock(this, (TextView) findViewById(R.id.clock), coins);
+		// coins = (TextView) view.findViewById(R.id.money);
+		// clock = new Clock(getActivity(), (TextView) view.findViewById(R.id.clock), coins);
 
-		spinTime = (Spinner) findViewById(R.id.spinner_time);
-		spinPackage = (Spinner) findViewById(R.id.spinner_package);
-		spinDifficulty = (Spinner) findViewById(R.id.spinner_difficulty);
+		spinTime = (Spinner) view.findViewById(R.id.spinner_time);
+		spinPackage = (Spinner) view.findViewById(R.id.spinner_package);
+		spinDifficulty = (Spinner) view.findViewById(R.id.spinner_difficulty);
 
-		graphView = (GraphView) findViewById(R.id.graph);
+		graphView = (GraphView) view.findViewById(R.id.graph);
 
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		sharedPrefsMoney = getActivity().getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getActivity().getSharedPreferences("Stats", 0);
 		Money = new Coins(sharedPrefsMoney.getInt("money", 0), sharedPrefsMoney.getInt("paid_money", 0));
 
 		initSpinners();
 		setGraph();
 
 		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+
+		return view;
 	}
 
 	@Override
-	protected void onStart() {
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// setContentView(R.layout.activity_progress);
+
+		// layout = (LinearLayout) findViewById(R.id.layout);
+		// typefaces = Typefaces.getInstance(this);
+		// EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
+		//
+		// unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+		// displayPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
+		// displayCustomPackageKeys = EZ.list();
+		// times = getResources().getStringArray(R.array.times);
+		// EggKeys = getResources().getStringArray(R.array.egg_keys);
+		// EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
+		//
+		// new OpenDatabase().execute();
+		//
+		// back = (ImageButton) findViewById(R.id.back);
+		// back.setOnClickListener(new OnClickListener() {
+		// public void onClick(View v) {
+		// finish();
+		// }
+		// });
+		//
+		// coins = (TextView) findViewById(R.id.money);
+		// clock = new Clock(this, (TextView) findViewById(R.id.clock), coins);
+		//
+		// spinTime = (Spinner) findViewById(R.id.spinner_time);
+		// spinPackage = (Spinner) findViewById(R.id.spinner_package);
+		// spinDifficulty = (Spinner) findViewById(R.id.spinner_difficulty);
+		//
+		// graphView = (GraphView) findViewById(R.id.graph);
+		//
+		// sharedPrefsMoney = getSharedPreferences("Packages", 0);
+		// sharedPrefsStats = getSharedPreferences("Stats", 0);
+		// Money = new Coins(sharedPrefsMoney.getInt("money", 0), sharedPrefsMoney.getInt("paid_money", 0));
+		//
+		// initSpinners();
+		// setGraph();
+		//
+		// MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+	}
+
+	@Override
+	public void onStart() {
 		super.onStart();
 		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
 	}
 
 	@Override
-	protected void onDestroy() {
-		clock.destroy();
+	public void onDestroy() {
+		// clock.destroy();
 		super.onDestroy();
 	}
 
 	@Override
-	protected void onResume() {
+	public void onResume() {
 		super.onResume();
-		sharedPrefsMoney = getSharedPreferences("Packages", 0);
-		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		sharedPrefsMoney = getActivity().getSharedPreferences("Packages", 0);
+		sharedPrefsStats = getActivity().getSharedPreferences("Stats", 0);
 		Money.setMoneyPaid(sharedPrefsMoney.getInt("paid_money", 0));
 		Money.setMoney(sharedPrefsMoney.getInt("money", 0));
-		coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
-		Money.increaseMoney(EggHelper.unlockEgg(this, coins, null, EggKeys[6], EggMaxValues[6]));
+		// coins.setText(String.valueOf(Money.getMoney() + Money.getMoneyPaid()));
+		// Money.increaseMoney(EggHelper.unlockEgg(getActivity(), coins, null, EggKeys[6], EggMaxValues[6]));
 	}
 
 	@Override
-	protected void onPause() {
+	public void onPause() {
 		SharedPreferences.Editor editor = sharedPrefsMoney.edit();
 		editor.putInt("money", Money.getMoney());
 		editor.putInt("paid_money", Money.getMoneyPaid());
@@ -153,11 +200,11 @@ public class ShowProgressActivity extends FragmentActivity {
 		super.onPause();
 	}
 
-	@Override
-	public void onAttachedToWindow() {
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-	}
+	// @Override
+	// public void onAttachedToWindow() {
+	// getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+	// getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+	// }
 
 	private void initSpinners() {
 		packages = getUnlockedPackages();
@@ -165,42 +212,49 @@ public class ShowProgressActivity extends FragmentActivity {
 		for (int i = 1; i < difficulties.length; i++) {
 			difficulties[i] = Difficulty.fromValueToString(i - 1);
 		}
-		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times) {
+		ArrayAdapter<String> adapterTime = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, times) {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
 				((TextView) v).setTypeface(typefaces.robotoLight);
+				((TextView) v).setGravity(Gravity.CENTER);
 				return v;
 			}
 
 			public View getDropDownView(int position, View convertView, ViewGroup parent) {
 				View v = super.getDropDownView(position, convertView, parent);
 				((TextView) v).setTypeface(typefaces.robotoLight);
+				((TextView) v).setGravity(Gravity.CENTER);
 				return v;
 			}
 		};
-		ArrayAdapter<String> adapterPackages = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, packages) {
+		ArrayAdapter<String> adapterPackages = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, packages) {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
 				((TextView) v).setTypeface(typefaces.robotoLight);
+				((TextView) v).setGravity(Gravity.CENTER);
 				return v;
 			}
 
 			public View getDropDownView(int position, View convertView, ViewGroup parent) {
 				View v = super.getDropDownView(position, convertView, parent);
 				((TextView) v).setTypeface(typefaces.robotoLight);
+				((TextView) v).setGravity(Gravity.CENTER);
 				return v;
 			}
 		};
-		ArrayAdapter<String> adapterDifficulties = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, difficulties) {
+		ArrayAdapter<String> adapterDifficulties = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item,
+				difficulties) {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
 				((TextView) v).setTypeface(typefaces.robotoLight);
+				((TextView) v).setGravity(Gravity.CENTER);
 				return v;
 			}
 
 			public View getDropDownView(int position, View convertView, ViewGroup parent) {
 				View v = super.getDropDownView(position, convertView, parent);
 				((TextView) v).setTypeface(typefaces.robotoLight);
+				((TextView) v).setGravity(Gravity.CENTER);
 				return v;
 			}
 		};
@@ -208,6 +262,11 @@ public class ShowProgressActivity extends FragmentActivity {
 		adapterPackages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		adapterDifficulties.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+		Drawable drawable = getResources().getDrawable(R.drawable.dropdown);
+		int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+		spinTime.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
+		spinPackage.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
+		spinDifficulty.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
 		spinTime.setAdapter(adapterTime);
 		spinTime.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
@@ -267,7 +326,7 @@ public class ShowProgressActivity extends FragmentActivity {
 	}
 
 	private void setGraph() {
-		sharedPrefsStats = getSharedPreferences("Stats", 0);
+		sharedPrefsStats = getActivity().getSharedPreferences("Stats", 0);
 		long oldestTime = getOldestTime();
 
 		if (dbManager != null) {
@@ -294,7 +353,7 @@ public class ShowProgressActivity extends FragmentActivity {
 		long answerTimeAve = sharedPrefsStats.getLong("answerTimeAve", 0);
 		int difficultyAve = sharedPrefsStats.getInt("difficultyAve", 0);
 
-		String eggs = EggHelper.getNumberUnlocked(this) + " / " + EggHelper.getTotalEggs(this);
+		String eggs = EggHelper.getNumberUnlocked(getActivity()) + " / " + EggHelper.getTotalEggs(getActivity());
 		graphView.setStats(difficultyAve, correct, wrong, coins, totalTime, bestStreak, currentStreak, answerTimeFast, answerTimeAve, eggs);
 	}
 

@@ -170,6 +170,17 @@ public class PreferenceHelper {
 		}
 	}
 
+	public static void setShareCompeteShown(Context ctx, boolean val) {
+		SharedPreferences.Editor sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE).edit();
+		sharedPrefsChallengeEdit.putBoolean("shown", val);
+		sharedPrefsChallengeEdit.commit();
+	}
+
+	public static boolean isShareCompeteShown(Context ctx) {
+		SharedPreferences sharedPrefsChallengeEdit = ctx.getSharedPreferences(CHALLENGE_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsChallengeEdit.getBoolean("shown", false);
+	}
+
 	public static void addPackToOpen(Context ctx, PackageData pd) {
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		try {

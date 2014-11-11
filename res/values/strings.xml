@@ -430,5 +430,6 @@
     <string name="update_question">Update Question!</string>
     <string name="worth">Question Worth </string>
     <string name="yes">Yes</string>
+    <string name="promt_tutorial_complete">"You can always access the menu for more packs and challenges "</string>
     
 </resources>

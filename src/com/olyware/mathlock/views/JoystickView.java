@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -24,10 +23,12 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.olyware.mathlock.R;
@@ -62,7 +63,7 @@ public class JoystickView extends View {
 	private float answerSizePix, optionX, optionY, appDragX = 0, appDragY = 0, strokeWidth;
 	private double touchX, touchY, startX, startY, appAngle;
 	private boolean quizMode, quickUnlock, selectUnlock, options = false, selectSideBar = false, problem = true, paused = false,
-			measured = false, isFirstApp = false, shouldStartAnimations = false, wentOutOfBox = false;
+			measured = false, isFirstApp = false, shouldStartAnimations = false;
 	private String shareOldAnswer;
 
 	private int[] selectLeft = new int[5], selectRight = new int[5];
@@ -507,7 +508,8 @@ public class JoystickView extends View {
 	public void showStartAnimation(int start, int delay) {
 		if (start == 0) {
 			options = true;
-			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			// setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			setSidePaths(Height - pad);
 		}
 		invalidate();
 		animateHandler.removeCallbacks(startAnimate);
@@ -704,7 +706,8 @@ public class JoystickView extends View {
 		dstHeight = radiusOfSettingsIcons * 2 + barHeight;
 
 		if (options || shouldOpenOptionFromTutorial(tutorial)) {
-			setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+			// setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3); pai changed
+			setSidePaths(Height - pad);
 		} else {
 			setSidePaths(Height - pad);
 		}
@@ -954,7 +957,6 @@ public class JoystickView extends View {
 		int actionType = event.getAction();
 		if (!paused) {
 			if (actionType == MotionEvent.ACTION_DOWN) {
-				wentOutOfBox = false;
 				invalidate();
 				startX = event.getX();
 				startY = event.getY();
@@ -1009,21 +1011,19 @@ public class JoystickView extends View {
 			} else if (actionType == MotionEvent.ACTION_MOVE) {
 				touchX = event.getX();
 				touchY = event.getY();
-				if (touchY < 0) { // Pai code for upper bound for lock
-					wentOutOfBox = true;
-					returnToDefault();
-				} else if (!wentOutOfBox) {
-
+				if (touchY > 40 + (bmpUnlock.getHeight() / 2)) { // Pai code for upper bound for lock
+					// wentOutOfBox = true;
+					// returnToDefault();
 					checkSelection(false, false);
 					invalidate();
 				}
-			} else if (actionType == MotionEvent.ACTION_UP && !wentOutOfBox) {
+			} else if (actionType == MotionEvent.ACTION_UP) {
 				tapTimer = System.currentTimeMillis();
 				checkSelection(true, false);
 				returnToDefault();
 			}
 
-		} else if (actionType == MotionEvent.ACTION_UP && !wentOutOfBox) {
+		} else if (actionType == MotionEvent.ACTION_UP) {
 			resetGuess();
 			// setAlpha(0);
 			invalidate();
@@ -1418,7 +1418,8 @@ public class JoystickView extends View {
 			@Override
 			public void run() {
 				if (shouldOpenOptionFromTutorial(tutorial)) {
-					setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+					// setSidePaths(Height - radiusOfSettingsIcons * 2 - pad * 3);
+					setSidePaths(Height - pad);
 					options = true;
 				} else {
 					setSidePaths(Height - pad);
@@ -1610,7 +1611,10 @@ public class JoystickView extends View {
 	private int getMiddlePoint() {
 		int[] loc = new int[2];
 		getLocationOnScreen(loc);
-		return ((Activity) getContext()).getWindowManager().getDefaultDisplay().getHeight() / 2 - loc[1];
+		WindowManager window = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		window.getDefaultDisplay().getMetrics(displaymetrics);
+		return displaymetrics.heightPixels / 2 - loc[1];
 	}
 
 	private void setDimensions() {

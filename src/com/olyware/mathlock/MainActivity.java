@@ -43,9 +43,12 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -200,6 +203,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private UiLifecycleHelper uiHelper;
 	private Bitmap HelpQuestionImage;
 	private ProgressDialog progressDialog;
+	private ShowProgressActivity progressFrarment;
+	private TutorialCompleteFragment completeFragment;
+	private Fragment fragmentCurrentShown = null;
 
 	public static Context getContext() {
 		return ctx;
@@ -415,10 +421,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			uiHelper = new UiLifecycleHelper(this, null);
 			uiHelper.onCreate(savedInstanceState);
 
-			findViewById(R.id.txtFriends).setOnClickListener(this);
-			findViewById(R.id.txtProgress).setOnClickListener(this);
-			findViewById(R.id.txtQzMode).setOnClickListener(this);
-			findViewById(R.id.txtStore).setOnClickListener(this);
+			findViewById(R.id.pnlFriends).setOnClickListener(this);
+			findViewById(R.id.pnlProgress).setOnClickListener(this);
+			findViewById(R.id.pnlQuizMode).setOnClickListener(this);
+			findViewById(R.id.pnlStore).setOnClickListener(this);
 			findViewById(R.id.setting_gear).setOnClickListener(this);
 
 			IntentFilter logoutFilter = new IntentFilter(getString(R.string.logout_receiver_filter));
@@ -578,7 +584,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						if (s == JoystickSelect.A || s == JoystickSelect.B || s == JoystickSelect.C || s == JoystickSelect.D) {
 							boolean continueQuizMode = PreferenceHelper.setLockscreenFrequency(MainActivity.this, s);
 							quizMode = joystick.setQuizMode(continueQuizMode);
-							setQuizeMode(findViewById(R.id.txtQzMode));
+							setQuizeMode();
 							PreferenceHelper.setTutorialQuestion(MainActivity.this, 5);
 						}
 						break;
@@ -594,6 +600,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					case 7: // Unlock more question packs (slide the icon up)
 						if (s == JoystickSelect.Store || s == JoystickSelect.A)
 							PreferenceHelper.setTutorialDone(MainActivity.this);
+
 						break;
 					}
 					JoystickSelected(s, vibrate, Extra);
@@ -601,7 +608,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
 			quizMode = joystick.setQuizMode(!locked && !fromLogin);
-			setQuizeMode(findViewById(R.id.txtQzMode));
+			setQuizeMode();
 			if (fromLogin)
 				sharedPrefs.edit().putBoolean("from_login", false).commit();
 
@@ -756,7 +763,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			joystick.setNumberOfChallenges(ContactHelper.getNumberOfChallenges(this));
 			if (locked && quizMode && !fromTutorial)
 				quizMode = joystick.setQuizMode(false);
-			setQuizeMode(findViewById(R.id.txtQzMode));
+			setQuizeMode();
 
 			// get settings
 			sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -864,11 +871,25 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (locked && UnlockedPackages && !quizMode) {		// if locked then don't allow back button to exit app
 				return;
 			} else {
-				super.onBackPressed();
+				if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
+					removeProgressFragment();
+				} else {
+					super.onBackPressed();
+				}
 			}
 		} else {
-			super.onBackPressed();
+			if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
+				removeProgressFragment();
+			} else {
+				super.onBackPressed();
+			}
 		}
+	}
+
+	private void removeProgressFragment() {
+		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(R.color.bottom_bar_background));
+		getSupportFragmentManager().beginTransaction().remove(fragmentCurrentShown).commit();
+		findViewById(R.id.progress_underline).setVisibility(View.INVISIBLE);
 	}
 
 	@Override
@@ -1148,10 +1169,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	}
 
+	private void checkandloadTutorialComplete() {
+		boolean show = fromTutorialPosition == -1 && !PreferenceHelper.isShareCompeteShown(getApplicationContext());
+		Log.e("TUTORIAL", "" + show);
+		if (show) {
+			PreferenceHelper.setShareCompeteShown(getApplicationContext(), show);
+			showToutorialComplete();
+		}
+	}
+
 	private void setProblemAndAnswer() {
 		fromTutorialPosition = PreferenceHelper.getTutorialQuestionNumber(ctx);
 		GenericQuestion tutorialQuestion = PreferenceHelper.getTutorialQuestion(this, fromTutorialPosition);
 		packToOpen = PreferenceHelper.getPackToOpen(this);
+		checkandloadTutorialComplete();
 		String packName = "";
 		try {
 			PackageManager pm = getPackageManager();
@@ -1170,10 +1201,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		fromTutorial = false;
 		fromAskToOpen = false;
 		urls = answersNone;
+		Log.d("TUTORIAL", "TUTORIAL" + fromTutorialPosition);
 		if (tutorialQuestion != null) {
+
 			fromTutorial = true;
 			quizMode = joystick.setQuizMode(true);
-			setQuizeMode(findViewById(R.id.txtQzMode));
+			setQuizeMode();
 			joystick.setProblem(true);
 			questionWorth = 0;
 			questionWorthMax = 0;
@@ -1866,7 +1899,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
-			setQuizeMode(findViewById(R.id.txtQzMode));
+			setQuizeMode();
 			break;
 		case Settings:		// settings was selected
 			fromSettings = true;
@@ -2258,7 +2291,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										Toast.makeText(MainActivity.this, getString(R.string.challenge_accepted), Toast.LENGTH_LONG).show();
 										setProblemAndAnswer();
 										quizMode = joystick.setQuizMode(!quizMode);
-										setQuizeMode(findViewById(R.id.txtQzMode));
+										setQuizeMode();
 										String encryptedUserID = ContactHelper.getUserID(MainActivity.this);
 										encryptedUserID = encryptedUserID.equals("") ? "Unknown" : EncryptionHelper
 												.encryptForURL(encryptedUserID);
@@ -2528,32 +2561,77 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public void onClick(View view) {
 
-		if (view.getId() == R.id.txtFriends) {
+		if (view.getId() == R.id.pnlFriends) {
 			displayFriends();
-		} else if (view.getId() == R.id.txtProgress) {
+		} else if (view.getId() == R.id.pnlProgress) {
 			unlocking = false;
-			startActivity(new Intent(this, ShowProgressActivity.class));
-		} else if (view.getId() == R.id.txtQzMode) {
+			// startActivity(new Intent(this, ShowProgressActivity.class));
+			if (progressFrarment == null || !progressFrarment.isVisible())
+				showProgressFragment();
+		} else if (view.getId() == R.id.pnlQuizMode) {
 			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
 			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
 			quizMode = joystick.setQuizMode(!quizMode);
-			setQuizeMode(view);
+			setQuizeMode();
 
-		} else if (view.getId() == R.id.txtStore) {
+		} else if (view.getId() == R.id.pnlStore) {
 			unlocking = false;
 			startActivity(new Intent(this, ShowStoreActivity.class));
 		} else if (view.getId() == R.id.setting_gear) {
 			fromSettings = true;
 			unlocking = false;
 			startActivity(new Intent(this, ShowSettingsActivity.class));
+		} else if (view.getId() == R.id.crossImage) {
+			removeProgressFragment();
+		} else if (view.getId() == R.id.txtOkey) {
+			// getSupportFragmentManager().beginTransaction().remove(completeFragment).commit();
+			removeProgressFragment();
 		}
 
 	}
 
-	private void setQuizeMode(View view) {
+	private void showProgressFragment() {
+		findViewById(R.id.PnlContainer).setVisibility(View.VISIBLE);
+		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(android.R.color.white));
+		findViewById(R.id.progress_underline).setVisibility(View.VISIBLE);
+
+		if (progressFrarment == null)
+			progressFrarment = new ShowProgressActivity();
+
+		// Bundle bundle = new Bundle();
+		// bundle.putString(ProgressFragment.EXTRA_MESSAGE, getString(R.string.fetching_device_details));
+		// progressFragment.setArguments(bundle);
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+		transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+		transaction.replace(R.id.PnlContainer, progressFrarment);
+		transaction.commit();
+
+		fragmentCurrentShown = progressFrarment;
+	}
+
+	private void showToutorialComplete() {
+
+		findViewById(R.id.PnlContainer).setVisibility(View.VISIBLE);
+		if (completeFragment == null)
+			completeFragment = new TutorialCompleteFragment();
+
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+		transaction.replace(R.id.PnlContainer, completeFragment);
+		transaction.commit();
+		fragmentCurrentShown = completeFragment;
+	}
+
+	private void removeTutorialFragment() {
+		findViewById(R.id.PnlContainer).setVisibility(View.GONE);
+		getSupportFragmentManager().beginTransaction().remove(completeFragment).commit();
+	}
+
+	private void setQuizeMode() {
 		if (quizMode)
-			((TextView) view).setBackgroundColor(getResources().getColor(R.color.light_blue_selector));
+			findViewById(R.id.pnlQuizMode).setBackgroundColor(getResources().getColor(R.color.light_blue_selector));
 		else
-			((TextView) view).setBackgroundColor(getResources().getColor(android.R.color.transparent));
+			findViewById(R.id.pnlQuizMode).setBackgroundColor(getResources().getColor(android.R.color.transparent));
 	}
 }

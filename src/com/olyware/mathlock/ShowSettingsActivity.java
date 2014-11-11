@@ -150,6 +150,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 				Intent mainIntent = new Intent(ctx, MainActivity.class);
 				mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				PreferenceHelper.setShareCompeteShown(getApplicationContext(), false);
 				startActivity(mainIntent);
 				finish();
 				return true;
