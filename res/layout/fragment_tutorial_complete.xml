@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/okey_background"
             android:gravity="center"
-            android:text="Okey"
+            android:text="Okay"
             android:textColor="@android:color/white"
             android:textSize="24sp" />
     </LinearLayout>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white" >
+
+    <RelativeLayout
+        android:id="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="50dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Advance Settings"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/crossImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/crossmark" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatorActionBar"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/actionBar"
+        android:background="@color/light_white_seperator" />
+
+    <RelativeLayout
+        android:id="@+id/pnlUseAsLockScreen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seperatorActionBar"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:gravity="center"
+        android:minHeight="60dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Use as a lock screen"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/lockscreenValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="yes"
+            android:textColor="@color/light_blue_background"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatorUseLockScreen"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/pnlUseAsLockScreen"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@color/light_white_seperator" />
+
+    <RelativeLayout
+        android:id="@+id/pnlLockScreenTimeout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seperatorUseLockScreen"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+           android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center"
+        android:minHeight="60dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Lock screen timeout"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/timeoutValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="1 minute"
+            android:textColor="@color/light_blue_background"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatorLockscreentimeout"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/pnlLockScreenTimeout"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@color/light_white_seperator" />
+
+    <RelativeLayout
+        android:id="@+id/pnlautoadjustdifficulty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seperatorLockscreentimeout"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+           android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center"
+        android:minHeight="60dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Auto adjust difficulty"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/autoadjustValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="yes"
+            android:textColor="@color/light_blue_background"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatoradjustlayout"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/pnlautoadjustdifficulty"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@color/light_white_seperator" />
+
+    <RelativeLayout
+        android:id="@+id/pnlvibrate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seperatoradjustlayout"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+           android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center"
+        android:minHeight="60dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="vibrate on key press"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/vibrateValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="yes"
+            android:textColor="@color/light_blue_background"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatorvibrate"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/pnlvibrate"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@color/light_white_seperator" />
+
+    <RelativeLayout
+        android:id="@+id/pnlanalytics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seperatorvibrate"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+           android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center"
+        android:minHeight="60dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Send analytics to HiQ"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/analyticsValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="yes"
+            android:textColor="@color/light_blue_background"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatoranalytics"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/pnlanalytics"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@color/light_white_seperator" />
+
+    <RelativeLayout
+        android:id="@+id/pnlPush"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seperatoranalytics"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+           android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center"
+        android:minHeight="60dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Get push notifiactions"
+            android:textColor="@color/font_advancesetting"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/pushValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="yes"
+            android:textColor="@color/light_blue_background"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+</RelativeLayout>

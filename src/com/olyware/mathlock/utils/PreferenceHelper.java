@@ -60,7 +60,7 @@ public class PreferenceHelper {
 	final public static String SWISHER_JSON = "swisher_json";
 	final public static String SWISHER_COUNT = "swisher_count";
 	final public static String SWISHER_TOTAL = "swisher_total";
-	final public static String SWISHER_FILENAME_WITH_EXTENSION = "Kara Swisher Trivia.csv";
+	final public static String SWISHER_FILENAME_WITH_EXTENSION = "Kara Swisher Trivia.csv"; // chnaged for testing pai
 	final public static String SWISHER_FILENAME = "Kara Swisher Trivia";
 	final public static int SWISHER_MAX_COUNT = 3;
 

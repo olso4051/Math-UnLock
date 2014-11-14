@@ -56,10 +56,12 @@ public class ShowProgressActivity extends Fragment {
 		@Override
 		protected Integer doInBackground(Void... voids) {
 			publishProgress(0);
-			dbManager = new DatabaseManager(getActivity().getApplicationContext());
-			customCategories = dbManager.getAllCustomCategories();
-			for (String cat : customCategories)
-				displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
+			if (isVisible()) {
+				dbManager = new DatabaseManager(getActivity().getApplicationContext());
+				customCategories = dbManager.getAllCustomCategories();
+				for (String cat : customCategories)
+					displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
+			}
 			return 0;
 		}
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="screen" >
+
     <PreferenceScreen
         android:key="logout_button"
         android:title="@string/settings_logout" />
@@ -10,175 +11,166 @@
     <PreferenceScreen
         android:key="info_button"
         android:title="@string/settings_info" />
+
     <PreferenceCategory
-        android:title="@string/settings"
-        android:key="settings">
+        android:key="settings"
+        android:title="@string/settings" >
         <ListPreference
-	        android:key="difficulty_min"
-	        android:title="@string/difficulty_min"
-	        android:summary="@string/difficulty_min_summary"
-	        android:dialogTitle="@string/difficulty_min"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_min_default" />
+            android:defaultValue="@string/difficulty_min_default"
+            android:dialogTitle="@string/difficulty_min"
+            android:entries="@array/difficulty_entries"
+            android:entryValues="@array/difficulty_values"
+            android:key="difficulty_min"
+            android:summary="@string/difficulty_min_summary"
+            android:title="@string/difficulty_min" />
         <ListPreference
-            
-	        android:key="difficulty_max"
-	        android:title="@string/difficulty_max"
-	        android:summary="@string/difficulty_max_summary"
-	        android:dialogTitle="@string/difficulty_max"
-	        android:entries="@array/difficulty_entries"
-	        android:entryValues="@array/difficulty_values"
-	        android:defaultValue="@string/difficulty_max_default" />
+            android:defaultValue="@string/difficulty_max_default"
+            android:dialogTitle="@string/difficulty_max"
+            android:entries="@array/difficulty_entries"
+            android:entryValues="@array/difficulty_values"
+            android:key="difficulty_max"
+            android:summary="@string/difficulty_max_summary"
+            android:title="@string/difficulty_max" />
         <ListPreference
-            
-      		android:key="max_tries"
-      		android:title="@string/max_tries_title"
-      		android:summary="@string/max_tries_summary"
-      		android:dialogTitle="@string/max_tries_title"
-	        android:entries="@array/max_tries_entries"
-	        android:entryValues="@array/max_tries_values"
-	        android:defaultValue="@string/max_tries_default" />
+            android:defaultValue="@string/max_tries_default"
+            android:dialogTitle="@string/max_tries_title"
+            android:entries="@array/max_tries_entries"
+            android:entryValues="@array/max_tries_values"
+            android:key="max_tries"
+            android:summary="@string/max_tries_summary"
+            android:title="@string/max_tries_title" />
+
         <PreferenceScreen
-            
-	        android:title="@string/settings_advanced"
-	        android:persistent="false">
-	        <CheckBoxPreference
-	            
-		        android:key="lockscreen"
-		        android:title="@string/enable_lockscreen"
-		        android:summary="@string/enable_lockscreen_summary"
-		        android:defaultValue="true"/>
-	        <ListPreference
-	            
-		        android:key="lockscreen2"
-		        android:dependency="lockscreen"
-		        android:title="@string/enable_lockscreen2"
-		        android:summary="@string/enable_lockscreen2_summary"
-		        android:dialogTitle="@string/enable_lockscreen2"
-		        android:entries="@array/lockscreen2_entries"
-		        android:entryValues="@array/lockscreen2_values"
-		        android:defaultValue="@string/default_entry" />
-	        <CheckBoxPreference
-	            
-		        android:key="algorithm"
-		        android:title="@string/enable_algorithm"
-		        android:summary="@string/enable_algorithm_summary"
-		        android:defaultValue="true"/>
-	        <CheckBoxPreference
-	            
-		        android:key="vibration"
-		        android:title="@string/enable_vibration"
-		        android:summary="@string/enable_vibration_summary"
-		        android:defaultValue="true"/>
-	        <CheckBoxPreference
-	            
-		        android:key="analytics_tracking"
-		        android:title="@string/enable_tracking"
-		        android:summary="@string/enable_tracking_summary"
-		        android:defaultValue="true"/>
-	        <CheckBoxPreference
-	            
-		        android:key="push_notifications"
-		        android:title="@string/enable_push"
-		        android:summary="@string/enable_push_summary"
-		        android:defaultValue="true"/>
-	        <!-- <ListPreference
+            android:persistent="false"
+            android:title="@string/settings_advanced" >
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="lockscreen"
+                android:summary="@string/enable_lockscreen_summary"
+                android:title="@string/enable_lockscreen" />
+
+            <ListPreference
+                android:defaultValue="@string/default_entry"
+                android:dependency="lockscreen"
+                android:dialogTitle="@string/enable_lockscreen2"
+                android:entries="@array/lockscreen2_entries"
+                android:entryValues="@array/lockscreen2_values"
+                android:key="lockscreen2"
+                android:summary="@string/enable_lockscreen2_summary"
+                android:title="@string/enable_lockscreen2" />
+
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="algorithm"
+                android:summary="@string/enable_algorithm_summary"
+                android:title="@string/enable_algorithm" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="vibration"
+                android:summary="@string/enable_vibration_summary"
+                android:title="@string/enable_vibration" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="analytics_tracking"
+                android:summary="@string/enable_tracking_summary"
+                android:title="@string/enable_tracking" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="push_notifications"
+                android:summary="@string/enable_push_summary"
+                android:title="@string/enable_push" />
+            <!--
+                 <ListPreference
 		        android:key="sponsored"
 		        android:title="@string/enable_sponsored"
 		        android:summary="@string/enable_sponsored_summary"
 		        android:dialogTitle="@string/enable_sponsored"
 		        android:entries="@array/sponsored_entries"
 		        android:entryValues="@array/sponsored_values"
-		        android:defaultValue="@string/default_sponsored_entry" />-->
-	    </PreferenceScreen>
-	</PreferenceCategory>
-	<PreferenceCategory
-	    android:title="@string/settings_question_pack"
-	    android:key="question_packs_settings">
-		<PreferenceScreen
-		    
-	        android:key="question_packs"
-	        android:title="@string/settings_questions"
-	        android:persistent="false">
-		    <PreferenceCategory
-		        android:title="@string/settings_math_title"
-		        android:enabled="false"
-		        android:key="settings_math">
-		        <CheckBoxPreference
-		            
-			        android:key="enable_math"
-			        android:title="@string/enable"
-			        android:summary="@string/enable_math_summary"
-			        android:defaultValue="false"/>
-			</PreferenceCategory>
-			<PreferenceCategory
-		        android:title="@string/settings_vocab_title"
-		        android:enabled="false"
-		        android:key="settings_vocab">
-		        <CheckBoxPreference
-		            
-			        android:key="enable_vocab"
-			        android:title="@string/enable"
-			        android:summary="@string/enable_vocab_summary"
-			        android:defaultValue="false"/>
-			</PreferenceCategory>
-			<PreferenceCategory
-		        android:title="@string/settings_language_title"
-		        android:enabled="false"
-		        android:key="settings_language">
-		        <CheckBoxPreference
-		            
-			        android:key="enable_language"
-			        android:title="@string/enable"
-			        android:summary="@string/enable_language_summary"
-			        android:defaultValue="false"/>
-			    <ListPreference
-			        
-			        android:key="from_language"
-			        android:title="@string/language_from"
-			        android:summary="@string/language_from_default"
-			        android:dialogTitle="@string/language_from"
-			        android:entries="@array/language_entries"
-			        android:entryValues="@array/language_values_not_localized"
-			        android:defaultValue="@string/language_from_default" />
-			    <ListPreference
-			        
-			        android:key="to_language"
-			        android:title="@string/language_to"
-			        android:summary="@string/language_to_default"
-			        android:dialogTitle="@string/language_to"
-			        android:entries="@array/language_entries"
-			        android:entryValues="@array/language_values_not_localized"
-			        android:defaultValue="@string/language_to_default" />
-			</PreferenceCategory>
-			<PreferenceCategory
-		        android:title="@string/settings_engineer_title"
-		        android:enabled="false"
-		        android:key="settings_engineer">
-		        <CheckBoxPreference
-		            
-			        android:key="enable_engineer"
-			        android:title="@string/enable"
-			        android:summary="@string/enable_engineer_summary"
-			        android:defaultValue="false"/>
-			</PreferenceCategory>
-			<PreferenceCategory
-		        android:title="@string/settings_hiqh_trivia_title"
-		        android:enabled="false"
-		        android:key="settings_hiqh_trivia">
-		        <CheckBoxPreference
-		            
-			        android:key="enable_hiqh_trivia"
-			        android:title="@string/enable"
-			        android:summary="@string/enable_hiqh_trivia_summary"
-			        android:defaultValue="false"/>
-			</PreferenceCategory>
-			<PreferenceCategory
-		        android:title="@string/settings_custom_title"
-		        android:enabled="true"
-		        android:key="settings_custom">
-			</PreferenceCategory>
-		</PreferenceScreen>
-	</PreferenceCategory>
+		        android:defaultValue="@string/default_sponsored_entry" />
+            -->
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="question_packs_settings"
+        android:title="@string/settings_question_pack" >
+        <PreferenceScreen
+            android:key="question_packs"
+            android:persistent="false"
+            android:title="@string/settings_questions" >
+            <PreferenceCategory
+                android:enabled="false"
+                android:key="settings_math"
+                android:title="@string/settings_math_title" >
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="enable_math"
+                    android:summary="@string/enable_math_summary"
+                    android:title="@string/enable" />
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:enabled="false"
+                android:key="settings_vocab"
+                android:title="@string/settings_vocab_title" >
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="enable_vocab"
+                    android:summary="@string/enable_vocab_summary"
+                    android:title="@string/enable" />
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:enabled="false"
+                android:key="settings_language"
+                android:title="@string/settings_language_title" >
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="enable_language"
+                    android:summary="@string/enable_language_summary"
+                    android:title="@string/enable" />
+
+                <ListPreference
+                    android:defaultValue="@string/language_from_default"
+                    android:dialogTitle="@string/language_from"
+                    android:entries="@array/language_entries"
+                    android:entryValues="@array/language_values_not_localized"
+                    android:key="from_language"
+                    android:summary="@string/language_from_default"
+                    android:title="@string/language_from" />
+                <ListPreference
+                    android:defaultValue="@string/language_to_default"
+                    android:dialogTitle="@string/language_to"
+                    android:entries="@array/language_entries"
+                    android:entryValues="@array/language_values_not_localized"
+                    android:key="to_language"
+                    android:summary="@string/language_to_default"
+                    android:title="@string/language_to" />
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:enabled="false"
+                android:key="settings_engineer"
+                android:title="@string/settings_engineer_title" >
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="enable_engineer"
+                    android:summary="@string/enable_engineer_summary"
+                    android:title="@string/enable" />
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:enabled="false"
+                android:key="settings_hiqh_trivia"
+                android:title="@string/settings_hiqh_trivia_title" >
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="enable_hiqh_trivia"
+                    android:summary="@string/enable_hiqh_trivia_summary"
+                    android:title="@string/enable" />
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:enabled="true"
+                android:key="settings_custom"
+                android:title="@string/settings_custom_title" >
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
 </PreferenceScreen>

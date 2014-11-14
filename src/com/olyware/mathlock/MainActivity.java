@@ -55,6 +55,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -887,6 +888,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void removeProgressFragment() {
+
+		((ImageView) findViewById(R.id.progress_icon)).setImageResource(R.drawable.progress_icon);
+		((TextView) findViewById(R.id.txtProgress)).setTextColor(getResources().getColor(R.color.unselected_tab_Bar));
+
 		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(R.color.bottom_bar_background));
 		getSupportFragmentManager().beginTransaction().remove(fragmentCurrentShown).commit();
 		findViewById(R.id.progress_underline).setVisibility(View.INVISIBLE);
@@ -1462,8 +1467,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					if (!success) {
 						// custom question
 						if ((location[count] > 4) && (location[count] < PackageKeys.size())) {
-							currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 5);
-							success = setCustomProblem(customCategories.get(location[count] - 5), Difficulty.fromValue(difficultyMin),
+							currentPack = getString(R.string.custom) + " " + customCategories.get(location[count] - 6);
+							success = setCustomProblem(customCategories.get(location[count] - 6), Difficulty.fromValue(difficultyMin),
 									Difficulty.fromValue(difficultyMax));
 						}
 						// failed to load a question
@@ -2580,7 +2585,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else if (view.getId() == R.id.setting_gear) {
 			fromSettings = true;
 			unlocking = false;
-			startActivity(new Intent(this, ShowSettingsActivity.class));
+			startActivity(new Intent(this, SettingsActivity.class));
 		} else if (view.getId() == R.id.crossImage) {
 			removeProgressFragment();
 		} else if (view.getId() == R.id.txtOkey) {
@@ -2591,6 +2596,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void showProgressFragment() {
+
+		((ImageView) findViewById(R.id.progress_icon)).setImageResource(R.drawable.progress_selected);
+		((TextView) findViewById(R.id.txtProgress)).setTextColor(getResources().getColor(R.color.selected_tab_Bar));
+
 		findViewById(R.id.PnlContainer).setVisibility(View.VISIBLE);
 		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(android.R.color.white));
 		findViewById(R.id.progress_underline).setVisibility(View.VISIBLE);
@@ -2629,9 +2638,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void setQuizeMode() {
-		if (quizMode)
-			findViewById(R.id.pnlQuizMode).setBackgroundColor(getResources().getColor(R.color.light_blue_selector));
-		else
-			findViewById(R.id.pnlQuizMode).setBackgroundColor(getResources().getColor(android.R.color.transparent));
+		if (quizMode) {
+			((ImageView) findViewById(R.id.quiz_icon)).setImageResource(R.drawable.quiz_mode_selected);
+			((TextView) findViewById(R.id.txtQzMode)).setTextColor(getResources().getColor(R.color.selected_tab_Bar));
+			findViewById(R.id.quiz_underline).setVisibility(View.VISIBLE);
+		} else {
+			((ImageView) findViewById(R.id.quiz_icon)).setImageResource(R.drawable.qz_mode);
+			((TextView) findViewById(R.id.txtQzMode)).setTextColor(getResources().getColor(R.color.unselected_tab_Bar));
+			findViewById(R.id.quiz_underline).setVisibility(View.INVISIBLE);
+		}
 	}
 }
