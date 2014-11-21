@@ -72,7 +72,7 @@ public class ShowProgressActivity extends Fragment {
 
 		@Override
 		protected void onPostExecute(Integer result) {
-			if (result == 0) {
+			if (result == 0 && isVisible()) {
 				initSpinners();
 				setGraph();
 			}

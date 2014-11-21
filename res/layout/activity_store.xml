@@ -1,309 +1,539 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:orientation="vertical"
-	android:id="@+id/layout" >
-	<LinearLayout 
-	   	android:layout_width="match_parent"
-       	android:layout_height="wrap_content"
-       	android:padding="@dimen/login_vertical_margin_half"
-       	android:orientation="horizontal" >
-       	<ImageButton
-		    android:id="@+id/back"
-		    android:contentDescription="@string/back"
-		    android:enabled="true"
-		    android:layout_gravity="center_vertical"
-		    android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:background="@drawable/back"/>
-    	<TextView
-	    	android:id="@+id/money"
-	    	android:gravity="center_vertical"
-	    	android:layout_width="wrap_content"
-	    	android:layout_height="fill_parent"
-	    	android:textSize="25sp"
-	    	android:drawableLeft="@drawable/coins"
-	    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-	    	android:text="@string/default_money"/>
-    	<TextView
-	    	android:id="@+id/store"
-	    	android:gravity="center_vertical|right"
-	    	android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:textSize="45sp"
-	    	android:textStyle="bold"
-	    	android:text="@string/store"/>
-	</LinearLayout>
-	<LinearLayout
-	   	android:layout_width="match_parent"
-       	android:layout_height="wrap_content"
-       	android:padding="@dimen/login_vertical_margin_half"
-       	android:orientation="horizontal" >
-		<Button
-		    android:id="@+id/extra_coins1"
-		    android:enabled="false"
-		    android:layout_height="wrap_content"
-			android:layout_width="0dp"
-			android:layout_weight="5"
-			android:text="@string/extra_coins1"
-			android:textSize="20sp"
-			android:textStyle="bold"/>
-		<TextView
-	    	android:id="@+id/cost_small"
-	    	android:gravity="center_vertical|right"
-	    	android:layout_width="0dp"
-	    	android:layout_weight="1"
-	    	android:layout_height="fill_parent"
-	    	android:textSize="20sp"
-	    	android:text="@string/cost_small"/>
-	</LinearLayout>
-	<LinearLayout
-	   	android:layout_width="match_parent"
-       	android:layout_height="wrap_content"
-       	android:padding="@dimen/login_vertical_margin_half"
-       	android:orientation="horizontal" >
-		<Button
-		    android:id="@+id/extra_coins2"
-		    android:enabled="false" 
-		    android:layout_height="wrap_content"
-			android:layout_width="0dp"
-			android:layout_weight="5"
-			android:text="@string/extra_coins2"
-			android:textSize="20sp"
-			android:textStyle="bold"/>
-		<TextView
-	    	android:id="@+id/cost_large"
-	    	android:gravity="center_vertical|right"
-	    	android:layout_width="0dp"
-	    	android:layout_weight="1"
-	    	android:layout_height="fill_parent"
-	    	android:textSize="20sp"
-	    	android:text="@string/cost_large"/>
-	</LinearLayout>
-	<LinearLayout
-	   	android:layout_width="match_parent"
-       	android:layout_height="wrap_content"
-       	android:padding="@dimen/login_vertical_margin_half"
-       	android:orientation="horizontal" >
-		<Button
-		    android:id="@+id/extra_coins3"
-		    android:enabled="false" 
-		    android:layout_height="wrap_content"
-			android:layout_width="0dp"
-			android:layout_weight="5"
-			android:text="@string/extra_coins3"
-			android:textSize="20sp"
-			android:textStyle="bold"/>
-		<TextView
-	    	android:id="@+id/cost_all"
-	    	android:gravity="center_vertical|right"
-	    	android:layout_width="0dp"
-	    	android:layout_weight="1"
-	    	android:layout_height="fill_parent"
-	    	android:textSize="20sp"
-	    	android:text="@string/cost_all"/>
-	</LinearLayout>
-	
-	<ScrollView
-	    android:layout_width="match_parent"
-		android:layout_height="wrap_content" >
-	    <LinearLayout
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:padding="@dimen/login_vertical_margin_half"
-		    android:orientation="vertical" >
-		    <TextView
-		    	android:id="@+id/packs"
-		    	android:gravity="center"
-		    	android:layout_width="fill_parent"
-		    	android:layout_height="wrap_content"
-		    	android:textSize="30sp"
-		    	android:text="@string/packs"/>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_all"
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_all"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/all_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_math"
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_math"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/math_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_vocab"
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_vocab"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/vocab_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_language" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_language"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/language_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_engineer" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_engineer"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/engineer_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_hiqh_trivia" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_hiqh_trivia"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/hiqh_trivia_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_hiq_expansion" 
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_hiq_expansion"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/hiq_expansion_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-			<LinearLayout
-			   	android:layout_width="match_parent"
-		       	android:layout_height="wrap_content"
-		       	android:orientation="horizontal" >
-				<Button
-				    android:id="@+id/unlock_custom"
-				    android:layout_height="wrap_content"
-					android:layout_width="0dp"
-					android:layout_weight="4"
-					android:text="@string/unlock_custom"
-					android:textSize="20sp"
-					android:textStyle="bold"/>
-				<TextView
-			    	android:id="@+id/custom_cost"
-			    	android:gravity="center_vertical|right"
-			    	android:layout_width="0dp"
-			    	android:layout_weight="3"
-			    	android:layout_height="fill_parent"
-			    	android:textSize="20sp"
-			    	android:drawableRight="@drawable/coin1"
-			    	android:drawablePadding="@dimen/login_vertical_margin_quarter"
-			    	android:text="@string/purchased"/>
-			</LinearLayout>
-		</LinearLayout>
-	</ScrollView>
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/login_vertical_margin_half"
+        android:visibility="gone" >
+
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/back"
+            android:contentDescription="@string/back"
+            android:enabled="true" />
+
+        <TextView
+            android:id="@+id/money"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:drawableLeft="@drawable/coins"
+            android:drawablePadding="@dimen/login_vertical_margin_quarter"
+            android:gravity="center_vertical"
+            android:text="@string/default_money"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/store"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|right"
+            android:text="@string/store"
+            android:textSize="45sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="50dp" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/hiq_logo_progress" />
+
+        <ImageView
+            android:id="@+id/crossImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/crossmark" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/seperatorActionBar"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/actionBar"
+        android:background="@color/light_white_seperator" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/login_vertical_margin_half"
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/extra_coins1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:enabled="false"
+            android:text="@string/extra_coins1"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cost_small"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:text="@string/cost_small"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/login_vertical_margin_half"
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/extra_coins2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:enabled="false"
+            android:text="@string/extra_coins2"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cost_large"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:text="@string/cost_large"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/login_vertical_margin_half"
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/extra_coins3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:enabled="false"
+            android:text="@string/extra_coins3"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cost_all"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:text="@string/cost_all"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/packs"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/packs"
+                android:textSize="30sp"
+                android:visibility="gone" />
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyAll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/list1"
+                android:gravity="center_vertical"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_all"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/all_cost"
+                    android:background="@null"
+                    android:gravity="left"
+                    android:text="@string/unlock_all"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_Desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_all"
+                    android:layout_toLeftOf="@+id/all_cost"
+                    android:background="@null"
+                    android:gravity="left"
+                    android:text="@string/desc_all"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/all_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:drawableTop="@drawable/oval_unselected"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyMath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list2"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_math"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/math_cost"
+                    android:background="@null"
+                    android:gravity="left"
+                    android:text="@string/unlock_math"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_math"
+                    android:layout_toLeftOf="@+id/math_cost"
+                    android:background="@null"
+                    android:gravity="left"
+                    android:text="@string/desc_Math"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/math_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyVocab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list3"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_vocab"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/vocab_cost"
+                    android:background="@null"
+                    android:gravity="left"
+                    android:text="@string/unlock_vocab"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_vocab_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_vocab"
+                    android:layout_toLeftOf="@+id/vocab_cost"
+                    android:background="@null"
+                    android:gravity="left"
+                    android:text="@string/desc_vocab"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/vocab_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list4"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_language"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/language_cost"
+                    android:background="@null"
+                    android:text="@string/unlock_language"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_language_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_language"
+                    android:layout_toLeftOf="@+id/language_cost"
+                    android:background="@null"
+                    android:text="@string/desc_language"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/language_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyEngineer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list5"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_engineer"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/engineer_cost"
+                    android:background="@null"
+                    android:text="@string/unlock_engineer"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_engineer_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_engineer"
+                    android:layout_toLeftOf="@+id/engineer_cost"
+                    android:background="@null"
+                    android:text="@string/desc_engineering"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/engineer_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyHiqTravia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list1"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_hiqh_trivia"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/hiqh_trivia_cost"
+                    android:background="@null"
+                    android:text="@string/unlock_hiqh_trivia"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_hiqh_trivia_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_hiqh_trivia"
+                    android:layout_toLeftOf="@+id/hiqh_trivia_cost"
+                    android:background="@null"
+                    android:text="@string/desc_hiq_trivia"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/hiqh_trivia_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/pnlBuyHiqTraviaExpansion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list2"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/unlock_hiq_expansion"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/hiq_expansion_cost"
+                    android:background="@null"
+                    android:text="@string/unlock_hiq_expansion"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_hiq_expansion_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_hiq_expansion"
+                    android:layout_toLeftOf="@+id/hiq_expansion_cost"
+                    android:background="@null"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/hiq_expansion_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/list3"
+                android:gravity="center"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:visibility="gone" >
+
+                <TextView
+                    android:id="@+id/unlock_custom"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/custom_cost"
+                    android:background="@null"
+                    android:text="@string/unlock_custom"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/unlock_custom_desc"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/unlock_custom"
+                    android:layout_toLeftOf="@+id/custom_cost"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/custom_cost"
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="@dimen/login_vertical_margin_quarter"
+                    android:gravity="center"
+                    android:text="@string/purchased"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

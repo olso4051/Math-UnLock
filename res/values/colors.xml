@@ -45,5 +45,10 @@
     <color name="selected_tab_Bar">#4A90E2</color>
     <color name="unselected_tab_Bar">#A0A0A0</color>
     <color name="font_advancesetting">#616161</color>
+    <color name="list1">#538FA6</color>
+    <color name="list2">#F85D70</color>
+    <color name="list3">#686868</color>
+    <color name="list4">#FFC668</color>
+    <color name="list5">#72C171</color>
 
 </resources>

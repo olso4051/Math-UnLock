@@ -1,0 +1,201 @@
+question_text,answer_correct,answer_incorrect1,answer_incorrect2,answer_incorrect3,difficulty
+How much has Google spent acquiring other companies?,$22 billion,$500 million,$50 billion,$5 billion,0
+Android was sold to Google for how much?,$50 million,$1 billion,$5 million,$100 million,1
+Who owns the popular rating company Zagat?,Google,Yahoo,Conde Nast,News Corp,2
+Who owns tumblr?,Yahoo,Google,Tumblr,Amazon,3
+What start up did Nick D'Aloisio found?,Summly,FourSquare,Twitter,Nest,4
+What is Vine?,Video sharing app,Wine review site,Healthy eating magazine,Plant sculpting network,0
+Who is an investor in WealthFront?,Mike Jones (Science),Mike Zuckerberg (Facebook),Jack Dorsey (Twitter),Sam Altman (Y Combinator),1
+"Which man is not a part of the group commonly called the ""PayPal Mafia""",Arthur Rock,Peter Thiel,Reid Hoffman,Elon Musk,2
+What was the first venture capital firm in Silicon Valley?,Davis & Rock,Andreessen Horowitz,KPCB,Sequoia Capital,3
+What is a term sheet?,How an investment is made,Another term for NDA,How co-founders will work together,The terms and conditions,4
+"What are ""turns"" of debt?",Debt to EBITDA ratio,Amount of debt to be repaid,How the debt is issued,"One person pays, then another pays",0
+What is sandbagging?,Stalling an acquisition,Pulling an all nighter,Shipping a new product,Underfunding a raise round,1
+"A ""bolt-on"" is what?",A business acquired for a portfolio company,Additional equity raised,A new feature added to a product,Equity issued to a co-founder,2
+"When pre-money value is higher than post-money value, the raise was:",A down round,Accretive,A success,Dilutive,3
+EBITDA stands for:,"Earnings Before Interest, Taxes, Depreciation, and Amortization",An accounting trick,Earnings Before Interest and Taxes,Free Cash Flow,4
+Profit Margins for SaaS companies are typically around,30%,5%,10%,50%,0
+ARPDAU is:,A mobile  revenue metric,A hotel profit measure,Critical to debt raising,Based on installs,1
+The typical ARPDAU for casual games is:,Under $0.04,$1,$0.10,$5,2
+Y Combinator terms are typically,$120k for 7%,$50k for 10%,$100k for 6%,$250k for 4%,3
+What is the typical cost of payment processing?,2.50%,3.90%,$0.30,1%,4
+What are Brian Acton and Jan Koum known for?,Founding WhatsApp,Making Twitter,Starting Kik,Co-founding Facebook,0
+Square was founded by:,Jack Dorsey,Tony Fadell,Elon Musk,Jim Goetz,1
+Tony Fadell and Matt Rogers of Nest were acquired by,Google,Yahoo,Honeywell,Apple,2
+Noam Bardin sold Waze to Google for,$1 billion,$100 million,$1 and Google options,Undisclosed sum,3
+"Elon Musk released ""D"", which is",Tesla's all wheel drive,Digital space launch,A new SpaceX craft,His charity fund,4
+Jim Goetz is known for what acquisition?,Facebook / WhatsApp,Yahoo / Summly,Google / Android,Apple / Beats,0
+Ev Williams is known for which company?,Medium,Large,Small,MicroBlogg,1
+Mark Zuckerberg's Facebook does how much in mobile ads?,$1 billion,$10 billion,$500 million,$100 million,2
+Travis Kalanick founded,Uber,Lyft,Sidecar,SaferTaxi,3
+Jelly was founded by Ben Finkel and,Biz Stone,Buzz Rock,Al Gore,Bono,4
+GoPro and Nicholas Woodman started in,2002,2001,2005,2010,0
+Google X is,A top secret research lab,A new space project,Google's banned site list,A motorcycle race,1
+Who is Larry Page?,CEO of Google,Whitehouse Press Secretary,Chairman of Apple,Montana Senator,2
+Dropbox's revenue is around,$200 million,$1 billion,$100 million,$25 million,3
+Box was founded by,Aaron Levie,Drew Houston,Arash Ferdowsi,Ilya Fushman,4
+Airbnb has how many properties on its site?,"550,000","25,000","100,000","2,500,000",0
+FireEye is,A hacker detection system,A contact lens maker,A cable manufacturer,A surfer brand,1
+Klout's top score is,100,200,1000,25,2
+Reed Hastings is known for,Netflix,Hulu,Comcast On Demand,Coke and Popcorn,3
+Which company holds the record for largest seed round?,Clinkle,Color,Airtime,Facebook,4
+What does Stripe do?,Payment processing,HTML5 rendering,Mobile app creation,Cloud hosting,0
+What is the top funded Kickstarter project?,Pebble,Ouya,Project Eternity,Form 1,1
+What is the current ratio,$Current Assets / Current Liabilities$,$Current Assets / Total Liabilities$,$Cash / Interest Payments$,$Cash / Burn Rate$,2
+A good current ratio is,2,1,3,1.5,3
+Gross profit is calculated as,$Sales-COGS$,$Sales-Returns$,$Sales-Taxes$,$Sales-Expenses$,4
+Gross profit margin is,$Gross Profit/Net Sales$,$Gross Profit/Revenue$,$Gross Profit/Expenses$,$Gross Profit/Returns$,0
+Calculate net profit margin as,$Net Profit \(before tax\)/Net Sales$,$Gross Profit/Revenue$,$Revenue-Expenses$,$COGS/Salaries$,1
+Accounts receivable turnover is,$Net Sales/Accounts Receivable$,$Accounts Receivable/365$,$52\\*Accounts Receivable /Sales$,$Accounts Receivable/Sales$,2
+Service businesses usually have accounts receivable turnovers of,3 to 4,1 to 2,0 to 1,5 to 6,3
+Profit per square foot is,$Net Profit \(before tax\)/Sq Ft Office Space$,$Net Revenue/Sq Ft Office Space$,$COGS/Sq Ft Office Space$,$Sq Ft Office Space/Net Sales \(before taxes\)$,4
+Fixed costs are,Not dependent on sales,Unchangeable,Vary with sales,"Bad, very bad",0
+Variable costs are,Dependent on sales amount,Not dependent on sales,Cannot be forecasted,Change daily,1
+"""Current"" in accounting means",Used within one year,Used within two years,Used this month,For daily use,2
+Working capital is,$Current assets-Current Liabilities$,$Cash-Expenses$,$Cash-Payroll$,$Revenue-Expenses$,3
+COGS stands for,Cost of Goods Sold,Capital of Good Services,Certified Operations Generations,Credit of General Services,4
+ROI stands for,Return on Investment,Rate of Increase,Ratio of Investments,Rate of Instability,0
+How do you calculate Present Value?,$Future Value/\(1+Rate of Return)^Periods$,$Future Value\\*\(1+Rate of Return\)$,$\(1+Rate of Return\)^(Periods)$,$Future Value^\(1+Periods\),1
+What does a balance sheet show?,"Assets, Liabilities, and Equity",Cash Flow,Revenue and Expenses,The Interest Rate on Debt,2
+Accounts payable shows,What you owe creditors,What you own,What customers owe you,Your profits,3
+GAAP refers to,US-based accounting principles,International accounting rules,IRS reporting requirements,Investor regulations,4
+A convertible note is,Debt,Common stock,Preferred stock,A bank loan,0
+Employee options pools do what to founder equity?,Dilute it,Increase it,Not related,Give more return,1
+A graphical web advertising unit,Banner ad,Advertising plan,Paper stock,Direct mail,2
+A communication method by which you get customers,Channel,Stream,Market segment,Brick and mortar,3
+"Demographics include age, gender, income and",Education,Attitude,Likes,Opinions,4
+Direct marketing means sending a message,Directly to consumers,The fastest way possible,Directly to the ad agency,First to the newspapers,0
+The end user is the person,Using the product,Posting on Facebook,Buying the product,Distributing to the public,1
+"""Creatives"" means",Material used to generate leads,The smart art people,Inventors like Steve Jobs,The Outliers,2
+A demand is a,Willingness & ability to buy,Interest in a product,Ability to buy,A need,3
+Billionaires think the world is,Tangibly fungible,Changing,Their playground,Easy,4
+The Value Equation is,$Benefits/Price$,$Benefits-Price$,$Price+Benefits$,$Cost+Price$,0
+CPA means,Cost per Action,Cost per Addition,Credit per Acquisition,Cost per Alert,1
+CPC stands for,Cost per Click,Credit per Consumer,Cost per Customer,Credit per Computer,2
+Backlinks are,Links from other websites to yours,Linking to Google,Links that take you back,Another name for the Back butotn,3
+Spiders online are,Scripts that gather data,Viruses,Bad computers,Hacker networks,4
+CTR is,$Clicks/Impression$,$Clicks/Visitors$,$Unique Visitors/All Visitors$,$Revenue/User$,0
+"The cost per 1,000 impressions is",CPM,CPK,CPT,PPT,1
+CAC measures the,cost of new customers,revenue per user,value per current user,country of revenue,2
+EdgeRank is which company's algorithm?,Facebook,Google,Bing,Yahoo,3
+"Penguin, Panda, and Hummingbird refer to",Google,Facebook,Apple,iOS,4
+An interstitial is an ad that appears,Between two pages,On top of the page,Below the fold,On your phone,0
+The top PageRank value is,10,1,100,5,1
+PPC campaigns pay per,Click,Customer,Current user,Client,2
+What industry is not in Consumer Discretionary?,Tobacco,Media,Auto,Retail,3
+Which is not considered Consumer Staples?,Apparel,Beverages,Household Products,Food,4
+Utilities is comprised of all except,Internet,Water,Gas,Electric,0
+Debt yields and prices move,Inversely,Correlated,Together,Unrelated,1
+"What percentage of all US buildings will be ""green"" by 2016?",50%,25%,10%,75%,2
+"50% of all ""green"" construction is funded by",The US government,Private companies,Silicon Valley,Banks,3
+The mHealth market will be worth ____ by 2018,$10 billion,$1 billion,$100 million,$5 billion,4
+"In 2012, specialty-food sales were",$85 billion,$100 million,$25 billion,$570 million,0
+"Since 2003, how many specialty-food products launched?","4,300","1,250","5,000",150,1
+"In 2014, online baby apparel sales were",$6 billion,$3 billion,$227 million,$132 million,2
+40% of all baby apparel sales are,diapers,clothing,baby accessories,furniture,3
+"In 2018, how many baby eCommerce stores will there be?","6,000","1,000","10,000",600,4
+About how many languages are there worldwide?,"6,700","1,200","5,500",376,0
+How many translation businesses are there?,"50,000","1,000","43,800","25,000",1
+What percentage of translation businesses are individuals?,95%,27%,50%,63%,2
+"Of the Top 10 Fastest Growing Economies, Africa has",6,1,0,2,3
+The Baltic Dry Index can forecast world economic levels in the next,2 to 4 months,4 to 6 months,1 to 2 years,0 to 1 month,4
+Global intrastructure demand can be forecast by,Copper,Steel,Diamonds,Taconite,0
+The Russel 2000 can be a proxy for,Retail spending,Energy prices,Blue chip investing,Government regulation,1
+Money velocity and savings habits move,Inversely,Together,Correlated,Unrelated,2
+"In 2013 to 2022, the Internet of Things will produce what profits?",$14.4 trillion,$100 billion,$5 trillion,$750 billion,3
+How many American students drop out of school yearly?,3 million,1 million,10 million,7 million,4
+"By 2018, the global wearables market will be",$8 billion,$6 billion,$500 million,$15 billion,0
+"Since 2009, how much has been invested in security technology companies?",$2.9 billion,$1.3 billion,$3.9 billion,$5.1 billion,1
+What percentage of post-2003 startups are worth $1 billion or more?,0.07%,2%,10%,0.50%,2
+How many billion-dollar plus companies are born yearly?,4,20,10,1,3
+"How long until the  average ""liquidity event""?",7 years,1 year,12 months,10 years,4
+What is the average age for an successful entrepreneur?,40,19,21,35,0
+Most billion dollar startups have how many co-founders?,3,2,5,4,1
+What percent of foudning teams have school or work history?,90%,74%,25%,50%,2
+What percent of co-founders went to school together?,46%,30%,90%,75%,3
+What percent of founding CEOs are still around at an exit?,76%,50%,22%,17%,4
+What percentage of founding CEOs have technical degrees?,50%,75%,10%,35%,0
+What percent of billion dollar companies did not majorly pivot?,90%,10%,30%,80%,1
+The amount the average successful startup raises before an exit,$41 million,$35 million,$100 million,$10 million,2
+The average exit amount for a successful startup,$243 million,$1 billion,$10 million,$142 million,3
+Average raise before an acquisition,$29 million,$17 million,$21 million,$53 million,4
+Average acquisition amount,$155 million,$253 million,$37 million,$532 million,0
+Original investment to exit multiple,7.5x,5.2x,1.2x,100.3x,1
+Average age of company before acquisition,7 years,12 months,10 years,5 years,2
+Average age of company before IPO,8.5 years,5.3 years,25.1 years,10 years,3
+What percent of founders have bachelors derees,95.10%,76.10%,35.40%,99.80%,4
+What percent of founders have advanced degrees?,47%,75%,82%,17%,0
+What percent of founders came from extremely rich families?,1%,10%,5%,3%,1
+What percent of founders are married when launching?,70%,10%,5%,90%,2
+What percent of founders have kids when launching?,60%,5%,7.90%,30%,3
+How many startups has the average founder launched?,2.3,1,1.4,3,4
+How many founders are the first in their family to start a business?,52%,15%,83%,34%,0
+Which is not a marketing framework?,KML,5 Cs,4 Ps,STP,1
+Which is not one of the 5 C's of marketing?,Clients,Company,Collaborators,Customers,2
+Which is not one of the 5 C's of marketing?,Computers,Company,Competitors,Climate,3
+Which is not one of the 5 C's of marketing?,Category,Company,Climate,Customers,4
+Which is not one of the 4 P's of marketing?,People,Product,Price,Promotion,0
+Which is not one of the 4 P's of marketing?,Percent,Price,Place,Product,1
+Which is not part of the STP framework?,Simulation,Segmentation,Targeting,Positioning,2
+CPI means,Cost Per Install,Consumer Price Indicator,Computer Process Indexing,Client Percentage Inactive,3
+A PR kit should be provided by,Every company,Large companies,Tech companies,Media houses,4
+Loss of a trademark due to it becoming a common word is,Genericide,Misuse,Abandonment,Failure to Police,0
+Which is not a part of SWOT analysis?,Options,Strengths,Opportunities,Weaknesses,1
+Which is not a part of SWOT analysis?,Transactions,Weaknesses,Strengths,Threats,2
+Which is not a part of SWOT analysis?,Situation,Threats,Opportunities,Strengths,3
+"In startup terms, ""MVP"" stands for",Minimum Viable Product,Most Valueable Programmer,Mean Variance Pattern,Max Value Proposition,4
+What is an entrepreneur?,Someone who invests time and money to start a business,Someone who makes a lot of money,Someone who dislikes their job,Someone who earns a lot of money,0
+What is capital?,Financial assets,A prohibitive cost of entry,A large building,A founder's ownership,1
+Making a purchase you had not planned is,An impulse purchase,Comparison shopping,A warranty,Consumer spending,2
+Which of the following will change profit margins?,All of these,Sale price,Amount of product,Cost to produce product,3
+"What is ""creative distruction""?","Something new ""kills"" something old",Incremental changes,Building from the ashes,A hostile takeover,4
+Which is th earliest stage of capital?,Seed money,Series A,Private Equity,IPO,0
+"Which of the following would be an ""exit""?",All of these,An IPO,A merger,A hostile takeover,1
+Which investment vehicle is most senior?,1st Tranche Debt,Preferred Stock,Founder's Equity,Subordinated Debt,2
+Who get's paid last in an exit?,Founders,Banks,Venture Capitalists,Customers,3
+Which account is paid first in liquidation?,Accounts Payable,Founders,Investors,All at the same time,4
+What is the general limit on net worth increases in one generation?,$10 million,$100 million,$5 million,$250 million,0
+An business accelerator focuses on,Growth,Ideation,Product / Market Fit,Pivoting,1
+A business incubator primarily provides,Tools and advice to start,Help raising a Series B,Marketing and growth,Government grants,2
+"In startup terms, a ""runway"" is",The time before cash runs out,A place planes land,The time from idea to market,The product feedback loop,3
+A viral k-factor would be,1.5,1,0.9,0.1,4
+Stock options are a,Chance to buy equity,Obligation to buy equity,Chance to sell equity,Debt,0
+Treasury stock is stock that the company has,Bought back,Issued to investors,Given to founders,Sold to the government,1
+Which is the strongest legal idea protection?,Utility patent,Copyright,Provisional Patent,Design patent,2
+What is the typical forecasting period for a startup?,12 months,3 months,5 years,3 years,3
+Depreciation is a _____ expense,Noncash,Cash,Imaginary,"Bad, very bad",4
+An in-depth source for industry data is,IBISWorld,Yahoo,The Yellow Pages,Chamber of Commerce,0
+A vesting schedule for employees shows how much and when they get,Equity,Cash,Promotions,New computers,1
+Regulation D deals with,Raising from investors,Cash minimums in the bank,Health insurance policies,Medical policies,2
+Debt is good when expected profits exceed the,Interest,Principle,Equity hook,Debt is always bad,3
+Coworking is,Shared office space,A verb for your co-workers,Working together,Something with a cow,4
+Which entity allows pass through taxation?,S Corporation,C Corporation,LLC,Sole Proprietorship,0
+What's a base tax rate when forecasting?,35%,40%,5%,15%,1
+Benefits can add up to what amount to an employee's salary?,30%,$500,4%,15%,2
+Which state generally has the best environment for business entities?,Delaware,Washington,California,New York,3
+How long should your elevator pitch be?,30 seconds,1 minute,3 minutes,15 seconds,4
+What percent of 5 year forecasts are accurate?,0%,50%,25%,90%,0
+Which US government agency helps with startups?,SBA,IRS,FCC,FAA,1
+What is the average success fee an investment bank charges to raise equity?,3-5%,7-8%,"$5,000",1-2%,2
+A convertible note values the company at,Nothing this round,$Investment/Percent Equity$,$Equity/Investment$,$1 million,3
+What is a Capped Note?,Convertible debt with a ceiling on valuation,Convertible debt with minimum equity,A maximum interest rate,Optional dividends,4
+"Simply, post money valuation is",$Pre-money + New cash$,Impossible to calculate,Based on the next round,$New cash-Expenses+Revenue$,0
+Which class of investment always has voting rights?,Common stock,Preferred Stock,Senior Debt,Office Leases,1
+Liquidation preference determines what during a liquidation event?,Who gets paid what and when,How founders get equity,The interest rate on dividends,The board seats investors get,2
+Participating preferred allows what?,A double dip on exit,Board meeting votes,Onsite office space,Decision power in marketing,3
+"""Pro-rata"" is Latin for",In proportion,Professional rates,For free,Highest grade,4
+Your 3 fellow Board members can fire you as CEO if,They vote on it,They ask HR,They never can,They control 51% equity,0
+Venture capital funds last for,10 years,3 years,Forever,20 years,1
+"""Limited Partners"" or ""LPs"" are",Passive investors in a VC fund,Limited to just Board seats,Another term for VCs,Who the CEO reports to,2
+New VC funds typically need to invest their cash within,5 years,24 months,2 weeks,At IPO,3
+What percentage of a VC fund is the partners own money?,1-5%,5-10%,50-70%,0%,4
+How do you monitor project progress to a plan?,Gantt chart,Flow diagrams,Network map,Capacity loading graph,0
+Local governments spend more on this than state govenments,Education,Corrections,Hospitals,Public Welfare,1
+What is the most costly function of state and local governments ?,Education,Social Security,Highways,Police Protection,2
+State governments administer all of the following health and welfare programs except,Social Security,Unemployment Compensation,Medicaid,Temporary Assistance for Needy Families,3
+The cheapest day to buy airline tickets is generally,Tuesday,Wednesday,Friday,Monday,4
+"""Bootstrapping"" means",Self-funding,Raising early venture capital,Listing on the OTCBB,Getting a bank loan,0
+"In mobile development, ""APK"" refers to",An Android application format,An iOS app,App store ranking,An over budget project,1
+"A ""churn rate"" is an app's rate of user",abandonment,adoption,subscription,sharing,2
+A CDN will help your app be delivering this faster,Content,Subscribers,Downloads,Pricing,3
+"""DAU"" is a metric of",Daily active users,Daily added users,Down-state active UI,Dynamic aggregate users,4

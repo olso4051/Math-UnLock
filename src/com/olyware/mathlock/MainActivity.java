@@ -133,7 +133,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000, 0, 1, 2 };
-	final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1", "expansion" };
+	// final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1", "expansion", "engineer",
+	// "hiqentrepack", "math" };
+	final private static String[] SKU = { "allpack", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
@@ -206,6 +208,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private ProgressDialog progressDialog;
 	private ShowProgressActivity progressFrarment;
 	private TutorialCompleteFragment completeFragment;
+	private PacksFrgment packFragment;
 	private Fragment fragmentCurrentShown = null;
 
 	public static Context getContext() {
@@ -257,6 +260,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (!dbManager.isDestroyed()) {
 				customCategories = dbManager.getAllCustomCategories();
 				PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+				// PackageKeys.add(0, "unlock_all");
 				displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
 				for (String cat : customCategories) {
 					PackageKeys.add(getString(R.string.custom_enable) + cat);
@@ -490,29 +494,70 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					} else {
 						// check for non-consumed purchases
 						if (inventory.hasPurchase(SKU[0])) {
-							mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(MainActivity.this, 0);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 0);
 						}
 						if (inventory.hasPurchase(SKU[1])) {
-							mHelper.consumeAsync(inventory.getPurchase(SKU[1]), mConsumeFinishedListener);
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(MainActivity.this, 1);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 1);
 						}
 						if (inventory.hasPurchase(SKU[2])) {
-							mHelper.consumeAsync(inventory.getPurchase(SKU[2]), mConsumeFinishedListener);
-						}
-						if (inventory.hasPurchase(SKU[3])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(MainActivity.this, 2);
 						} else {
 							PreferenceHelper.lockSubscription(MainActivity.this, 2);
 						}
-						if (inventory.hasPurchase(SKU[4])) {
+						if (inventory.hasPurchase(SKU[3])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(MainActivity.this, 3);
 						} else {
 							PreferenceHelper.lockSubscription(MainActivity.this, 3);
 						}
+						if (inventory.hasPurchase(SKU[4])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(MainActivity.this, 4);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 4);
+						}
 						if (inventory.hasPurchase(SKU[5])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(MainActivity.this, 5);
+						} else {
+							PreferenceHelper.lockSubscription(MainActivity.this, 5);
+						}
+						if (inventory.hasPurchase(SKU[6])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(MainActivity.this, 6);
 						} else {
 							PreferenceHelper.lockSubscription(MainActivity.this, 6);
 						}
+
+						// if (inventory.hasPurchase(SKU[1])) {
+						// mHelper.consumeAsync(inventory.getPurchase(SKU[1]), mConsumeFinishedListener);
+						// }
+						// if (inventory.hasPurchase(SKU[2])) {
+						// mHelper.consumeAsync(inventory.getPurchase(SKU[2]), mConsumeFinishedListener);
+						// }
+						// if (inventory.hasPurchase(SKU[3])) {
+						// PreferenceHelper.unlockSubscription(MainActivity.this, 2);
+						// } else {
+						// PreferenceHelper.lockSubscription(MainActivity.this, 2);
+						// }
+						// if (inventory.hasPurchase(SKU[4])) {
+						// PreferenceHelper.unlockSubscription(MainActivity.this, 3);
+						// } else {
+						// PreferenceHelper.lockSubscription(MainActivity.this, 3);
+						// }
+						// if (inventory.hasPurchase(SKU[5])) {
+						// PreferenceHelper.unlockSubscription(MainActivity.this, 6);
+						// } else {
+						// PreferenceHelper.lockSubscription(MainActivity.this, 6);
+						// }
+
 					}
 				}
 			};
@@ -545,6 +590,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			mHandler = new Handler();
 
 			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+			// PackageKeys.add(0, "unlock_all");
 			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
 			LanguageEntries = getResources().getStringArray(R.array.language_entries);
 			unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
@@ -789,6 +835,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (!dbManager.isDestroyed()) {
 					customCategories = dbManager.getAllCustomCategories();
 					PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+					// PackageKeys.add(0, "unlock_all");
 					for (String cat : customCategories)
 						PackageKeys.add(getString(R.string.custom_enable) + cat);
 				}
@@ -892,9 +939,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		((ImageView) findViewById(R.id.progress_icon)).setImageResource(R.drawable.progress_icon);
 		((TextView) findViewById(R.id.txtProgress)).setTextColor(getResources().getColor(R.color.unselected_tab_Bar));
 
+		((ImageView) findViewById(R.id.pack_icon)).setImageResource(R.drawable.packs);
+		((TextView) findViewById(R.id.txtStore)).setTextColor(getResources().getColor(R.color.unselected_tab_Bar));
+
 		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(R.color.bottom_bar_background));
 		getSupportFragmentManager().beginTransaction().remove(fragmentCurrentShown).commit();
 		findViewById(R.id.progress_underline).setVisibility(View.INVISIBLE);
+		findViewById(R.id.pack_underline).setVisibility(View.INVISIBLE);
+
+		onResume();
 	}
 
 	@Override
@@ -934,6 +987,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		if (fragmentCurrentShown instanceof PacksFrgment && ((PacksFrgment) fragmentCurrentShown).mHelper != null
+				&& !((PacksFrgment) fragmentCurrentShown).mHelper.handleActivityResult(1, resultCode, data)) {
+			super.onActivityResult(requestCode, resultCode, data);
+			// ((PacksFrgment) fragmentCurrentShown).refereshlist();
+
+		}
 		if (loggedIn) {
 			uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
 				@Override
@@ -1315,6 +1375,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						resetQuestionWorth(questionWorthMax);
 					}
 				} else if (PreferenceHelper.isSwisherPackOn(this)) {
+					// ?? Need to worry about this
 					fromDontShare = true;
 					joystick.setProblem(true);
 					if (!PreferenceHelper.isSwisherPackAdded(this, dbManager)) {
@@ -1322,8 +1383,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						setPackageKeys();
 					}
 					int fromSwisherCount = PreferenceHelper.getSwisherPackCount(ctx);
-					currentPack = getString(R.string.custom) + " " + PreferenceHelper.SWISHER_FILENAME;
-					CustomQuestion question = dbManager.getSwisherQuestion(fromSwisherCount);
+					currentPack = getString(R.string.custom) + " " + PreferenceHelper.getCustomFileName(ctx);
+					CustomQuestion question = dbManager.getSwisherQuestion(MainActivity.this, fromSwisherCount);
 					if (question == null) {
 						setDefaultQuestion();
 						return;
@@ -1335,8 +1396,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					questionWorthMax = 10;
 					decreaseRate = 500;
 
-					questionDescription
-							.setText(getString(R.string.question_description_prefix) + " | " + PreferenceHelper.SWISHER_FILENAME);
+					questionDescription.setText(getString(R.string.question_description_prefix) + " | "
+							+ PreferenceHelper.getCustomFileName(ctx));
 
 					problem.setText(question.getQuestionText());
 					problem.setTextColor(defaultTextColor);
@@ -1401,12 +1462,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					boolean success;
 
 					// get the difficulty
-					difficultyMax = Integer.parseInt(sharedPrefs.getString("difficulty_max", "1"));
-					difficultyMin = Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
+					difficultyMax = 5;// Integer.parseInt(sharedPrefs.getString("difficulty_max", "1"));
+					difficultyMin = 0; // Integer.parseInt(sharedPrefs.getString("difficulty_min", "0"));
 					difficulty = difficultyMax;
 
 					for (int i = 0; i < PackageKeys.size(); i++) {
-						if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5) {
+						if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5) { // Chnage the i!=5
 							EnabledPackageKeys[count] = PackageKeys.get(i);
 							location[count] = i;
 							weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
@@ -1656,7 +1717,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	private boolean setCustomProblem(String category, Difficulty min, Difficulty max) {
 		currentTableName = getString(R.string.custom_table);
-		CustomQuestion question = dbManager.getCustomQuestion(category, min, max, ID);
+		CustomQuestion question = dbManager.getCustomQuestion(MainActivity.this, category, min, max, ID);
 		if (question == null)
 			return false;
 		ID = question.getID();
@@ -1682,7 +1743,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public int getEnabledPackages() {
 		int count = 0;
 		for (int i = 0; i < PackageKeys.size(); i++) {
-			if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5)
+			if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5) // changed i != 5
 				count++;
 		}
 		return count;
@@ -1894,7 +1955,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			break;
 		case Store:		// Store was selected
 			unlocking = false;
-			startActivity(new Intent(this, ShowStoreActivity.class));
+			// startActivity(new Intent(this, ShowStoreFragment.class));
 			break;
 		case Progress:		// progress was selected
 			unlocking = false;
@@ -1999,10 +2060,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if ((scheme.equals(getString(R.string.coin_scheme1)) || scheme.equals(getString(R.string.coin_scheme2)))
 						&& host.equals(getString(R.string.coin_host)) && path.equals(getString(R.string.coin_path))) {
 					if (coinHash.toLowerCase(Locale.ENGLISH).equals(CustomInstallReceiver.SWISHER_KEY)) {
-						PreferenceHelper.turnSwisherPackOn(this);
+						PreferenceHelper.setCustomFileName(this, PreferenceHelper.SWISHER_FILENAME);
+						PreferenceHelper.turnSwisherPackOn(this, PreferenceHelper.SWISHER_FILENAME_WITH_EXTENSION);
+					} else if (coinHash.toLowerCase(Locale.ENGLISH).equals(CustomInstallReceiver.ENTRE_KEY)) {
+						PreferenceHelper.setCustomFileName(this, PreferenceHelper.ENTRE_FILENAME);
+						PreferenceHelper.turnSwisherPackOn(this, PreferenceHelper.ENTRE_FILENAME_WITH_EXTENSION);
 					} else {
 						MoneyHelper.addPromoCoins(this, coinHash);
 					}
+
 				}
 			}
 			// String scheme = "sharequestion";
@@ -2581,7 +2647,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		} else if (view.getId() == R.id.pnlStore) {
 			unlocking = false;
-			startActivity(new Intent(this, ShowStoreActivity.class));
+			showPacksFragment();
+			// startActivity(new Intent(this, ShowStoreActivity.class));
 		} else if (view.getId() == R.id.setting_gear) {
 			fromSettings = true;
 			unlocking = false;
@@ -2595,10 +2662,42 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	}
 
+	private void showPacksFragment() {
+
+		((ImageView) findViewById(R.id.progress_icon)).setImageResource(R.drawable.progress_icon);
+		((TextView) findViewById(R.id.txtProgress)).setTextColor(getResources().getColor(R.color.unselected_tab_Bar));
+
+		((ImageView) findViewById(R.id.pack_icon)).setImageResource(R.drawable.packs_icon_selected);
+		((TextView) findViewById(R.id.txtStore)).setTextColor(getResources().getColor(R.color.selected_tab_Bar));
+		findViewById(R.id.progress_underline).setVisibility(View.INVISIBLE);
+
+		findViewById(R.id.PnlContainer).setVisibility(View.VISIBLE);
+		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(android.R.color.white));
+		findViewById(R.id.pack_underline).setVisibility(View.VISIBLE);
+
+		if (packFragment == null)
+			packFragment = new PacksFrgment();
+
+		// Bundle bundle = new Bundle();
+		// bundle.putString(ProgressFragment.EXTRA_MESSAGE, getString(R.string.fetching_device_details));
+		// progressFragment.setArguments(bundle);
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+		transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+		transaction.replace(R.id.PnlContainer, packFragment);
+		transaction.commit();
+
+		fragmentCurrentShown = packFragment;
+	}
+
 	private void showProgressFragment() {
 
 		((ImageView) findViewById(R.id.progress_icon)).setImageResource(R.drawable.progress_selected);
 		((TextView) findViewById(R.id.txtProgress)).setTextColor(getResources().getColor(R.color.selected_tab_Bar));
+
+		((ImageView) findViewById(R.id.pack_icon)).setImageResource(R.drawable.packs);
+		((TextView) findViewById(R.id.txtStore)).setTextColor(getResources().getColor(R.color.unselected_tab_Bar));
+		findViewById(R.id.pack_underline).setVisibility(View.INVISIBLE);
 
 		findViewById(R.id.PnlContainer).setVisibility(View.VISIBLE);
 		findViewById(R.id.pnlBottomBar).setBackgroundColor(getResources().getColor(android.R.color.white));
@@ -2630,11 +2729,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		transaction.replace(R.id.PnlContainer, completeFragment);
 		transaction.commit();
 		fragmentCurrentShown = completeFragment;
-	}
-
-	private void removeTutorialFragment() {
-		findViewById(R.id.PnlContainer).setVisibility(View.GONE);
-		getSupportFragmentManager().beginTransaction().remove(completeFragment).commit();
 	}
 
 	private void setQuizeMode() {

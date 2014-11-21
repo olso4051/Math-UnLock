@@ -44,6 +44,7 @@
         android:xlargeScreens="true" />
 
     <application
+        android:debuggable="true"
         android:name=".MyApplication"
         android:allowBackup="true"
         android:backupAgent="com.olyware.mathlock.utils.AppBackupAgent"
@@ -89,7 +90,7 @@
             android:theme="@style/AppThemeBlackFull" >
         </activity>
         <activity
-            android:name=".ShowStoreActivity"
+            android:name=".ShowStoreFragment"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeBlackFull" >

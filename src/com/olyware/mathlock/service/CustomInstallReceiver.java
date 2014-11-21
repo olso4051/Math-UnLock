@@ -40,6 +40,7 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 	final private static String SHARE_ID = "deeldat_share_id";
 	final private static String PROMO_COIN_ID = "promo_coin";
 	final public static String SWISHER_KEY = "kara_swisher";
+	final public static String ENTRE_KEY = "entrepreneur";
 
 	// final private static String[] EXPECTED_PARAMETERS = { "utm_source", "utm_medium", "utm_content", "utm_term", "utm_campaign" };
 
@@ -146,7 +147,11 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 		}
 		if (!coinHash.equals("")) {
 			if (coinHash.toLowerCase(Locale.ENGLISH).equals(SWISHER_KEY)) {
-				PreferenceHelper.turnSwisherPackOn(context);
+				PreferenceHelper.setCustomFileName(context, PreferenceHelper.SWISHER_FILENAME);
+				PreferenceHelper.turnSwisherPackOn(context, PreferenceHelper.SWISHER_FILENAME_WITH_EXTENSION);
+			} else if (coinHash.toLowerCase(Locale.ENGLISH).equals(CustomInstallReceiver.ENTRE_KEY)) {
+				PreferenceHelper.setCustomFileName(context, PreferenceHelper.ENTRE_FILENAME);
+				PreferenceHelper.turnSwisherPackOn(context, PreferenceHelper.ENTRE_FILENAME_WITH_EXTENSION);
 			} else {
 				MoneyHelper.addPromoCoins(context, coinHash);
 			}

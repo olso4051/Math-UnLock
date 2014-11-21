@@ -432,4 +432,14 @@
     <string name="yes">Yes</string>
     <string name="promt_tutorial_complete">"You can always access the menu for more packs and challenges "</string>
     
+    <string name="desc_all">Get all present and future HiQ packs for life</string>
+    <string name="desc_Math">From simple to calculus</string>
+    <string name="desc_vocab">Expand your vocabulary</string>
+    <string name="desc_language">Over 1,000 words in 15 languages</string>
+    <string name="desc_engineering">Computer, mechanical, electrical - its all here</string>
+    <string name="desc_hiq_trivia">Fun and strange facts</string>
+    
+   
+    
+    
 </resources>

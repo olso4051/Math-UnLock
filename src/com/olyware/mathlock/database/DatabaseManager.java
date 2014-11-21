@@ -253,18 +253,19 @@ public class DatabaseManager {
 			return null;
 	}
 
-	public CustomQuestion getSwisherQuestion(int count) {
-		return getCustomQuestion(PreferenceHelper.SWISHER_FILENAME, Difficulty.VERY_EASY, Difficulty.INSANE, -1, count);
+	public CustomQuestion getSwisherQuestion(Context ctx, int count) {
+		return getCustomQuestion(ctx, PreferenceHelper.getCustomFileName(ctx), Difficulty.VERY_EASY, Difficulty.INSANE, -1, count);
 	}
 
-	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
-		return getCustomQuestion(category, minDifficulty, maxDifficulty, notID, -1);
+	public CustomQuestion getCustomQuestion(Context ctx, String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID) {
+		return getCustomQuestion(ctx, category, minDifficulty, maxDifficulty, notID, -1);
 	}
 
-	public CustomQuestion getCustomQuestion(String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID, int count) {
+	public CustomQuestion getCustomQuestion(Context ctx, String category, Difficulty minDifficulty, Difficulty maxDifficulty, long notID,
+			int count) {
 		if (db.isOpen()) {
 			String diff = "";
-			if (!category.equals(PreferenceHelper.SWISHER_FILENAME))
+			if (!category.equals(PreferenceHelper.getCustomFileName(ctx)))
 				diff = " AND difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 						+ String.valueOf(minDifficulty.getValue());
 			String where = CustomQuestionContract.CATEGORY + " = '" + category.replaceAll("'", "''") + "'";
@@ -419,6 +420,7 @@ public class DatabaseManager {
 			int packs = packIDs.size();
 			Random rand = new Random();
 			List<GenericQuestion> challengeQuestions = new ArrayList<GenericQuestion>(questions);
+			Context ctx = MainActivity.getContext();
 			for (int i = 0; i < questions; i++) {
 				int pack = packIDs.get(rand.nextInt(packs)) - 1;
 				switch (pack) {
@@ -431,7 +433,7 @@ public class DatabaseManager {
 							Difficulty.fromValue(builder.getDifficultyMax()), 4, -1)));
 					break;
 				case 2:	// Language
-					Context ctx = MainActivity.getContext();
+
 					SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 					String fromLanguage = sharedPrefs.getString("from_language", ctx.getString(R.string.language_from_default));
 					String toLanguage = sharedPrefs.getString("to_language", ctx.getString(R.string.language_to_default));
@@ -450,7 +452,7 @@ public class DatabaseManager {
 					break;
 				default:
 					// custom question
-					challengeQuestions.add(getGenericQuestion(getCustomQuestion(this.getAllCustomCategories().get(pack - 5),
+					challengeQuestions.add(getGenericQuestion(getCustomQuestion(ctx, this.getAllCustomCategories().get(pack - 5),
 							Difficulty.fromValue(builder.getDifficultyMin()), Difficulty.fromValue(builder.getDifficultyMax()), -1)));
 					break;
 				}
@@ -688,9 +690,9 @@ public class DatabaseManager {
 			return -1;
 	}
 
-	public boolean isSwisherPackAdded() {
+	public boolean isSwisherPackAdded(String catname) {
 		if (db.isOpen()) {
-			String where = CustomQuestionContract.CATEGORY + " = '" + PreferenceHelper.SWISHER_FILENAME + "'";
+			String where = CustomQuestionContract.CATEGORY + " = '" + catname + "'";
 			cursor = db.query(CustomQuestionContract.TABLE_NAME, CustomQuestionContract.ALL_COLUMNS, where, null, null, null, null);
 			return cursor.moveToFirst();
 		} else

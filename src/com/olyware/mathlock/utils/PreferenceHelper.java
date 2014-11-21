@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -57,11 +58,15 @@ public class PreferenceHelper {
 	final public static String MONEY_PREFS_PACKS = "packs_to_open";
 
 	final public static String SWISHER_ON = "swisher_enabled";
+	final public static String CUSTOM_FILENAME = "fileName";
 	final public static String SWISHER_JSON = "swisher_json";
 	final public static String SWISHER_COUNT = "swisher_count";
 	final public static String SWISHER_TOTAL = "swisher_total";
 	final public static String SWISHER_FILENAME_WITH_EXTENSION = "Kara Swisher Trivia.csv"; // chnaged for testing pai
 	final public static String SWISHER_FILENAME = "Kara Swisher Trivia";
+	final public static String ENTRE_FILENAME = "Entrepreneur Pack";
+	final public static String ENTRE_FILENAME_WITH_EXTENSION = "Entrepreneur pack.csv";
+
 	final public static int SWISHER_MAX_COUNT = 3;
 
 	final public static String TUTORIAL_QUESTION = "tutrial_question";
@@ -292,7 +297,11 @@ public class PreferenceHelper {
 
 	public static void unlockSubscription(Context ctx, int product) {
 		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
-		String[] PackageKeys = ctx.getResources().getStringArray(R.array.enable_package_keys);
+		String[] PackageKeys; // ctx.getResources().getStringArray(R.array.enable_package_keys);
+		ArrayList<String> pack = new ArrayList<String>(Arrays.asList(ctx.getResources().getStringArray(R.array.enable_package_keys)));
+		pack.add(0, "unlock_all");
+		PackageKeys = new String[pack.size()];
+		pack.toArray(PackageKeys);
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
 		boolean unlocked = sharedPrefsMoney.getBoolean(unlockSubscriptionPackageKeys[product], false);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
@@ -303,7 +312,7 @@ public class PreferenceHelper {
 		if (!unlocked) {
 			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 			SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
-			editorPrefs.putBoolean(PackageKeys[product - 1], true);
+			editorPrefs.putBoolean(PackageKeys[product], true);
 			editorPrefs.commit();
 		}
 	}
@@ -311,7 +320,11 @@ public class PreferenceHelper {
 	public static void lockSubscription(Context ctx, int product) {
 		String[] unlockPackageKeys = ctx.getResources().getStringArray(R.array.unlock_package_keys);
 		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
-		String[] PackageKeys = ctx.getResources().getStringArray(R.array.enable_package_keys);
+		String[] PackageKeys; // ctx.getResources().getStringArray(R.array.enable_package_keys);
+		ArrayList<String> pack = new ArrayList<String>(Arrays.asList(ctx.getResources().getStringArray(R.array.enable_package_keys)));
+		pack.add(0, "unlock_all");
+		PackageKeys = new String[pack.size()];
+		pack.toArray(PackageKeys);
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, 0);
 		SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
 		editorPrefsMoney.putBoolean(unlockSubscriptionPackageKeys[product], false);		// locks the product
@@ -320,7 +333,7 @@ public class PreferenceHelper {
 		if (!sharedPrefsMoney.getBoolean(unlockPackageKeys[product], false)) {
 			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 			SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
-			editorPrefs.putBoolean(PackageKeys[product - 1], false);
+			editorPrefs.putBoolean(PackageKeys[product], false);
 			if (product == 6) {
 				String[] customPacks = ctx.getResources().getStringArray(R.array.enable_custom_packs);
 				for (String customPack : customPacks) {
@@ -1050,7 +1063,7 @@ public class PreferenceHelper {
 		if (!sharedPrefsSwisher.getBoolean(SWISHER_ON, false))
 			return false;
 		else
-			return dbManager.isSwisherPackAdded();
+			return dbManager.isSwisherPackAdded(getCustomFileName(ctx));
 	}
 
 	public static void addSwisherPack(Context ctx, DatabaseManager dbManager) {
@@ -1063,12 +1076,21 @@ public class PreferenceHelper {
 		}
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 		SharedPreferences.Editor editPrefs = sharedPrefs.edit();
-		editPrefs.putBoolean(ctx.getString(R.string.custom_enable) + SWISHER_FILENAME, true).commit();
+		editPrefs.putBoolean(ctx.getString(R.string.custom_enable) + getCustomFileName(ctx), true).commit();
 	}
 
 	public static int getSwisherPackCount(Context ctx) {
 		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
 		return sharedPrefsSwisher.getInt(SWISHER_COUNT, 0);
+	}
+
+	public static String getCustomFileName(Context ctx) {
+		SharedPreferences sharedPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsSwisher.getString(CUSTOM_FILENAME, "");
+	}
+
+	public static void setCustomFileName(Context ctx, String filename) {
+		ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE).edit().putString(CUSTOM_FILENAME, filename).commit();
 	}
 
 	public static void incrementSwisherPackCount(Context ctx) {
@@ -1077,6 +1099,7 @@ public class PreferenceHelper {
 		int count = sharedPrefsSwisher.getInt(SWISHER_COUNT, 0) + 1;
 		if (count >= sharedPrefsSwisher.getInt(SWISHER_TOTAL, 0)) {
 			turnSwisherPackOff(ctx);
+			setCustomFileName(ctx, "");
 		} else {
 			editPrefsSwisher.putInt(SWISHER_COUNT, count).commit();
 		}
@@ -1097,12 +1120,12 @@ public class PreferenceHelper {
 		editPrefsSwisher.putBoolean(SWISHER_ON, false).putInt(SWISHER_COUNT, -1).commit();
 	}
 
-	public static void turnSwisherPackOn(Context ctx) {
+	public static void turnSwisherPackOn(Context ctx, String filenamewithextension) {
 		SharedPreferences.Editor editPrefsSwisher = ctx.getSharedPreferences(SWISHER_PREFS, Context.MODE_PRIVATE).edit();
 		editPrefsSwisher.putBoolean(SWISHER_ON, true).putInt(SWISHER_COUNT, 0).commit();
 		ArrayList<String[]> tempQuestions = new ArrayList<String[]>();
 		try {
-			InputStream is = ctx.getAssets().open(SWISHER_FILENAME_WITH_EXTENSION);
+			InputStream is = ctx.getAssets().open(filenamewithextension);
 			Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			CSVReader csvReader = new CSVReader(reader);
 			String[] lineEntries = csvReader.readNext();
@@ -1116,7 +1139,7 @@ public class PreferenceHelper {
 					if (lineEntries.length == 6) {
 						if (Difficulty.isDifficulty(lineEntries[5])) {
 							tempQuestions.add(new String[] { lineEntries[0], lineEntries[1], lineEntries[2], lineEntries[3],
-									lineEntries[4], SWISHER_FILENAME, lineEntries[5] });
+									lineEntries[4], getCustomFileName(ctx), lineEntries[5] });
 						}
 					}
 					lineEntries = csvReader.readNext();
