@@ -61,9 +61,9 @@ import com.facebook.Session;
 import com.facebook.Settings;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.adapter.ChallengeData;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.dialog.ChallengeDialog;
@@ -223,8 +223,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// screen has come on
-			trackerGA.set(Fields.SESSION_CONTROL, "start");
-			trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
+			// trackerGA.set(Fields.SESSION_CONTROL, "start");
+			// trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 			startCountdown();
 			// showWallpaper();
 		}
@@ -692,10 +692,17 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
 	protected void onStop() {
 		if (loggedIn) {
 			joystick.removeCallbacks();
 		}
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
 		super.onStop();
 	}
 
@@ -835,8 +842,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			if (pm.isScreenOn()) {
-				trackerGA.set(Fields.SESSION_CONTROL, "start");
-				trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
+				// trackerGA.set(Fields.SESSION_CONTROL, "start");
+				// trackerGA.set(Fields.SCREEN_NAME, SCREEN_LABEL);
 				joystick.startAnimations();
 				new NotificationHelper(this).clearChallengeResultNotification();
 				new NotificationHelper(this).clearChallengeNotification();
@@ -1752,6 +1759,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case B:		// B was selected
 		case C:		// C was selected
 		case D:		// D was selected
+			sendEvent("Packs", "Pack name", currentPack, null);
 			if (joystick.isAskingForSponsored() && Extra != 1)
 				PreferenceHelper.resetSponsoredQuestions(this);
 			if (fromDeepLink)
@@ -2443,10 +2451,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				action = "quick_unlock_" + action;
 		}
 		if (!screenViewed) {
-			trackerGA.send(MapBuilder.createAppView().build());
+			trackerGA.send(new HitBuilders.AppViewBuilder().build());
 			screenViewed = true;
 		}
-		trackerGA.send(MapBuilder.createEvent(category, action, label, value).build());
+		trackerGA.send(new HitBuilders.EventBuilder().setCategory(category).setAction(action).setLabel(label).build());
 	}
 
 	@SuppressLint("NewApi")

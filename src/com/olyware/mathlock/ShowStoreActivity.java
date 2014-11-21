@@ -2,6 +2,7 @@ package com.olyware.mathlock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,8 +21,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.utils.Coins;
 import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.IabHelper;
@@ -61,7 +63,7 @@ public class ShowStoreActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
 
-		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+		// MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
 		Cost = MainActivity.getCost();
 		SKU = MainActivity.getSKU();
@@ -291,7 +293,14 @@ public class ShowStoreActivity extends FragmentActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
 	}
 
 	@Override
@@ -444,14 +453,25 @@ public class ShowStoreActivity extends FragmentActivity {
 	}
 
 	private void sendEvent(String category, String action, String label, Long value) {
-		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+		MyApplication.getGaTracker().send(new HitBuilders.EventBuilder().setCategory(category).setAction(action).setLabel(label).build());
 	}
 
 	private void sendTransaction(String transactionID, Double revenue) {
-		MyApplication.getGaTracker().send(MapBuilder.createTransaction(transactionID, "In-App Store", revenue, 0.0d, 0.0d, "USD").build());
+		// MyApplication.getGaTracker().send(MapBuilder.createTransaction(transactionID, "In-App Store", revenue, 0.0d, 0.0d,
+		// "USD").build());
+		sendDataToTrackers(new HitBuilders.TransactionBuilder().setTransactionId(transactionID).setAffiliation("In-App Store")
+				.setRevenue(revenue).setTax(0.0d).setShipping(0.0d).setCurrencyCode("USD").build());
 	}
 
 	private void sendItem(String transactionID, String name, String SKU, String category, Double price) {
-		MyApplication.getGaTracker().send(MapBuilder.createItem(transactionID, name, SKU, category, price, 1L, "USD").build());
+		// MyApplication.getGaTracker().send(MapBuilder.createItem(transactionID, name, SKU, category, price, 1L, "USD").build());
+		sendDataToTrackers(new HitBuilders.ItemBuilder().setTransactionId(transactionID).setName(name).setSku(SKU).setCategory(category)
+				.setPrice(price).setQuantity(1L).setCurrencyCode("USD").build());
+	}
+
+	// Sends the ecommerce data.
+	private void sendDataToTrackers(Map<String, String> params) {
+		Tracker appTracker = MyApplication.getGaTracker();
+		appTracker.send(params);
 	}
 }

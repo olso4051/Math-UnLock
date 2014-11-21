@@ -19,8 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.model.Difficulty;
 import com.olyware.mathlock.ui.Typefaces;
@@ -118,13 +118,20 @@ public class ShowProgressActivity extends FragmentActivity {
 		initSpinners();
 		setGraph();
 
-		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+		// MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
 	}
 
 	@Override

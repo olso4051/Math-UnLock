@@ -100,6 +100,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		mPrefUserFacebookEmail = ctx.getString(R.string.pref_user_facebook_email);
 
 		facebookButtonClicked = false;
+
 	}
 
 	@Override

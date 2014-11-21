@@ -18,8 +18,8 @@ import android.preference.PreferenceScreen;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.WindowManager;
 
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.utils.PreferenceHelper;
@@ -61,7 +61,7 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 		addPreferencesFromResource(R.xml.preferences);
 		ctx = this;
 
-		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+		// MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		unlockSubPackageKeys = getResources().getStringArray(R.array.unlock_sub_package_keys);
@@ -236,7 +236,15 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
+
 	}
 
 	@Override
@@ -308,6 +316,6 @@ public class ShowSettingsActivity extends PreferenceActivity implements OnShared
 	}
 
 	private void sendEvent(String category, String action, String label, Long value) {
-		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+		MyApplication.getGaTracker().send(new HitBuilders.EventBuilder().setCategory(category).setAction(action).setLabel(label).build());
 	}
 }

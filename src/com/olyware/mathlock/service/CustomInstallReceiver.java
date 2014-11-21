@@ -14,9 +14,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import com.google.analytics.tracking.android.CampaignTrackingReceiver;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.CampaignTrackingReceiver;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.utils.EncryptionHelper;
@@ -49,7 +49,9 @@ public class CustomInstallReceiver extends BroadcastReceiver {
 		if (sharedPrefs.getBoolean("first_open_install", true)) {
 			Loggy.d("first open_install");
 			Tracker trackerGA = MyApplication.getGaTracker();
-			trackerGA.send(MapBuilder.createEvent("acquisition", "install", "done", 0l).build());
+			// trackerGA.send(MapBuilder.createEvent("acquisition", "install", "done", 0l).build());
+			trackerGA.send(new HitBuilders.EventBuilder().setCategory("acquisition").setAction("install").setLabel("done").setValue(0l)
+					.build());
 			sharedPrefs.edit().putBoolean("first_open_install", false).commit();
 		}
 
