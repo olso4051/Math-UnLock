@@ -123,13 +123,11 @@ import com.olyware.mathlock.views.EquationView;
 import com.olyware.mathlock.views.JoystickSelect;
 import com.olyware.mathlock.views.JoystickSelectListener;
 import com.olyware.mathlock.views.JoystickView;
-import com.playhaven.android.PlayHaven;
 import com.playhaven.android.PlayHavenException;
 import com.playhaven.android.push.GCMRegistrationRequest;
 import com.playhaven.android.req.OpenRequest;
 import com.playhaven.android.req.RequestListener;
 import com.playhaven.android.view.FullScreen;
-import com.tapjoy.TapjoyConnect;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse, RequestListener,
 		OnClickListener {
@@ -370,19 +368,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		try {
-			PlayHaven.configure(this, R.string.playhaven_token, R.string.playhaven_secret, R.string.gcm_api_id);
-			if (!sharedPrefs.getBoolean(MyApplication.PUSH_PREF_KEY, true)) {
-				(new GCMRegistrationRequest()).deregister(this);
-			} else {
-				(new GCMRegistrationRequest()).register(this);
-			}
-			OpenRequest open = new OpenRequest();
-			open.setResponseHandler(this);
-			open.send(this);
-		} catch (PlayHavenException e) {
-			Loggy.e("We have encountered an error", e);
+		// try {
+		// No Addz
+		// PlayHaven.configure(this, R.string.playhaven_token, R.string.playhaven_secret, R.string.gcm_api_id);
+		if (!sharedPrefs.getBoolean(MyApplication.PUSH_PREF_KEY, true)) {
+			(new GCMRegistrationRequest()).deregister(this);
+		} else {
+			(new GCMRegistrationRequest()).register(this);
 		}
+		OpenRequest open = new OpenRequest();
+		open.setResponseHandler(this);
+		open.send(this);
+		// } catch (PlayHavenException e) {
+		// Loggy.e("We have encountered an error", e);
+		// }
 		getDeepLinkData(getIntent().getData());
 		trackerGA = MyApplication.getGaTracker();
 		if (sharedPrefs.getBoolean("first_open", true)) {
@@ -390,7 +389,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			sendEvent("acquisition", "open", "done", 0l);
 			sharedPrefs.edit().putBoolean("first_open", false).commit();
 		}
-		TapjoyConnect.requestTapjoyConnect(this, "937ee2a5-b377-4ed3-8156-16f635e69749", "m7lfX2V6hofuY9pKz34t");
+		// No Addz
+		// TapjoyConnect.requestTapjoyConnect(this, "937ee2a5-b377-4ed3-8156-16f635e69749", "m7lfX2V6hofuY9pKz34t");
 
 		// Add code to print out the key hash
 		/*try {
