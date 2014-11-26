@@ -31,7 +31,8 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 
 	private ListView packList;
 	private ArrayList<PackItem> packItems = new ArrayList<PackItem>();
-	final private static String[] SKU = { "allpack", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
+	// final private static String[] SKU = { "allpack", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
+	final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
 	final private static String PURCHASE_KEY = "jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:";
 	private int[] Cost;
 	private String[] unlockPackageKeys, unlockSubPackageKeys, PackageKeys, packageInfo;
@@ -114,48 +115,53 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					if (inventory.hasPurchase(SKU[0])) {
 						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 						PreferenceHelper.unlockSubscription(getActivity(), 0);
+						for (int i = 0; i < unlockPackageKeys.length; i++)
+							PreferenceHelper.unlockSubscription(getActivity(), i);
 					} else {
 						PreferenceHelper.lockSubscription(getActivity(), 0);
-					}
-					if (inventory.hasPurchase(SKU[1])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						PreferenceHelper.unlockSubscription(getActivity(), 1);
-					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 1);
-					}
-					if (inventory.hasPurchase(SKU[2])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						PreferenceHelper.unlockSubscription(getActivity(), 2);
-					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 2);
-					}
-					if (inventory.hasPurchase(SKU[3])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						PreferenceHelper.unlockSubscription(getActivity(), 3);
-					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 3);
-					}
-					if (inventory.hasPurchase(SKU[4])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						PreferenceHelper.unlockSubscription(getActivity(), 4);
-					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 4);
-					}
-					if (inventory.hasPurchase(SKU[5])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						PreferenceHelper.unlockSubscription(getActivity(), 5);
-					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 5);
-					}
-					if (inventory.hasPurchase(SKU[6])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						PreferenceHelper.unlockSubscription(getActivity(), 6);
-					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 6);
+						// for (int i = 0; i < unlockPackageKeys.length; i++)
+						// PreferenceHelper.lockSubscription(getActivity(), i);
+						if (inventory.hasPurchase(SKU[1])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(getActivity(), 1);
+						} else {
+							PreferenceHelper.lockSubscription(getActivity(), 1);
+						}
+						if (inventory.hasPurchase(SKU[2])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(getActivity(), 2);
+						} else {
+							PreferenceHelper.lockSubscription(getActivity(), 2);
+						}
+						if (inventory.hasPurchase(SKU[3])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(getActivity(), 3);
+						} else {
+							PreferenceHelper.lockSubscription(getActivity(), 3);
+						}
+						if (inventory.hasPurchase(SKU[4])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(getActivity(), 4);
+						} else {
+							PreferenceHelper.lockSubscription(getActivity(), 4);
+						}
+						if (inventory.hasPurchase(SKU[5])) {
+							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+							PreferenceHelper.unlockSubscription(getActivity(), 5);
+						} else {
+							PreferenceHelper.lockSubscription(getActivity(), 5);
+						}
 					}
 
+					// if (inventory.hasPurchase(SKU[6])) {
+					// // mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+					// PreferenceHelper.unlockSubscription(getActivity(), 6);
+					// } else {
+					// PreferenceHelper.lockSubscription(getActivity(), 6);
+					// }
+
 					packItems.clear();
-					int[] subs = { 0, 1, 2, 3, 4, 5, 6 };
+					int[] subs = { 0, 1, 2, 3, 4, 5 };
 					for (int i = 0; i < subs.length; i++) {
 						PackItem item = new PackItem();
 						item.setTitle(packageTitle.get(subs[i]));
@@ -169,8 +175,7 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 							// cost[subs[i]].setText(inventory.getSkuDetails(SKU[SKUsubs[i]]).getPrice() + getString(R.string.per_month));
 							// cost[subs[i]].setCompoundDrawablesWithIntrinsicBounds(null, drawable_unselected, null, null);
 						} else {
-							boolean isOn = i != 0
-									&& PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(PackageKeys[i], false);
+							boolean isOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(PackageKeys[i], false);
 
 							item.setTextToShow(isOn ? "ON" : "OFF");
 							item.setPurchased(true);
@@ -185,6 +190,7 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					packList.setAdapter(adapter);
 
 					packList.setOnItemClickListener(PacksFrgment.this);
+
 				}
 			}
 		};
@@ -192,6 +198,8 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 
 	public void refereshlist() {
 		List<String> additionalSkuList = Arrays.asList(SKU);
+		if (mHelper != null)
+			mHelper.flagEndAsync();
 		mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 	}
 
@@ -219,6 +227,7 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					// }
 					// }
 					refereshlist();
+
 				}
 			}
 		});
@@ -233,11 +242,14 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					// handle error
 					return;
 				} else if (purchase.getSku().equals(SKU[0])) {
+					// mHelper.consumeAsync(purchase, null);
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 0.99 * .7);
 					sendItem(purchase.getOrderId(), "All Packs", purchase.getSku(), "subscriptions", 1.00);
 					// mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 					PreferenceHelper.unlockSubscription(getActivity(), 0);
+					for (int i = 0; i < unlockPackageKeys.length; i++)
+						PreferenceHelper.unlockSubscription(getActivity(), i);
 				}
 				if (purchase.getSku().equals(SKU[1])) {
 					MoneyHelper.BoughtSomething(getActivity());
@@ -271,12 +283,24 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					sendItem(purchase.getOrderId(), "Hiq Travia Subscription", purchase.getSku(), "subscriptions", 3.00);
 					PreferenceHelper.unlockSubscription(getActivity(), 5);
 				}
-				if (purchase.getSku().equals(SKU[6])) {
-					MoneyHelper.BoughtSomething(getActivity());
-					sendTransaction(purchase.getOrderId(), 3.00 * .7);
-					sendItem(purchase.getOrderId(), "Expansion Subscription", purchase.getSku(), "subscriptions", 3.00);
-					PreferenceHelper.unlockSubscription(getActivity(), 6);
-				}
+
+				// PackItem item = packItems.get(Arrays.asList(SKU).indexOf(purchase.getSku()));
+				// int i = Arrays.asList(SKU).indexOf(purchase.getSku());
+				// boolean isOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(PackageKeys[i], false);
+				//
+				// item.setTextToShow(isOn ? "ON" : "OFF");
+				// item.setPurchased(true);
+				// item.setEnabled(isOn);
+				// if (adapter != null)
+				// adapter.notifyDataSetChanged();
+				refereshlist();
+
+				// if (purchase.getSku().equals(SKU[6])) {
+				// MoneyHelper.BoughtSomething(getActivity());
+				// sendTransaction(purchase.getOrderId(), 3.00 * .7);
+				// sendItem(purchase.getOrderId(), "Expansion Subscription", purchase.getSku(), "subscriptions", 3.00);
+				// PreferenceHelper.unlockSubscription(getActivity(), 6);
+				// }
 			}
 		};
 
@@ -286,16 +310,46 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		if (packItems.get(arg2).isPurchased()) {
 
-			packItems.get(arg2).setEnabled(!packItems.get(arg2).isEnabled());
-			packItems.get(arg2).setTextToShow(packItems.get(arg2).isEnabled() ? "ON" : "OFF");
-			PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
-					.putBoolean(PackageKeys[arg2], packItems.get(arg2).isEnabled()).commit();
+			if (arg2 != 0) { // not all packs
+				packItems.get(arg2).setEnabled(!packItems.get(arg2).isEnabled());
+				packItems.get(arg2).setTextToShow(packItems.get(arg2).isEnabled() ? "ON" : "OFF");
+				PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+						.putBoolean(PackageKeys[arg2], packItems.get(arg2).isEnabled()).commit();
+				// if all pack disabled expect the first one
+				boolean onepackenabled = false;
+				for (int i = 1; i < packItems.size(); i++) {
+					if (packItems.get(i).isEnabled()) {
+						onepackenabled = true;
+						break;
+					}
+				}
+				// disable the first one too
+				if (!onepackenabled && sharedPrefsMoney.getBoolean(unlockSubPackageKeys[0], false)) {
+					packItems.get(0).setEnabled(false);
+					packItems.get(0).setTextToShow(packItems.get(0).isEnabled() ? "ON" : "OFF");
+					PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+							.putBoolean(PackageKeys[0], packItems.get(0).isEnabled()).commit();
+				}
+			} else {
+				// enable/disable depend on first one
+				packItems.get(0).setEnabled(!packItems.get(0).isEnabled());
+				packItems.get(0).setTextToShow(packItems.get(0).isEnabled() ? "ON" : "OFF");
+				PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+						.putBoolean(PackageKeys[0], packItems.get(0).isEnabled()).commit();
+				for (int i = 1; i < packItems.size(); i++) {
+					packItems.get(i).setEnabled(packItems.get(0).isEnabled());
+					packItems.get(i).setTextToShow(packItems.get(0).isEnabled() ? "ON" : "OFF");
+					PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+							.putBoolean(PackageKeys[i], packItems.get(0).isEnabled()).commit();
+				}
+			}
 			adapter.notifyDataSetChanged();
 
 		} else {
 			if (mHelper != null)
 				mHelper.flagEndAsync();
-			mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
+			// mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
+			mHelper.launchPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
 		}
 	}
 

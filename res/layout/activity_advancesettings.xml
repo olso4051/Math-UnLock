@@ -168,7 +168,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="vibrate on key press"
+            android:text="Vibrate on key press"
             android:textColor="@color/font_advancesetting"
             android:textSize="18sp" />
 
@@ -246,7 +246,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="Get push notifiactions"
+            android:text="Get push notifications"
             android:textColor="@color/font_advancesetting"
             android:textSize="18sp" />
 

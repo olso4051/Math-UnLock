@@ -51,6 +51,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -106,6 +107,8 @@ import com.olyware.mathlock.utils.EggHelper;
 import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
+import com.olyware.mathlock.utils.IabHelper.OnConsumeMultiFinishedListener;
+import com.olyware.mathlock.utils.IabHelper.QueryInventoryFinishedListener;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
 import com.olyware.mathlock.utils.Loggy;
@@ -135,7 +138,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	final private static int[] Cost = { 1000, 5000, 10000, 0, 1, 2 };
 	// final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1", "expansion", "engineer",
 	// "hiqentrepack", "math" };
-	final private static String[] SKU = { "allpack", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
+	// final private static String[] SKU = { "testpackall", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
+	final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
@@ -260,7 +264,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (!dbManager.isDestroyed()) {
 				customCategories = dbManager.getAllCustomCategories();
 				PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-				// PackageKeys.add(0, "unlock_all");
+				PackageKeys.add(0, "unlock_all");
 				displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
 				for (String cat : customCategories) {
 					PackageKeys.add(getString(R.string.custom_enable) + cat);
@@ -474,17 +478,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						// handle error
 					} else {
 						// in app billing is set up. check for non-consumed purchases
-						List<String> additionalSkuList = new ArrayList<String>();
-						additionalSkuList.add(SKU[0]);
-						additionalSkuList.add(SKU[1]);
-						additionalSkuList.add(SKU[2]);
-						additionalSkuList.add(SKU[3]);
-						additionalSkuList.add(SKU[4]);
-						additionalSkuList.add(SKU[5]);
+						// List<String> additionalSkuList = new ArrayList<String>();
+						// additionalSkuList.add(SKU[0]);
+						// additionalSkuList.add(SKU[1]);
+						// additionalSkuList.add(SKU[2]);
+						// additionalSkuList.add(SKU[3]);
+						// additionalSkuList.add(SKU[4]);
+						// additionalSkuList.add(SKU[5]);
+						List<String> additionalSkuList = Arrays.asList(SKU);
 						mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 					}
 				}
 			});
+
+			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
+			PackageKeys.add(0, "unlock_all");
+			unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 			// this listener checks the google play server for prices and consumable products purchased but not yet
 			// provisioned to the user
 			mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
@@ -496,45 +505,50 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						if (inventory.hasPurchase(SKU[0])) {
 							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(MainActivity.this, 0);
+							for (int i = 0; i < unlockPackageKeys.length; i++)
+								PreferenceHelper.unlockSubscription(MainActivity.this, i);
 						} else {
 							PreferenceHelper.lockSubscription(MainActivity.this, 0);
+							// for (int i = 0; i < unlockPackageKeys.length; i++)
+							// PreferenceHelper.lockSubscription(MainActivity.this, i);
+							if (inventory.hasPurchase(SKU[1])) {
+								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+								PreferenceHelper.unlockSubscription(MainActivity.this, 1);
+							} else {
+								PreferenceHelper.lockSubscription(MainActivity.this, 1);
+							}
+							if (inventory.hasPurchase(SKU[2])) {
+								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+								PreferenceHelper.unlockSubscription(MainActivity.this, 2);
+							} else {
+								PreferenceHelper.lockSubscription(MainActivity.this, 2);
+							}
+							if (inventory.hasPurchase(SKU[3])) {
+								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+								PreferenceHelper.unlockSubscription(MainActivity.this, 3);
+							} else {
+								PreferenceHelper.lockSubscription(MainActivity.this, 3);
+							}
+							if (inventory.hasPurchase(SKU[4])) {
+								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+								PreferenceHelper.unlockSubscription(MainActivity.this, 4);
+							} else {
+								PreferenceHelper.lockSubscription(MainActivity.this, 4);
+							}
+							if (inventory.hasPurchase(SKU[5])) {
+								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+								PreferenceHelper.unlockSubscription(MainActivity.this, 5);
+							} else {
+								PreferenceHelper.lockSubscription(MainActivity.this, 5);
+							}
 						}
-						if (inventory.hasPurchase(SKU[1])) {
-							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-							PreferenceHelper.unlockSubscription(MainActivity.this, 1);
-						} else {
-							PreferenceHelper.lockSubscription(MainActivity.this, 1);
-						}
-						if (inventory.hasPurchase(SKU[2])) {
-							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-							PreferenceHelper.unlockSubscription(MainActivity.this, 2);
-						} else {
-							PreferenceHelper.lockSubscription(MainActivity.this, 2);
-						}
-						if (inventory.hasPurchase(SKU[3])) {
-							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-							PreferenceHelper.unlockSubscription(MainActivity.this, 3);
-						} else {
-							PreferenceHelper.lockSubscription(MainActivity.this, 3);
-						}
-						if (inventory.hasPurchase(SKU[4])) {
-							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-							PreferenceHelper.unlockSubscription(MainActivity.this, 4);
-						} else {
-							PreferenceHelper.lockSubscription(MainActivity.this, 4);
-						}
-						if (inventory.hasPurchase(SKU[5])) {
-							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-							PreferenceHelper.unlockSubscription(MainActivity.this, 5);
-						} else {
-							PreferenceHelper.lockSubscription(MainActivity.this, 5);
-						}
-						if (inventory.hasPurchase(SKU[6])) {
-							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-							PreferenceHelper.unlockSubscription(MainActivity.this, 6);
-						} else {
-							PreferenceHelper.lockSubscription(MainActivity.this, 6);
-						}
+
+						// if (inventory.hasPurchase(SKU[6])) {
+						// // mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
+						// PreferenceHelper.unlockSubscription(MainActivity.this, 6);
+						// } else {
+						// PreferenceHelper.lockSubscription(MainActivity.this, 6);
+						// }
 
 						// if (inventory.hasPurchase(SKU[1])) {
 						// mHelper.consumeAsync(inventory.getPurchase(SKU[1]), mConsumeFinishedListener);
@@ -565,13 +579,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() {
 				public void onConsumeFinished(Purchase purchase, IabResult result) {
 					if (result.isSuccess()) {
-						if (purchase.getSku().equals(SKU[0])) {
-							updatePaidMoney(Cost[0]);
-						} else if (purchase.getSku().equals(SKU[1])) {
-							updatePaidMoney(Cost[1]);
-						} else if (purchase.getSku().equals(SKU[2])) {
-							updatePaidMoney(Cost[2]);
-						}
+						// if (purchase.getSku().equals(SKU[0])) {
+						// updatePaidMoney(Cost[0]);
+						// } else if (purchase.getSku().equals(SKU[1])) {
+						// updatePaidMoney(Cost[1]);
+						// } else if (purchase.getSku().equals(SKU[2])) {
+						// updatePaidMoney(Cost[2]);
+						// }
+
 					} else {
 						// handle error
 					}
@@ -589,11 +604,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 			mHandler = new Handler();
 
-			PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-			// PackageKeys.add(0, "unlock_all");
 			displayAllPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
 			LanguageEntries = getResources().getStringArray(R.array.language_entries);
-			unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
+
 			LanguageValues = getResources().getStringArray(R.array.language_values_not_localized);
 			EggKeys = getResources().getStringArray(R.array.egg_keys);
 			EggMaxValues = getResources().getIntArray(R.array.egg_max_values);
@@ -679,12 +692,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 										if (rand.nextBoolean()) {
 											HelpQuestionImage = takeScreenShot();
 											joystick.askToShare(getString(R.string.ask_to_share0));
-										} else {
-											joystick.askToShare(getString(R.string.store));
 										}
-									} else {
-										joystick.askMoreGames();
+										// else {
+										// joystick.askToShare(getString(R.string.store));
+										// }
 									}
+									// else {
+									// joystick.askMoreGames(); // Commented because it should not ask for games
+									// }
 								}
 							} else {
 								rand = new Random();
@@ -835,7 +850,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (!dbManager.isDestroyed()) {
 					customCategories = dbManager.getAllCustomCategories();
 					PackageKeys = EZ.list(getResources().getStringArray(R.array.enable_package_keys));
-					// PackageKeys.add(0, "unlock_all");
+					PackageKeys.add(0, "unlock_all");
 					for (String cat : customCategories)
 						PackageKeys.add(getString(R.string.custom_enable) + cat);
 				}
@@ -976,13 +991,48 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if (loggedIn) {
-			// PAI COMMENTED - new UI on oct 27th- 2014 start here //
-			// joystick.showStartAnimation(0, 3000);
-			// PAI COMMENTED - new UI on oct 27th- 2014 ends here //
-			return false;
-		} else
-			return super.onCreateOptionsMenu(menu);
+
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+		// if (loggedIn) {
+		// // PAI COMMENTED - new UI on oct 27th- 2014 start here //
+		// // joystick.showStartAnimation(0, 3000);
+		// // PAI COMMENTED - new UI on oct 27th- 2014 ends here //
+		// return false;
+		// } else
+		// return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_settings) {
+
+			List<String> additionalSkuList = Arrays.asList(SKU);
+			Toast.makeText(ctx, "Started consuming", 1).show();
+			mHelper.queryInventoryAsync(true, additionalSkuList, new QueryInventoryFinishedListener() {
+
+				@Override
+				public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+
+					// Remove this
+					List<Purchase> list = new ArrayList<Purchase>();
+
+					for (int i = 0; i < SKU.length; i++) {
+						if (inv != null && inv.getPurchase(SKU[i]) != null)
+							list.add(inv.getPurchase(SKU[i]));
+					}
+					mHelper.consumeAsync(list, new OnConsumeMultiFinishedListener() {
+
+						@Override
+						public void onConsumeMultiFinished(List<Purchase> purchases, List<IabResult> results) {
+							Toast.makeText(ctx, "Done consuming", 1).show();
+						}
+					});
+				}
+			});
+
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -1467,7 +1517,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					difficulty = difficultyMax;
 
 					for (int i = 0; i < PackageKeys.size(); i++) {
-						if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5) { // Chnage the i!=5
+						if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) { // Chnage the i!=5
 							EnabledPackageKeys[count] = PackageKeys.get(i);
 							location[count] = i;
 							weights[count] = dbManager.getPriority(i, fromLanguage, toLanguage, Difficulty.fromValue(difficultyMin),
@@ -1501,23 +1551,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					}
 
 					switch (location[count]) {
-					case 0:			// math question
+					case 0:
+					case 1:			// math question
 						currentPack = getString(R.string.math);
 						success = setMathProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
-					case 1:			// vocabulary question
+					case 2:			// vocabulary question
 						currentPack = getString(R.string.vocab);
 						success = setVocabProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
-					case 2:			// language question
+					case 3:			// language question
 						currentPack = getString(R.string.language);
 						success = setLanguageProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
-					case 3:			// engineer question
+					case 4:			// engineer question
 						currentPack = getString(R.string.engineer);
 						success = setEngineerProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
-					case 4:			// HiqH Trivia question
+					case 5:			// HiqH Trivia question
 						currentPack = getString(R.string.hiqh_trivia);
 						success = setHiqHTriviaProblem(Difficulty.fromValue(difficultyMin), Difficulty.fromValue(difficultyMax));
 						break;
@@ -1743,7 +1794,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public int getEnabledPackages() {
 		int count = 0;
 		for (int i = 0; i < PackageKeys.size(); i++) {
-			if (sharedPrefs.getBoolean(PackageKeys.get(i), false) && i != 5) // changed i != 5
+			if (sharedPrefs.getBoolean(PackageKeys.get(i), false)) // changed i != 5
 				count++;
 		}
 		return count;
@@ -2423,8 +2474,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						SharedPreferences sharedPrefsMoney = getSharedPreferences("Packages", 0);
 						SharedPreferences.Editor editorPrefs = sharedPrefs.edit();
 						SharedPreferences.Editor editorPrefsMoney = sharedPrefsMoney.edit();
-						sendEvent("store", "unlocked_pack", PackageKeys.get(which), null);
-						editorPrefs.putBoolean(PackageKeys.get(which), true).commit();			// enables the question pack
+						sendEvent("store", "unlocked_pack", PackageKeys.get(which + 1), null);
+						editorPrefs.putBoolean(PackageKeys.get(which + 1), true).commit();			// enables the question pack
 						editorPrefsMoney.putBoolean(unlockPackageKeys[which + 1], true).commit();	// unlocks the question pack
 
 						UnlockedPackages = isAnyPackageUnlocked();
@@ -2633,6 +2684,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void onClick(View view) {
 
 		if (view.getId() == R.id.pnlFriends) {
+
 			displayFriends();
 		} else if (view.getId() == R.id.pnlProgress) {
 			unlocking = false;

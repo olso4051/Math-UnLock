@@ -111,6 +111,7 @@
             android:layout_below="@+id/pnlRestartTutorial"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
+            android:visibility="invisible"
             android:background="@color/light_white_seperator" />
 
         <RelativeLayout
@@ -123,7 +124,8 @@
             android:gravity="center_vertical"
             android:minHeight="60dp"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" >
+            android:paddingRight="5dp"
+            android:visibility="gone" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -142,10 +144,10 @@
             android:background="@color/graph_text_color_blue_dark"
             android:gravity="center"
             android:padding="4dp"
-            android:visibility="gone"
             android:text="Package Settings"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:id="@+id/pnlMinimumDifficulty"
@@ -155,10 +157,10 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:gravity="center"
-            android:visibility="gone"
             android:minHeight="60dp"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" >
+            android:paddingRight="5dp"
+            android:visibility="gone" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -196,9 +198,9 @@
             android:layout_marginRight="15dp"
             android:gravity="center"
             android:minHeight="60dp"
-            android:visibility="gone"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" >
+            android:paddingRight="5dp"
+            android:visibility="gone" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -225,6 +227,7 @@
             android:layout_below="@+id/pnlMaxDifficulty"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
+            android:visibility="invisible"
             android:background="@color/light_white_seperator" />
 
         <RelativeLayout
@@ -236,9 +239,9 @@
             android:layout_marginRight="15dp"
             android:gravity="center"
             android:minHeight="60dp"
-            android:visibility="gone"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" >
+            android:paddingRight="5dp"
+            android:visibility="gone" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -269,7 +272,7 @@
             android:layout_marginTop="25dp"
             android:background="@drawable/advance_settings"
             android:gravity="center"
-            android:text="Advance Settings"
+            android:text="Advanced Settings"
             android:textColor="@color/graph_text_color_blue"
             android:textSize="18sp" />
     </RelativeLayout>

@@ -93,12 +93,12 @@
     <string-array name="tutorial_sub_questions">
         <item name="tutorial_0"><![CDATA[<small><small><font color=\'#999999\'>correct answers turn </font><font color=\'#00FF00\'>GREEN</font><font color=\'#999999\'>, wrong turn </font><font color=\'#FF0000\'>RED</font></small></small>]]></item>
         <item name="tutorial_1"><![CDATA[<small><small><font color=\'#999999\'>slide to "+" to add your favorite apps</font></small></small>]]></item>
-        <item name="tutorial_2"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the friend icon up</font></small></small>]]></item>
-        <item name="tutorial_3"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the gear icon up</font></small></small>]]></item>
+        <item name="tutorial_2"><![CDATA[<small><small><font color=\'#999999\'>Tap the friends icon</font></small></small>]]></item>
+        <item name="tutorial_3"><![CDATA[<small><small><font color=\'#999999\'>Tap the gear icon</font></small></small>]]></item>
         <item name="tutorial_4"><![CDATA[<small><small><font color=\'#999999\'>how often Hiq is used as your locksceen, change this setting at anytime</font></small></small>]]></item>
-        <item name="tutorial_5"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the refresh icon up</font></small></small>]]></item>
-        <item name="tutorial_6"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the progress arrow icon up</font></small></small>]]></item>
-        <item name="tutorial_7"><![CDATA[<small><small><font color=\'#999999\'>slide menu bar up then the cart icon up</font></small></small>]]></item>
+        <item name="tutorial_5"><![CDATA[<small><small><font color=\'#999999\'>Tap the quiz icon</font></small></small>]]></item>
+        <item name="tutorial_6"><![CDATA[<small><small><font color=\'#999999\'>Tap the progress arrow icon</font></small></small>]]></item>
+        <item name="tutorial_7"><![CDATA[<small><small><font color=\'#999999\'>Tap the packs icon</font></small></small>]]></item>
     </string-array>
     <string-array name="tutorial_answers_0">
         <item name="answer_0">Slide Here And Release To Answer</item>
@@ -329,7 +329,7 @@
         <item>unlock_language</item>
 		<item>unlock_engineer</item>
 		<item>unlock_hiqh_trivia</item>
-		<item>unlock_hiq_expansion</item>
+		<!-- <item>unlock_hiq_expansion</item> -->
     </string-array>
     <string-array name="unlock_sub_package_keys">
         <item>unlock_all_subscription</item>
@@ -338,7 +338,7 @@
         <item>unlock_language_subscription</item>
 		<item>unlock_engineer_subscription</item>
 		<item>unlock_hiqh_trivia_subscription</item>
-		<item>unlock_hiq_expansion_subscription</item>
+		<!-- <item>unlock_hiq_expansion_subscription</item> -->
     </string-array>
     <integer-array name="unlock_cost">
         <item>10000</item>
@@ -350,13 +350,15 @@
 		<item>5000</item>
     </integer-array>
     <string name="custom_enable">enable_custom_</string>
+
     <string-array name="enable_package_keys">
+
         <item>enable_math</item>
         <item>enable_vocab</item>
         <item>enable_language</item>
 		<item>enable_engineer</item>
 		<item>enable_hiqh_trivia</item>
-		<item>enable_hiq_expansion</item>
+		<!-- <item>enable_hiq_expansion</item> -->
     </string-array>
 
     <string name="all">All</string>
@@ -381,7 +383,7 @@
         <item>@string/language</item>
 		<item>@string/engineer</item>
 		<item>@string/hiqh_trivia</item>
-		<item>@string/hiq_expansion</item>
+		<!-- <item>@string/hiq_expansion</item> -->
     </string-array>
     <string name="custom_settings">settings_custom</string>
     <string-array name="settings_keys">
