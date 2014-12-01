@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
@@ -34,10 +35,15 @@ public class SettingsActivity extends Activity implements OnClickListener {
 	private RelativeLayout pnlMaxDifficulty;
 	private RelativeLayout pnlMaxAttempts;
 
+	private RelativeLayout pnlFromLanguage;
+	private RelativeLayout pnlToLanguage;
+
 	private TextView MinimumDifficultyValue;
 	private TextView MaxDifficultyValue;
 	private TextView MaxAttemptsyValue;
 	private TextView txtlogin;
+	private TextView tolanguage;
+	private TextView fromLanguage;
 
 	private ArrayList<String> keys;
 	private ArrayList<String> values;
@@ -48,6 +54,10 @@ public class SettingsActivity extends Activity implements OnClickListener {
 	private String KEY_MINDIFFICULTY = "difficulty_min";
 	private String KEY_MAXDIFFICULTY = "difficulty_max";
 	private String KEY_MAXATTEMPTS = "max_tries";
+	private String KEY_FROMLANGUAGE = "from_language";
+	private String KEY_TOLANGUAGE = "to_language";
+
+	private boolean isLanguageEnabled = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +84,15 @@ public class SettingsActivity extends Activity implements OnClickListener {
 
 	private void initView() {
 
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		isLanguageEnabled = sharedPrefs.getBoolean("enable_language", false);
+
 		pnlLogin = (RelativeLayout) findViewById(R.id.pnlLogin);
 		pnlRestartTutorial = (RelativeLayout) findViewById(R.id.pnlRestartTutorial);
 		pnlInfo = (RelativeLayout) findViewById(R.id.pnlInfo);
+
+		pnlFromLanguage = (RelativeLayout) findViewById(R.id.pnlFromlanguage);
+		pnlToLanguage = (RelativeLayout) findViewById(R.id.pnlTolanguage);
 
 		pnlMinimumDifficulty = (RelativeLayout) findViewById(R.id.pnlMinimumDifficulty);
 		pnlMaxDifficulty = (RelativeLayout) findViewById(R.id.pnlMaxDifficulty);
@@ -87,6 +103,10 @@ public class SettingsActivity extends Activity implements OnClickListener {
 		MaxDifficultyValue = (TextView) findViewById(R.id.MaxDifficultyValue);
 		MaxAttemptsyValue = (TextView) findViewById(R.id.MaxAttemptsyValue);
 		txtlogin = (TextView) findViewById(R.id.txtlogin);
+
+		tolanguage = (TextView) findViewById(R.id.tolanguage);
+		fromLanguage = (TextView) findViewById(R.id.fromlanguage);
+
 		if (!getSharedPreferences(getString(R.string.pref_user_info), Context.MODE_PRIVATE).getBoolean(
 				getString(R.string.pref_user_skipped), false)) {
 			txtlogin.setText("Logout");
@@ -110,6 +130,9 @@ public class SettingsActivity extends Activity implements OnClickListener {
 		pnlRestartTutorial.setOnClickListener(this);
 		pnlInfo.setOnClickListener(this);
 
+		pnlFromLanguage.setOnClickListener(this);
+		pnlToLanguage.setOnClickListener(this);
+
 		pnlMinimumDifficulty.setOnClickListener(this);
 		pnlMaxDifficulty.setOnClickListener(this);
 		pnlMaxAttempts.setOnClickListener(this);
@@ -124,6 +147,16 @@ public class SettingsActivity extends Activity implements OnClickListener {
 		MinimumDifficultyValue.setText(keys.get(Integer.parseInt(preferences.getString(KEY_MINDIFFICULTY, "0"))));
 		MaxDifficultyValue.setText(keys.get(Integer.parseInt(preferences.getString(KEY_MAXDIFFICULTY, "1"))));
 		MaxAttemptsyValue.setText(maxkeys.get(Integer.parseInt(preferences.getString(KEY_MAXATTEMPTS, "1")) - 1));
+
+		String selectedTo = preferences.getString(KEY_TOLANGUAGE, getString(R.string.language_to_default));
+		selectedTo = String.valueOf(selectedTo.charAt(0)).toUpperCase() + selectedTo.substring(1, selectedTo.length());
+
+		tolanguage.setText(selectedTo);
+
+		selectedTo = preferences.getString(KEY_FROMLANGUAGE, getString(R.string.language_from_default));
+		selectedTo = String.valueOf(selectedTo.charAt(0)).toUpperCase() + selectedTo.substring(1, selectedTo.length());
+
+		fromLanguage.setText(selectedTo);
 
 	}
 
@@ -206,6 +239,65 @@ public class SettingsActivity extends Activity implements OnClickListener {
 					});
 			break;
 
+		case R.id.pnlFromlanguage:
+			if (isLanguageEnabled) {
+				final PreferenceListDialog listDialogFrom = new PreferenceListDialog(SettingsActivity.this);
+				ArrayList<String> fromlanguage = new ArrayList<String>(Arrays.asList(getResources()
+						.getStringArray(R.array.language_entries)));
+
+				for (int i = 0; i < fromlanguage.size(); i++)
+					if (preferences.getString(KEY_TOLANGUAGE, getString(R.string.language_to_default))
+							.equalsIgnoreCase(fromlanguage.get(i))) {
+						fromlanguage.remove(i);
+					}
+
+				String selectedFrom = preferences.getString(KEY_FROMLANGUAGE, getString(R.string.language_from_default));
+				selectedFrom = String.valueOf(selectedFrom.charAt(0)).toUpperCase() + selectedFrom.substring(1, selectedFrom.length());
+				listDialogFrom.show(R.layout.dailog_preferencelist, null, fromlanguage, selectedFrom, new OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+						listDialogFrom.dismiss();
+						ArrayList<String> valu = new ArrayList<String>(Arrays.asList(getResources().getStringArray(
+								R.array.language_values_not_localized)));
+						valu.remove(preferences.getString(KEY_TOLANGUAGE, getString(R.string.language_to_default)));
+						preferences.edit().putString(KEY_FROMLANGUAGE, valu.get(arg2)).commit();
+						loadPreference();
+					}
+				});
+			} else {
+				Toast.makeText(SettingsActivity.this, "Please enable language pack to change the preference.", 1).show();
+			}
+			break;
+
+		case R.id.pnlTolanguage:
+			if (isLanguageEnabled) {
+				final PreferenceListDialog listDialogTo = new PreferenceListDialog(SettingsActivity.this);
+				ArrayList<String> ToLanguage = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.language_entries)));
+				for (int i = 0; i < ToLanguage.size(); i++)
+					if (preferences.getString(KEY_FROMLANGUAGE, getString(R.string.language_from_default)).equalsIgnoreCase(
+							ToLanguage.get(i))) {
+						ToLanguage.remove(i);
+					}
+				String selectedTo = preferences.getString(KEY_TOLANGUAGE, getString(R.string.language_to_default));
+				selectedTo = String.valueOf(selectedTo.charAt(0)).toUpperCase() + selectedTo.substring(1, selectedTo.length());
+				listDialogTo.show(R.layout.dailog_preferencelist, null, ToLanguage, selectedTo, new OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+						listDialogTo.dismiss();
+						ArrayList<String> valu = new ArrayList<String>(Arrays.asList(getResources().getStringArray(
+								R.array.language_values_not_localized)));
+						valu.remove(preferences.getString(KEY_FROMLANGUAGE, getString(R.string.language_from_default)));
+						preferences.edit().putString(KEY_TOLANGUAGE, valu.get(arg2)).commit();
+						loadPreference();
+					}
+				});
+			} else {
+				Toast.makeText(SettingsActivity.this, "Please enable Language pack to change the preference.", 1).show();
+			}
+			break;
+
 		case R.id.AdvanceSettings:
 			startActivity(new Intent(this, AdvanceSettingActivity.class));
 			break;
@@ -219,5 +311,4 @@ public class SettingsActivity extends Activity implements OnClickListener {
 		}
 
 	}
-
 }

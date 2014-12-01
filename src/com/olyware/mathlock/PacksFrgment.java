@@ -34,9 +34,12 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 	private ListView packList;
 	private ArrayList<PackItem> packItems = new ArrayList<PackItem>();
 	// final private static String[] SKU = { "allpack", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
-	final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
-	// final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
+	// final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
+
+	// Production
+	final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
 	final public static String PURCHASE_KEY = "jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:";
+
 	private int[] Cost;
 	private String[] unlockPackageKeys, unlockSubPackageKeys, PackageKeys, packageInfo;
 	private ArrayList<String> packageTitle = new ArrayList<String>();
@@ -83,8 +86,8 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 
 		packageTitle.add(getString(R.string.unlock_all));
 		packageTitle.add(getString(R.string.unlock_math));
-		packageTitle.add(getString(R.string.unlock_vocab));
-		packageTitle.add(getString(R.string.unlock_language));
+		packageTitle.add("English Vocabulary");
+		packageTitle.add("Languages");
 		packageTitle.add(getString(R.string.unlock_engineer));
 		packageTitle.add(getString(R.string.unlock_hiqh_trivia));
 		packageTitle.add(getString(R.string.unlock_hiq_expansion));
@@ -340,13 +343,23 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 						.putBoolean(PackageKeys[arg2], packItems.get(arg2).isEnabled()).commit();
 				// if all pack disabled expect the first one
 				boolean onepackenabled = false;
+				boolean onepackdisabled = false;
 				int count = 0;
 				for (int i = 1; i < packItems.size(); i++) {
 					if (packItems.get(i).isEnabled()) {
 						onepackenabled = true;
 						count++;
+					} else {
+						onepackdisabled = true;
 					}
 
+				}
+
+				if (sharedPrefsMoney.getBoolean(unlockSubPackageKeys[0], false) && onepackdisabled) {
+					packItems.get(0).setEnabled(false);
+					packItems.get(0).setTextToShow(packItems.get(0).isEnabled() ? "ON" : "OFF");
+					PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+							.putBoolean(PackageKeys[0], packItems.get(0).isEnabled()).commit();
 				}
 				// disable the first one too
 				if (!onepackenabled && sharedPrefsMoney.getBoolean(unlockSubPackageKeys[0], false)) {
@@ -380,8 +393,8 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 		} else {
 			if (mHelper != null)
 				mHelper.flagEndAsync();
-			// mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
-			mHelper.launchPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
+			mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
+			// mHelper.launchPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
 		}
 	}
 

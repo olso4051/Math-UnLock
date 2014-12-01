@@ -111,8 +111,100 @@
             android:layout_below="@+id/pnlRestartTutorial"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
-            android:visibility="invisible"
-            android:background="@color/light_white_seperator" />
+            android:background="@color/light_white_seperator"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/languageCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seperatorRestartTutorial"
+            android:background="@color/graph_text_color_blue_dark"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="Language Settings"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+        <RelativeLayout
+            android:id="@+id/pnlFromlanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/languageCategory"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:gravity="center"
+            android:minHeight="60dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="From language : "
+                android:textColor="@color/font_advancesetting"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/fromlanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="English"
+                android:textColor="@color/light_blue_background"
+                android:textSize="18sp" />
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/seperatorfromlanguage"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/pnlFromlanguage"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:background="@color/light_white_seperator"
+            android:visibility="visible" />
+
+        <RelativeLayout
+            android:id="@+id/pnlTolanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seperatorfromlanguage"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:gravity="center"
+            android:minHeight="60dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="To language : "
+                android:textColor="@color/font_advancesetting"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tolanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="Spanish"
+                android:textColor="@color/light_blue_background"
+                android:textSize="18sp" />
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/seperatortolanguage"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/pnlTolanguage"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:background="@color/light_white_seperator"
+            android:visibility="visible" />
 
         <RelativeLayout
             android:id="@+id/pnlInfo"
@@ -227,8 +319,8 @@
             android:layout_below="@+id/pnlMaxDifficulty"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
-            android:visibility="invisible"
-            android:background="@color/light_white_seperator" />
+            android:background="@color/light_white_seperator"
+            android:visibility="invisible" />
 
         <RelativeLayout
             android:id="@+id/pnlMaxAttempts"
@@ -265,7 +357,7 @@
             android:id="@+id/AdvanceSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/pnlMaxAttempts"
+            android:layout_below="@+id/seperatortolanguage"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"

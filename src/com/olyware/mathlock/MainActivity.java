@@ -138,9 +138,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	// final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1", "expansion", "engineer",
 	// "hiqentrepack", "math" };
 	// final private static String[] SKU = { "testpackall", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
-	final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
-	final private static String SKU_QUIZ = "testquizemode";
-	// final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
+	// final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
+	// final private static String SKU_QUIZ = "testquizemode";
+	// Production subscriptions
+	final private static String SKU_QUIZ = "quizmode";
+	final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
+
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
@@ -649,10 +652,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
 			// quizMode = joystick.setQuizMode(!locked && !fromLogin);
-			quizMode = joystick
-					.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this)); // Is
-																																	// subscribed
-																																	// ?
+			quizMode = joystick.setQuizMode(!locked
+					&& (getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this))); // Is
+			// subscribed
+			// ?
 			setQuizeMode();
 			if (fromLogin)
 				sharedPrefs.edit().putBoolean("from_login", false).commit();
@@ -919,11 +922,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				// showWallpaper();
 			}
 
-			quizMode = joystick
-					.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this)); // Is
-																																	// subscribed
-																																	// ?
-			setQuizeMode();
+			// quizMode = joystick
+			// .setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this)); // Is
+			// // subscribed
+			// // ?
+			// setQuizeMode();
 		}
 
 	}
@@ -992,15 +995,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
+		// getMenuInflater().inflate(R.menu.activity_main, menu);
+		// return true;
 		// if (loggedIn) {
 		// // PAI COMMENTED - new UI on oct 27th- 2014 start here //
 		// // joystick.showStartAnimation(0, 3000);
 		// // PAI COMMENTED - new UI on oct 27th- 2014 ends here //
 		// return false;
 		// } else
-		// return super.onCreateOptionsMenu(menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -1292,6 +1295,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Log.e("TUTORIAL", "" + show);
 		if (show) {
 			PreferenceHelper.setShareCompeteShown(getApplicationContext(), show);
+			quizMode = joystick.setQuizMode(false);
+			setQuizeMode();
 			showToutorialComplete();
 		}
 	}
@@ -1320,7 +1325,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		fromAskToOpen = false;
 		urls = answersNone;
 		Log.d("TUTORIAL", "TUTORIAL" + fromTutorialPosition);
-		quizMode = joystick.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this));
+		// quizMode = joystick.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this));
 		setQuizeMode();
 		if (tutorialQuestion != null) {
 
@@ -1989,6 +1994,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				if (Extra == 0)
 					updateStats(false);
 				joystick.pauseSelection();
+				finish();
 				launchHomeScreen(MoneyHelper.updateMoneyTime * 2, true);
 			} else if ((answerLoc == answer) && quizMode) {
 				displayCorrectOrNot(answerLoc, answer); // Correct
@@ -2720,13 +2726,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			} else {
 				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 				builder.setTitle("Oops!").setCancelable(false);
-				builder.setMessage("It seems that you have not subscribed to any question packs. Enabling the quize mode alone needs subscribtion($3/month).");
+				builder.setMessage("It seems that you have not subscribed to any question packs. Enabling the quiz mode alone needs subscribtion($3/month).");
 				builder.setPositiveButton("Subscribe", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						if (mHelper != null)
 							mHelper.flagEndAsync();
-						// mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
-						mHelper.launchPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
+						mHelper.launchSubscriptionPurchaseFlow(MainActivity.this, SKU_QUIZ, 1, new OnIabPurchaseFinishedListener() {
 
 							@Override
 							public void onIabPurchaseFinished(IabResult result, Purchase info) {
@@ -2741,9 +2746,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 								}
 							}
 						}, PacksFrgment.PURCHASE_KEY);
+						// mHelper.launchPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
+						//
+						// @Override
+						// public void onIabPurchaseFinished(IabResult result, Purchase info) {
+						// if (result.isFailure()) {
+						//
+						// } else {
+						// if (info.getSku().equals(SKU_QUIZ)) {
+						// PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
+						// }
+						// quizMode = joystick.setQuizMode(true);
+						// setQuizeMode();
+						// }
+						// }
+						// }, PacksFrgment.PURCHASE_KEY);
 					}
 				});
-				builder.setNegativeButton("Not, now", new DialogInterface.OnClickListener() {
+				builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
