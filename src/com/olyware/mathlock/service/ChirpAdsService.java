@@ -13,9 +13,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.IBinder;
 
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.utils.Loggy;
 import com.olyware.mathlock.utils.NotificationHelper;
@@ -61,7 +60,7 @@ public class ChirpAdsService extends Service {
 	public void onCreate() {
 		Loggy.d("chirpadsservice onCreate");
 		trackerGA = MyApplication.getGaTracker();
-		trackerGA.set(Fields.SCREEN_NAME, "ChirpAds Service");
+		// trackerGA.set(Fields.SCREEN_NAME, "ChirpAds Service");
 		super.onCreate();
 	}
 
@@ -70,7 +69,10 @@ public class ChirpAdsService extends Service {
 		for (PackageData data : packagesToWatch) {
 			String pkg = data.getPack();
 			long time = data.getTimeToOpen();
-			trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
+			// trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
+			trackerGA.send(new HitBuilders.EventBuilder().setCategory("chirpAds").setAction("app_opened").setLabel(pkg).setValue(time)
+					.build());
+
 		}
 		if (timer != null) {
 			timer.cancel();
@@ -105,7 +107,10 @@ public class ChirpAdsService extends Service {
 						int i = packagesToWatch.indexOf(new PackageData(pkg, 0));
 						if (i >= 0 && i < packagesToWatch.size()) {
 							long time = packagesToWatch.get(i).getTimeToOpen();
-							trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
+							// trackerGA.send(MapBuilder.createEvent("chirpAds", "app_opened", pkg, time).build());
+							trackerGA.send(new HitBuilders.EventBuilder().setCategory("chirpAds").setAction("app_opened").setLabel(pkg)
+									.setValue(time).build());
+
 							NotificationHelper.clearAppNotification(getApplicationContext());
 							PreferenceHelper.removePackToOpen(getApplicationContext(), pkg);
 							packagesToWatch.remove(i);

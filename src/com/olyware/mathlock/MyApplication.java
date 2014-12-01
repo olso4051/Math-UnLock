@@ -7,9 +7,9 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.google.analytics.tracking.android.GoogleAnalytics;
-import com.google.analytics.tracking.android.Logger.LogLevel;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Logger.LogLevel;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.playhaven.android.push.GCMRegistrationRequest;
 
@@ -25,7 +25,8 @@ public class MyApplication extends Application {
 	private static final boolean GA_IS_DRY_RUN = false;
 
 	// GA Logger verbosity.
-	private static final LogLevel GA_LOG_LEVEL = GA_IS_DRY_RUN ? LogLevel.VERBOSE : LogLevel.ERROR;
+	// private static final LogLevel GA_LOG_LEVEL = GA_IS_DRY_RUN ? LogLevel.VERBOSE : LogLevel.ERROR;
+	private static final int GA_LOG_LEVEL = GA_IS_DRY_RUN ? LogLevel.VERBOSE : LogLevel.ERROR;
 
 	// Key used to store a user's tracking preferences in SharedPreferences.
 	private static final String TRACKING_PREF_KEY = "analytics_tracking";
@@ -51,8 +52,13 @@ public class MyApplication extends Application {
 	 * block as all Google Analytics work occurs off the main thread.
 	 */
 	private void initializeGoogleAnalytics() {
+		GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+		mTracker = analytics.newTracker(R.xml.app_tracker);
+
+		mTracker.enableAdvertisingIdCollection(true);
+
 		mGa = GoogleAnalytics.getInstance(this);
-		mTracker = mGa.getTracker(getString(R.string.google_analytics_tracking_id));
+		// mTracker = mGa.getTracker(getString(R.string.google_analytics_tracking_id));
 
 		// Set dryRun flag.
 		mGa.setDryRun(GA_IS_DRY_RUN);

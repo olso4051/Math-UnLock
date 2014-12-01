@@ -2,6 +2,7 @@ package com.olyware.mathlock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,7 +17,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.adapter.PackItemAdapter;
 import com.olyware.mathlock.model.PackItem;
 import com.olyware.mathlock.utils.IabHelper;
@@ -95,6 +98,19 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 		packageSummury.add("Expansion");
 
 		return view;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(getActivity()).reportActivityStart(getActivity());
+	}
+
+	@Override
+	public void onStop() {
+		GoogleAnalytics.getInstance(getActivity()).reportActivityStop(getActivity());
+		super.onStop();
 	}
 
 	private void initListner() {
@@ -243,10 +259,11 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					// handle error
 					return;
 				} else if (purchase.getSku().equals(SKU[0])) {
+					sendEvent("store", "unlocked_pack", "all_packages", (long) 50.0);
 					// mHelper.consumeAsync(purchase, null);
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 0.99 * .7);
-					sendItem(purchase.getOrderId(), "All Packs", purchase.getSku(), "subscriptions", 1.00);
+					sendItem(purchase.getOrderId(), "All Packs", purchase.getSku(), "subscriptions", 50.00);
 					// mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 					PreferenceHelper.unlockSubscription(getActivity(), 0);
 					for (int i = 0; i < unlockPackageKeys.length; i++)
@@ -256,32 +273,37 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 1.99 * .7);
 					sendItem(purchase.getOrderId(), "math", purchase.getSku(), "subscriptions", 1.00);
+					sendEvent("store", "unlocked_pack", "math", (long) 1.0);
 					// mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 					PreferenceHelper.unlockSubscription(getActivity(), 1);
 				}
 				if (purchase.getSku().equals(SKU[2])) {
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 2.99 * .7);
-					sendItem(purchase.getOrderId(), "Vocab", purchase.getSku(), "subscriptions", 2.99);
+					sendItem(purchase.getOrderId(), "Vocab", purchase.getSku(), "subscriptions", 1.00);
+					sendEvent("store", "unlocked_pack", "Vocab", (long) 1.0);
 					// mHelper.consumeAsync(purchase, mConsumeFinishedListener);
 					PreferenceHelper.unlockSubscription(getActivity(), 2);
 				}
 				if (purchase.getSku().equals(SKU[3])) {
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 1.00 * .7);
-					sendItem(purchase.getOrderId(), "Language Subscription", purchase.getSku(), "subscriptions", 1.00);
+					sendItem(purchase.getOrderId(), "Language Subscription", purchase.getSku(), "subscriptions", 3.00);
+					sendEvent("store", "unlocked_pack", "Language Subscription ", (long) 3.0);
 					PreferenceHelper.unlockSubscription(getActivity(), 3);
 				}
 				if (purchase.getSku().equals(SKU[4])) {
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 1.00 * .7);
 					sendItem(purchase.getOrderId(), "Engineeer Subscription", purchase.getSku(), "subscriptions", 1.00);
+					sendEvent("store", "unlocked_pack", "Engineeer Subscription", (long) 1.0);
 					PreferenceHelper.unlockSubscription(getActivity(), 4);
 				}
 				if (purchase.getSku().equals(SKU[5])) {
 					MoneyHelper.BoughtSomething(getActivity());
 					sendTransaction(purchase.getOrderId(), 3.00 * .7);
-					sendItem(purchase.getOrderId(), "Hiq Travia Subscription", purchase.getSku(), "subscriptions", 3.00);
+					sendItem(purchase.getOrderId(), "Hiq Travia Subscription", purchase.getSku(), "subscriptions", 1.00);
+					sendEvent("store", "unlocked_pack", "Hiq Travia Subscription", (long) 1.0);
 					PreferenceHelper.unlockSubscription(getActivity(), 5);
 				}
 
@@ -363,12 +385,31 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 		}
 	}
 
+	private void sendEvent(String category, String action, String label, Long value) {
+		// MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+		MyApplication.getGaTracker().send(new HitBuilders.EventBuilder().setCategory(category).setAction(action).setLabel(label).build());
+
+	}
+
 	private void sendTransaction(String transactionID, Double revenue) {
-		MyApplication.getGaTracker().send(MapBuilder.createTransaction(transactionID, "In-App Store", revenue, 0.0d, 0.0d, "USD").build());
+		// MyApplication.getGaTracker().send(MapBuilder.createTransaction(transactionID, "In-App Store", revenue, 0.0d, 0.0d,
+		// "USD").build());
+		sendDataToTrackers(new HitBuilders.TransactionBuilder().setTransactionId(transactionID).setAffiliation("In-App Store")
+				.setRevenue(revenue).setTax(0.0d).setShipping(0.0d).setCurrencyCode("USD").build());
+
 	}
 
 	private void sendItem(String transactionID, String name, String SKU, String category, Double price) {
-		MyApplication.getGaTracker().send(MapBuilder.createItem(transactionID, name, SKU, category, price, 1L, "USD").build());
+		// MyApplication.getGaTracker().send(MapBuilder.createItem(transactionID, name, SKU, category, price, 1L, "USD").build());
+		sendDataToTrackers(new HitBuilders.ItemBuilder().setTransactionId(transactionID).setName(name).setSku(SKU).setCategory(category)
+				.setPrice(price).setQuantity(1L).setCurrencyCode("USD").build());
+
+	}
+
+	// Sends the ecommerce data.
+	private void sendDataToTrackers(Map<String, String> params) {
+		Tracker appTracker = MyApplication.getGaTracker();
+		appTracker.send(params);
 	}
 
 }

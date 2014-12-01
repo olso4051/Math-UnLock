@@ -5,9 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.MyApplication;
 
 public class ChirpAdsReceiver extends BroadcastReceiver {
@@ -29,8 +28,10 @@ public class ChirpAdsReceiver extends BroadcastReceiver {
 			} else {
 				Tracker trackerGA;
 				trackerGA = MyApplication.getGaTracker();
-				trackerGA.set(Fields.SCREEN_NAME, "FlashAds Service");
-				trackerGA.send(MapBuilder.createEvent("install", "updated", pack, 0l).build());
+				// trackerGA.set(Fields.SCREEN_NAME, "FlashAds Service");
+				// trackerGA.send(MapBuilder.createEvent("install", "updated", pack, 0l).build());
+				trackerGA.send(new HitBuilders.EventBuilder().setCategory("install").setAction("updated").setLabel(pack).build());
+
 			}
 		}
 	}

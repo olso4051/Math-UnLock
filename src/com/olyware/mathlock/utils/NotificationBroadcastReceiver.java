@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.service.AutoClick;
 
@@ -31,7 +31,10 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 			final String pack = bundle.getString(ACTION_REMIND_PACKAGE);
 			Loggy.d("pack = " + pack + " clicked = " + clicked);
 			if (clicked) {
-				trackerGA.send(MapBuilder.createEvent("install", "notification_clicked", pack, 0l).build());
+				// trackerGA.send(MapBuilder.createEvent("install", "notification_clicked", pack, 0l).build());
+				trackerGA.send(new HitBuilders.EventBuilder().setCategory("install").setAction("notification_clicked").setLabel(pack)
+						.setValue((long) 0l).build());
+
 				new AutoClick(context, pack, false) {
 					@Override
 					protected void onPostExecute(AutoClickResult result) {
@@ -41,7 +44,10 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 					}
 				}.execute();
 			} else {
-				trackerGA.send(MapBuilder.createEvent("install", "notification_cleared", pack, 0l).build());
+				// trackerGA.send(MapBuilder.createEvent("install", "notification_cleared", pack, 0l).build());
+				trackerGA.send(new HitBuilders.EventBuilder().setCategory("install").setAction("notification_cleared").setLabel(pack)
+						.setValue((long) 0l).build());
+
 			}
 		}
 	}

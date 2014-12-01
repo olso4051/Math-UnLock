@@ -37,8 +37,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.adapter.CustomArrayAdapter;
 import com.olyware.mathlock.database.DatabaseManager;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
@@ -281,13 +281,20 @@ public class ShowCustomEditActivity extends FragmentActivity {
 
 		resetContentView(R.layout.activity_custom_edit2, null, -1);
 
-		MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
+		// MyApplication.getGaTracker().set(Fields.SCREEN_NAME, SCREEN_LABEL);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MyApplication.getGaTracker().send(MapBuilder.createAppView().build());
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
 	}
 
 	@Override
@@ -724,6 +731,8 @@ public class ShowCustomEditActivity extends FragmentActivity {
 	}
 
 	private void sendEvent(String category, String action, String label, Long value) {
-		MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+		// MyApplication.getGaTracker().send(MapBuilder.createEvent(category, action, label, value).build());
+		MyApplication.getGaTracker().send(new HitBuilders.EventBuilder().setCategory(category).setAction(action).setLabel(label).build());
+
 	}
 }

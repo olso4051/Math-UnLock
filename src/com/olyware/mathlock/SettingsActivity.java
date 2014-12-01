@@ -17,6 +17,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.dialog.PreferenceListDialog;
 import com.olyware.mathlock.service.ScreenService;
 import com.olyware.mathlock.utils.PreferenceHelper;
@@ -53,6 +55,20 @@ public class SettingsActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_settings);
 		preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
 		initView();
+
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
 
 	}
 

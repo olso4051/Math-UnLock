@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.MyApplication;
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.views.JoystickView;
@@ -36,7 +36,10 @@ public class EggHelper {
 			editorPrefsEggs.putBoolean(Egg, true).commit();
 			MoneyHelper.setMoney(context, coins, j, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0), 0);
 
-			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
+			// MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
+			MyApplication.getGaTracker().send(
+					new HitBuilders.EventBuilder().setCategory("easter_egg").setAction("egg_found").setLabel(Egg).setValue((long) amount)
+							.build());
 
 			// Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else
@@ -58,7 +61,10 @@ public class EggHelper {
 			editorPrefsEggs.putBoolean(Egg, true).commit();
 			MoneyHelper.setMoney(ctx, sharedPrefsMoney.getInt("money", 0) + a, sharedPrefsMoney.getInt("paid_money", 0));
 
-			MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
+			// MyApplication.getGaTracker().send(MapBuilder.createEvent("easter_egg", "egg_found", Egg, (long) amount).build());
+			MyApplication.getGaTracker().send(
+					new HitBuilders.EventBuilder().setCategory("easter_egg").setAction("egg_found").setLabel(Egg).setValue((long) amount)
+							.build());
 
 			// Toast.makeText(ctx, ctx.getString(R.string.egg_found) + " " + amount, Toast.LENGTH_SHORT).show();
 		} else

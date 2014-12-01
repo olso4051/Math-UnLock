@@ -14,6 +14,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.dialog.PreferenceListDialog;
 
 public class AdvanceSettingActivity extends Activity implements OnClickListener {
@@ -51,6 +53,20 @@ public class AdvanceSettingActivity extends Activity implements OnClickListener 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		initview();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MyApplication.getGaTracker().send(new HitBuilders.AppViewBuilder().build());
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
+
 	}
 
 	private void initview() {
