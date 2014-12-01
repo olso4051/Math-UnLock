@@ -81,7 +81,7 @@
         <item name="tutorial_7">Extended Tutorial 3 of 3</item>
     </string-array>
     <string-array name="tutorial_questions">
-        <item name="tutorial_0">Press and Hold The Lock</item>
+        <item name="tutorial_0">Press + Hold The Lock</item>
         <item name="tutorial_1">Double Tap the Lock To Quickly Unlock</item>
         <item name="tutorial_2">Challenge Your Friends</item>
         <item name="tutorial_3">Change Settings</item>
@@ -92,7 +92,7 @@
     </string-array>
     <string-array name="tutorial_sub_questions">
         <item name="tutorial_0"><![CDATA[<small><small><font color=\'#999999\'>correct answers turn </font><font color=\'#00FF00\'>GREEN</font><font color=\'#999999\'>, wrong turn </font><font color=\'#FF0000\'>RED</font></small></small>]]></item>
-        <item name="tutorial_1"><![CDATA[<small><small><font color=\'#999999\'>slide to "+" to add your favorite apps</font></small></small>]]></item>
+        <item name="tutorial_1"><![CDATA[<small><small><font color=\'#999999\'>slide "+" to add your favorite apps</font></small></small>]]></item>
         <item name="tutorial_2"><![CDATA[<small><small><font color=\'#999999\'>Tap the friends icon</font></small></small>]]></item>
         <item name="tutorial_3"><![CDATA[<small><small><font color=\'#999999\'>Tap the gear icon</font></small></small>]]></item>
         <item name="tutorial_4"><![CDATA[<small><small><font color=\'#999999\'>how often Hiq is used as your locksceen, change this setting at anytime</font></small></small>]]></item>
@@ -101,7 +101,7 @@
         <item name="tutorial_7"><![CDATA[<small><small><font color=\'#999999\'>Tap the packs icon</font></small></small>]]></item>
     </string-array>
     <string-array name="tutorial_answers_0">
-        <item name="answer_0">Slide Here And Release To Answer</item>
+        <item name="answer_0">Slide lock here,release to answer</item>
         <item name="answer_1">X</item>
         <item name="answer_2">X</item>
         <item name="answer_3">X</item>

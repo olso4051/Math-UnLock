@@ -108,6 +108,7 @@ import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabHelper.OnConsumeMultiFinishedListener;
+import com.olyware.mathlock.utils.IabHelper.OnIabPurchaseFinishedListener;
 import com.olyware.mathlock.utils.IabHelper.QueryInventoryFinishedListener;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
@@ -138,6 +139,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	// "hiqentrepack", "math" };
 	// final private static String[] SKU = { "testpackall", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
 	final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
+	final private static String SKU_QUIZ = "testquizemode";
+	// final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
 	final private String[] answersNone = { "", "", "", "" };
 	final private static String SCREEN_LABEL = "Home Screen", LOGIN_LABEL = "Login Screen";
 	final private static int REQUEST_PICK_APP = 42;
@@ -485,7 +488,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						// additionalSkuList.add(SKU[3]);
 						// additionalSkuList.add(SKU[4]);
 						// additionalSkuList.add(SKU[5]);
-						List<String> additionalSkuList = Arrays.asList(SKU);
+						ArrayList<String> additionalSkuList = new ArrayList<String>(Arrays.asList(SKU));
+						additionalSkuList.add("language1");
+						additionalSkuList.add("vocab1");
+						additionalSkuList.add(SKU_QUIZ);
 						mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
 					}
 				}
@@ -517,13 +523,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							} else {
 								PreferenceHelper.lockSubscription(MainActivity.this, 1);
 							}
-							if (inventory.hasPurchase(SKU[2])) {
+							if (inventory.hasPurchase(SKU[2]) || inventory.hasPurchase("language1")) {// OLD Subscription
 								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 								PreferenceHelper.unlockSubscription(MainActivity.this, 2);
 							} else {
 								PreferenceHelper.lockSubscription(MainActivity.this, 2);
 							}
-							if (inventory.hasPurchase(SKU[3])) {
+							if (inventory.hasPurchase(SKU[3]) || inventory.hasPurchase("vocab1")) { // OLD Subscription
 								// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 								PreferenceHelper.unlockSubscription(MainActivity.this, 3);
 							} else {
@@ -543,36 +549,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							}
 						}
 
-						// if (inventory.hasPurchase(SKU[6])) {
-						// // mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
-						// PreferenceHelper.unlockSubscription(MainActivity.this, 6);
-						// } else {
-						// PreferenceHelper.lockSubscription(MainActivity.this, 6);
-						// }
-
-						// if (inventory.hasPurchase(SKU[1])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[1]), mConsumeFinishedListener);
-						// }
-						// if (inventory.hasPurchase(SKU[2])) {
-						// mHelper.consumeAsync(inventory.getPurchase(SKU[2]), mConsumeFinishedListener);
-						// }
-						// if (inventory.hasPurchase(SKU[3])) {
-						// PreferenceHelper.unlockSubscription(MainActivity.this, 2);
-						// } else {
-						// PreferenceHelper.lockSubscription(MainActivity.this, 2);
-						// }
-						// if (inventory.hasPurchase(SKU[4])) {
-						// PreferenceHelper.unlockSubscription(MainActivity.this, 3);
-						// } else {
-						// PreferenceHelper.lockSubscription(MainActivity.this, 3);
-						// }
-						// if (inventory.hasPurchase(SKU[5])) {
-						// PreferenceHelper.unlockSubscription(MainActivity.this, 6);
-						// } else {
-						// PreferenceHelper.lockSubscription(MainActivity.this, 6);
-						// }
-
+						PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, inventory.hasPurchase(SKU_QUIZ));
+						quizMode = joystick.setQuizMode(inventory.hasPurchase(SKU_QUIZ));
+						setQuizeMode();
 					}
+
 				}
 			};
 			// this listener checks for products that have been consumed and provisions them to the user
@@ -667,7 +648,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
-			quizMode = joystick.setQuizMode(!locked && !fromLogin);
+			// quizMode = joystick.setQuizMode(!locked && !fromLogin);
+			quizMode = joystick
+					.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this)); // Is
+																																	// subscribed
+																																	// ?
 			setQuizeMode();
 			if (fromLogin)
 				sharedPrefs.edit().putBoolean("from_login", false).commit();
@@ -925,7 +910,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 				// showWallpaper();
 			}
+
+			quizMode = joystick
+					.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this)); // Is
+																																	// subscribed
+																																	// ?
+			setQuizeMode();
 		}
+
 	}
 
 	@Override
@@ -936,14 +928,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			} else {
 				if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
 					removeProgressFragment();
-				} else {
+				} else if (!locked) {
 					super.onBackPressed();
 				}
 			}
 		} else {
 			if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
 				removeProgressFragment();
-			} else {
+			} else if (!locked) {
 				super.onBackPressed();
 			}
 		}
@@ -1007,19 +999,20 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_settings) {
 
-			List<String> additionalSkuList = Arrays.asList(SKU);
+			ArrayList<String> additionalSkuList = new ArrayList<String>(Arrays.asList(SKU));
+			additionalSkuList.add(SKU_QUIZ);
+			final ArrayList<String> listskus = additionalSkuList;
 			Toast.makeText(ctx, "Started consuming", 1).show();
-			mHelper.queryInventoryAsync(true, additionalSkuList, new QueryInventoryFinishedListener() {
+			mHelper.queryInventoryAsync(true, listskus, new QueryInventoryFinishedListener() {
 
 				@Override
 				public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-
 					// Remove this
 					List<Purchase> list = new ArrayList<Purchase>();
 
-					for (int i = 0; i < SKU.length; i++) {
-						if (inv != null && inv.getPurchase(SKU[i]) != null)
-							list.add(inv.getPurchase(SKU[i]));
+					for (int i = 0; i < listskus.size(); i++) {
+						if (inv != null && inv.getPurchase(listskus.get(i)) != null)
+							list.add(inv.getPurchase(listskus.get(i)));
 					}
 					mHelper.consumeAsync(list, new OnConsumeMultiFinishedListener() {
 
@@ -1043,6 +1036,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			super.onActivityResult(requestCode, resultCode, data);
 			// ((PacksFrgment) fragmentCurrentShown).refereshlist();
 
+		} else if (!mHelper.handleActivityResult(2, resultCode, data)) {
+			super.onActivityResult(requestCode, resultCode, data);
 		}
 		if (loggedIn) {
 			uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
@@ -1317,6 +1312,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		fromAskToOpen = false;
 		urls = answersNone;
 		Log.d("TUTORIAL", "TUTORIAL" + fromTutorialPosition);
+		quizMode = joystick.setQuizMode(getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this));
+		setQuizeMode();
 		if (tutorialQuestion != null) {
 
 			fromTutorial = true;
@@ -1789,6 +1786,16 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				return true;
 			}
 		return false;
+	}
+
+	private int getCountOfPackageUnlocked() {
+		String[] unlockSubPackageKeys = getResources().getStringArray(R.array.unlock_sub_package_keys);
+		int count = 0;
+		for (int i = 0; i < unlockSubPackageKeys.length; i++)
+			if (sharedPrefsMoney.getBoolean(unlockSubPackageKeys[i], false)) {
+				count++;
+			}
+		return count;
 	}
 
 	public int getEnabledPackages() {
@@ -2692,10 +2699,46 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (progressFrarment == null || !progressFrarment.isVisible())
 				showProgressFragment();
 		} else if (view.getId() == R.id.pnlQuizMode) {
-			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
-			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
-			quizMode = joystick.setQuizMode(!quizMode);
-			setQuizeMode();
+			if (quizMode || (getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this))) {
+				sendEvent("ui_action", "settings_selected", "quiz_mode", null);
+				Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
+				quizMode = joystick.setQuizMode(!quizMode);
+				setQuizeMode();
+			} else {
+				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+				builder.setTitle("Oops!").setCancelable(false);
+				builder.setMessage("It seems that you have not subscribed to any question packs. Enabling the quize mode alone needs subscribtion($3/month).");
+				builder.setPositiveButton("Subscribe", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						if (mHelper != null)
+							mHelper.flagEndAsync();
+						// mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
+						mHelper.launchPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
+
+							@Override
+							public void onIabPurchaseFinished(IabResult result, Purchase info) {
+								if (result.isFailure()) {
+
+								} else {
+									if (info.getSku().equals(SKU_QUIZ)) {
+										PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
+									}
+									quizMode = joystick.setQuizMode(true);
+									setQuizeMode();
+								}
+							}
+						}, PacksFrgment.PURCHASE_KEY);
+					}
+				});
+				builder.setNegativeButton("Not, now", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+				builder.create().show();
+			}
 
 		} else if (view.getId() == R.id.pnlStore) {
 			unlocking = false;
@@ -2784,6 +2827,15 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	private void setQuizeMode() {
+
+		// if (quizMode) {
+		// int count = getCountOfPackageUnlocked();
+		// if (count > 1) {
+		// Toast.makeText(getContext(), "COunt " + getCountOfPackageUnlocked(), 1).show();
+		// } else if (count != 0) {
+		// Toast.makeText(getContext(), "Please pay 3 $ " + getCountOfPackageUnlocked(), 1).show();
+		// }
+		// }
 		if (quizMode) {
 			((ImageView) findViewById(R.id.quiz_icon)).setImageResource(R.drawable.quiz_mode_selected);
 			((TextView) findViewById(R.id.txtQzMode)).setTextColor(getResources().getColor(R.color.selected_tab_Bar));

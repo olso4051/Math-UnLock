@@ -199,6 +199,20 @@ public class PreferenceHelper {
 		}
 	}
 
+	public static boolean isSubscribedToQuizeMode(Context ctx) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsMoney.getBoolean("sub_quiz_mode", false);
+
+	}
+
+	public static void setSubscribedToQuizeMode(Context ctx, boolean value) {
+		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editPrefsMoney = sharedPrefsMoney.edit();
+		editPrefsMoney.putBoolean("sub_quiz_mode", value);
+		editPrefsMoney.commit();
+
+	}
+
 	public static String getPackToOpen(Context ctx) {
 		SharedPreferences sharedPrefsMoney = ctx.getSharedPreferences(MONEY_PREFS, Context.MODE_PRIVATE);
 		try {

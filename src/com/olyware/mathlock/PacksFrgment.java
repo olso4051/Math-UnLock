@@ -2,7 +2,6 @@ package com.olyware.mathlock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -33,7 +32,8 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 	private ArrayList<PackItem> packItems = new ArrayList<PackItem>();
 	// final private static String[] SKU = { "allpack", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
 	final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
-	final private static String PURCHASE_KEY = "jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:";
+	// final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
+	final public static String PURCHASE_KEY = "jF8foS2vFiNit8vn#ksl9aTkuK)_uVWe5OKn2Lo:";
 	private int[] Cost;
 	private String[] unlockPackageKeys, unlockSubPackageKeys, PackageKeys, packageInfo;
 	private ArrayList<String> packageTitle = new ArrayList<String>();
@@ -127,13 +127,13 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 						} else {
 							PreferenceHelper.lockSubscription(getActivity(), 1);
 						}
-						if (inventory.hasPurchase(SKU[2])) {
+						if (inventory.hasPurchase(SKU[2]) || inventory.hasPurchase("language1")) {// OLD Subscription
 							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(getActivity(), 2);
 						} else {
 							PreferenceHelper.lockSubscription(getActivity(), 2);
 						}
-						if (inventory.hasPurchase(SKU[3])) {
+						if (inventory.hasPurchase(SKU[3]) || inventory.hasPurchase("vocab1")) { // OLD Subscription
 							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(getActivity(), 3);
 						} else {
@@ -188,7 +188,6 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 
 					adapter = new PackItemAdapter(getLayoutInflater(getArguments()), packItems, colors);
 					packList.setAdapter(adapter);
-
 					packList.setOnItemClickListener(PacksFrgment.this);
 
 				}
@@ -197,7 +196,9 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 	}
 
 	public void refereshlist() {
-		List<String> additionalSkuList = Arrays.asList(SKU);
+		ArrayList<String> additionalSkuList = new ArrayList<String>(Arrays.asList(SKU));
+		additionalSkuList.add("language1");
+		additionalSkuList.add("vocab1");
 		if (mHelper != null)
 			mHelper.flagEndAsync();
 		mHelper.queryInventoryAsync(true, additionalSkuList, mQueryFinishedListener);
@@ -317,15 +318,24 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 						.putBoolean(PackageKeys[arg2], packItems.get(arg2).isEnabled()).commit();
 				// if all pack disabled expect the first one
 				boolean onepackenabled = false;
+				int count = 0;
 				for (int i = 1; i < packItems.size(); i++) {
 					if (packItems.get(i).isEnabled()) {
 						onepackenabled = true;
-						break;
+						count++;
 					}
+
 				}
 				// disable the first one too
 				if (!onepackenabled && sharedPrefsMoney.getBoolean(unlockSubPackageKeys[0], false)) {
 					packItems.get(0).setEnabled(false);
+					packItems.get(0).setTextToShow(packItems.get(0).isEnabled() ? "ON" : "OFF");
+					PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+							.putBoolean(PackageKeys[0], packItems.get(0).isEnabled()).commit();
+				}
+
+				if (onepackenabled && count == packItems.size() - 1 && sharedPrefsMoney.getBoolean(unlockSubPackageKeys[0], false)) {
+					packItems.get(0).setEnabled(true);
 					packItems.get(0).setTextToShow(packItems.get(0).isEnabled() ? "ON" : "OFF");
 					PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
 							.putBoolean(PackageKeys[0], packItems.get(0).isEnabled()).commit();
