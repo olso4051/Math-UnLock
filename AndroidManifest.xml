@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.olyware.mathlock"
-    android:versionCode="80"
-    android:versionName="3.1.2" >
+    android:versionCode="83"
+    android:versionName="3.2" >
 
     <uses-sdk
         android:minSdkVersion="10"
@@ -44,7 +44,6 @@
         android:xlargeScreens="true" />
 
     <application
-        android:debuggable="true"
         android:name=".MyApplication"
         android:allowBackup="true"
         android:backupAgent="com.olyware.mathlock.utils.AppBackupAgent"
