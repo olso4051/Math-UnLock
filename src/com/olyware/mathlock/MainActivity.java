@@ -138,6 +138,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	// final private static String[] SKU = { "coins1000", "coins5000", "coins10000", "vocab1", "language1", "expansion", "engineer",
 	// "hiqentrepack", "math" };
 	// final private static String[] SKU = { "testpackall", "math", "vocab1", "language1", "engineer", "hiqentrepack", "expansion" };
+	// Test
 	// final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
 	// final private static String SKU_QUIZ = "testquizemode";
 	// Production subscriptions
@@ -935,7 +936,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	public void onBackPressed() {
 		if (loggedIn) {
 			if (locked && UnlockedPackages && !quizMode) {		// if locked then don't allow back button to exit app
-				return;
+				if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
+					removeProgressFragment();
+				} else {
+					return;
+				}
 			} else {
 				if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
 					removeProgressFragment();
@@ -997,12 +1002,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 		// getMenuInflater().inflate(R.menu.activity_main, menu);
 		// return true;
-		// if (loggedIn) {
-		// // PAI COMMENTED - new UI on oct 27th- 2014 start here //
-		// // joystick.showStartAnimation(0, 3000);
-		// // PAI COMMENTED - new UI on oct 27th- 2014 ends here //
-		// return false;
-		// } else
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -1047,7 +1047,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			super.onActivityResult(requestCode, resultCode, data);
 			// ((PacksFrgment) fragmentCurrentShown).refereshlist();
 
-		} else if (!mHelper.handleActivityResult(2, resultCode, data)) {
+		} else if (mHelper != null && !mHelper.handleActivityResult(2, resultCode, data)) {
 			super.onActivityResult(requestCode, resultCode, data);
 		}
 		if (loggedIn) {
@@ -2731,21 +2731,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					public void onClick(DialogInterface dialog, int id) {
 						if (mHelper != null)
 							mHelper.flagEndAsync();
-						mHelper.launchSubscriptionPurchaseFlow(MainActivity.this, SKU_QUIZ, 1, new OnIabPurchaseFinishedListener() {
-
-							@Override
-							public void onIabPurchaseFinished(IabResult result, Purchase info) {
-								if (result.isFailure()) {
-
-								} else {
-									if (info.getSku().equals(SKU_QUIZ)) {
-										PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
-									}
-									quizMode = joystick.setQuizMode(true);
-									setQuizeMode();
-								}
-							}
-						}, PacksFrgment.PURCHASE_KEY);
 						// mHelper.launchPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
 						//
 						// @Override
@@ -2761,6 +2746,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						// }
 						// }
 						// }, PacksFrgment.PURCHASE_KEY);
+						mHelper.launchSubscriptionPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
+
+							@Override
+							public void onIabPurchaseFinished(IabResult result, Purchase info) {
+								if (result.isFailure()) {
+
+								} else {
+									if (info.getSku().equals(SKU_QUIZ)) {
+										PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
+									}
+									quizMode = joystick.setQuizMode(true);
+									setQuizeMode();
+								}
+							}
+						}, PacksFrgment.PURCHASE_KEY);
+
 					}
 				});
 				builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {

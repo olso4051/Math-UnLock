@@ -137,9 +137,11 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 						for (int i = 0; i < unlockPackageKeys.length; i++)
 							PreferenceHelper.unlockSubscription(getActivity(), i);
 					} else {
-						PreferenceHelper.lockSubscription(getActivity(), 0);
+						// PreferenceHelper.unlockSubscription(getActivity(), 0);
 						// for (int i = 0; i < unlockPackageKeys.length; i++)
-						// PreferenceHelper.lockSubscription(getActivity(), i);
+						// PreferenceHelper.unlockSubscription(getActivity(), i);
+						PreferenceHelper.lockSubscription(getActivity(), 0);
+						//
 						if (inventory.hasPurchase(SKU[1])) {
 							// mHelper.consumeAsync(inventory.getPurchase(SKU[0]), mConsumeFinishedListener);
 							PreferenceHelper.unlockSubscription(getActivity(), 1);
@@ -393,8 +395,8 @@ public class PacksFrgment extends Fragment implements OnItemClickListener {
 		} else {
 			if (mHelper != null)
 				mHelper.flagEndAsync();
-			mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
 			// mHelper.launchPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
+			mHelper.launchSubscriptionPurchaseFlow(getActivity(), SKU[arg2], 1, mPurchaseFinishedListener, PURCHASE_KEY);
 		}
 	}
 

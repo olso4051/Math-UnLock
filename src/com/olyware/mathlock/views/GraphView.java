@@ -30,8 +30,11 @@ public class GraphView extends View {
 	private float left, top, right, bottom;
 	private Typeface font;
 
-	private String Stats[] = { "Average Difficulty", "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak",
-			"Current Streak", "Total Study Time", "Fastest Time", "Average Time", "coins/hr (cph)", "Eggs Found" };
+	// private String Stats[] = { "Average Difficulty", "Correct Answers", "Incorrect Answers", "(+/-) Coins", "Best Streak",
+	// "Current Streak", "Total Study Time", "Fastest Time", "Average Time", "coins/hr (cph)", "Eggs Found" };
+
+	private String Stats[] = { "Average Difficulty", "Correct Answers", "Incorrect Answers", "Best Streak", "Current Streak",
+			"Total Study Time", "Fastest Time", "Average Time" };
 	private String StatsValues[] = new String[Stats.length];
 
 	private Paint TextLabelPaint, TextStatsPaintL, TextStatsPaintR, TextStatsPaintC, GraphPaint, LinePaint;
@@ -156,17 +159,17 @@ public class GraphView extends View {
 		StatsValues[0] = Difficulty.fromValueToString(difficultyAve);
 		StatsValues[1] = correct + "";
 		StatsValues[2] = wrong + "";
-		StatsValues[3] = coins + "";
-		StatsValues[4] = streakBest + "";
-		StatsValues[5] = streakCurrent + "";
-		StatsValues[6] = format(totalTime);
-		StatsValues[7] = format(answerTimeFast);
-		StatsValues[8] = format(answerTimeAve);
-		if (totalTime != 0)
-			StatsValues[9] = coins * 1000l * 60l * 60l / totalTime + "";
-		else
-			StatsValues[9] = 0 + "";
-		StatsValues[10] = eggs;
+		// StatsValues[3] = coins + "";
+		StatsValues[3] = streakBest + "";
+		StatsValues[4] = streakCurrent + "";
+		StatsValues[5] = format(totalTime);
+		StatsValues[6] = format(answerTimeFast);
+		StatsValues[7] = format(answerTimeAve);
+		// if (totalTime != 0)
+		// StatsValues[9] = coins * 1000l * 60l * 60l / totalTime + "";
+		// else
+		// StatsValues[9] = 0 + "";
+		// StatsValues[10] = eggs;
 	}
 
 	// =========================================

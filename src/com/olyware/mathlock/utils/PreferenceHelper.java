@@ -310,6 +310,8 @@ public class PreferenceHelper {
 	}
 
 	public static void unlockSubscription(Context ctx, int product) {
+		if (ctx == null)
+			return;
 		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
 		String[] PackageKeys; // ctx.getResources().getStringArray(R.array.enable_package_keys);
 		ArrayList<String> pack = new ArrayList<String>(Arrays.asList(ctx.getResources().getStringArray(R.array.enable_package_keys)));
@@ -332,6 +334,8 @@ public class PreferenceHelper {
 	}
 
 	public static void lockSubscription(Context ctx, int product) {
+		if (ctx == null)
+			return;
 		String[] unlockPackageKeys = ctx.getResources().getStringArray(R.array.unlock_package_keys);
 		String[] unlockSubscriptionPackageKeys = ctx.getResources().getStringArray(R.array.unlock_sub_package_keys);
 		String[] PackageKeys; // ctx.getResources().getStringArray(R.array.enable_package_keys);

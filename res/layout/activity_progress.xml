@@ -23,6 +23,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
+            android:padding="12dp"
             android:src="@drawable/crossmark" />
     </RelativeLayout>
 
@@ -30,8 +31,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#538FA6"
-        android:orientation="horizontal"
         android:gravity="center"
+        android:orientation="horizontal"
         android:paddingTop="5dp" >
 
         <Spinner

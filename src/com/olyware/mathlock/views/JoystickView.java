@@ -38,7 +38,7 @@ public class JoystickView extends View {
 	private final int pad = 5, NumAnswers = 4, NumOptions = 5, startFrames = 30, startFrameTime = 50, frameTimeReveal = 10,
 			pulseFrames = 100;
 	private final long tapLength = 250;
-	private int answerSizeSPDefault = 22;
+	private int answerSizeSPDefault = 20;
 
 	private Bitmap bmpSelectBar, bmpS, bmpQ, bmpQs, bmpP, bmpStore, bmpFriend, bmpFriendSelected, bmpUnlock, bmpBackRed;
 	// private Bitmap[] bmpBack = new Bitmap[3];
@@ -1699,7 +1699,7 @@ public class JoystickView extends View {
 	private boolean decreaseAnswerSize() {
 		if (answerSizeSP == 1)
 			return false;
-		answerSizeSP = Math.max(answerSizeSP - 1, 1);
+		answerSizeSP = Math.max(answerSizeSP - 3, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
 		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {

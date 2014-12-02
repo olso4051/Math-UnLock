@@ -56,11 +56,13 @@ public class ShowProgressActivity extends Fragment {
 		@Override
 		protected Integer doInBackground(Void... voids) {
 			publishProgress(0);
-			if (isVisible()) {
+			// if (isVisible()) {
+			if (getActivity() != null) {
 				dbManager = new DatabaseManager(getActivity().getApplicationContext());
 				customCategories = dbManager.getAllCustomCategories();
 				for (String cat : customCategories)
 					displayCustomPackageKeys.add(getString(R.string.custom) + " " + cat);
+				// }
 			}
 			return 0;
 		}
@@ -72,7 +74,7 @@ public class ShowProgressActivity extends Fragment {
 
 		@Override
 		protected void onPostExecute(Integer result) {
-			if (result == 0 && isVisible()) {
+			if (result == 0 && getActivity() != null) {
 				initSpinners();
 				setGraph();
 			}
@@ -335,6 +337,8 @@ public class ShowProgressActivity extends Fragment {
 	}
 
 	private void setGraph() {
+		if (getActivity() == null)
+			return;
 		sharedPrefsStats = getActivity().getSharedPreferences("Stats", 0);
 		long oldestTime = getOldestTime();
 
