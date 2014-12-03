@@ -142,7 +142,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	// final private static String[] SKU = { "testpackall", "testmath", "testvocab", "testlanguage", "testengineer", "testhiqtravia" };
 	// final private static String SKU_QUIZ = "testquizemode";
 	// Production subscriptions
-	final private static String SKU_QUIZ = "quizmode";
+	// final private static String SKU_QUIZ = "quizmode";
+	// !$
+	final private static String SKU_QUIZ = "quiztest";
 	final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
 
 	final private String[] answersNone = { "", "", "", "" };
@@ -2726,7 +2728,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			} else {
 				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 				builder.setTitle("Oops!").setCancelable(false);
-				builder.setMessage("It seems that you have not subscribed to any question packs. Enabling the quiz mode alone needs subscribtion($3/month).");
+				builder.setMessage(getString(R.string.quiz_sub_msg));
 				builder.setPositiveButton("Subscribe", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						if (mHelper != null)

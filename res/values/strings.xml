@@ -438,6 +438,7 @@
     <string name="desc_language">Over 1,000 words in 15 languages</string>
     <string name="desc_engineering">Computer, mechanical, electrical - its all here</string>
     <string name="desc_hiq_trivia">Fun and strange facts</string>
+    <string name="quiz_sub_msg">It seems that you have not subscribed to any question packs. Enabling the quiz mode alone needs subscribtion($1/month).</string>
     
    
     
