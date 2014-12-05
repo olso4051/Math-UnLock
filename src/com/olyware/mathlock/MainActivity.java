@@ -108,7 +108,6 @@ import com.olyware.mathlock.utils.EncryptionHelper;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.IabHelper;
 import com.olyware.mathlock.utils.IabHelper.OnConsumeMultiFinishedListener;
-import com.olyware.mathlock.utils.IabHelper.OnIabPurchaseFinishedListener;
 import com.olyware.mathlock.utils.IabHelper.QueryInventoryFinishedListener;
 import com.olyware.mathlock.utils.IabResult;
 import com.olyware.mathlock.utils.Inventory;
@@ -555,9 +554,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							}
 						}
 
-						PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, inventory.hasPurchase(SKU_QUIZ));
-						quizMode = joystick.setQuizMode(inventory.hasPurchase(SKU_QUIZ));
-						setQuizeMode();
+						// PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, inventory.hasPurchase(SKU_QUIZ));
+						// quizMode = joystick.setQuizMode(inventory.hasPurchase(SKU_QUIZ));
+						// setQuizeMode();
 					}
 
 				}
@@ -654,9 +653,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 			});
 			boolean fromLogin = sharedPrefs.getBoolean("from_login", true);
-			// quizMode = joystick.setQuizMode(!locked && !fromLogin);
-			quizMode = joystick.setQuizMode(!locked
-					&& (getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this))); // Is
+			quizMode = joystick.setQuizMode(!locked && !fromLogin);
+			// quizMode = joystick.setQuizMode(!locked
+			// && (getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this))); // Is
 			// subscribed
 			// ?
 			setQuizeMode();
@@ -1297,8 +1296,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		Log.e("TUTORIAL", "" + show);
 		if (show) {
 			PreferenceHelper.setShareCompeteShown(getApplicationContext(), show);
-			quizMode = joystick.setQuizMode(false);
-			setQuizeMode();
+			// quizMode = joystick.setQuizMode(false);
+			// setQuizeMode();
 			showToutorialComplete();
 		}
 	}
@@ -2720,61 +2719,61 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			if (progressFrarment == null || !progressFrarment.isVisible())
 				showProgressFragment();
 		} else if (view.getId() == R.id.pnlQuizMode) {
-			if (quizMode || (getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this))) {
-				sendEvent("ui_action", "settings_selected", "quiz_mode", null);
-				Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
-				quizMode = joystick.setQuizMode(!quizMode);
-				setQuizeMode();
-			} else {
-				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-				builder.setTitle("Oops!").setCancelable(false);
-				builder.setMessage(getString(R.string.quiz_sub_msg));
-				builder.setPositiveButton("Subscribe", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						if (mHelper != null)
-							mHelper.flagEndAsync();
-						// mHelper.launchPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
-						//
-						// @Override
-						// public void onIabPurchaseFinished(IabResult result, Purchase info) {
-						// if (result.isFailure()) {
-						//
-						// } else {
-						// if (info.getSku().equals(SKU_QUIZ)) {
-						// PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
-						// }
-						// quizMode = joystick.setQuizMode(true);
-						// setQuizeMode();
-						// }
-						// }
-						// }, PacksFrgment.PURCHASE_KEY);
-						mHelper.launchSubscriptionPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
-
-							@Override
-							public void onIabPurchaseFinished(IabResult result, Purchase info) {
-								if (result.isFailure()) {
-
-								} else {
-									if (info.getSku().equals(SKU_QUIZ)) {
-										PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
-									}
-									quizMode = joystick.setQuizMode(true);
-									setQuizeMode();
-								}
-							}
-						}, PacksFrgment.PURCHASE_KEY);
-
-					}
-				});
-				builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-				builder.create().show();
-			}
+			// if (quizMode || (getCountOfPackageUnlocked() >= 1 || PreferenceHelper.isSubscribedToQuizeMode(MainActivity.this))) {
+			sendEvent("ui_action", "settings_selected", "quiz_mode", null);
+			Money.increaseMoney(EggHelper.unlockEgg(this, coins, joystick, EggKeys[3], EggMaxValues[3]));
+			quizMode = joystick.setQuizMode(!quizMode);
+			setQuizeMode();
+			// } else {
+			// AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+			// builder.setTitle("Oops!").setCancelable(false);
+			// builder.setMessage(getString(R.string.quiz_sub_msg));
+			// builder.setPositiveButton("Subscribe", new DialogInterface.OnClickListener() {
+			// public void onClick(DialogInterface dialog, int id) {
+			// if (mHelper != null)
+			// mHelper.flagEndAsync();
+			// // mHelper.launchPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
+			// //
+			// // @Override
+			// // public void onIabPurchaseFinished(IabResult result, Purchase info) {
+			// // if (result.isFailure()) {
+			// //
+			// // } else {
+			// // if (info.getSku().equals(SKU_QUIZ)) {
+			// // PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
+			// // }
+			// // quizMode = joystick.setQuizMode(true);
+			// // setQuizeMode();
+			// // }
+			// // }
+			// // }, PacksFrgment.PURCHASE_KEY);
+			// mHelper.launchSubscriptionPurchaseFlow(MainActivity.this, SKU_QUIZ, 2, new OnIabPurchaseFinishedListener() {
+			//
+			// @Override
+			// public void onIabPurchaseFinished(IabResult result, Purchase info) {
+			// if (result.isFailure()) {
+			//
+			// } else {
+			// if (info.getSku().equals(SKU_QUIZ)) {
+			// PreferenceHelper.setSubscribedToQuizeMode(MainActivity.this, true);
+			// }
+			// quizMode = joystick.setQuizMode(true);
+			// setQuizeMode();
+			// }
+			// }
+			// }, PacksFrgment.PURCHASE_KEY);
+			//
+			// }
+			// });
+			// builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {
+			//
+			// @Override
+			// public void onClick(DialogInterface dialog, int which) {
+			// dialog.cancel();
+			// }
+			// });
+			// builder.create().show();
+			// }
 
 		} else if (view.getId() == R.id.pnlStore) {
 			unlocking = false;
