@@ -211,6 +211,10 @@
         <activity
             android:name="com.tapjoy.mraid.view.Browser"
             android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="com.chartboost.sdk.CBImpressionActivity"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- FOR UPSIGHT -->
         <activity

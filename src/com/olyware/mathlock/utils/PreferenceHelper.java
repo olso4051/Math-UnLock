@@ -640,6 +640,16 @@ public class PreferenceHelper {
 		return sharedPrefsUsers.getInt(USER_PREFS_SPONSORED_QUIZ_MODE_ANSWERED, 0);
 	}
 
+	public static void setlastlaunch(Context ctx, long time) {
+		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsUsers.putLong("date_firstlaunch", time).commit();
+	}
+
+	public static long getlastlaunch(Context ctx) {
+		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsUsers.getLong("date_firstlaunch", 0);
+	}
+
 	public static void setLastSponsoredRequestTime(Context ctx, long time) {
 		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
 		editPrefsUsers.putLong(USER_PREFS_LAST_SPONSORED, time).commit();
@@ -662,17 +672,20 @@ public class PreferenceHelper {
 		editPrefsUsers.putInt(USER_PREFS_SPONSORED_QUIZ_MODE_ANSWERED, 0).commit();
 	}
 
-	public static void getSponsoredQuestion(final Context ctx) {
+	public static void getSponsoredQuestion(final Context ctx, boolean customQuestion) {
 		resetQuizModeQuestionsAnswered(ctx);
 		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
 		String userID = sharedPrefsUsers.getString(ctx.getString(R.string.pref_user_userid), "");
 		final PackageManager pm = ctx.getPackageManager();
 		List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-		List<String> packs = new ArrayList<String>(packages.size());
-		for (ApplicationInfo packageInfo : packages) {
-			packs.add(packageInfo.packageName);
+		List<String> packs = null;
+		if (customQuestion) {
+			packs = new ArrayList<String>(packages.size());
+			for (ApplicationInfo packageInfo : packages) {
+				packs.add(packageInfo.packageName);
+			}
 		}
-		new GetSponsoredAppQuestion(ctx, userID, packs) {
+		new GetSponsoredAppQuestion(ctx, userID, packs, false) {
 			@Override
 			protected void onPostExecute(Integer result) {
 				if (result == 0) {

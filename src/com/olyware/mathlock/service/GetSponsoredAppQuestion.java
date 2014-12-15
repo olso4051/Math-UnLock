@@ -27,8 +27,9 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 	private String packHash, sponsor, description, error;
 	private List<String> installedPacks, questionHashes, questions;
 	private List<String[]> answers, urls;
+	private boolean customquestion = false;
 
-	public GetSponsoredAppQuestion(Context ctx, String userID, List<String> installedPacks) {
+	public GetSponsoredAppQuestion(Context ctx, String userID, List<String> installedPacks, boolean value) {
 		baseURL = ctx.getString(R.string.service_base_url);
 		this.userID = userID;
 		this.installedPacks = installedPacks;
@@ -36,6 +37,7 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 		this.questionHashes = new ArrayList<String>();
 		this.answers = new ArrayList<String[]>();
 		this.urls = new ArrayList<String[]>();
+		customquestion = value;
 	}
 
 	public String getPackHash() {
@@ -105,11 +107,16 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 		try {
 			JSONObject data = new JSONObject();
 			data.put("user_id", userID);
-			JSONArray installedPacksArray = new JSONArray();
-			for (String installedPack : installedPacks) {
-				installedPacksArray.put(installedPack);
+			JSONArray installedPacksArray = null;
+			if (customquestion) {
+				installedPacksArray = new JSONArray();
+				for (String installedPack : installedPacks) {
+					installedPacksArray.put(installedPack);
+				}
+				data.put("installed_packs", installedPacksArray);
+			} else {
+				data.put("installed_packs", "");
 			}
-			data.put("installed_packs", installedPacksArray);
 			Loggy.d("JSON to question = " + data.toString());
 
 			httpPost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));

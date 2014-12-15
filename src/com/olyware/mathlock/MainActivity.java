@@ -61,6 +61,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.apptimize.Apptimize;
+import com.apptimize.ApptimizeVar;
+import com.chartboost.sdk.CBLocation;
+import com.chartboost.sdk.Chartboost;
+import com.chartboost.sdk.ChartboostDelegate;
+import com.chartboost.sdk.Libraries.CBLogging.Level;
+import com.chartboost.sdk.Model.CBError.CBClickError;
+import com.chartboost.sdk.Model.CBError.CBImpressionError;
 import com.facebook.AppEventsLogger;
 import com.facebook.LoggingBehavior;
 import com.facebook.Session;
@@ -131,6 +139,12 @@ import com.playhaven.android.view.FullScreen;
 
 public class MainActivity extends FragmentActivity implements LoginFragment.OnFinishedListener, GCMHelper.GCMResponse, RequestListener,
 		OnClickListener {
+
+	private ApptimizeVar<Integer> maxVar = ApptimizeVar.createInteger("max", -1);
+	private ApptimizeVar<Integer> xQuestion = ApptimizeVar.createInteger("xquestion", -1);
+	// private ApptimizeVar<Boolean> isCustomQuestion = ApptimizeVar.createBoolean("customquestion", false);
+	private int max_count = 0, x_count = 0;
+	private boolean videoshowing = false;
 	final private int startingPmoney = 0, streakToIncrease = 40;
 	final private Coins Money = new Coins(0, 0);
 	final private static int[] Cost = { 1000, 5000, 10000, 0, 1, 2 };
@@ -143,6 +157,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	// Production subscriptions
 	// final private static String SKU_QUIZ = "quizmode";
 	// !$
+	private static final String TAG = "Chartboost";
+
 	final private static String SKU_QUIZ = "quiztest";
 	final private static String[] SKU = { "allpacksforlife", "mathpack", "englishvocabulary", "languages", "engineering", "trivia" };
 
@@ -375,6 +391,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Chartboost.startWithAppId(this, "5488295143150f120ea6da4a", "6e7e0378f2a450ca666c17f35846cb85c8a3f44d");
+		// wishbones
+		// Chartboost.startWithAppId(this, "5476ee600d6025668b23bcd2", "70a9ca38647d9e329cafe8b222ec7048fb1f31f0");
+		Chartboost.setLoggingLevel(Level.ALL);
+		Chartboost.setDelegate(delegate);
+		/*
+		 * Optional: If you want to program responses to Chartboost events,
+		 * supply a delegate object here and see step (10) for more information
+		 */
+		// Chartboost.setDelegate(delegate);
+		Chartboost.onCreate(this);
+
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		// try {
 		// No Addz
@@ -764,11 +793,13 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Chartboost.onStart(this);
 		GoogleAnalytics.getInstance(this).reportActivityStart(this);
 	}
 
 	@Override
 	protected void onStop() {
+		Chartboost.onStop(this);
 		if (loggedIn) {
 			joystick.removeCallbacks();
 		}
@@ -935,12 +966,23 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 	@Override
 	public void onBackPressed() {
-		if (loggedIn) {
-			if (locked && UnlockedPackages && !quizMode) {		// if locked then don't allow back button to exit app
-				if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
-					removeProgressFragment();
+
+		if (Chartboost.onBackPressed())
+			return;
+		else {
+			if (loggedIn) {
+				if (locked && UnlockedPackages && !quizMode) {		// if locked then don't allow back button to exit app
+					if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
+						removeProgressFragment();
+					} else {
+						return;
+					}
 				} else {
-					return;
+					if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
+						removeProgressFragment();
+					} else if (!locked) {
+						super.onBackPressed();
+					}
 				}
 			} else {
 				if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
@@ -948,12 +990,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				} else if (!locked) {
 					super.onBackPressed();
 				}
-			}
-		} else {
-			if (fragmentCurrentShown != null && fragmentCurrentShown.isVisible()) {
-				removeProgressFragment();
-			} else if (!locked) {
-				super.onBackPressed();
 			}
 		}
 	}
@@ -1506,12 +1542,18 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 					joystick.setAnswers(answersRandom, answerLoc);
 					resetQuestionWorth(questionWorthMax);
-				} else if (EnabledPackages > 0) {
+				} else if (EnabledPackages > 0) { // Change this pai
 					if (quizMode) {
 						PreferenceHelper.incrementQuizModeQuestionsAnswered(this);
 						long currentTime = System.currentTimeMillis();
-						if (PreferenceHelper.shouldGetSponsoredApp(this, currentTime)) {
-							PreferenceHelper.getSponsoredQuestion(this);
+						long lastUpdateTime = PreferenceHelper.getlastlaunch(this);
+						if ((lastUpdateTime + (24 * 60 * 60 * 1000)) < System.currentTimeMillis()
+								|| (xQuestion.value() != -1 && x_count >= xQuestion.value())) {// if
+							// (PreferenceHelper.shouldGetSponsoredApp(this,
+							x_count = 0;																									// currentTime))
+							lastUpdateTime = System.currentTimeMillis(); 																					// {
+							PreferenceHelper.setlastlaunch(this, lastUpdateTime);
+							PreferenceHelper.getSponsoredQuestion(this, false);
 							PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
 						}
 					}
@@ -1939,6 +1981,22 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		case C:		// C was selected
 		case D:		// D was selected
 			sendEvent("Packs", "Pack name", currentPack, null);
+			// show chart boost video
+			if (maxVar.value() != -1 && max_count >= maxVar.value() && !videoshowing) {
+				// Toast.makeText(this, "Suc", 1).show();
+				String toastStr = "Loading Rewarded Interstitial";
+				if (Chartboost.hasRewardedVideo(CBLocation.LOCATION_ACHIEVEMENTS))
+					toastStr = "Loading Rewarded Interstitial From Cache";
+				Log.i(TAG, toastStr);
+				Chartboost.showRewardedVideo(CBLocation.LOCATION_GAMEOVER);
+				Apptimize.metricAchieved("video_showed");
+				videoshowing = true;
+				max_count = 0;
+			}
+			if (!videoshowing)
+				max_count++;
+
+			x_count++;
 			if (joystick.isAskingForSponsored() && Extra != 1)
 				PreferenceHelper.resetSponsoredQuestions(this);
 			if (fromDeepLink)
@@ -2778,7 +2836,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		} else if (view.getId() == R.id.pnlStore) {
 			unlocking = false;
 			showPacksFragment();
-			// startActivity(new Intent(this, ShowStoreActivity.class));
+			// startActivity(new Intent(this, ShowStoreFragment.class));
 		} else if (view.getId() == R.id.setting_gear) {
 			fromSettings = true;
 			unlocking = false;
@@ -2881,4 +2939,163 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			findViewById(R.id.quiz_underline).setVisibility(View.INVISIBLE);
 		}
 	}
+
+	private ChartboostDelegate delegate = new ChartboostDelegate() {
+
+		@Override
+		public boolean shouldRequestInterstitial(String location) {
+			Log.i(TAG, "SHOULD REQUEST INTERSTITIAL '" + (location != null ? location : "null"));
+			return true;
+		}
+
+		@Override
+		public boolean shouldDisplayInterstitial(String location) {
+			Log.i(TAG, "SHOULD DISPLAY INTERSTITIAL '" + (location != null ? location : "null"));
+			return true;
+		}
+
+		@Override
+		public void didCacheInterstitial(String location) {
+			Log.i(TAG, "DID CACHE INTERSTITIAL '" + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didFailToLoadInterstitial(String location, CBImpressionError error) {
+			Log.i(TAG, "DID FAIL TO LOAD INTERSTITIAL '" + (location != null ? location : "null") + " Error: " + error.name());
+			// Toast.makeText(getApplicationContext(), "INTERSTITIAL '" + location + "' REQUEST FAILED - " + error.name(),
+			// Toast.LENGTH_SHORT)
+			// .show();
+		}
+
+		@Override
+		public void didDismissInterstitial(String location) {
+			Log.i(TAG, "DID DISMISS INTERSTITIAL: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didCloseInterstitial(String location) {
+			Log.i(TAG, "DID CLOSE INTERSTITIAL: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didClickInterstitial(String location) {
+			Log.i(TAG, "DID CLICK INTERSTITIAL: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didDisplayInterstitial(String location) {
+			Log.i(TAG, "DID DISPLAY INTERSTITIAL: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public boolean shouldRequestMoreApps(String location) {
+			Log.i(TAG, "SHOULD REQUEST MORE APPS: " + (location != null ? location : "null"));
+			return true;
+		}
+
+		@Override
+		public boolean shouldDisplayMoreApps(String location) {
+			Log.i(TAG, "SHOULD DISPLAY MORE APPS: " + (location != null ? location : "null"));
+			return true;
+		}
+
+		@Override
+		public void didFailToLoadMoreApps(String location, CBImpressionError error) {
+			Log.i(TAG, "DID FAIL TO LOAD MOREAPPS " + (location != null ? location : "null") + " Error: " + error.name());
+			Toast.makeText(getApplicationContext(), "MORE APPS REQUEST FAILED - " + error.name(), Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		public void didCacheMoreApps(String location) {
+			Log.i(TAG, "DID CACHE MORE APPS: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didDismissMoreApps(String location) {
+			Log.i(TAG, "DID DISMISS MORE APPS " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didCloseMoreApps(String location) {
+			Log.i(TAG, "DID CLOSE MORE APPS: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didClickMoreApps(String location) {
+			Log.i(TAG, "DID CLICK MORE APPS: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didDisplayMoreApps(String location) {
+			Log.i(TAG, "DID DISPLAY MORE APPS: " + (location != null ? location : "null"));
+		}
+
+		@Override
+		public void didFailToRecordClick(String uri, CBClickError error) {
+			Log.i(TAG, "DID FAILED TO RECORD CLICK " + (uri != null ? uri : "null") + ", error: " + error.name());
+			Toast.makeText(getApplicationContext(), "FAILED TO RECORD CLICK " + (uri != null ? uri : "null") + ", error: " + error.name(),
+					Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		public boolean shouldDisplayRewardedVideo(String location) {
+			Log.i(TAG, String.format("SHOULD DISPLAY REWARDED VIDEO: '%s'", (location != null ? location : "null")));
+			return true;
+		}
+
+		@Override
+		public void didCacheRewardedVideo(String location) {
+			Log.i(TAG, String.format("DID CACHE REWARDED VIDEO: '%s'", (location != null ? location : "null")));
+		}
+
+		@Override
+		public void didFailToLoadRewardedVideo(String location, CBImpressionError error) {
+			Log.i(TAG, String.format("DID FAIL TO LOAD REWARDED VIDEO: '%s', Error:  %s", (location != null ? location : "null"),
+					error.name()));
+			max_count = 0;
+			videoshowing = false;
+		}
+
+		@Override
+		public void didDismissRewardedVideo(String location) {
+			Log.i(TAG, String.format("DID DISMISS REWARDED VIDEO '%s'", (location != null ? location : "null")));
+		}
+
+		@Override
+		public void didCloseRewardedVideo(String location) {
+			Log.i(TAG, String.format("DID CLOSE REWARDED VIDEO '%s'", (location != null ? location : "null")));
+		}
+
+		@Override
+		public void didClickRewardedVideo(String location) {
+			Log.i(TAG, String.format("DID CLICK REWARDED VIDEO '%s'", (location != null ? location : "null")));
+		}
+
+		@Override
+		public void didCompleteRewardedVideo(String location, int reward) {
+			max_count = 0;
+			videoshowing = false;
+			// Pai
+			// Log.i(TAG, String.format(
+			// "DID COMPLETE REWARDED VIDEO '%s' FOR REWARD %d",
+			// (location != null ? location : "null"), reward));
+			// try {
+			// initShareComplete();
+			// } catch (JSONException e) {
+			// e.printStackTrace();
+			// }
+
+		}
+
+		@Override
+		public void didDisplayRewardedVideo(String location) {
+			Log.i(TAG, String.format("DID DISPLAY REWARDED VIDEO '%s' FOR REWARD", location));
+		}
+
+		@Override
+		public void willDisplayVideo(String location) {
+			Log.i(TAG, String.format("WILL DISPLAY VIDEO '%s", location));
+		}
+
+	};
 }

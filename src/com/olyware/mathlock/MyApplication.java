@@ -7,6 +7,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.apptimize.Apptimize;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Logger.LogLevel;
 import com.google.android.gms.analytics.Tracker;
@@ -36,6 +37,7 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
+		Apptimize.setup(this, "DbaTxKVfHZLYLccYdS6beuJa5CNketQ");
 		// The following line triggers the initialization of ACRA
 		// ACRA.init(this);
 
