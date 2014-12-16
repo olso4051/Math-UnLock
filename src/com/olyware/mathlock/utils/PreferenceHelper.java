@@ -650,6 +650,16 @@ public class PreferenceHelper {
 		return sharedPrefsUsers.getLong("date_firstlaunch", 0);
 	}
 
+	public static void setTodayCountofSponseredQuestion(Context ctx, int time) {
+		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsUsers.putInt("count_today", time).commit();
+	}
+
+	public static int getTodayCountofSponseredQuestion(Context ctx) {
+		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsUsers.getInt("count_today", 0);
+	}
+
 	public static void setLastSponsoredRequestTime(Context ctx, long time) {
 		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
 		editPrefsUsers.putLong(USER_PREFS_LAST_SPONSORED, time).commit();

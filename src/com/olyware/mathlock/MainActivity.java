@@ -141,7 +141,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		OnClickListener {
 
 	private ApptimizeVar<Integer> maxVar = ApptimizeVar.createInteger("max", -1);
-	private ApptimizeVar<Integer> xQuestion = ApptimizeVar.createInteger("xquestion", -1);
+	private ApptimizeVar<Integer> xQuestion = ApptimizeVar.createInteger("xquestion", 10);
 	// private ApptimizeVar<Boolean> isCustomQuestion = ApptimizeVar.createBoolean("customquestion", false);
 	private int max_count = 0, x_count = 0;
 	private boolean videoshowing = false;
@@ -1550,11 +1550,19 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						if ((lastUpdateTime + (24 * 60 * 60 * 1000)) < System.currentTimeMillis()
 								|| (xQuestion.value() != -1 && x_count >= xQuestion.value())) {// if
 							// (PreferenceHelper.shouldGetSponsoredApp(this,
-							x_count = 0;																									// currentTime))
-							lastUpdateTime = System.currentTimeMillis(); 																					// {
-							PreferenceHelper.setlastlaunch(this, lastUpdateTime);
-							PreferenceHelper.getSponsoredQuestion(this, false);
-							PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
+							if (lastUpdateTime + (24 * 60 * 60 * 1000) < System.currentTimeMillis()) {
+								PreferenceHelper.setlastlaunch(this, currentTime);
+								PreferenceHelper.setTodayCountofSponseredQuestion(ctx, 0);
+							}
+							if (PreferenceHelper.getTodayCountofSponseredQuestion(ctx) < 100) {
+								x_count = 0;																									// currentTime))
+								lastUpdateTime = System.currentTimeMillis(); 																					// {
+
+								PreferenceHelper.getSponsoredQuestion(this, false);
+								PreferenceHelper.setTodayCountofSponseredQuestion(ctx,
+										PreferenceHelper.getTodayCountofSponseredQuestion(ctx) + 1);
+								PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
+							}
 						}
 					}
 					joystick.setProblem(true);
