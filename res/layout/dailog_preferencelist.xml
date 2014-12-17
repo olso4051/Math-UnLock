@@ -11,7 +11,7 @@
         android:layout_height="350dp"
         android:divider="@color/light_white_seperator"
         android:dividerHeight="1dp"
-        android:scrollbars="none" >
+        android:scrollbars="vertical" >
     </ListView>
 
 </LinearLayout>

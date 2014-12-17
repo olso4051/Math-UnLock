@@ -12,9 +12,11 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +24,8 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.dialog.PreferenceListDialog;
 import com.olyware.mathlock.service.ScreenService;
+import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.PreferenceHelper;
 
 public class SettingsActivity extends Activity implements OnClickListener {
@@ -83,6 +87,10 @@ public class SettingsActivity extends Activity implements OnClickListener {
 	}
 
 	private void initView() {
+
+		ScrollView layout = (ScrollView) findViewById(R.id.layout);
+		Typefaces typefaces = Typefaces.getInstance(this);
+		EZ.setFont((ViewGroup) layout, typefaces.avenirnext);
 
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		isLanguageEnabled = sharedPrefs.getBoolean("enable_language", false);

@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.olyware.mathlock.R;
 import com.olyware.mathlock.model.PackItem;
+import com.olyware.mathlock.ui.Typefaces;
 
 public class PackItemAdapter extends BaseAdapter {
 
@@ -49,11 +50,17 @@ public class PackItemAdapter extends BaseAdapter {
 		TextView text = (TextView) view.findViewById(R.id.txtTitle);
 		text.setText(packItems.get(arg0).getTitle());
 
+		text.setTypeface(Typefaces.getInstance(text.getContext()).avenirnext);
+
 		text = (TextView) view.findViewById(R.id.txtSummary);
 		text.setText(packItems.get(arg0).getSummury());
 
+		text.setTypeface(Typefaces.getInstance(text.getContext()).avenirnext);
+
 		text = (TextView) view.findViewById(R.id.txtOnOff);
 		text.setText(packItems.get(arg0).getTextToShow());
+
+		text.setTypeface(Typefaces.getInstance(text.getContext()).avenirnext);
 
 		ImageView imageView = (ImageView) view.findViewById(R.id.selected);
 		if (packItems.get(arg0).isPurchased() && packItems.get(arg0).isEnabled())

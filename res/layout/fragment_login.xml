@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    style="@style/LoginTheme"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    style="@style/LoginTheme"
     android:orientation="vertical" >
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:focusableInTouchMode="true"
-        android:orientation="vertical">
+        android:orientation="vertical" >
 
         <ImageView
             android:id="@+id/imageView"
@@ -25,118 +25,113 @@
         <LinearLayout
             android:id="@+id/fragment_login_inputs"
             android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:orientation="vertical">
-            
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
             <com.facebook.widget.LoginButton
-		        android:id="@+id/authButton"
-		        style="@style/SpanningView.Button"
-		        android:layout_gravity="center_horizontal" />
-	        
-	        <LinearLayout
-		        style="@style/SpanningView"
-		        android:orientation="horizontal">
-		        
-		        <View
-		            android:layout_width="0dp"
-		            android:layout_weight="1"
-		            android:layout_height="1dp"
-		            android:background="@color/grey"
-		            android:layout_gravity="center_vertical"/>
-		        
-		        <TextView
-		            android:layout_width="wrap_content"
-		            android:layout_height="wrap_content"
-		            android:layout_gravity="center_horizontal"
-		            android:paddingLeft="@dimen/login_horizontal_margin_half"
-		            android:paddingRight="@dimen/login_horizontal_margin_half"
-		            android:textColor="@color/grey"
-	            	android:textSize="@dimen/text_size_large"
-		            android:text="@string/or" />
-			
-		        <View
-		            android:layout_width="0dp"
-		            android:layout_weight="1"
-		            android:layout_height="1dp"
-		            android:background="@color/grey"
-		            android:layout_gravity="center_vertical"/>
-		        
-			</LinearLayout>
-	        
-	        <EditText
-	            android:id="@+id/fragment_login_username"
-	            style="@style/SpanningView.EditText"
-	            android:ems="10"
-	            android:hint="@string/fragment_login_username_hint"
-	            android:inputType="textPersonName" />
-	
-	        <LinearLayout
-	            android:id="@+id/fragment_login_buttons_login_skip"
-		        android:layout_width="fill_parent"
-		        android:layout_height="wrap_content"
-		        android:focusableInTouchMode="true"
-		        android:orientation="horizontal">
-		        
-		        <Button
-		            android:id="@+id/fragment_login_button_login"
-		            style="@style/SpanningView.Button.Left"
-		            android:layout_width="0dp"
-		            android:layout_weight="2"
-		            android:layout_gravity="center_horizontal"
-		            android:enabled="false"
-		            android:gravity="center_vertical|center_horizontal"
-		            android:text="@string/fragment_login_button_login_text" />
-		        
-		        <Button
-		            android:id="@+id/fragment_login_button_skip"
-		            style="@style/SpanningView.Button.Right"
-		            android:layout_width="0dp"
-		            android:layout_weight="1"
-		            android:layout_gravity="center_horizontal"
-		            android:clickable="false"
-		            android:gravity="center_vertical|center_horizontal"
-		            android:text="@string/fragment_login_button_skip_text" />
-			
-			</LinearLayout>
-			
-	        <TextView
-	            android:id="@+id/fragment_login_text_disclaimer"
-	            style="@style/SpanningView"
-	            android:layout_gravity="center_horizontal"
-	            android:layout_marginBottom="@dimen/login_vertical_margin"
-	            android:gravity="center_horizontal"
-	            android:text="@string/fragment_login_disclaimer"
-	            android:textColor="@color/supporting_text"
-	            android:textSize="@dimen/text_size_extra_small"
-	            android:textStyle="italic" />
-	        
-	    </LinearLayout>
-		
+                android:id="@+id/authButton"
+                style="@style/SpanningView.Button"
+                android:layout_gravity="center_horizontal" />
+
+            <LinearLayout
+                style="@style/SpanningView"
+                android:orientation="horizontal" >
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:background="@color/grey" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingLeft="@dimen/login_horizontal_margin_half"
+                    android:paddingRight="@dimen/login_horizontal_margin_half"
+                    android:text="@string/or"
+                    android:textColor="@color/grey"
+                    android:textSize="@dimen/text_size_large" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:background="@color/grey" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/fragment_login_username"
+                style="@style/SpanningView.EditText"
+                android:ems="10"
+                android:hint="@string/fragment_login_username_hint"
+                android:inputType="textPersonName" />
+
+            <LinearLayout
+                android:id="@+id/fragment_login_buttons_login_skip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:focusableInTouchMode="true"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/fragment_login_button_login"
+                    style="@style/SpanningView.Button.Left"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="2"
+                    android:enabled="false"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/fragment_login_button_login_text" />
+
+                <Button
+                    android:id="@+id/fragment_login_button_skip"
+                    style="@style/SpanningView.Button.Right"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:clickable="false"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/fragment_login_button_skip_text" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/fragment_login_text_disclaimer"
+                style="@style/SpanningView"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/login_vertical_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/fragment_login_disclaimer"
+                android:textColor="@color/supporting_text"
+                android:textSize="@dimen/text_size_extra_small"
+                android:textStyle="italic" />
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/fragment_login_progress_layout"
-            android:alpha="0"
             android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:orientation="vertical">
-	        
-	        <ProgressBar
-	            android:id="@+id/fragment_login_progress"
-	            style="?android:attr/progressBarStyleLarge"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_gravity="center_horizontal"/>
-	
-	        <TextView
-	            android:id="@+id/fragment_login_text_logging_in"
-	            android:layout_gravity="center_horizontal"
-	            android:layout_height="wrap_content"
-	            android:layout_width="wrap_content"
-	            android:textSize="@dimen/text_size_small"
-	            android:gravity="center"
-	            android:text="@string/fragment_login_logging_in"/>
-	        
-		</LinearLayout>
-		
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            android:orientation="vertical" >
+
+            <ProgressBar
+                android:id="@+id/fragment_login_progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/fragment_login_text_logging_in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="@string/fragment_login_logging_in"
+                android:textSize="@dimen/text_size_small" />
+        </LinearLayout>
     </LinearLayout>
-    
+
 </ScrollView>

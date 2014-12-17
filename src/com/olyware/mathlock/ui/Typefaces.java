@@ -7,12 +7,14 @@ public class Typefaces {
 	protected static Typefaces instance;
 	public Typeface robotoLight;
 	public Typeface robotoMedium;
+	public Typeface avenirnext;
 	public Typeface robotoCondensed_Regular;
 
 	protected Typefaces(Context context) {
 		try {
 			robotoLight = Typeface.createFromAsset(context.getAssets(), "Roboto-Light.otf");
 			robotoMedium = Typeface.createFromAsset(context.getAssets(), "Roboto-Medium.ttf");
+			avenirnext = Typeface.createFromAsset(context.getAssets(), "avenirnext.otf");
 			robotoCondensed_Regular = Typeface.createFromAsset(context.getAssets(), "RobotoCondensed-Regular.ttf");
 		} catch (Exception e) {
 			// Unable to load typefaces

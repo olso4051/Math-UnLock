@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RelativeLayout;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.olyware.mathlock.dialog.PreferenceListDialog;
+import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.EZ;
 
 public class AdvanceSettingActivity extends Activity implements OnClickListener {
 
@@ -70,6 +73,10 @@ public class AdvanceSettingActivity extends Activity implements OnClickListener 
 	}
 
 	private void initview() {
+
+		RelativeLayout layout = (RelativeLayout) findViewById(R.id.layout);
+		Typefaces typefaces = Typefaces.getInstance(this);
+		EZ.setFont((ViewGroup) layout, typefaces.avenirnext);
 
 		pnlUseAsLockScreen = (RelativeLayout) findViewById(R.id.pnlUseAsLockScreen);
 		pnlLockScreenTimeout = (RelativeLayout) findViewById(R.id.pnlLockScreenTimeout);

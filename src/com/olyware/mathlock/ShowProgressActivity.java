@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -88,7 +89,7 @@ public class ShowProgressActivity extends Fragment {
 
 		layout = (LinearLayout) view.findViewById(R.id.layout);
 		typefaces = Typefaces.getInstance(getActivity());
-		EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
+		EZ.setFont((ViewGroup) layout, typefaces.avenirnext);
 
 		unlockPackageKeys = getResources().getStringArray(R.array.unlock_package_keys);
 		displayPackageKeys = EZ.list(getResources().getStringArray(R.array.display_packages));
@@ -275,9 +276,11 @@ public class ShowProgressActivity extends Fragment {
 
 		Drawable drawable = getResources().getDrawable(R.drawable.dropdown);
 		int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
-		spinTime.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
-		spinPackage.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
-		spinDifficulty.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+			spinTime.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
+			spinPackage.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
+			spinDifficulty.setDropDownVerticalOffset(drawable.getIntrinsicHeight() + px + 5);
+		}
 		spinTime.setAdapter(adapterTime);
 		spinTime.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override

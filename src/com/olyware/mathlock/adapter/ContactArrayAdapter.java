@@ -69,9 +69,9 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 				row = inflater.inflate(sectionLayoutResourceId, parent, false);
 				sectionHolder = new CustomSectionDataHolder();
 				sectionHolder.title = (TextView) row.findViewById(R.id.section_title);
-				sectionHolder.title.setTypeface(fonts.robotoLight);
+				sectionHolder.title.setTypeface(fonts.avenirnext);
 				sectionHolder.description = (TextView) row.findViewById(R.id.section_description);
-				sectionHolder.description.setTypeface(fonts.robotoLight);
+				sectionHolder.description.setTypeface(fonts.avenirnext);
 				row.setTag(sectionHolder);
 			}
 		} else {
@@ -101,9 +101,9 @@ public class ContactArrayAdapter extends ArrayAdapter<CustomContactData> {
 					row = inflater.inflate(sectionLayoutResourceId, parent, false);
 					sectionHolder = new CustomSectionDataHolder();
 					sectionHolder.title = (TextView) row.findViewById(R.id.section_title);
-					sectionHolder.title.setTypeface(fonts.robotoLight);
+					sectionHolder.title.setTypeface(fonts.avenirnext);
 					sectionHolder.description = (TextView) row.findViewById(R.id.section_description);
-					sectionHolder.description.setTypeface(fonts.robotoLight);
+					sectionHolder.description.setTypeface(fonts.avenirnext);
 					row.setTag(sectionHolder);
 				}
 			}

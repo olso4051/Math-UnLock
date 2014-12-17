@@ -70,7 +70,7 @@ public class GraphView extends View {
 	private void initGraphView(Context ctx) {
 		this.ctx = ctx;
 		Typefaces typefaces = Typefaces.getInstance(this.ctx);
-		font = typefaces.robotoLight;
+		font = typefaces.avenirnext;
 
 		textLabelSizeSP = 40; // text size in scaled pixels
 		textLabelSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textLabelSizeSP, getResources().getDisplayMetrics());

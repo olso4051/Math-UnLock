@@ -57,7 +57,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -173,7 +173,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private boolean fromSettings = false, fromPlay = false, fromShare = false, fromDeepLink = false, fromChallenge = false,
 			fromTutorial = false, fromDontShare = false, fromSponsored = false, moreGamesAvailable = false, fromAskToOpen = false;
 
-	private LinearLayout layout;
+	private RelativeLayout layout;
 	private Clock clock;
 	private TextView clockTextView, coins, questionDescription;
 	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500, backgroundState = 0;
@@ -608,14 +608,14 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				}
 			};
 
-			layout = (LinearLayout) findViewById(R.id.layout);
+			layout = (RelativeLayout) findViewById(R.id.layout);
 			BitmapDrawable gradient = new BitmapDrawable(getResources(), getWallpaperImage(false));
 			BitmapDrawable dim = new BitmapDrawable(getResources(), getWallpaperImage(true));
 			backgroundTransition = new TransitionDrawable(new Drawable[] { gradient, dim });
 			setLayoutBackground(layout, backgroundTransition);
 
 			typefaces = Typefaces.getInstance(this);
-			EZ.setFont((ViewGroup) layout, typefaces.robotoLight);
+			EZ.setFont((ViewGroup) layout, typefaces.avenirnext);
 
 			mHandler = new Handler();
 
@@ -1210,7 +1210,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	}
 
 	@SuppressLint("NewApi")
-	private void setLayoutBackground(LinearLayout layout, TransitionDrawable background) {
+	private void setLayoutBackground(RelativeLayout layout, TransitionDrawable background) {
 		if (android.os.Build.VERSION.SDK_INT < 16)
 			layout.setBackgroundDrawable(background);
 		else
@@ -1547,8 +1547,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						PreferenceHelper.incrementQuizModeQuestionsAnswered(this);
 						long currentTime = System.currentTimeMillis();
 						long lastUpdateTime = PreferenceHelper.getlastlaunch(this);
-						if ((lastUpdateTime + (24 * 60 * 60 * 1000)) < System.currentTimeMillis()
-								|| (xQuestion.value() != -1 && x_count >= xQuestion.value())) {// if
+						if ((xQuestion.value() != -1 && x_count >= xQuestion.value())) {// if
 							// (PreferenceHelper.shouldGetSponsoredApp(this,
 							if (lastUpdateTime + (24 * 60 * 60 * 1000) < System.currentTimeMillis()) {
 								PreferenceHelper.setlastlaunch(this, currentTime);

@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -29,6 +30,8 @@ import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.olyware.mathlock.service.CustomInstallReceiver;
 import com.olyware.mathlock.service.RegisterID;
+import com.olyware.mathlock.ui.Typefaces;
+import com.olyware.mathlock.utils.EZ;
 import com.olyware.mathlock.utils.GCMHelper;
 import com.olyware.mathlock.utils.PreferenceHelper;
 
@@ -105,6 +108,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_login, container, false);
+
+		ScrollView layout = (ScrollView) view.findViewById(R.id.layout);
+		Typefaces typefaces = Typefaces.getInstance(getActivity());
+		EZ.setFont((ViewGroup) layout, typefaces.avenirnext);
 
 		inputs = (LinearLayout) view.findViewById(R.id.fragment_login_inputs);
 		progress = (LinearLayout) view.findViewById(R.id.fragment_login_progress_layout);

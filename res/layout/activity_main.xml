@@ -1,11 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res/com.olyware.mathlock"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
     <LinearLayout
-        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/seperator"
