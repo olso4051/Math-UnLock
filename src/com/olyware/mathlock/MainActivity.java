@@ -1507,8 +1507,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 
 					joystick.setAnswers(answersRandom, answerLoc);
 					resetQuestionWorth(questionWorthMax);
-				} else if (!unlocking && PreferenceHelper.isSponsoredQuestionsStored(this)
-						&& PreferenceHelper.isSponsoredQuestionsStarted(this)) {
+				} else if (PreferenceHelper.isSponsoredQuestionsStored(this) && PreferenceHelper.isSponsoredQuestionsStarted(this)) {// pai
 					fromDontShare = true;
 					fromSponsored = true;
 					joystick.setProblem(true);
@@ -1543,27 +1542,29 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					joystick.setAnswers(answersRandom, answerLoc);
 					resetQuestionWorth(questionWorthMax);
 				} else if (EnabledPackages > 0) { // Change this pai
-					if (quizMode) {
-						PreferenceHelper.incrementQuizModeQuestionsAnswered(this);
-						long currentTime = System.currentTimeMillis();
-						long lastUpdateTime = PreferenceHelper.getlastlaunch(this);
-						if ((xQuestion.value() != -1 && x_count >= xQuestion.value())) {// if
-							// (PreferenceHelper.shouldGetSponsoredApp(this,
-							if (lastUpdateTime + (24 * 60 * 60 * 1000) < System.currentTimeMillis()) {
-								PreferenceHelper.setlastlaunch(this, currentTime);
-								PreferenceHelper.setTodayCountofSponseredQuestion(ctx, 0);
-							}
-							if (PreferenceHelper.getTodayCountofSponseredQuestion(ctx) < 100) {
-								x_count = 0;																									// currentTime))
-								lastUpdateTime = System.currentTimeMillis(); 																					// {
+					// if (quizMode) {
+					PreferenceHelper.incrementQuizModeQuestionsAnswered(this);
+					long currentTime = System.currentTimeMillis();
+					long lastUpdateTime = PreferenceHelper.getlastlaunch(this);
+					Random random = new Random();
 
-								PreferenceHelper.getSponsoredQuestion(this, false);
-								PreferenceHelper.setTodayCountofSponseredQuestion(ctx,
-										PreferenceHelper.getTodayCountofSponseredQuestion(ctx) + 1);
-								PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
-							}
+					if ((!quizMode && random.nextInt(100) < 10) || (xQuestion.value() != -1 && x_count >= xQuestion.value())) {// if
+						// (PreferenceHjoelper.shouldGetSponsoredApp(this,
+						if (lastUpdateTime + (24 * 60 * 60 * 1000) < System.currentTimeMillis()) {
+							PreferenceHelper.setlastlaunch(this, currentTime);
+							PreferenceHelper.setTodayCountofSponseredQuestion(ctx, 0);
+						}
+						if (PreferenceHelper.getTodayCountofSponseredQuestion(ctx) < 100) {
+							x_count = 0;																									// currentTime))
+							lastUpdateTime = System.currentTimeMillis(); 																					// {
+
+							PreferenceHelper.getSponsoredQuestion(this, false);
+							PreferenceHelper.setTodayCountofSponseredQuestion(ctx,
+									PreferenceHelper.getTodayCountofSponseredQuestion(ctx) + 1);
+							PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
 						}
 					}
+					// }
 					joystick.setProblem(true);
 					final String EnabledPackageKeys[] = new String[EnabledPackages];
 					final int location[] = new int[EnabledPackages];
@@ -2053,6 +2054,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 						setProblemAndAnswer();
 					}
 				}, MoneyHelper.updateMoneyTime);
+				if (!quizMode)
+					finish();
+
 			} else if (EnabledPackages == 0) {
 				this.finish();
 			} else if (attempts >= maxAttempts && !(answerLoc == answer) && !quizMode && maxAttempts < 4) {
