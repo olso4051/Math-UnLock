@@ -1,5 +1,6 @@
 package com.olyware.mathlock;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -308,6 +309,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				PreferenceHelper.loadCustomPacks(MainActivity.this, dbManager);
 			}*/
 			setPackageKeys();
+			checkVocabDB();
+			checkLanDB();
 			return null;
 		}
 
@@ -737,6 +740,24 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			GCMHelper.registerAndStoreGCM(this, getApplicationContext());
 		}
 		// joystick.askToShare(getString(R.string.ask_to_share0)); // Pai added
+	}
+
+	private void checkVocabDB() {
+		long lastUpdateTime = PreferenceHelper.getlastVocabDBUpdate(this);
+		if (lastUpdateTime + (24 * 60 * 60 * 1000) < System.currentTimeMillis()) {
+			PreferenceHelper.setlastVocabDBUpdate(this, System.currentTimeMillis());
+			dbManager.copyRandomVocab();
+			Log.d("TEST", "UPDATING THE NEW DB");
+		}
+	}
+
+	private void checkLanDB() {
+		long lastUpdateTime = PreferenceHelper.getlastLanguageDBUpdate(this);
+		if (lastUpdateTime + (24 * 60 * 60 * 1000) < System.currentTimeMillis()) {
+			PreferenceHelper.setlastLanguageDBUpdate(this, System.currentTimeMillis());
+			dbManager.copyRandomLanguage();
+			Log.d("TEST", "UPDATING THE NEW DB");
+		}
 	}
 
 	@Override
@@ -1512,6 +1533,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					fromSponsored = true;
 					joystick.setProblem(true);
 					currentPack = getString(R.string.sponsored);
+					changetheame(true);
 					List<GenericQuestion> questions = PreferenceHelper.getStoredSponsoredQuestions(this);
 					if (questions.size() == 0) {
 						PreferenceHelper.resetSponsoredQuestions(this);
@@ -1667,6 +1689,21 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		}
 	}
 
+	private void changetheame(boolean isSponsred) {
+
+		if (isSponsred) {
+			File fileForImage = new File(getExternalCacheDir().getAbsolutePath() + "/temp");
+			Drawable d = Drawable.createFromPath(fileForImage.getAbsolutePath());
+			if (d != null)
+				findViewById(R.id.layout).setBackgroundDrawable(d);
+			// setLayoutBackground(layout, backgroundTransition);
+		} else {
+			findViewById(R.id.layout).setBackgroundDrawable(null);
+			setLayoutBackground(layout, backgroundTransition);
+		}
+
+	}
+
 	private void setDefaultQuestion() {
 		joystick.resetGuess();
 		joystick.setProblem(false);
@@ -1737,9 +1774,10 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		return true;
 	}
 
-	private boolean setVocabProblem(Difficulty min, Difficulty max) {
+	private boolean setVocabProblem(final Difficulty min, final Difficulty max) {
 		currentTableName = getString(R.string.vocab_table);
-		List<VocabQuestion> questions = dbManager.getVocabQuestions(min, max, answers.length, ID);
+
+		final List<VocabQuestion> questions = dbManager.getVocabQuestions(min, max, answers.length, ID);
 		if (questions == null)
 			return false;
 		ID = questions.get(0).getID();
@@ -1758,6 +1796,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 		decreaseRate = decreaseRate * 10;
 		problem.setText("Define: " + questions.get(0).getQuestionText());
 		return true;
+
 	}
 
 	private boolean setLanguageProblem(Difficulty min, Difficulty max) {
@@ -2040,6 +2079,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				PreferenceHelper.removePackToOpen(this, pack);
 				finish();
 			} else if (fromSponsored) {
+				changetheame(false);
 				displayCorrectOrNot(answer, answer);
 				PreferenceHelper.removeSponsoredQuestion(this, sponsoredHash, answerLocs[answer]);
 				if (!urlsRandom[answer].equals("")) {

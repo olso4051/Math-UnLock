@@ -3,6 +3,7 @@ package com.olyware.mathlock.database.contracts;
 public final class VocabQuestionContract extends QuestionContract {
 
 	public static final String TABLE_NAME = "t_vocab_question";
+	public static final String TEMP_TABLE_NAME = "t_vocab_question_temp";
 	public static final String[] ALL_COLUMNS;
 	public static final String[] QUESTION_AND_PRIORITY;
 

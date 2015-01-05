@@ -1,75 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-	tools:ignore="TypographyDashes">
-    
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyDashes">
+
     <string-array name="package_names">
-		<item name="1">com.orbitz</item>
-		<item name="2">com.machinezone.gow</item>
-		<item name="3">com.onavo.android.onavoid</item>
-		<item name="4">com.poshmark.app</item>
-		<item name="5">com.scopely.slotsvacation</item>
-		<item name="6">air.com.sgn.cookiejam.gp</item>
-		<item name="7">com.asiandate</item>
-		<item name="8">com.kongregate.mobile.tyrant.google</item>
-		<item name="9">com.stubhub</item>
-		<item name="10">com.itonline.anastasiadate</item>
-		<item name="11">com.cheeky</item>
-		<item name="12">com.superhippo.pirates</item>
-		<item name="13">com.cervomedia.spw</item>
-		<item name="14">com.priceline.android.negotiator</item>
+        <item name="1">com.orbitz</item>
+        <item name="2">com.machinezone.gow</item>
+        <item name="3">com.onavo.android.onavoid</item>
+        <item name="4">com.poshmark.app</item>
+        <item name="5">com.scopely.slotsvacation</item>
+        <item name="6">air.com.sgn.cookiejam.gp</item>
+        <item name="7">com.asiandate</item>
+        <item name="8">com.kongregate.mobile.tyrant.google</item>
+        <item name="9">com.stubhub</item>
+        <item name="10">com.itonline.anastasiadate</item>
+        <item name="11">com.cheeky</item>
+        <item name="12">com.superhippo.pirates</item>
+        <item name="13">com.cervomedia.spw</item>
+        <item name="14">com.priceline.android.negotiator</item>
     </string-array>
-    
     <string-array name="package_name_links">
-		<item name="1">http://api.chirpads.com/tracking/impressionclick/0c778435-d5c0-4f27-a3cd-2342566009f9/</item>
-		<item name="2">http://api.chirpads.com/tracking/impressionclick/639c3b12-16cb-46c0-9229-77c8d50cf4c4/</item>
-		<item name="3">http://api.chirpads.com/tracking/impressionclick/feb88bf3-1620-4453-8d74-87b4aa3a328b/</item>
-		<item name="4">http://api.chirpads.com/tracking/impressionclick/487a17f0-1936-4ca8-9000-7842375e2cca/</item>
-		<item name="5">http://api.chirpads.com/tracking/impressionclick/ac4c2189-6f5b-41f4-84bb-79fab2eedefe/</item>
-		<item name="6">http://api.chirpads.com/tracking/impressionclick/5ddd4e53-0a74-4370-ae02-272e6dd913de/</item>
-		<item name="7">http://api.chirpads.com/tracking/impressionclick/49fcdf76-92b9-4ec8-b948-66b4eff5ec8a/</item>
-		<item name="8">http://api.chirpads.com/tracking/impressionclick/b6f6abbb-a188-4e5f-8b79-d1d39c708d92/</item>
-		<item name="9">http://api.chirpads.com/tracking/impressionclick/6a45f0ea-78b2-4bb2-8bd0-bccb8b1c84a3/</item>
-		<item name="10">http://api.chirpads.com/tracking/impressionclick/4097863d-8ef2-4b35-953a-67a30d0ac682/</item>
-		<item name="11">http://api.chirpads.com/tracking/impressionclick/87e1e4db-a19c-4fcd-b751-45f5d70a1b2d/</item>
-		<item name="12">http://api.chirpads.com/tracking/impressionclick/e250c002-3130-42a9-8120-97fe71958ca8/</item>
-		<item name="13">http://api.chirpads.com/tracking/impressionclick/56a85142-50a1-4830-b31c-e88dd24cfd16/</item>
-		<item name="14">http://api.chirpads.com/tracking/impressionclick/19fd6dba-8feb-465f-a2b0-5479527d0a9d/</item>
+        <item name="1">http://api.chirpads.com/tracking/impressionclick/0c778435-d5c0-4f27-a3cd-2342566009f9/</item>
+        <item name="2">http://api.chirpads.com/tracking/impressionclick/639c3b12-16cb-46c0-9229-77c8d50cf4c4/</item>
+        <item name="3">http://api.chirpads.com/tracking/impressionclick/feb88bf3-1620-4453-8d74-87b4aa3a328b/</item>
+        <item name="4">http://api.chirpads.com/tracking/impressionclick/487a17f0-1936-4ca8-9000-7842375e2cca/</item>
+        <item name="5">http://api.chirpads.com/tracking/impressionclick/ac4c2189-6f5b-41f4-84bb-79fab2eedefe/</item>
+        <item name="6">http://api.chirpads.com/tracking/impressionclick/5ddd4e53-0a74-4370-ae02-272e6dd913de/</item>
+        <item name="7">http://api.chirpads.com/tracking/impressionclick/49fcdf76-92b9-4ec8-b948-66b4eff5ec8a/</item>
+        <item name="8">http://api.chirpads.com/tracking/impressionclick/b6f6abbb-a188-4e5f-8b79-d1d39c708d92/</item>
+        <item name="9">http://api.chirpads.com/tracking/impressionclick/6a45f0ea-78b2-4bb2-8bd0-bccb8b1c84a3/</item>
+        <item name="10">http://api.chirpads.com/tracking/impressionclick/4097863d-8ef2-4b35-953a-67a30d0ac682/</item>
+        <item name="11">http://api.chirpads.com/tracking/impressionclick/87e1e4db-a19c-4fcd-b751-45f5d70a1b2d/</item>
+        <item name="12">http://api.chirpads.com/tracking/impressionclick/e250c002-3130-42a9-8120-97fe71958ca8/</item>
+        <item name="13">http://api.chirpads.com/tracking/impressionclick/56a85142-50a1-4830-b31c-e88dd24cfd16/</item>
+        <item name="14">http://api.chirpads.com/tracking/impressionclick/19fd6dba-8feb-465f-a2b0-5479527d0a9d/</item>
     </string-array>
-    
     <string-array name="custom_packs">
-		<item>Analogy</item>
-		<item>Antonyms 1</item>
-		<item>Antonyms 2</item>
-		<item>English Vocab 2</item>
-		<item>Math (Grade 6)</item>
-		<item>Math (Grade 7)</item>
-		<item>Science (Grade 8)</item>
-		<item>Science 1</item>
-		<item>Science 2</item>
-		<item>Science 3</item>
-		<item>Science 4</item>
-		<item>Synonyms 1</item>
+        <item>Analogy</item>
+        <item>Antonyms 1</item>
+        <item>Antonyms 2</item>
+        <item>English Vocab 2</item>
+        <item>Math (Grade 6)</item>
+        <item>Math (Grade 7)</item>
+        <item>Science (Grade 8)</item>
+        <item>Science 1</item>
+        <item>Science 2</item>
+        <item>Science 3</item>
+        <item>Science 4</item>
+        <item>Synonyms 1</item>
     </string-array>
     <string-array name="enable_custom_packs">
-		<item>enable_custom_Analogy</item>
-		<item>enable_custom_Antonyms 1</item>
-		<item>enable_custom_Antonyms 2</item>
-		<item>enable_custom_English Vocab 2</item>
-		<item>enable_custom_Math (Grade 6)</item>
-		<item>enable_custom_Math (Grade 7)</item>
-		<item>enable_custom_Science (Grade 8)</item>
-		<item>enable_custom_Science 1</item>
-		<item>enable_custom_Science 2</item>
-		<item>enable_custom_Science 3</item>
-		<item>enable_custom_Science 4</item>
-		<item>enable_custom_Synonyms 1</item>
+        <item>enable_custom_Analogy</item>
+        <item>enable_custom_Antonyms 1</item>
+        <item>enable_custom_Antonyms 2</item>
+        <item>enable_custom_English Vocab 2</item>
+        <item>enable_custom_Math (Grade 6)</item>
+        <item>enable_custom_Math (Grade 7)</item>
+        <item>enable_custom_Science (Grade 8)</item>
+        <item>enable_custom_Science 1</item>
+        <item>enable_custom_Science 2</item>
+        <item>enable_custom_Science 3</item>
+        <item>enable_custom_Science 4</item>
+        <item>enable_custom_Synonyms 1</item>
     </string-array>
-    
     <string-array name="dont_show_again">
         <item name="dont_show">Don\'t ask me again</item>
     </string-array>
-    
     <string-array name="tutorial_title_questions">
         <item name="tutorial_0">Tutorial 1 of 5</item>
         <item name="tutorial_1">Tutorial 2 of 5</item>
@@ -126,9 +120,9 @@
     </string-array>
     <string-array name="tutorial_answers_4">
         <item name="answer_0">Always\n(smartest)</item>
-        <item name="answer_1">Very Often</item><!-- 15 min timeout -->
-        <item name="answer_2">Often</item><!-- 1 hour timeout -->
-        <item name="answer_3">Not Often</item><!-- 8 hout timeout -->
+        <item name="answer_1">Very Often</item> <!-- 15 min timeout -->
+        <item name="answer_2">Often</item> <!-- 1 hour timeout -->
+        <item name="answer_3">Not Often</item> <!-- 8 hout timeout -->
     </string-array>
     <string-array name="tutorial_answers_5">
         <item name="answer_0">OK</item>
@@ -148,7 +142,6 @@
         <item name="answer_2">X</item>
         <item name="answer_3">X</item>
     </string-array>
-    
     <string-array name="difficulty_entries">
         <item name="very_easy">Very Easy</item>
         <item name="easy">Easy</item>
@@ -198,7 +191,6 @@
         <item name="hour8">28800000</item>
         <item name="day">86400000</item>
     </string-array>
-    
     <string-array name="sponsored_entries">
         <item name="max">Every time</item>
         <item name="day10">10 per day</item>
@@ -226,7 +218,6 @@
         <item name="month1">2419200000</item>
         <item name="never">9223372036854775807</item>
     </string-array>
-    
     <string-array name="times">
         <item>All</item>
         <item>Last Year</item>
@@ -235,7 +226,6 @@
         <item>Last Week</item>
         <item>Today</item>
     </string-array>
-    
     <string-array name="max_tries_entries">
         <item name="1">1</item>
         <item name="2">2</item>
@@ -248,7 +238,6 @@
         <item name="3">3</item>
         <item name="4">4</item>
     </string-array>
-    
     <string-array name="language_entries">
         <item name="bengali">Bengali</item>
         <item name="chinese">Chinese (Simplified)</item>
@@ -287,6 +276,44 @@
         <item name="swedish">swedish</item>
         <item name="russian">russian</item>
     </string-array>
+    <string-array name="language_with_db">
+        <item name="english">english</item>
+        <item name="spanish">spanish</item>
+        <item name="portuguese">portuguese</item>
+        <item name="german">german</item>
+        <item name="danish">danish</item>
+        <item name="dutch">dutch</item>
+        <item name="chinese">chinese</item>
+        <item name="hindi">hindi</item>
+        <item name="bengali">bengali</item>
+        <item name="russian">russian</item>
+        <item name="japanese">japanese</item>
+        <item name="french">french</item>
+        <item name="italian">italian</item>
+        <item name="polish">polish</item>
+        <item name="swedish">swedish</item>
+        <item name="norwegian">norwegian</item>
+        <item name="latin">latin</item>
+    </string-array>
+    <string-array name="language_priorities_with_db">
+        <item name="english">english_priority</item>
+        <item name="spanish">spanish_priority</item>
+        <item name="portuguese">portuguese_priority</item>
+        <item name="german">german_priority</item>
+        <item name="danish">danish_priority</item>
+        <item name="dutch">dutch_priority</item>
+        <item name="chinese">chinese_priority</item>
+        <item name="hindi">hindi_priority</item>
+        <item name="bengali">bengali_priority</item>
+        <item name="russian">russian_priority</item>
+        <item name="japanese">japanese_priority</item>
+        <item name="french">french_priority</item>
+        <item name="italian">italian_priority</item>
+        <item name="polish">polish_priority</item>
+        <item name="swedish">swedish_priority</item>
+        <item name="norwegian">norwegian_priority</item>
+        <item name="latin">latin_priority</item>
+    </string-array>
     <string-array name="language_priorities_not_localized">
         <item name="bengali">bengali_priority</item>
         <item name="chinese">chinese_priority</item>
@@ -306,13 +333,14 @@
         <item name="swedish">swedish_priority</item>
         <item name="russian">russian_priority</item>
     </string-array>
-    
+
     <string name="math_table">t_math_question</string>
-	<string name="vocab_table">t_vocab_question</string>
+    <string name="vocab_table">t_vocab_question</string>
     <string name="language_table">t_language_question</string>
     <string name="engineer_table">t_engineer_question</string>
     <string name="hiq_trivia_table">t_hiq_trivia_question</string>
     <string name="custom_table">t_custom_question</string>
+
     <string-array name="table_names">
         <item name="math">@string/math_table</item>
         <item name="vocab">@string/vocab_table</item>
@@ -321,89 +349,91 @@
         <item name="hiqh_trivia">@string/hiq_trivia_table</item>
         <item name="custom_trivia">@string/custom_table</item>
     </string-array>
-    
     <string-array name="unlock_package_keys">
         <item>unlock_all</item>
         <item>unlock_math</item>
         <item>unlock_vocab</item>
         <item>unlock_language</item>
-		<item>unlock_engineer</item>
-		<item>unlock_hiqh_trivia</item>
-		<!-- <item>unlock_hiq_expansion</item> -->
+        <item>unlock_engineer</item>
+        <item>unlock_hiqh_trivia</item>
+        <!-- <item>unlock_hiq_expansion</item> -->
     </string-array>
     <string-array name="unlock_sub_package_keys">
         <item>unlock_all_subscription</item>
         <item>unlock_math_subscription</item>
         <item>unlock_vocab_subscription</item>
         <item>unlock_language_subscription</item>
-		<item>unlock_engineer_subscription</item>
-		<item>unlock_hiqh_trivia_subscription</item>
-		<!-- <item>unlock_hiq_expansion_subscription</item> -->
+        <item>unlock_engineer_subscription</item>
+        <item>unlock_hiqh_trivia_subscription</item>
+        <!-- <item>unlock_hiq_expansion_subscription</item> -->
     </string-array>
+
     <integer-array name="unlock_cost">
         <item>10000</item>
         <item>1500</item>
         <item>3000</item>
         <item>5000</item>
-		<item>1500</item>
-		<item>1500</item>
-		<item>5000</item>
+        <item>1500</item>
+        <item>1500</item>
+        <item>5000</item>
     </integer-array>
+
     <string name="custom_enable">enable_custom_</string>
 
     <string-array name="enable_package_keys">
-
         <item>enable_math</item>
         <item>enable_vocab</item>
         <item>enable_language</item>
-		<item>enable_engineer</item>
-		<item>enable_hiqh_trivia</item>
-		<!-- <item>enable_hiq_expansion</item> -->
+        <item>enable_engineer</item>
+        <item>enable_hiqh_trivia</item>
+        <!-- <item>enable_hiq_expansion</item> -->
     </string-array>
 
     <string name="all">All</string>
-	<string name="math">Math</string>
-	<string name="vocab">Vocab</string>
+    <string name="math">Math</string>
+    <string name="vocab">Vocab</string>
     <string name="language">Language</string>
-	<string name="engineer">Engineer</string>
-	<string name="hiqh_trivia">Hiq Trivia</string>
-	<string name="hiq_expansion">Expansion</string>
-	<string name="custom">Custom</string>
+    <string name="engineer">Engineer</string>
+    <string name="hiqh_trivia">Hiq Trivia</string>
+    <string name="hiq_expansion">Expansion</string>
+    <string name="custom">Custom</string>
+
     <string-array name="starting_packages">
         <item>@string/math</item>
         <item>@string/vocab</item>
         <item>@string/language</item>
-		<item>@string/engineer</item>
-		<item>@string/hiqh_trivia</item>
+        <item>@string/engineer</item>
+        <item>@string/hiqh_trivia</item>
     </string-array>
     <string-array name="display_packages">
         <item>@string/all</item>
         <item>@string/math</item>
         <item>@string/vocab</item>
         <item>@string/language</item>
-		<item>@string/engineer</item>
-		<item>@string/hiqh_trivia</item>
-		<!-- <item>@string/hiq_expansion</item> -->
+        <item>@string/engineer</item>
+        <item>@string/hiqh_trivia</item>
+        <!-- <item>@string/hiq_expansion</item> -->
     </string-array>
+
     <string name="custom_settings">settings_custom</string>
+
     <string-array name="settings_keys">
         <item>settings_math</item>
         <item>settings_vocab</item>
         <item>settings_language</item>
-		<item>settings_engineer</item>
-		<item>settings_hiqh_trivia</item>
-		<item>@string/custom_settings</item>
+        <item>settings_engineer</item>
+        <item>settings_hiqh_trivia</item>
+        <item>@string/custom_settings</item>
     </string-array>
     <string-array name="package_info">
         <item>Unlocks all current and future question packs</item>
         <item>Math questions from elementary to college difficulty</item>
         <item>English vocabulary questions from elementary to college difficulty</item>
         <item>Learn a new language by translating the thousands of words and sentences in 17 different languages</item>
-		<item>Complete science and engineering related equations to keep fresh</item>
-		<item>Fun trivia questions</item>
-		<item>Unlock all the extra packs under Custom Questions in Settings.</item>
+        <item>Complete science and engineering related equations to keep fresh</item>
+        <item>Fun trivia questions</item>
+        <item>Unlock all the extra packs under Custom Questions in Settings.</item>
     </string-array>
-    
     <string-array name="egg_keys">
         <item>settings</item>
         <item>unknown</item>
@@ -425,6 +455,7 @@
         <item>challenge_sent</item>
         <item>challenge_accepted</item>
     </string-array>
+
     <integer-array name="egg_max_values">
         <item>500</item>
         <item>500</item>
@@ -446,17 +477,17 @@
         <item>2500</item>
         <item>2500</item>
     </integer-array>
-    
+
     <string-array name="hints">
         <item>Answer questions by sliding the lock to the correct answer</item>
-	    <item>Slide icons out of settings bar to select\n\n
+        <item>Slide icons out of settings bar to select\n\n
 	        This one is Quiz Mode, use it to keep the questions rolling</item>
-	    <item>Enable and adjust features in settings</item>
-	    <item>See your progress and stats</item>
-	    <item>unlock more stuff in the store</item>
-	    <item>Challenge Friends Coming Soon</item>
+        <item>Enable and adjust features in settings</item>
+        <item>See your progress and stats</item>
+        <item>unlock more stuff in the store</item>
+        <item>Challenge Friends Coming Soon</item>
     </string-array>
-    
+
     <integer-array name="notify_streaks">
         <item>20</item>
         <item>50</item>
@@ -475,9 +506,10 @@
         <item>15000</item>
         <item>30000</item>
     </integer-array>
-    
+
     <string-array name="invite_messages">
         <item>I\'m unlocking my IQ, Download Hiq so we can challenge each other.\n\n</item>
-	    <item>Check out this cool app. It puts fun questions on my lockscreen. We can even challenge each other.\n\n</item>
+        <item>Check out this cool app. It puts fun questions on my lockscreen. We can even challenge each other.\n\n</item>
     </string-array>
+
 </resources>

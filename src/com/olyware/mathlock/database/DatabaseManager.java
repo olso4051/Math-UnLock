@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.olyware.mathlock.MainActivity;
 import com.olyware.mathlock.R;
@@ -182,14 +183,28 @@ public class DatabaseManager {
 			return null;
 	}
 
+	public void copyRandomVocab() {
+
+		if (db.isOpen()) {
+
+			db.execSQL("delete from " + VocabQuestionContract.TEMP_TABLE_NAME);
+			db.execSQL("INSERT INTO " + VocabQuestionContract.TEMP_TABLE_NAME + " SELECT * FROM " + VocabQuestionContract.TABLE_NAME
+					+ " ORDER BY RANDOM() LIMIT 2000");
+
+			Cursor cursor = db.query(VocabQuestionContract.TEMP_TABLE_NAME, null, null, null, null, null, "RANDOM()", "2000");
+			Log.d("TESTING : ", "COOL : " + cursor.getCount());
+		}
+
+	}
+
 	public List<VocabQuestion> getVocabQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, long notID) {
 		if (db.isOpen()) {
 			// String order = "RANDOM()";// LIMIT " + number;
 			String where = "difficulty <= " + String.valueOf(maxDifficulty.getValue()) + " AND difficulty >= "
 					+ String.valueOf(minDifficulty.getValue()) + " AND " + BaseContract._ID + " != " + notID;
-			cursor = db.query(VocabQuestionContract.TABLE_NAME, QuestionContract.ALL_COLUMNS, where, null, null, null, null);
+			cursor = db.query(VocabQuestionContract.TEMP_TABLE_NAME, QuestionContract.ALL_COLUMNS, where, null, null, null, null);
 
-			Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + VocabQuestionContract.TABLE_NAME
+			Cursor cursor2 = db.rawQuery("SELECT SUM(" + QuestionContract.PRIORITY + ") FROM " + VocabQuestionContract.TEMP_TABLE_NAME
 					+ " WHERE " + where, null);
 			cursor2.moveToFirst();
 			int sum = cursor2.getInt(0);
@@ -197,6 +212,20 @@ public class DatabaseManager {
 			return DatabaseModelFactory.buildVocabQuestions(cursor, sum, number);
 		} else
 			return null;
+	}
+
+	public void copyRandomLanguage() {
+
+		if (db.isOpen()) {
+
+			db.execSQL("delete from " + LanguageQuestionContract.TEMP_TABLE_NAME);
+			db.execSQL("INSERT INTO " + LanguageQuestionContract.TEMP_TABLE_NAME + " SELECT * FROM " + LanguageQuestionContract.TABLE_NAME
+					+ " ORDER BY RANDOM() LIMIT 2000");
+
+			Cursor cursor = db.query(LanguageQuestionContract.TEMP_TABLE_NAME, null, null, null, null, null, "RANDOM()", "2000");
+			Log.d("TESTING : ", "COOL_LAN : " + cursor.getCount());
+		}
+
 	}
 
 	public List<LanguageQuestion> getLanguageQuestions(Difficulty minDifficulty, Difficulty maxDifficulty, int number, String fromLanguage,
@@ -209,10 +238,10 @@ public class DatabaseManager {
 					+ " != " + notID;
 			String[] columns = { fromLanguage, toLanguage, fromLanguagePriority, toLanguagePriority, QuestionContract.DIFFICULTY,
 					QuestionContract._ID, QuestionContract.TIME_STEP, QuestionContract.TIME_STEPS };
-			cursor = db.query(LanguageQuestionContract.TABLE_NAME, columns, where, null, null, null, null);
+			cursor = db.query(LanguageQuestionContract.TEMP_TABLE_NAME, columns, where, null, null, null, null);
 
 			Cursor cursor2 = db.rawQuery("SELECT SUM(" + fromLanguagePriority + "+" + toLanguagePriority + ") FROM "
-					+ LanguageQuestionContract.TABLE_NAME + " WHERE " + where, null);
+					+ LanguageQuestionContract.TEMP_TABLE_NAME + " WHERE " + where, null);
 			cursor2.moveToFirst();
 			int sum = cursor2.getInt(0);
 			cursor2.close();

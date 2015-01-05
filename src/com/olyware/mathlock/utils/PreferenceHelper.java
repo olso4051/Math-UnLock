@@ -640,6 +640,26 @@ public class PreferenceHelper {
 		return sharedPrefsUsers.getInt(USER_PREFS_SPONSORED_QUIZ_MODE_ANSWERED, 0);
 	}
 
+	public static void setlastVocabDBUpdate(Context ctx, long time) {
+		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsUsers.putLong("date_DBUpdate_vocab", time).commit();
+	}
+
+	public static long getlastVocabDBUpdate(Context ctx) {
+		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsUsers.getLong("date_DBUpdate_vocab", 0);
+	}
+
+	public static void setlastLanguageDBUpdate(Context ctx, long time) {
+		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
+		editPrefsUsers.putLong("date_DBUpdate_lan", time).commit();
+	}
+
+	public static long getlastLanguageDBUpdate(Context ctx) {
+		SharedPreferences sharedPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+		return sharedPrefsUsers.getLong("date_DBUpdate_lan", 0);
+	}
+
 	public static void setlastlaunch(Context ctx, long time) {
 		SharedPreferences.Editor editPrefsUsers = ctx.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE).edit();
 		editPrefsUsers.putLong("date_firstlaunch", time).commit();

@@ -6,6 +6,8 @@ import com.olyware.mathlock.R;
 public final class LanguageQuestionContract extends QuestionContract {
 
 	public static final String TABLE_NAME = "t_language_question";
+	public static final String TEMP_TABLE_NAME = "t_language_question_temp";
+
 	public static final String[] LANGUAGES = MainActivity.getContext().getResources().getStringArray(R.array.language_values_not_localized);
 	public static final String[] LANGUAGE_PRIORITIES = MainActivity.getContext().getResources()
 			.getStringArray(R.array.language_priorities_not_localized);

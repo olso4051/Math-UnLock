@@ -5,6 +5,7 @@ import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 
 import com.apptimize.Apptimize;
@@ -12,6 +13,11 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Logger.LogLevel;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.playhaven.android.push.GCMRegistrationRequest;
 
 @ReportsCrashes(formKey = "", // will not be used
@@ -33,6 +39,8 @@ public class MyApplication extends Application {
 	private static final String TRACKING_PREF_KEY = "analytics_tracking";
 	public static final String PUSH_PREF_KEY = "push_notifications";
 
+	private ImageLoader imageLoader;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -47,6 +55,26 @@ public class MyApplication extends Application {
 
 	private void initGCM() {
 		mGcm = GoogleCloudMessaging.getInstance(this);
+	}
+
+	public ImageLoader getImageLoader() {
+
+		if (imageLoader == null) {
+			initImageLoader();
+		}
+
+		return imageLoader;
+	}
+
+	private void initImageLoader() {
+		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheOnDisk(true).cacheInMemory(true)
+				.imageScaleType(ImageScaleType.IN_SAMPLE_INT).bitmapConfig(Bitmap.Config.RGB_565).build();
+		ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(MyApplication.this)
+				.defaultDisplayImageOptions(defaultOptions).memoryCache(new WeakMemoryCache()).threadPoolSize(3);
+
+		ImageLoaderConfiguration config = builder.build();
+		imageLoader = ImageLoader.getInstance();
+		imageLoader.init(config);
 	}
 
 	/*

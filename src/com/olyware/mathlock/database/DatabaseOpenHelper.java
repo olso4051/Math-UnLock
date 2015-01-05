@@ -13,6 +13,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.olyware.mathlock.MainActivity;
+import com.olyware.mathlock.R;
 import com.olyware.mathlock.database.contracts.BaseContract;
 import com.olyware.mathlock.database.contracts.CustomQuestionContract;
 import com.olyware.mathlock.database.contracts.EngineerQuestionContract;
@@ -42,19 +44,78 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 		DATABASE_FULL_PATH = context.getDatabasePath(DATABASE_NAME).getAbsolutePath();
 		DATABASE_PATH = DATABASE_FULL_PATH.substring(0, DATABASE_FULL_PATH.indexOf(DATABASE_NAME));
 		DATABASE_OLD_FULL_PATH = DATABASE_PATH + "old_" + DATABASE_NAME;
+
 		int databaseState = dbState();
 		if (databaseState == 0)
 			copyDatabase();
 		else if (databaseState == 2)
 			upgradeDatabase();
+
+		StringBuilder sqlBuilder = new StringBuilder();
+		sqlBuilder.append("CREATE TABLE IF NOT EXISTS " + VocabQuestionContract.TEMP_TABLE_NAME + " ( ");
+		sqlBuilder.append(QuestionContract.QUESTION_TEXT + " STRING, ");
+		sqlBuilder.append(QuestionContract.ANSWER_CORRECT + " STRING,");
+		sqlBuilder.append(QuestionContract.DIFFICULTY + " INTEGER,");
+		sqlBuilder.append(QuestionContract.PRIORITY + " INTEGER,");
+		sqlBuilder.append(QuestionContract.TIME_STEP + " INTEGER,");
+		sqlBuilder.append(QuestionContract.TIME_STEPS + " INTEGER ");
+		sqlBuilder.append(");");
+		SQLiteDatabase db = SQLiteDatabase.openDatabase(DATABASE_FULL_PATH, null, SQLiteDatabase.OPEN_READWRITE);
+		db.execSQL(sqlBuilder.toString());
+
+		String[] LANGUAGES = MainActivity.getContext().getResources().getStringArray(R.array.language_with_db);
+		String[] LANGUAGE_PRIORITIES = MainActivity.getContext().getResources().getStringArray(R.array.language_priorities_with_db);
+		sqlBuilder = new StringBuilder();
+		sqlBuilder.append("CREATE TABLE IF NOT EXISTS " + LanguageQuestionContract.TEMP_TABLE_NAME + " ( ");
+		sqlBuilder.append(LANGUAGES[0] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[0] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[1] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[1] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[2] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[2] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[3] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[3] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[4] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[4] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[5] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[5] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[6] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[6] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[7] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[7] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[8] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[8] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[9] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[9] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[10] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[10] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[11] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[11] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[12] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[12] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[13] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[13] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[14] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[14] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[15] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[15] + " INTEGER, ");
+		sqlBuilder.append(LANGUAGES[16] + " STRING, ");
+		sqlBuilder.append(LANGUAGE_PRIORITIES[16] + " INTEGER, ");
+		sqlBuilder.append(QuestionContract.DIFFICULTY + " INTEGER,");
+		sqlBuilder.append(QuestionContract.TIME_STEP + " INTEGER,");
+		sqlBuilder.append(QuestionContract.TIME_STEPS + " INTEGER ");
+		sqlBuilder.append(");");
+		db.execSQL(sqlBuilder.toString());
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		// Do nothing
+
 	}
 
 	private void copyDatabase() {
+
 		try {
 			InputStream is = context.getAssets().open(DATABASE_NAME);
 			File dest = new File(DATABASE_FULL_PATH);
