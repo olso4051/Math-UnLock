@@ -122,6 +122,15 @@ public class EquationLayout {
 			paint.setTextAlign(Paint.Align.CENTER);
 			bounds = new Rect();
 			setWidthAndHeight();
+			setSuitableTextSize();
+		}
+
+		private void setSuitableTextSize() {
+			int textSize = getEstimateTextSize();
+			for (; textSize > 0; textSize--) {
+				if (isTextSizeSuitable(textSize))
+					return;
+			}
 		}
 
 		public int getX() {
@@ -209,6 +218,23 @@ public class EquationLayout {
 			HeightAg = bounds.height();
 			Top = Y - HeightB - HeightA + HeightAg;
 			Bottom = Y - HeightA + HeightAg;
+		}
+
+		private boolean isTextSizeSuitable(int size) {
+			mTextBreakPoints = new ArrayList<Integer>();
+			testPaintWhite.setTextSize(size);
+			int start = 0;
+			int end = text.length();
+			while (start < end) {
+				int len = paint.breakText(text, start, end, true, Width, null);
+				start += len;
+				mTextBreakPoints.add(start);
+			}
+			return mTextBreakPoints.size() * size < Height;
+		}
+
+		private int getEstimateTextSize() {
+			return (int) Math.sqrt(Width * Height / text.length() * 2);
 		}
 	}
 
@@ -482,8 +508,17 @@ public class EquationLayout {
 					c.drawLine(textAttributes.get(i).getLeft(), textAttributes.get(i).getY(), textAttributes.get(i).getRight(),
 							textAttributes.get(i).getY(), testPaintWhite);
 				} else if (equationText.charAt(i) != '¶') {
-					c.drawText(textAttributes.get(i).getText(), textAttributes.get(i).getX(), textAttributes.get(i).getY(), textAttributes
-							.get(i).getTextPaint());
+					int start = 0;
+					int x = 0;
+					int y = 0;
+					for (int point : mTextBreakPoints) {
+						y += textAttributes.get(i).getTextPaint().getTextSize();
+						c.drawText(textAttributes.get(i).getText(), start, point, x, y, textAttributes.get(i).getTextPaint());
+						start = point;
+					}
+					// c.drawText(textAttributes.get(i).getText(), textAttributes.get(i).getX(), textAttributes.get(i).getY(),
+					// textAttributes
+					// .get(i).getTextPaint());
 				}
 			}
 		}
@@ -502,6 +537,8 @@ public class EquationLayout {
 		}
 		c.restore();
 	}
+
+	private List<Integer> mTextBreakPoints;
 
 	public void setColor(int color) {
 		this.color = color;

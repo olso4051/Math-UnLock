@@ -17,6 +17,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.WallpaperManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -179,6 +180,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 	private TextView clockTextView, coins, questionDescription;
 	private int questionWorthMax = 0, questionWorth = 0, decreaseRate = 500, backgroundState = 0;
 	private EquationView problem;
+	private ImageView problemimageView;
 	private Drawable imageLeft;	// left,top,right,bottom
 	private TransitionDrawable backgroundTransition;
 	private boolean quizMode = false;
@@ -634,6 +636,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			clock = new Clock(this, clockTextView, coins);
 			questionDescription = (TextView) findViewById(R.id.description);
 			problem = (EquationView) findViewById(R.id.problem);
+			problemimageView = (ImageView) findViewById(R.id.problemImage);
 			defaultTextColor = problem.getTextColors().getDefaultColor();
 
 			joystick = (JoystickView) findViewById(R.id.joystick);
@@ -1550,18 +1553,34 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 					questionDescription.setText(getString(R.string.question_description_prefix) + " | "
 							+ PreferenceHelper.getSponsoredQuestionSponsor(this));
 
+					// change it here to show image in question
 					problem.setText(questions.get(0).getQuestion());
-					problem.setTextColor(defaultTextColor);
+					if (questions.get(0).getQuestion().startsWith("image://")) {
+						problem.setVisibility(View.GONE);
+						problemimageView.setVisibility(View.VISIBLE);
+						File fileForImage = new File(getExternalCacheDir().getAbsolutePath() + "/question");
+						Drawable d = Drawable.createFromPath(fileForImage.getAbsolutePath());
+						problemimageView.setImageDrawable(d);
+					} else {
+						problem.setVisibility(View.VISIBLE);
+						problem.setTextColor(defaultTextColor);
+						problemimageView.setVisibility(View.GONE);
+					}
 
 					joystick.resetGuess();
 					joystick.unPauseSelection();
 
 					answers = questions.get(0).getAnswers();
 					urls = questions.get(0).getURLs();
+
 					sponsoredHash = questions.get(0).getHash();
 					setRandomAnswers();
 
 					joystick.setAnswers(answersRandom, answerLoc);
+
+					if (answers != null && answers[0].startsWith("image://")) {
+						joystick.setUpBitmapForAnswer(false);
+					}
 					resetQuestionWorth(questionWorthMax);
 				} else if (EnabledPackages > 0) { // Change this pai
 					// if (quizMode) {
@@ -1584,9 +1603,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 							PreferenceHelper.setTodayCountofSponseredQuestion(ctx,
 									PreferenceHelper.getTodayCountofSponseredQuestion(ctx) + 1);
 							PreferenceHelper.setLastSponsoredRequestTime(this, currentTime);
+							// }
 						}
 					}
-					// }
 					joystick.setProblem(true);
 					final String EnabledPackageKeys[] = new String[EnabledPackages];
 					final int location[] = new int[EnabledPackages];
@@ -2079,19 +2098,28 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				PreferenceHelper.removePackToOpen(this, pack);
 				finish();
 			} else if (fromSponsored) {
-				changetheame(false);
 				displayCorrectOrNot(answer, answer);
 				PreferenceHelper.removeSponsoredQuestion(this, sponsoredHash, answerLocs[answer]);
 				if (!urlsRandom[answer].equals("")) {
-					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlsRandom[answer]));
-					startActivity(browserIntent);
+					try {
+						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlsRandom[answer]));
+						startActivity(browserIntent);
+					} catch (ActivityNotFoundException activityNotFoundException) {
+
+					}
 				}
 				joystick.pauseSelection();
 				mHandler.removeCallbacksAndMessages(null);
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
+
+						problem.setVisibility(View.VISIBLE);
+						problemimageView.setVisibility(View.GONE);
+						joystick.setUpBitmapForAnswer(true);
+						changetheame(false);
 						setProblemAndAnswer();
+
 					}
 				}, MoneyHelper.updateMoneyTime);
 				if (!quizMode)

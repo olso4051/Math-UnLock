@@ -5,6 +5,8 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
 import ch.boye.httpclientandroidlib.client.HttpClient;
@@ -19,6 +21,7 @@ import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.olyware.mathlock.R;
+import com.olyware.mathlock.service.AdvertisingIdClient.AdInfo;
 import com.olyware.mathlock.utils.ContactHelper;
 import com.olyware.mathlock.utils.JSONHelper;
 import com.olyware.mathlock.utils.Loggy;
@@ -27,7 +30,7 @@ import com.olyware.mathlock.utils.PreferenceHelper;
 public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 	private String baseURL;
 	private String success, error;
-	private String userName, regID, userID, referral, birthday, gender, location, email, facebookID, phoneNumberEncrypted;
+	private String userName, regID, userID, referral, birthday, gender, location, email, facebookID, phoneNumberEncrypted, ad_id;
 	private Context ctx;
 
 	public RegisterID(Context ctx, String userName, String regID, String userID, String referral, String birthday, String gender,
@@ -137,6 +140,15 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 			return 1;
 		}
 
+		AdInfo adInfo;
+		try {
+			adInfo = AdvertisingIdClient.getAdvertisingIdInfo(ctx);
+			ad_id = adInfo.getId();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+
+		Log.d("TAG", "ad_id" + ad_id);
 		// POST to API new or update registration, also referral's registration
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -175,6 +187,9 @@ public class RegisterID extends AsyncTask<Void, Integer, Integer> {
 			}
 			if (!phoneNumberEncrypted.equals("")) {
 				data.put("phone_hash", phoneNumberEncrypted);
+			}
+			if (!TextUtils.isEmpty(ad_id)) {
+				data.put("google_ad_id", ad_id);
 			}
 
 			Loggy.d("test", "JSON to " + endpoint + ": " + data.toString());

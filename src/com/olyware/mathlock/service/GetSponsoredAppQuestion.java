@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -118,8 +119,8 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 		JSONObject jsonResponse;
 		try {
 			JSONObject data = new JSONObject();
-			// data.put("user_id", userID);
-			data.put("user_id", "testuserfemale");
+			data.put("user_id", userID);
+			// data.put("user_id", "testuser");
 			JSONArray installedPacksArray = null;
 			if (customquestion) {
 				installedPacksArray = new JSONArray();
@@ -128,19 +129,24 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 				}
 				data.put("installed_packs", installedPacksArray);
 			} else {
-				data.put("installed_packs", "");
+				// data.put("installed_packs", "");
 			}
-			Loggy.d("JSON to question = " + data.toString());
+			Log.d("JSON to question = ", "" + data.toString());
 
 			httpPost.setEntity(new StringEntity(data.toString(), ContentType.create("text/plain", "UTF-8")));
 			httpPost.setHeader("Content-Type", "application/json");
 			HttpResponse response = httpclient.execute(httpPost);
 			entity = response.getEntity();
 			fullResult = EntityUtils.toString(entity);
+			Log.d("JSON to question = ", "" + fullResult);
 			Loggy.d("fullResult = " + fullResult);
 			jsonResponse = new JSONObject(fullResult);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return 1;
+		}
+		String error = JSONHelper.getStringFromJSON(jsonResponse, "error");
+		if (error.equals("true")) {
 			return 1;
 		}
 		if (entity != null && fullResult != null && jsonResponse != null) {
@@ -149,36 +155,33 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 			description = JSONHelper.getStringFromJSON(jsonResponse, "type");
 			questionHashes = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "question_hash");
 			questions = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "text");
+			// String hai = "image://http://media-cache-ak0.pinimg.com/originals/1b/42/87/1b42870a08499773664d125bc3ef6600.jpg";
+			// questions.clear();
+			// questions.add(hai);
 			answers = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "answers");
-			urls = JSONHelper.getStringArrayListFromJSON2(jsonResponse, "questions", "urls");
+			urls = getStringArrayListFromJSON2(jsonResponse, "questions", "urls");
 			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
 			// background
 			backgroundtextUrls = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "background");
 			if (backgroundtextUrls != null && backgroundtextUrls.size() > 0 && !TextUtils.isEmpty(backgroundtextUrls.get(0))) {
 				// download the image
-				File fileForImage = new File(context.getExternalCacheDir().getAbsolutePath() + "/temp");
+				downloadandSaveImage(backgroundtextUrls.get(0), "temp");
+			}
 
-				InputStream sourceStream;
-				ImageDownloader downloader = new BaseImageDownloader(context);
-				try {
-					Log.d("TAG", "backgroundtextUrls : " + backgroundtextUrls.get(0));
-					// sourceStream = downloader.getStream(backgroundtextUrls.get(0), null);
-					sourceStream = downloader.getStream("http://shechive.files.wordpress.com/2010/09/beautiful-nature-151.jpg", null);
-
-					if (sourceStream != null) {
-						try {
-							OutputStream targetStream = new FileOutputStream(fileForImage);
-							try {
-								IoUtils.copyStream(sourceStream, targetStream, null);
-							} finally {
-								targetStream.close();
-							}
-						} finally {
-							sourceStream.close();
-						}
+			// if question has the image
+			if (questions != null && questions.size() > 0 && !TextUtils.isEmpty(questions.get(0))
+					&& questions.get(0).startsWith("image://")) {
+				// download the image
+				downloadandSaveImage(questions.get(0).split("image://")[1], "question");
+			}
+			if (answers != null && answers.size() > 0 && answers.get(0) != null && answers.get(0).length > 0) {
+				String[] urlArray = answers.get(0);
+				for (int i = 0; i < urlArray.length; i++) {
+					if (!TextUtils.isEmpty(urlArray[i]) && urlArray[i].startsWith("image://")) {
+						String url = urlArray[i].split("image://")[1];
+						String name = urlArray[i].substring(urlArray[i].lastIndexOf("/") + 1);
+						downloadandSaveImage(url, name);
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 
@@ -193,13 +196,74 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 						+ "]");
 			if (urls != null && urls.size() > 0)
 				Loggy.d("urls = [" + urls.get(0)[0] + " , " + urls.get(0)[1] + " , " + urls.get(0)[2] + " , " + urls.get(0)[3] + "]");
-			if (questionHashes.size() > 0)
+			if (questionHashes != null && questionHashes.size() > 0)
 				return 0;
 			else
 				return 1;
 		} else {
 			return 1;
 		}
+	}
+
+	public static List<String[]> getStringArrayListFromJSON2(JSONObject json, String key, String key2) {
+		try {
+			JSONArray array = json.getJSONArray(key);
+			List<String[]> result = new ArrayList<String[]>(array.length());
+			for (int i = 0; i < array.length(); i++) {
+				JSONArray innerArray = array.getJSONObject(i).getJSONArray(key2);
+				String[] results = getStringArrayFromJSONArray(innerArray);
+				result.add(results);
+			}
+			return result;
+		} catch (JSONException e) {
+			return new ArrayList<String[]>();
+		}
+	}
+
+	public static String[] getStringArrayFromJSONArray(JSONArray array) {
+		List<String> list = getStringListFromJSONArray(array);
+		return list.toArray(new String[list.size()]);
+	}
+
+	public static List<String> getStringListFromJSONArray(JSONArray array) {
+		List<String> list = new ArrayList<String>();
+		try {
+			for (int i = 0; i < array.length(); i++) {
+				list.add(array.getString(i));
+			}
+			return list;
+		} catch (JSONException e) {
+			return new ArrayList<String>();
+		}
+	}
+
+	private void downloadandSaveImage(String url, String filename) {
+
+		File fileForImage = new File(context.getExternalCacheDir().getAbsolutePath() + "/" + filename);
+
+		InputStream sourceStream;
+		ImageDownloader downloader = new BaseImageDownloader(context);
+		try {
+			// Log.d("TAG", "backgroundtextUrls : " + backgroundtextUrls.get(0));
+			sourceStream = downloader.getStream(url, null);
+			// sourceStream = downloader.getStream("http://shechive.files.wordpress.com/2010/09/beautiful-nature-151.jpg", null);
+
+			if (sourceStream != null) {
+				try {
+					OutputStream targetStream = new FileOutputStream(fileForImage);
+					try {
+						IoUtils.copyStream(sourceStream, targetStream, null);
+					} finally {
+						targetStream.close();
+					}
+				} finally {
+					sourceStream.close();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override

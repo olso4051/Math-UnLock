@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -53,7 +54,7 @@ public class JoystickView extends View {
 	private TextPaint[] answerTextPaint = new TextPaint[NumAnswers];
 	private TextPaint optionPaintWhite, answerTextPaintBackup;
 	private Path optionPath, dstPathForSet;
-	private Paint settingsPaint, unlockPaint, transparentBlue, linePaint, backBlue, backRed, backGreen;
+	private Paint settingsPaint, unlockPaint, transparentBlue, linePaint, backBlue, backRed, backGreen, transparent;
 
 	private int optionPathCenterX, optionPathCenterY, tutorial, barY, barHeight, centerOffset, textSizeSP, textSizePix, answerSizeSP,
 			Width, Height, dstHeight, spacing, rUnlock, radiusOfSettingsIcons, rApps, swipeLengthOption, swipeLength1, correctLoc,
@@ -77,6 +78,7 @@ public class JoystickView extends View {
 	private StaticLayout[] layoutBackup = new StaticLayout[NumAnswers];
 	private EquationLayout[] layoutE = new EquationLayout[NumAnswers];
 	private boolean[] equation = new boolean[NumAnswers];
+	private boolean isAnsImage = false;
 
 	private JoystickSelectListener listener;
 
@@ -231,6 +233,10 @@ public class JoystickView extends View {
 		transparentBlue = new Paint(Paint.ANTI_ALIAS_FLAG);
 		transparentBlue.setStyle(Paint.Style.FILL);
 		transparentBlue.setARGB(191, 0, 127, 255);
+
+		transparent = new Paint(Paint.ANTI_ALIAS_FLAG);
+		transparent.setFilterBitmap(true);
+		transparent.setDither(true);
 
 		optionPath = new Path();
 		dstPathForSet = new Path();
@@ -756,25 +762,64 @@ public class JoystickView extends View {
 					// canvas.drawBitmap(bmpBack[2], srcRectForBack, RectForAnswers[i], unlockPaint);
 					canvas.drawRect(RectForAnswersBackground[i], backRed);
 				}
+				// Pai change here
 				// position the text then draw the layout
-				if (equation[i]) {
-					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
-							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
-					layoutE[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alphaAnswer : 255);
-					layoutE[i].draw(canvas);
-				} else {
-					canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
-							(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[i].getHeight() / 2);
-					if (selectUnlock && alphaAnswer == 0) {
-						if (backupTries > NumAnswers) {
-							layoutBackup[i].draw(canvas);
+
+				// canvas.drawBitmap(bmpUnlock, srcRectForUnlock, RectForAnswers[i], unlockPaint);
+				if (answers[i] != null && answers[i].startsWith("image://")) {
+					// canvas.drawBitmap(bitmapAnswers[i], srcRectForBitmap[i], srcRectForBitmap[i], transparent);
+					if (bitmapAnswers[i] == null) {
+						setUpBitmapForAnswer(false);
+					}
+					RectF rectReduced = new RectF(RectForAnswers[i]);
+					rectReduced.left = rectReduced.left + 10;
+					rectReduced.top = rectReduced.top + 10;
+					rectReduced.right = rectReduced.right - 10;
+					rectReduced.bottom = rectReduced.bottom - 10;
+					if (bitmapAnswers[i] != null)
+						canvas.drawBitmap(bitmapAnswers[i], null, rectReduced, transparent);
+					else {
+						if (equation[i]) {
+							canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+									(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
+							layoutE[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alphaAnswer : 255);
+							layoutE[i].draw(canvas);
 						} else {
-							backupTries++;
+							canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+									(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[i].getHeight() / 2);
+							if (selectUnlock && alphaAnswer == 0) {
+								if (backupTries > NumAnswers) {
+									layoutBackup[i].draw(canvas);
+								} else {
+									backupTries++;
+									layout[i].draw(canvas);
+								}
+							} else {
+								backupTries = 0;
+								layout[i].draw(canvas);
+							}
+						}
+					}
+				} else {
+					if (equation[i]) {
+						canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+								(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2);
+						layoutE[i].setAlpha((wrongGuess < 0 && !quickUnlock) ? alphaAnswer : 255);
+						layoutE[i].draw(canvas);
+					} else {
+						canvas.translate((RectForAnswers[i].left + RectForAnswers[i].right) / 2,
+								(RectForAnswers[i].top + RectForAnswers[i].bottom) / 2 - layout[i].getHeight() / 2);
+						if (selectUnlock && alphaAnswer == 0) {
+							if (backupTries > NumAnswers) {
+								layoutBackup[i].draw(canvas);
+							} else {
+								backupTries++;
+								layout[i].draw(canvas);
+							}
+						} else {
+							backupTries = 0;
 							layout[i].draw(canvas);
 						}
-					} else {
-						backupTries = 0;
-						layout[i].draw(canvas);
 					}
 				}
 				canvas.restore();
@@ -950,6 +995,44 @@ public class JoystickView extends View {
 		// }
 
 		// PAI COMMENTED - new UI on oct 27th- 2014 ends here //
+	}
+
+	private Bitmap[] bitmapAnswers;
+	private Rect[] srcRectForBitmap;
+
+	public void setUpBitmapForAnswer(boolean recycle) {
+		if (recycle) {
+			if (bitmapAnswers != null) {
+				for (int i = 0; i < bitmapAnswers.length; i++) {
+					if (bitmapAnswers[i] != null)
+						bitmapAnswers[i].recycle();
+					bitmapAnswers[i] = null;
+				}
+
+			}
+			bitmapAnswers = null;
+			return;
+		}
+
+		if (bitmapAnswers == null) {
+			bitmapAnswers = new Bitmap[4];
+			srcRectForBitmap = new Rect[4];
+		}
+		for (int i = 0; i < answers.length; i++) {
+			if (answers[i] != null && answers[i].startsWith("image://")) {
+				if (Width > 0 && getMiddlePoint() > 0) {
+					bitmapAnswers[i] = BitmapFactory.decodeFile(getContext().getExternalCacheDir().getAbsolutePath() + "/"
+							+ answers[i].substring(answers[i].lastIndexOf("/") + 1));
+
+					if (bitmapAnswers[i] != null) {
+						bitmapAnswers[i] = downscaleBitmap(bitmapAnswers[i], (Width / 2), getMiddlePoint() - 50);
+						srcRectForBitmap[i] = new Rect(0, 0, bitmapAnswers[i].getWidth(), bitmapAnswers[i].getHeight());
+					}
+
+				}
+			}
+		}
+
 	}
 
 	@Override
@@ -1724,6 +1807,89 @@ public class JoystickView extends View {
 		for (int i = 0; i < NumAnswers; i++) {
 			answerTextPaint[i].setTextSize(answerSizePix);
 		}
+	}
+
+	private Bitmap downscaleBitmap(Bitmap bitmap, int reqWidth, int reqHeight) {
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+
+		// Calculate inSampleSize
+		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+		// Decode bitmap with inSampleSize set
+		options.inJustDecodeBounds = false;
+
+		int width = bitmap.getWidth();
+		int height = bitmap.getHeight();
+		float scaleWidth = ((float) reqWidth) / width;
+		float scaleHeight = ((float) reqHeight) / height;
+
+		// CREATE A MATRIX FOR THE MANIPULATION
+		Matrix matrix = new Matrix();
+		// RESIZE THE BIT MAP
+		matrix.postScale(scaleWidth, scaleHeight);
+
+		// RECREATE THE NEW BITMAP
+		Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
+		bitmap.recycle();
+		return resizedBitmap;
+	}
+
+	private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+		int height = options.outHeight;
+		int width = options.outWidth;
+		int inSampleSize = 1;
+		if (height > reqHeight || width > reqWidth) {
+			final int heightRatio = Math.round((float) height / (float) reqHeight);
+			final int widthRatio = Math.round((float) width / (float) reqWidth);
+			inSampleSize = heightRatio < widthRatio ? widthRatio : heightRatio;
+		}
+
+		if (inSampleSize >= 3) {
+			inSampleSize = 2;
+		}
+		return inSampleSize;
+	}
+
+	private Bitmap scaleImage(Bitmap map) {
+		// Get the ImageView and its bitmap
+		if (map == null) {
+			return null; // Checking for null & return, as suggested in comments
+		}
+
+		// Get current dimensions AND the desired bounding box
+		int width = map.getWidth();
+		int height = map.getHeight();
+		int bounding = getMiddlePoint() - 50;
+		Log.i("Test", "original width = " + Integer.toString(width));
+		Log.i("Test", "original height = " + Integer.toString(height));
+		Log.i("Test", "bounding = " + Integer.toString(bounding));
+
+		// Determine how much to scale: the dimension requiring less scaling is
+		// closer to the its side. This way the image always stays inside your
+		// bounding box AND either x/y axis touches it.
+		float xScale = ((float) bounding) / width;
+		float yScale = ((float) bounding) / height;
+		float scale = (xScale <= yScale) ? xScale : yScale;
+		Log.i("Test", "xScale = " + Float.toString(xScale));
+		Log.i("Test", "yScale = " + Float.toString(yScale));
+		Log.i("Test", "scale = " + Float.toString(scale));
+
+		// Create a matrix for the scaling and add the scaling data
+		Matrix matrix = new Matrix();
+		matrix.postScale(scale, scale);
+
+		// Create a new bitmap and convert it to a format understood by the ImageView
+		Bitmap scaledBitmap = Bitmap.createBitmap(map, 0, 0, width, height, matrix, true);
+		width = scaledBitmap.getWidth(); // re-use
+		height = scaledBitmap.getHeight(); // re-use
+		Log.i("Test", "scaled width = " + Integer.toString(width));
+		Log.i("Test", "scaled height = " + Integer.toString(height));
+
+		// Now change ImageView's dimensions to match the scaled image
+
+		Log.i("Test", "done");
+		return scaledBitmap;
 	}
 
 	private void setArc(int startDeg, int totalDeg) {
