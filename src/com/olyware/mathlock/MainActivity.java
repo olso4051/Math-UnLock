@@ -1718,6 +1718,9 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 			// setLayoutBackground(layout, backgroundTransition);
 		} else {
 			findViewById(R.id.layout).setBackgroundDrawable(null);
+			File fileForImage = new File(getExternalCacheDir().getAbsolutePath() + "/temp");
+			if (fileForImage.exists())
+				fileForImage.delete();
 			setLayoutBackground(layout, backgroundTransition);
 		}
 
@@ -2088,7 +2091,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnFi
 				new AutoClick(this, pack, false) {
 					@Override
 					protected void onPostExecute(AutoClickResult result) {
-						if (open) {
+						if (open && ctx != null) {
 							PackageManager pm = ctx.getPackageManager();
 							Intent launchIntent = pm.getLaunchIntentForPackage(pack);
 							ctx.startActivity(launchIntent);

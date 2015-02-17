@@ -768,7 +768,7 @@ public class JoystickView extends View {
 				// canvas.drawBitmap(bmpUnlock, srcRectForUnlock, RectForAnswers[i], unlockPaint);
 				if (answers[i] != null && answers[i].startsWith("image://")) {
 					// canvas.drawBitmap(bitmapAnswers[i], srcRectForBitmap[i], srcRectForBitmap[i], transparent);
-					if (bitmapAnswers[i] == null) {
+					if (bitmapAnswers == null || bitmapAnswers[i] == null) {
 						setUpBitmapForAnswer(false);
 					}
 					RectF rectReduced = new RectF(RectForAnswers[i]);
@@ -1706,13 +1706,14 @@ public class JoystickView extends View {
 		for (int i = 0; i < NumAnswers; i++) {
 			if (!equation[i]) {
 				maxH = Math.max(bounds[i].height(), layout[i].getHeight());
+				// maxH = Math.max(bounds[i].height(), RectForAnswers[i].height());
 				maxH = Math.max(maxH, answerSizePix);
-				if ((maxH > ((barY - barHeight) / 2 - pad * 3 - rUnlock)) && (Height > 0)) {
+				if ((maxH > ((barY - barHeight) / 2 - pad * 3 - rUnlock)) && (Height > 0) && !answers[i].startsWith("image://")) {
 					if (decreaseAnswerSize()) {
 						setDimensions();
 						return;
 					}
-				} else if (isLayoutSplittingWords(answers[i], layout[i])) {
+				} else if (isLayoutSplittingWords(answers[i], layout[i]) && !answers[i].startsWith("image://")) {
 					if (decreaseAnswerSize()) {
 						setDimensions();
 						return;
@@ -1782,7 +1783,7 @@ public class JoystickView extends View {
 	private boolean decreaseAnswerSize() {
 		if (answerSizeSP == 1)
 			return false;
-		answerSizeSP = Math.max(answerSizeSP - 3, 1);
+		answerSizeSP = Math.max(answerSizeSP - 2, 1);
 		answerSizePix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, answerSizeSP, res.getDisplayMetrics());
 		answerTextPaintBackup.setTextSize(answerSizePix);
 		for (int i = 0; i < NumAnswers; i++) {

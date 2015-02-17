@@ -134,7 +134,7 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 		if (phonebookRefresh) {
 			ContentResolver cr = ctx.getContentResolver();
 			Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-			if (cur.getCount() > 0) {
+			if (cur != null && cur.getCount() > 0) {
 				// next stored contact
 				while (cur.moveToNext()) {
 					if (isCancelled())
@@ -214,7 +214,8 @@ public class RefreshContacts extends AsyncTask<Void, CustomContactData, Integer>
 					phoneNumbers.clear();
 				}
 			}
-			cur.close();
+			if (cur != null)
+				cur.close();
 		}
 		allEncryptedPhoneNumbers.addAll(ContactHelper.getPhoneHashes(allPhoneNumbers));
 

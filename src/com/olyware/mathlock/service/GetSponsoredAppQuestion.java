@@ -163,6 +163,7 @@ public class GetSponsoredAppQuestion extends AsyncTask<Void, Integer, Integer> {
 			error = JSONHelper.getStringFromJSON(jsonResponse, "error");
 			// background
 			backgroundtextUrls = JSONHelper.getStringListFromJSON2(jsonResponse, "questions", "background");
+			// downloadandSaveImage("http://media-cache-ak0.pinimg.com/originals/1b/42/87/1b42870a08499773664d125bc3ef6600.jpg", "temp");
 			if (backgroundtextUrls != null && backgroundtextUrls.size() > 0 && !TextUtils.isEmpty(backgroundtextUrls.get(0))) {
 				// download the image
 				downloadandSaveImage(backgroundtextUrls.get(0), "temp");
